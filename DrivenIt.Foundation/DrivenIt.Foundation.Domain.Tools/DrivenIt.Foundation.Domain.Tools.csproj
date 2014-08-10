@@ -4,11 +4,11 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{E9A0E315-07DA-4714-A153-8504920DA276}</ProjectGuid>
+    <ProjectGuid>{0582FE22-5A5B-49A6-9736-DD31E9ECA18F}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>DrivenIt.Foundation.Application</RootNamespace>
-    <AssemblyName>DrivenIt.Foundation.Application</AssemblyName>
+    <RootNamespace>DrivenIt.Foundation.Domain.Tools</RootNamespace>
+    <AssemblyName>DrivenIt.Foundation.Domain.Tools</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
@@ -32,6 +32,12 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="AutoMapper">
+      <HintPath>..\packages\AutoMapper.3.2.1\lib\net40\AutoMapper.dll</HintPath>
+    </Reference>
+    <Reference Include="AutoMapper.Net4">
+      <HintPath>..\packages\AutoMapper.3.2.1\lib\net40\AutoMapper.Net4.dll</HintPath>
+    </Reference>
     <Reference Include="Seterlund.CodeGuard">
       <HintPath>..\packages\Seterlund.CodeGuard.2.3.4\lib\net40\Seterlund.CodeGuard.dll</HintPath>
     </Reference>
@@ -44,21 +50,24 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="BaseApplicationService.cs" />
+    <Compile Include="Automapper\Extensions.cs" />
+    <Compile Include="Events\DomainEventBroker.cs" />
+    <Compile Include="Events\ErrorEventBroker.cs" />
+    <Compile Include="Events\ErrorEventListener.cs" />
+    <Compile Include="Events\DomainEventRegistrationRemover.cs" />
+    <Compile Include="Events\ErrorEventReporter.cs" />
+    <Compile Include="Events\GeneralErrorEvent.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="UnitOfWork\Extensions.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\DrivenIt.Foundation.Contracts\DrivenIt.Foundation.Contracts.csproj">
       <Project>{29374C66-56F3-4500-BB4E-0FBE5C64234A}</Project>
       <Name>DrivenIt.Foundation.Contracts</Name>
     </ProjectReference>
-    <ProjectReference Include="..\DrivenIt.Foundation.Domain.Tools\DrivenIt.Foundation.Domain.Tools.csproj">
-      <Project>{0582FE22-5A5B-49A6-9736-DD31E9ECA18F}</Project>
-      <Name>DrivenIt.Foundation.Domain.Tools</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
@@ -68,6 +77,7 @@
     </PropertyGroup>
     <Error Condition="!Exists('$(SolutionDir)\.nuget\NuGet.targets')" Text="$([System.String]::Format('$(ErrorText)', '$(SolutionDir)\.nuget\NuGet.targets'))" />
   </Target>
+  <Import Project="..\packages\AutoMapper.3.2.1\tools\AutoMapper.targets" Condition="Exists('..\packages\AutoMapper.3.2.1\tools\AutoMapper.targets')" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">

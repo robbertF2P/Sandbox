@@ -1,6 +1,7 @@
 ﻿namespace DrivenIt.Foundation.Contracts
 {
-    public interface IDomainModel
+    public interface IDomainTask
     {
+        
     }
 }

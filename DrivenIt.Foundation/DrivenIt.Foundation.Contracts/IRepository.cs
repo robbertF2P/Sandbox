@@ -1,8 +1,10 @@
-﻿using DrivenIt.Foundation.Contracts.UnitOfWork;
+﻿using System.Diagnostics;
+using DrivenIt.Foundation.Contracts.UnitOfWork;
 
 namespace DrivenIt.Foundation.Contracts
 {
-    public interface IRepository:ISupportUow 
+    public interface IRepository:ISupportUow
     {
+        void Process(IDomainTask task);
     }
 }

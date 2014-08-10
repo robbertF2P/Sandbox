@@ -1,15 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿
 using DrivenIt.Foundation.Contracts;
 using DrivenIt.Foundation.Contracts.UnitOfWork;
 
 namespace DrivenIt.Foundation.Infrastructure
 {
     public abstract class BaseRepository :IRepository
-
     {
         private readonly IUow _defaultUnitOfWork;
         private IDataContext _context;
@@ -30,5 +25,7 @@ namespace DrivenIt.Foundation.Infrastructure
         {
             _context = _defaultUnitOfWork.GetContext();
         }
+
+        public abstract void Process(IDomainTask task);
     }
 }

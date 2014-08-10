@@ -1,10 +1,7 @@
-﻿using System;
-using System.Data.Entity;
-using System.Data.Entity.Infrastructure;
-using System.Text;
-using System.Threading.Tasks;
-using DrivenIt.Foundation.Contracts;
+﻿using DrivenIt.Foundation.Contracts;
 using DrivenIt.Foundation.Contracts.UnitOfWork;
+using System;
+using System.Data.Entity;
 
 namespace DrivenIt.Foundation.Infrastructure.Data
 {
@@ -47,7 +44,7 @@ namespace DrivenIt.Foundation.Infrastructure.Data
             {
                 if (disposing)
                 {
-                    _contextWrapper.Context.Dispose();
+                    _contextWrapper.Dispose();
                     RestoreDefaultUnitOfWork();
                 }
             }
