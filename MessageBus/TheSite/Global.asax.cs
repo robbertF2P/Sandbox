@@ -37,7 +37,7 @@ namespace TheSite
 
 
             Bus = Configure.With().CastleWindsorBuilder(Container)
-                            .MsmqTransport()
+                .UseTransport<SqlServer>()
                             .UnicastBus()
                             .CreateBus()
                             .Start(() => Configure.Instance.ForInstallationOn<NServiceBus.Installation.Environments.Windows>().Install());

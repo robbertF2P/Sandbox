@@ -20,7 +20,7 @@ namespace DataLayer.Repositories
             }
         }
 
-        private Contract MapTo(Models.Contract contract)
+        private Contract MapTo(Datalayer.One.Models.Contract contract)
         {
             return new Contract()
                 {

@@ -51,6 +51,9 @@
     <Reference Include="NServiceBus.ObjectBuilder.CastleWindsor">
       <HintPath>..\packages\NServiceBus.CastleWindsor.4.0.3\lib\net40\NServiceBus.ObjectBuilder.CastleWindsor.dll</HintPath>
     </Reference>
+    <Reference Include="NServiceBus.Transports.SQLServer">
+      <HintPath>..\packages\NServiceBus.SqlServer.1.0.3\lib\net40\NServiceBus.Transports.SQLServer.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -61,9 +64,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ContractCreator.cs" />
-    <Compile Include="Contracts\IContractRepository.cs" />
+    <Compile Include="Contracts\IRelationRepository.cs" />
     <Compile Include="EndpointConfig.cs" />
-    <Compile Include="Models\ModuleContract.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -74,6 +76,10 @@
     <ProjectReference Include="..\Messages\Messages.csproj">
       <Project>{BE38D07C-E490-4F44-A64F-21F3D93C7C5A}</Project>
       <Name>Messages</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Module.One.Domain\Module.One.Domain.csproj">
+      <Project>{A2CA45BA-6D49-413E-8547-44C0C3160279}</Project>
+      <Name>Module.One.Domain</Name>
     </ProjectReference>
     <ProjectReference Include="..\Shared.Domain\Shared.Domain.csproj">
       <Project>{becc8596-d3a8-4918-8496-9f0e9c6f4487}</Project>

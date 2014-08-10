@@ -4,14 +4,14 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Module.One.Contracts;
-using Module.One.Models;
-using Shared.Domain;
+using Module.One.Domain;
+using Contract = Datalayer.One.Models.Contract;
 
 namespace Datalayer.One.Repositories
 {
-    public class ContractsRepository:IContractRepository
+    public class RelationRepository:IRelationRepository
     {
-        public ModuleContract GetById(Guid id)
+        public Relation GetById(Guid id)
         {
             using (var cnt = new ModuleOneContext())
             {
@@ -20,9 +20,9 @@ namespace Datalayer.One.Repositories
             }
         }
 
-        private ModuleContract MapTo(DataLayer.Models.Contract contract)
+        private Relation MapTo(Contract contract)
         {
-            return new ModuleContract();
+            return Relation.LoadRelation(Guid.Empty, "Test", new[] { MapTo(contract) });
         }
     }
 }

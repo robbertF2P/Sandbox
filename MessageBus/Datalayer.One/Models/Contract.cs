@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace DataLayer.Models
+namespace Datalayer.One.Models
 {
     public class Contract
     {

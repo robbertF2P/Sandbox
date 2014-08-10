@@ -3,13 +3,14 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Module.One.Models;
+using Module.One.Domain;
 using Shared.Domain;
 
 namespace Module.One.Contracts
 {
-    public interface IContractRepository
+    public interface IRelationRepository
     {
-        ModuleContract GetById(Guid id);
+        Relation GetById(Guid id);
     }
+
 }

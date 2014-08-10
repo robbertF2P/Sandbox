@@ -56,7 +56,6 @@
       <DependentUpon>201308162039190_Initial.cs</DependentUpon>
     </Compile>
     <Compile Include="Migrations\Configuration.cs" />
-    <Compile Include="Models\Contract.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Repositories\ContractRepository.cs" />
   </ItemGroup>
@@ -74,6 +73,10 @@
     <ProjectReference Include="..\Application.Layer\Application.Layer.csproj">
       <Project>{C088F2D7-1019-4F8C-A2E7-0E15319E6DDF}</Project>
       <Name>Application.Layer</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Datalayer.One\Datalayer.One.csproj">
+      <Project>{4bc9b4ef-0783-4d23-8627-bf3a7b0368fd}</Project>
+      <Name>Datalayer.One</Name>
     </ProjectReference>
     <ProjectReference Include="..\Shared.Domain\Shared.Domain.csproj">
       <Project>{becc8596-d3a8-4918-8496-9f0e9c6f4487}</Project>
