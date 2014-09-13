@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Api.Core;
 using Api.Core.Model;
+using Api.Core.Model.Collections;
 using FluentAssertions;
 using Microsoft.Owin.Testing;
 using Newtonsoft.Json;

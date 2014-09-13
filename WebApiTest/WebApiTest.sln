@@ -18,6 +18,10 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{96876A
 		.nuget\NuGet.targets = .nuget\NuGet.targets
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IIS.Host", "IIS.Host\IIS.Host.csproj", "{69D2BF3D-1FD6-4A77-BAA7-275E60DDCE46}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "InitialPoc", "InitialPoc", "{D24F2CAC-845B-4593-8A67-06A307FC084F}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -40,8 +44,16 @@ Global
 		{C62D956C-0279-41F3-8A15-42C4A3698349}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C62D956C-0279-41F3-8A15-42C4A3698349}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C62D956C-0279-41F3-8A15-42C4A3698349}.Release|Any CPU.Build.0 = Release|Any CPU
+		{69D2BF3D-1FD6-4A77-BAA7-275E60DDCE46}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{69D2BF3D-1FD6-4A77-BAA7-275E60DDCE46}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{69D2BF3D-1FD6-4A77-BAA7-275E60DDCE46}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{69D2BF3D-1FD6-4A77-BAA7-275E60DDCE46}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{D73E25E1-04D3-4BE8-85A4-BB6360A37C00} = {D24F2CAC-845B-4593-8A67-06A307FC084F}
+		{D388DB2D-25E8-4A57-B25A-A047C944FCEC} = {D24F2CAC-845B-4593-8A67-06A307FC084F}
 	EndGlobalSection
 EndGlobal

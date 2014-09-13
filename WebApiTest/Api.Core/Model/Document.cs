@@ -1,5 +1,6 @@
 ﻿using System;
 using Api.Core.Attributes;
+using Api.Core.Model.Base;
 using Newtonsoft.Json;
 
 namespace Api.Core.Model

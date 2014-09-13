@@ -16,6 +16,13 @@ namespace Api.Core
         {
             var config = new HttpConfiguration();
             
+            ConfigureWebApi(config);
+
+            app.UseWebApi(config);
+        }
+
+       public static void ConfigureWebApi(HttpConfiguration config)
+        {
             config.Filters.Add(new ArrayInputAttribute("fields"));
 
             config.Formatters.JsonFormatter.SerializerSettings.ContractResolver = new OptionalJsonContractResolver();
@@ -26,9 +33,7 @@ namespace Api.Core
             config.Routes.MapHttpRoute(
                 name: "DefaultApi",
                 routeTemplate: "{controller}"
-            );
-
-            app.UseWebApi(config);
+                );
         }
     }
 }

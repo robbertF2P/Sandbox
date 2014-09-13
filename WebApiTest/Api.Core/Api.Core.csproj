@@ -77,12 +77,23 @@
     <Compile Include="ActionFilter\ArrayInputAttribute.cs" />
     <Compile Include="Attributes\OptionalAttribute.cs" />
     <Compile Include="ContractResolver\OptionalJsonContractResolver.cs" />
+    <Compile Include="Controllers\CompaniesController.cs" />
     <Compile Include="Controllers\DocumentsController.cs" />
     <Compile Include="Controllers\Factory.cs" />
-    <Compile Include="Model\Collection.cs" />
+    <Compile Include="Controllers\TransactionProposalsController.cs" />
+    <Compile Include="Model\Base\BaseResource.cs" />
+    <Compile Include="Model\Collections\Collection.cs" />
     <Compile Include="Model\Comment.cs" />
+    <Compile Include="Model\CompanyReference.cs" />
     <Compile Include="Model\Document.cs" />
+    <Compile Include="Model\Collections\DocumentCollection.cs" />
+    <Compile Include="Model\DocumentComment.cs" />
+    <Compile Include="Model\DocumentImportSource.cs" />
+    <Compile Include="Model\DocumentReference.cs" />
     <Compile Include="Model\IHaveOptionalFields.cs" />
+    <Compile Include="Model\Base\Link.cs" />
+    <Compile Include="Model\Base\MetaLinks.cs" />
+    <Compile Include="Model\UserReference.cs" />
     <Compile Include="Startup.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
