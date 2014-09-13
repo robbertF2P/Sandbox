@@ -1,5 +1,6 @@
-﻿using Api.Core.Attributes;
-using Api.Core.Model;
+﻿using Api.Dto.Models;
+using Api.Dto.Models.Attributes;
+using Api.Dto.Models.Base;
 using Newtonsoft.Json.Serialization;
 using System;
 using System.Linq;

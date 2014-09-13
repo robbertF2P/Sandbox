@@ -1,16 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net.Http;
-using System.Text;
-using System.Threading.Tasks;
-using Api.Core;
-using Api.Core.Model;
-using Api.Core.Model.Collections;
+﻿using Api.Core;
+using Api.Dto.Models;
+using Api.Dto.Models.Collections;
 using FluentAssertions;
 using Microsoft.Owin.Testing;
 using Newtonsoft.Json;
 using NUnit.Framework;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace Api.Test
 {
@@ -39,10 +37,22 @@ namespace Api.Test
 
             response.IsSuccessStatusCode.Should().BeTrue();
             Console.Write(content);
-            var collection = JsonConvert.DeserializeObject<DocumentCollection>(content);
+            var collection = JsonConvert.DeserializeObject<PagedResourceCollection<Document>>(content);
             collection.Items.Should().NotBeEmpty();
         }
 
+        [Test]
+        public async void Test_get_collection_with_paging()
+        {
+            var response = await _server.HttpClient.GetAsync("/documents?offset=2&limit=1");
+            var content = await response.Content.ReadAsStringAsync();
+
+            response.IsSuccessStatusCode.Should().BeTrue();
+            Console.Write(content);
+            var collection = JsonConvert.DeserializeObject<PagedResourceCollection<Document>>(content);
+            collection.Items.Should().NotBeEmpty();
+            collection.Items.Should().HaveCount(1);
+        }
 
         [Test]
         public async void Test_get_single()
@@ -56,7 +66,7 @@ namespace Api.Test
             var document = JsonConvert.DeserializeObject<Document>(content);
 
             document.Should().NotBeNull();
-            document.Comments.Should().BeEmpty();
+            document.Comments.Should().BeNullOrEmpty();
         }
 
         [Test]
@@ -81,13 +91,13 @@ namespace Api.Test
             response.IsSuccessStatusCode.Should().BeTrue();
         }
 
-        private async Task<IEnumerable<DocumentReference>> Documents()
+        private async Task<IEnumerable<Document>> Documents()
         {
             var response = await _server.HttpClient.GetAsync("/documents");
             var content = await response.Content.ReadAsStringAsync();
 
             response.IsSuccessStatusCode.Should().BeTrue();
-            var collection = JsonConvert.DeserializeObject<DocumentCollection>(content);
+            var collection = JsonConvert.DeserializeObject<PagedResourceCollection<Document>>(content);
             return collection.Items;
         }
     }

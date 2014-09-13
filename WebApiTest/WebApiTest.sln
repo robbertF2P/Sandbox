@@ -22,6 +22,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IIS.Host", "IIS.Host\IIS.Ho
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "InitialPoc", "InitialPoc", "{D24F2CAC-845B-4593-8A67-06A307FC084F}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Api.Dto.Models", "Api.Dto.Models\Api.Dto.Models.csproj", "{FB3F1EC4-19BA-4443-94B3-435209F52A1E}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -48,6 +50,10 @@ Global
 		{69D2BF3D-1FD6-4A77-BAA7-275E60DDCE46}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{69D2BF3D-1FD6-4A77-BAA7-275E60DDCE46}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{69D2BF3D-1FD6-4A77-BAA7-275E60DDCE46}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FB3F1EC4-19BA-4443-94B3-435209F52A1E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FB3F1EC4-19BA-4443-94B3-435209F52A1E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FB3F1EC4-19BA-4443-94B3-435209F52A1E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FB3F1EC4-19BA-4443-94B3-435209F52A1E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

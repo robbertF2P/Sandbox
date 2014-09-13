@@ -82,6 +82,10 @@
       <Project>{51DE8545-330D-47F2-874A-F1A43AAA5313}</Project>
       <Name>Api.Core</Name>
     </ProjectReference>
+    <ProjectReference Include="..\Api.Dto.Models\Api.Dto.Models.csproj">
+      <Project>{fb3f1ec4-19ba-4443-94b3-435209f52a1e}</Project>
+      <Name>Api.Dto.Models</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />

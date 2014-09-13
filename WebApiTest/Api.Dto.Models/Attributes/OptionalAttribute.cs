@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Api.Core.Attributes
+namespace Api.Dto.Models.Attributes
 {
     public class OptionalAttribute : Attribute
     { }

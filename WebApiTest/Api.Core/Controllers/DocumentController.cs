@@ -1,24 +1,27 @@
 ﻿using System.Web.Http.Description;
-using Api.Core.Model;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web.Http;
-using Api.Core.Model.Collections;
+using Api.Core.ModelFactory;
+using Api.Dto.Models;
+using Api.Dto.Models.Collections;
 
 namespace Api.Core.Controllers
 {
-    [RoutePrefix("documents")]
-    public class DocumentsController:ApiController
+    [RoutePrefix(RoutePrefix)]
+    public class DocumentsController:BaseApiController
     {
+        public const string RoutePrefix = "documents";
+        public const int DefaultPagesize = 10;
+
         public static IEnumerable<Document> Data = Factory.GetDummyData();
 
-        [ResponseType(typeof(DocumentCollection))]
-        public IHttpActionResult Get([FromUri]string[] fields)
+        [ResponseType(typeof(PagedResourceCollection<Document>))]
+        public IHttpActionResult Get(string[] fields, int offSet=0, int limit=DefaultPagesize)
         {
-            var items = Data;
-            items.SetFields(fields);
-            return Ok(new DocumentCollection(ToReference(items), 20));
+            var items = Data.Skip(0).Take(limit);
+            return Ok(ResourceCollectionFactory.CreateCollection(items,fields, Data.Count(),offSet,limit, GetCurrentRoot() + RoutePrefix));
         }
         
         [Route("{id:guid}")]
@@ -27,8 +30,7 @@ namespace Api.Core.Controllers
         {
             var document = Data.SingleOrDefault(d => d.Id == id);
             if (document == null) return base.NotFound();
-            document.SetFields(fields);
-            return Ok(document);
+            return Ok(ResourceFactory.CreateResource(document, fields, GetCurrentRoot() + RoutePrefix));
         }
 
         [Route("{id:guid}")]
@@ -39,7 +41,8 @@ namespace Api.Core.Controllers
         }
 
         [HttpPost]
-        public string Import()
+        [Route("import")]
+        public string Import(byte[] documentToImport)
         {
             return "[ { Id: 123 } ]";
         }
@@ -70,10 +73,6 @@ namespace Api.Core.Controllers
         public void CreateTag(CreateTagRequest req)
         {
             return;
-        }
-        private IEnumerable<DocumentReference> ToReference(IEnumerable<Document> items)
-        {
-            return items.Select(document => new DocumentReference {Id = document.Id, Name = document.Name});
         }
     }
 }

@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using Api.Core.Model;
+using Api.Dto.Models;
 
 namespace Api.Core.Controllers
 {

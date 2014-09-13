@@ -1,12 +1,8 @@
 ﻿using System.Collections.Generic;
+using Api.Dto.Models.Base;
 
-namespace Api.Core.Model
+namespace Api.Dto.Models
 {
-    public interface IHaveOptionalFields
-    {
-        string[] OptionalFields { get; set; }
-    }
-
     public static class Utils
     {
 

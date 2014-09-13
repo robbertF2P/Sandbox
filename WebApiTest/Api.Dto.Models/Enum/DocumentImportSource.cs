@@ -1,4 +1,4 @@
-namespace Api.Core.Model
+namespace Api.Dto.Models
 {
     public enum DocumentImportSource
     {

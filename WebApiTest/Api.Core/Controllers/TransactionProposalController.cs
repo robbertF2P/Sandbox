@@ -7,8 +7,9 @@ using System.Web.Http;
 
 namespace Api.Core.Controllers
 {
-    [RoutePrefix("companies")]
-    public class CompaniesController:ApiController
+    [RoutePrefix(RoutePrefix)]
+    public class TransactionProposalsController:BaseApiController
     {
+        public const string RoutePrefix = "documents";
     }
 }
