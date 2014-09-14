@@ -13,10 +13,10 @@ namespace Api.Core.ModelFactory
             if (optionalFieldsItem != null) 
                 optionalFieldsItem.SetFields(fields);
 
-            item._links = new Dictionary<string, Uri>
-            {
-                {"self", new Uri(string.Format("{0}/{1}", baseUrl, item.Id))},
-            };
+            //item._links = new Dictionary<string, Uri>
+            //{
+            //    {"self", new Uri(string.Format("{0}/{1}", baseUrl, item.Id))},
+            //};
             
             return item;
         }

@@ -1,8 +1,6 @@
-﻿using Api.Core;
-using Api.Dto.Models;
+﻿using Api.Dto.Models;
 using Api.Dto.Models.Collections;
 using FluentAssertions;
-using Microsoft.Owin.Testing;
 using Newtonsoft.Json;
 using NUnit.Framework;
 using System;
@@ -13,22 +11,8 @@ using System.Threading.Tasks;
 namespace Api.Test
 {
     [TestFixture]
-    public class DocumentsApiTest
+    public class DocumentsApiTest:BaseTest
     {
-        private TestServer _server;
-
-        [TestFixtureSetUp]
-        public void FixtureInit()
-        {
-            _server = TestServer.Create<Startup>();
-        }
-
-        [TestFixtureTearDown]
-        public void FixtureDispose()
-        {
-            _server.Dispose();
-        }
-
         [Test]
         public async void Test_get_collection()
         {

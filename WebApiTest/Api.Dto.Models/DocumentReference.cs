@@ -1,4 +1,5 @@
-﻿using Api.Dto.Models.Base;
+﻿using System;
+using Api.Dto.Models.Base;
 
 namespace Api.Dto.Models
 {

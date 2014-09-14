@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using Api.Dto.Models.Base;
 
-namespace Api.Dto.Models
+namespace Api.Core.ModelFactory
 {
     public static class Utils
     {

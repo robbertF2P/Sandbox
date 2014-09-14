@@ -45,9 +45,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Attributes\OptionalAttribute.cs" />
-    <Compile Include="Collections\Collection.cs" />
+    <Compile Include="Base\UrlFactory.cs" />
+    <Compile Include="Collections\PagedResourceCollection.cs" />
     <Compile Include="Base\BaseResource.cs" />
-    <Compile Include="Collections\ResourceCollection.cs" />
     <Compile Include="Comment.cs" />
     <Compile Include="Company.cs" />
     <Compile Include="CompanyReference.cs" />

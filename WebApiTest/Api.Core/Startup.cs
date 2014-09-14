@@ -10,6 +10,7 @@ namespace Api.Core
     {
         public void Configuration(IAppBuilder app)
         {
+            app.Use<LoggerModule>();
             ConfigureWebApi(app);
         }
 

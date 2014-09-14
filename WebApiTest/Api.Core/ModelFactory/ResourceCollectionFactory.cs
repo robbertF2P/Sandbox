@@ -17,10 +17,9 @@ namespace Api.Core.ModelFactory
             if (optionalFieldsItems != null)
                     optionalFieldsItems.SetFields(fields);
 
-            if (inspectProperties) Process(items);
             return new PagedResourceCollection<T>()
             {
-                Items = new ResourceCollection<T>(items.Select(i => (T)ResourceFactory.CreateResource(i,fields, baseUrl))),
+                Items = items.Select(i => (T)ResourceFactory.CreateResource(i,fields, baseUrl)),
                 Total = total,
                 _links = new Dictionary<string, Uri>( )
                 {
@@ -35,14 +34,5 @@ namespace Api.Core.ModelFactory
             };
         }
 
-        private static void Process<T>(T root) where T : BaseResource, IResourceCollection
-        {
-            var collectionInterface = typeof (ResourceCollection<T>);
-            var properties = typeof (T).GetProperties().Where(p => p.PropertyType == collectionInterface);
-            foreach (var property in properties)
-            {
-                var value = property.GetValue(root) as ResourceCollection<T>;
-            }
-        }
     }
 }

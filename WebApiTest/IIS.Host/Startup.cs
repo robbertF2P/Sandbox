@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Api.Core;
 using Microsoft.Owin;
 using Owin;
 
@@ -12,7 +13,9 @@ namespace IIS.Host
     {
         public void Configuration(IAppBuilder app)
         {
+            app.Use<LoggerModule>();
             ConfigureAuth(app);
+            
         }
     }
 }
