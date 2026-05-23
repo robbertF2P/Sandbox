@@ -70,11 +70,11 @@ public sealed class FrontendPushActorTests : TestKit
         await actor.GracefulStop(TimeSpan.FromSeconds(3));
     }
 
-    private static IActorRef CreateHubPushActor(
+    private IActorRef CreateHubPushActor(
         RecordingHubContext hubContext,
         SerilogLoggerFactory loggerFactory)
     {
-        return ActorOf(
+        return Sys.ActorOf(
             Props.Create(() => new SignalRHubPushActor(
                 hubContext,
                 loggerFactory.CreateLogger<SignalRHubPushActor>())),
