@@ -1,3 +1,4 @@
+using Akka.Actor;
 using Akka.Hosting;
 using AkkaSignalRVuePoc.Api.Actors;
 using AkkaSignalRVuePoc.Api.Hubs;
@@ -45,11 +46,18 @@ try
                 .AllowCredentials();
         });
     });
-    builder.Services.AddAkka("akka-signalr-poc", (akkaBuilder, _) =>
+    builder.Services.AddAkka("akka-signalr-poc", akkaBuilder =>
     {
-        akkaBuilder
-            .AddActor<SignalRHubPushActor>("signalr-hub-push")
-            .AddActor<FrontendPushActor>("frontend-push");
+        akkaBuilder.WithActors((system, registry, resolver) =>
+        {
+            var hubPush = system.ActorOf(resolver.Props<SignalRHubPushActor>(), "signalr-hub-push");
+            registry.Register<SignalRHubPushActor>(hubPush);
+
+            var frontendPush = system.ActorOf(
+                Props.Create(() => new FrontendPushActor(hubPush)),
+                "frontend-push");
+            registry.Register<FrontendPushActor>(frontendPush);
+        });
     });
 
     var app = builder.Build();
