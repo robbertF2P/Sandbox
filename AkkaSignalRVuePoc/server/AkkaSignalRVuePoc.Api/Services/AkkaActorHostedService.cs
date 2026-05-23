@@ -26,11 +26,11 @@ public sealed class AkkaActorHostedService : IHostedService
 
         var resolver = DependencyResolver.For(_actorSystem);
         var hubPush = _actorSystem.ActorOf(
-            resolver.Props<SignalRHubPushActor>(),
+            SignalRHubPushActor.Props(resolver),
             "signalr-hub-push");
 
         _actorSystem.ActorOf(
-            Props.Create(() => new FrontendPushActor(hubPush)),
+            FrontendPushActor.Props(hubPush),
             "frontend-push");
 
         _logger.LogInformation("Started Akka.NET actor system {ActorSystem}", _actorSystem.Name);

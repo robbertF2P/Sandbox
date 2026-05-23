@@ -6,6 +6,7 @@ namespace AkkaSignalRVuePoc.Api.Actors;
 public sealed class FrontendPushActor : ReceiveActor, IWithTimers
 {
     private const string TimerKey = "frontend-message-push";
+    private static readonly TimeSpan DefaultPushInterval = TimeSpan.FromSeconds(5);
 
     private readonly IActorRef _hubPushActor;
     private readonly TimeSpan _pushInterval;
@@ -14,14 +15,23 @@ public sealed class FrontendPushActor : ReceiveActor, IWithTimers
 
     public FrontendPushActor(
         IActorRef hubPushActor,
-        TimeSpan? pushInterval = null,
-        bool publishImmediately = true)
+        TimeSpan pushInterval,
+        bool publishImmediately)
     {
         _hubPushActor = hubPushActor;
-        _pushInterval = pushInterval ?? TimeSpan.FromSeconds(5);
+        _pushInterval = pushInterval;
         _publishImmediately = publishImmediately;
 
         Receive<PushTick>(_ => PublishMessage());
+    }
+
+    public static Props Props(
+        IActorRef hubPushActor,
+        TimeSpan? pushInterval = null,
+        bool publishImmediately = true)
+    {
+        var interval = pushInterval ?? DefaultPushInterval;
+        return Akka.Actor.Props.Create(() => new FrontendPushActor(hubPushActor, interval, publishImmediately));
     }
 
     public ITimerScheduler Timers { get; set; } = null!;

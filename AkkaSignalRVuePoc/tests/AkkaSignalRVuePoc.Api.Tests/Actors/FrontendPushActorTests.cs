@@ -30,9 +30,7 @@ public sealed class FrontendPushActorTests : TestKit
         var hubPushActor = CreateHubPushActor(hubContext, loggerFactory);
 
         var actor = Sys.ActorOf(
-            Props.Create(() => new FrontendPushActor(
-                hubPushActor,
-                pushInterval: TimeSpan.FromMinutes(10))),
+            FrontendPushActor.Props(hubPushActor, pushInterval: TimeSpan.FromMinutes(10)),
             "initial-push-actor");
 
         var call = await hubContext.ClientProxy.WaitForCallAsync(TimeSpan.FromSeconds(3));
@@ -54,10 +52,10 @@ public sealed class FrontendPushActorTests : TestKit
         var hubPushActor = CreateHubPushActor(hubContext, loggerFactory);
 
         var actor = Sys.ActorOf(
-            Props.Create(() => new FrontendPushActor(
+            FrontendPushActor.Props(
                 hubPushActor,
                 pushInterval: TimeSpan.FromMilliseconds(50),
-                publishImmediately: false)),
+                publishImmediately: false),
             "periodic-push-actor");
 
         var firstCall = await hubContext.ClientProxy.WaitForCallAsync(TimeSpan.FromSeconds(3));
@@ -75,9 +73,9 @@ public sealed class FrontendPushActorTests : TestKit
         SerilogLoggerFactory loggerFactory)
     {
         return Sys.ActorOf(
-            Props.Create(() => new SignalRHubPushActor(
+            SignalRHubPushActor.Props(
                 hubContext,
-                loggerFactory.CreateLogger<SignalRHubPushActor>())),
+                loggerFactory.CreateLogger<SignalRHubPushActor>()),
             "signalr-hub-push");
     }
 

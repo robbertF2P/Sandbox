@@ -1,4 +1,5 @@
 using Akka.Actor;
+using Akka.DependencyInjection;
 using AkkaSignalRVuePoc.Api.Hubs;
 using Microsoft.AspNetCore.SignalR;
 
@@ -12,6 +13,14 @@ public sealed class SignalRHubPushActor : ReceiveActor
     {
         ReceiveAsync<PublishActorMessage>(message => PublishAsync(hubContext, logger, message));
     }
+
+    public static Props Props(DependencyResolver resolver) =>
+        resolver.Props<SignalRHubPushActor>();
+
+    public static Props Props(
+        IHubContext<LiveMessagesHub> hubContext,
+        ILogger<SignalRHubPushActor> logger) =>
+        Akka.Actor.Props.Create(() => new SignalRHubPushActor(hubContext, logger));
 
     private static async Task PublishAsync(
         IHubContext<LiveMessagesHub> hubContext,
