@@ -11,14 +11,20 @@ public sealed class FrontendPushActor : ReceiveActor, IWithTimers
 
     private readonly IHubContext<LiveMessagesHub> _hubContext;
     private readonly ILogger<FrontendPushActor> _logger;
+    private readonly TimeSpan _pushInterval;
+    private readonly bool _publishImmediately;
     private long _sequence;
 
     public FrontendPushActor(
         IHubContext<LiveMessagesHub> hubContext,
-        ILogger<FrontendPushActor> logger)
+        ILogger<FrontendPushActor> logger,
+        TimeSpan? pushInterval = null,
+        bool publishImmediately = true)
     {
         _hubContext = hubContext;
         _logger = logger;
+        _pushInterval = pushInterval ?? TimeSpan.FromSeconds(5);
+        _publishImmediately = publishImmediately;
 
         ReceiveAsync<PushTick>(PublishMessageAsync);
     }
@@ -27,8 +33,12 @@ public sealed class FrontendPushActor : ReceiveActor, IWithTimers
 
     protected override void PreStart()
     {
-        Self.Tell(PushTick.Instance);
-        Timers.StartPeriodicTimer(TimerKey, PushTick.Instance, TimeSpan.FromSeconds(5));
+        if (_publishImmediately)
+        {
+            Self.Tell(PushTick.Instance);
+        }
+
+        Timers.StartPeriodicTimer(TimerKey, PushTick.Instance, _pushInterval);
     }
 
     protected override void PostStop()

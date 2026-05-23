@@ -2,4 +2,7 @@
   <Folder Name="/server/">
     <Project Path="server/AkkaSignalRVuePoc.Api/AkkaSignalRVuePoc.Api.csproj" />
   </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/AkkaSignalRVuePoc.Api.Tests/AkkaSignalRVuePoc.Api.Tests.csproj" />
+  </Folder>
 </Solution>
