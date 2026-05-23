@@ -1,7 +1,5 @@
-using Akka.Actor;
-using Akka.Hosting;
-using AkkaSignalRVuePoc.Api.Actors;
 using AkkaSignalRVuePoc.Api.Hubs;
+using AkkaSignalRVuePoc.Api.Services;
 using Serilog;
 
 Log.Logger = new LoggerConfiguration()
@@ -46,19 +44,7 @@ try
                 .AllowCredentials();
         });
     });
-    builder.Services.AddAkka("akka-signalr-poc", akkaBuilder =>
-    {
-        akkaBuilder.WithActors((system, registry, resolver) =>
-        {
-            var hubPush = system.ActorOf(resolver.Props<SignalRHubPushActor>(), "signalr-hub-push");
-            registry.Register<SignalRHubPushActor>(hubPush);
-
-            var frontendPush = system.ActorOf(
-                Props.Create(() => new FrontendPushActor(hubPush)),
-                "frontend-push");
-            registry.Register<FrontendPushActor>(frontendPush);
-        });
-    });
+    builder.Services.AddHostedService<AkkaActorHostedService>();
 
     var app = builder.Build();
 
