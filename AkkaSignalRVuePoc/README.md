@@ -27,3 +27,12 @@ npm run dev
 Open the Vite URL, usually `http://localhost:5173`, to see actor messages arrive every five seconds.
 
 To point the client at a different hub URL, copy `.env.example` to `.env.local` and edit `VITE_SIGNALR_HUB_URL`.
+
+## Run the actor tests
+
+```bash
+cd AkkaSignalRVuePoc
+dotnet test AkkaSignalRVuePoc.slnx --logger "console;verbosity=detailed"
+```
+
+The actor tests use xUnit with `Akka.TestKit.Xunit2`. Test loggers are created with Serilog and write to the xUnit output stream via `Serilog.Sinks.XUnit`, so actor logs appear with the same Serilog console-style output template used by the API.
