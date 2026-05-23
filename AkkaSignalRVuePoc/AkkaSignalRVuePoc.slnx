@@ -1,0 +1,5 @@
+<Solution>
+  <Folder Name="/server/">
+    <Project Path="server/AkkaSignalRVuePoc.Api/AkkaSignalRVuePoc.Api.csproj" />
+  </Folder>
+</Solution>
