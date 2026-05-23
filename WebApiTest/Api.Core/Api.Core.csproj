@@ -79,12 +79,8 @@
     <Compile Include="Controllers\BaseApiController.cs" />
     <Compile Include="Controllers\CompanyController.cs" />
     <Compile Include="Controllers\DocumentsController.cs" />
-    <Compile Include="Controllers\Factory.cs" />
     <Compile Include="Controllers\TransactionProposalsController.cs" />
     <Compile Include="LoggerModule.cs" />
-    <Compile Include="ModelFactory\ResourceCollectionFactory.cs" />
-    <Compile Include="ModelFactory\ResourceFactory.cs" />
-    <Compile Include="ModelFactory\Utils.cs" />
     <Compile Include="Startup.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
@@ -93,9 +89,13 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Api.Dto.Models\Api.Dto.Models.csproj">
-      <Project>{FB3F1EC4-19BA-4443-94B3-435209F52A1E}</Project>
-      <Name>Api.Dto.Models</Name>
+    <ProjectReference Include="..\Api.Application\Api.Application.csproj">
+      <Project>{7A39133B-29DA-4EF6-B86E-4089A9532DB3}</Project>
+      <Name>Api.Application</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Api.Contracts\Api.Contracts.csproj">
+      <Project>{DBF88987-F1AA-4DB0-B705-D8636786A3EE}</Project>
+      <Name>Api.Contracts</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

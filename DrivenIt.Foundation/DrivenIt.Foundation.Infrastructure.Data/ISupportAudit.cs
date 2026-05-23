@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Data.Entity;
 
 namespace DrivenIt.Foundation.Infrastructure.Data
 {
@@ -8,5 +9,10 @@ namespace DrivenIt.Foundation.Infrastructure.Data
         string CreatedBy { get; set; }
         DateTime ModifiedOn { get; set; }
         string ModifiedBy { get; set; }
+    }
+
+    public interface ICreateDataContext
+    {
+        DbContext Create();
     }
 }

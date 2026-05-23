@@ -25,7 +25,5 @@ namespace DrivenIt.Foundation.Infrastructure
         {
             _context = _defaultUnitOfWork.GetContext();
         }
-
-        public abstract void Process(IDomainTask task);
     }
 }

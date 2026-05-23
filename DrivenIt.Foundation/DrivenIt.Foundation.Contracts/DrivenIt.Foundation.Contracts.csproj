@@ -45,9 +45,11 @@
     <Compile Include="Events\IDomainEventReporter.cs" />
     <Compile Include="IDomainModel.cs" />
     <Compile Include="IDomainTask.cs" />
+    <Compile Include="IManageDatabase.cs" />
     <Compile Include="IPrincipleContext.cs" />
     <Compile Include="IRepository.cs" />
     <Compile Include="IViewModel.cs" />
+    <Compile Include="IWantToRunOnStartup.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="UnitOfWork\IDataContext.cs" />
     <Compile Include="UnitOfWork\ISupportUow.cs" />

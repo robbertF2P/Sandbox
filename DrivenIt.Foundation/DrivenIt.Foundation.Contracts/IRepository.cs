@@ -5,6 +5,5 @@ namespace DrivenIt.Foundation.Contracts
 {
     public interface IRepository:ISupportUow
     {
-        void Process(IDomainTask task);
     }
 }

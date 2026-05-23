@@ -1,5 +1,4 @@
 using DrivenIt.Foundation.Contracts;
-using DrivenIt.Foundation.Contracts.Events;
 
 namespace DrivenIt.Foundation.Domain.Tools.Events
 {

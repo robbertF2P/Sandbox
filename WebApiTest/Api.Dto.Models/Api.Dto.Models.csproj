@@ -44,20 +44,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Attributes\OptionalAttribute.cs" />
-    <Compile Include="Base\UrlFactory.cs" />
-    <Compile Include="Collections\PagedResourceCollection.cs" />
-    <Compile Include="Base\BaseResource.cs" />
-    <Compile Include="Comment.cs" />
-    <Compile Include="Company.cs" />
-    <Compile Include="CompanyReference.cs" />
-    <Compile Include="Document.cs" />
-    <Compile Include="DocumentComment.cs" />
-    <Compile Include="Enum\DocumentImportSource.cs" />
-    <Compile Include="DocumentReference.cs" />
-    <Compile Include="Base\IHaveOptionalFields.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="UserReference.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

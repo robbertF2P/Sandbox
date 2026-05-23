@@ -17,7 +17,7 @@ namespace DrivenIt.Foundation.Infrastructure.Data
         public IUow StartUnitOfWork(params ISupportUow[] supporters)
         {
             if (supporters.Length == 0) throw new ArgumentException("at least one supporter should have been specified");
-            var unitOfWork = new DataContextUoW(_principleContext, supporters);
+            var unitOfWork = new DataContextUow(_principleContext, supporters);
             SetSupporters(supporters, unitOfWork);
             return unitOfWork;
         }

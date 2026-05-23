@@ -8,6 +8,8 @@ using System.Drawing;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using Serilog;
+using Serilog.Events;
 
 namespace ActiveDirectoryTester
 {
@@ -17,6 +19,8 @@ namespace ActiveDirectoryTester
         {
             InitializeComponent();
             Console.SetOut(new ListBoxWriter(consoleLb));
+            Serilog.Log.Logger = new LoggerConfiguration().WriteTo.ColoredConsole().CreateLogger();
+            Log.Information("started");
         }
 
         private void Form1_Load(object sender, EventArgs e)
@@ -56,6 +60,15 @@ namespace ActiveDirectoryTester
             {
                 Console.WriteLine("---stop---");
             }
+        }
+
+        private void button2_Click(object sender, EventArgs e)
+        {
+            Log.Information("started 1");
+            Log.Logger.Information("started 2");
+            Log.ForContext<Form>().Information("pff");
+            Log.Logger.Information("Debug level is:{enabledOrNot}", Log.Logger.IsEnabled(LogEventLevel.Debug));
+            Log.Logger.Debug("Clicked me");
         }
     }
 }

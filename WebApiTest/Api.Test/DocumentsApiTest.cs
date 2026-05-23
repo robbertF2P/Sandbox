@@ -1,5 +1,7 @@
-﻿using Api.Dto.Models;
-using Api.Dto.Models.Collections;
+﻿using Api.Application.Collections;
+using Api.Application.Models;
+using Api.Contracts;
+using Api.Contracts.Collections;
 using FluentAssertions;
 using Newtonsoft.Json;
 using NUnit.Framework;

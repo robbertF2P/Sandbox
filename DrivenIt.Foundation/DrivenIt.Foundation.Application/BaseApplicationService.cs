@@ -13,16 +13,15 @@ namespace DrivenIt.Foundation.Application
         private IRepository repository;
         public void Test()
         {
-            using(ErrorEventListener.Register(e=> Console.WriteLine("{0} : {1}",e.Key,e.Message)))
-            using (var uow = StartUow(repository))
-            {
-                IViewModel model= null;
-                var task=  model.ToTask<IDomainTask>()>()
-                ;
-                repository.Process(null);
-                ErrorEventReporter.Raise(new GeneralErrorEvent("This doesn't work"));
-                uow.SaveChanges();
-            }
+            //using(ErrorEventListener.Register(e=> Console.WriteLine("{0} : {1}",e.Key,e.Message)))
+            //using (var uow = StartUow(repository))
+            //{
+            //    IViewModel model= null;
+            //    var task=  model.ToTask<IDomainTask>>();
+            //    repository.Process(null);
+            //    ErrorEventReporter.Raise(new GeneralErrorEvent("This doesn't work"));
+            //    uow.SaveChanges();
+            //}
         }
 
         private IUow StartUow(params ISupportUow[] supporters)

@@ -5,15 +5,16 @@ using System.Data.Entity;
 
 namespace DrivenIt.Foundation.Infrastructure.Data
 {
-    public class DataContextUoW : IUow
+    public class DataContextUow : IUow
     {
+        public static Func<DbContext> ContextFactory; 
         private readonly ISupportUow[] _supporters;
         private readonly DataContextHelper _contextWrapper;
 
-        public DataContextUoW(IPrincipleContext principleContext, params ISupportUow[] supporters)
+        public DataContextUow(IPrincipleContext principleContext, params ISupportUow[] supporters)
         {
             _supporters = supporters;
-            _contextWrapper = new DataContextHelper(new DbContext(""), principleContext);
+            _contextWrapper = new DataContextHelper(ContextFactory(), principleContext);
         }
 
         public void SaveChanges()

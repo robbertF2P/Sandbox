@@ -80,6 +80,14 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Api.Application\Api.Application.csproj">
+      <Project>{7A39133B-29DA-4EF6-B86E-4089A9532DB3}</Project>
+      <Name>Api.Application</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Api.Contracts\Api.Contracts.csproj">
+      <Project>{DBF88987-F1AA-4DB0-B705-D8636786A3EE}</Project>
+      <Name>Api.Contracts</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Api.Core\Api.Core.csproj">
       <Project>{51DE8545-330D-47F2-874A-F1A43AAA5313}</Project>
       <Name>Api.Core</Name>

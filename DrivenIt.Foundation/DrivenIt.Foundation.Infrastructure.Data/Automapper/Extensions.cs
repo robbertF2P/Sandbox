@@ -1,10 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using AutoMapper;
+﻿using AutoMapper;
 using DrivenIt.Foundation.Contracts;
+using System.Collections.Generic;
 
 namespace DrivenIt.Foundation.Infrastructure.Data.Automapper
 {
@@ -24,13 +20,21 @@ namespace DrivenIt.Foundation.Infrastructure.Data.Automapper
             return Mapper.Map<IList<TDomainModel>>(models);
         }
 
-        //viewmodel => domain task
-        internal static TDomainTask ToTask<TDomainTask>(this IViewModel viewModel)
-            where TDomainTask : IDomainTask
+        
+        public static TDataModel To<TDataModel,TIn>(this TIn task, TDataModel original)
+            where TDataModel : IDataModel where TIn:IDomainTask
         {
-            if (null == viewModel) return default(TDomainTask);
+            if (null == task) return original;
 
-            return Mapper.Map<TDomainTask>(viewModel);
+            return Mapper.Map<TIn,TDataModel>(task, original);
+        }
+
+        public static TDataModel To<TDataModel>(this IDomainTask task)
+            where TDataModel : IDataModel
+        {
+            if (null == task) return default(TDataModel);
+
+            return Mapper.Map<TDataModel>(task);
         }
     }
 }

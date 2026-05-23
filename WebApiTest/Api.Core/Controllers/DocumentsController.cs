@@ -1,9 +1,10 @@
-﻿using Api.Core.ModelFactory;
-using Api.Dto.Models;
-using Api.Dto.Models.Collections;
+﻿using Api.Application;
+using Api.Application.Collections;
+using Api.Application.Models;
+using Api.Contracts;
+using Api.Contracts.Collections;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
@@ -15,31 +16,36 @@ namespace Api.Core.Controllers
     [RoutePrefix(RoutePrefix)]
     public class DocumentsController:BaseApiController
     {
+        private readonly IDocumentsProvider _provider;
         public const string RoutePrefix = "documents";
         public const int DefaultPagesize = 10;
-
-        public static IEnumerable<Document> Data = Factory.GetDummyDocuments();
-
+        public DocumentsController(IDocumentsProvider provider)
+        {
+            _provider = provider;
+        }
+        public DocumentsController():this(new Provider())
+        { }
         [ResponseType(typeof(PagedResourceCollection<Document>))]
         public IHttpActionResult Get(string[] fields, int offSet = 0, int limit = DefaultPagesize)
         {
-            var items = Data.AsParallel().Skip(offSet).Take(limit);
-            return Ok(ResourceCollectionFactory.CreateCollection(items,fields, Data.Count(),offSet,limit, GetCurrentRoot() + RoutePrefix));
+            var collection = _provider.GetDocuments(fields, offSet, limit);
+            return Ok(collection);
         }
         
         [Route("{id:guid}")]
         [ResponseType(typeof(Document))]
         public IHttpActionResult Get(Guid id, string[] fields)
         {
-            var document = Data.SingleOrDefault(d => d.Id == id);
-            if (document == null) return base.NotFound();
-            return Ok(ResourceFactory.CreateResource(document, fields, GetCurrentRoot() + RoutePrefix));
+            IDocument document = null;// Data.SingleOrDefault(d => d.Id == id);
+            return base.NotFound();
+            //if (document == null) return base.NotFound();
+            //return Ok(ResourceFactory.CreateResource(document, fields, GetCurrentRoot() + RoutePrefix));
         }
 
         [Route("{id:guid}")]
         public IHttpActionResult Delete(Guid id)
         {
-            Data = Data.Where(d => d.Id != id);
+            //Data = Data.Where(d => d.Id != id);
             return Ok();
         }
 
@@ -72,9 +78,9 @@ namespace Api.Core.Controllers
 
         [HttpGet]
         [Route("{id}/comments")]
-        public DocumentComment[] GetComments()
+        public IComment[] GetComments()
         {
-            return new DocumentComment[] { };
+            return new Comment[] { };
         }
 
         [HttpPost]
