@@ -8,7 +8,7 @@ public static class AkkaHostingExtensions
 {
     public static IServiceCollection AddAkkaActors(this IServiceCollection services)
     {
-        services.AddAkka("akka-signalr-poc", akka =>
+        services.AddAkka<AkkaActorHostedService>("akka-signalr-poc", (akka, _) =>
         {
             akka
                 .ConfigureLoggers(setup =>

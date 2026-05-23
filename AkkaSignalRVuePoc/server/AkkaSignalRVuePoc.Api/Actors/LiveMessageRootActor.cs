@@ -12,13 +12,13 @@ public sealed class LiveMessageRootActor : ReceiveActor
     {
         _hubPushActor = hubPushActor;
 
-        ReceiveAsync<PublishLiveMessageCommand>(HandlePublishAsync);
+        Receive<PublishLiveMessageCommand>(HandlePublish);
     }
 
     public static Props Props(IActorRef hubPushActor) =>
         Akka.Actor.Props.Create(() => new LiveMessageRootActor(hubPushActor));
 
-    private Task HandlePublishAsync(PublishLiveMessageCommand command)
+    private void HandlePublish(PublishLiveMessageCommand command)
     {
         if (string.IsNullOrWhiteSpace(command.Text))
         {
@@ -27,11 +27,11 @@ public sealed class LiveMessageRootActor : ReceiveActor
                 Sender.Tell(new Status.Failure(new ArgumentException("Text is required.", nameof(command.Text))));
             }
 
-            return Task.CompletedTask;
+            return;
         }
 
         var message = new PushMessage(
-            Sequence: Interlocked.Increment(ref _sequence),
+            Sequence: ++_sequence,
             Text: command.Text.Trim(),
             SentAt: DateTimeOffset.UtcNow,
             Source: Self.Path.ToStringWithoutAddress());
@@ -42,7 +42,5 @@ public sealed class LiveMessageRootActor : ReceiveActor
         {
             Sender.Tell(message);
         }
-
-        return Task.CompletedTask;
     }
 }
