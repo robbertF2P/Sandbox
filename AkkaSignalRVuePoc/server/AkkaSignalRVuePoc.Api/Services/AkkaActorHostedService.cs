@@ -1,5 +1,4 @@
 using Akka.Hosting;
-using Microsoft.Extensions.Hosting;
 
 namespace AkkaSignalRVuePoc.Api.Services;
 

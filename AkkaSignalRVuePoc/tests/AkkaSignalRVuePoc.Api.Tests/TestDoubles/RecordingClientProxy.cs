@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.SignalR;
 
 namespace AkkaSignalRVuePoc.Api.Tests.TestDoubles;
 
-internal sealed class RecordingClientProxy : IClientProxy
+public sealed class RecordingClientProxy : IClientProxy
 {
     private readonly ConcurrentQueue<RecordedHubCall> _calls = new();
     private readonly SemaphoreSlim _availableCalls = new(0);

@@ -35,7 +35,10 @@ public static class ProjectEndpoints
 
             var project = store.CreateProject(request);
             return project is null
-                ? Results.NotFound(new { Error = $"Organisation '{request.OrganisationId}' was not found." })
+                ? Results.NotFound(new
+                {
+                    Error = $"Organisation '{request.OrganisationId}' was not found."
+                })
                 : Results.Created($"/api/projects/{project.Id}", project);
         })
             .WithName("CreateProject")

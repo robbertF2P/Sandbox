@@ -3,6 +3,9 @@ using AkkaSignalRVuePoc.Api.Models;
 
 namespace AkkaSignalRVuePoc.Api.Actors;
 
+/// <summary>
+/// This actor simulates a heartbeat ticker that periodically sends messages to the frontend via the hub push actor. It can publish immediately on startup and then continue at regular intervals, which is useful for demonstrating real-time updates to connected clients.
+/// </summary>
 public sealed class FrontendPushActor : ReceiveActor, IWithTimers
 {
     private const string TimerKey = "frontend-message-push";

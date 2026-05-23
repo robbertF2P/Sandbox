@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.SignalR;
 
 namespace AkkaSignalRVuePoc.Api.Tests.TestDoubles;
 
-internal sealed class RecordingHubContext : IHubContext<LiveMessagesHub>
+public sealed class RecordingHubContext : IHubContext<LiveMessagesHub>
 {
     public RecordingHubContext()
     {
@@ -12,9 +12,18 @@ internal sealed class RecordingHubContext : IHubContext<LiveMessagesHub>
         Groups = new NoopGroupManager();
     }
 
-    public RecordingClientProxy ClientProxy { get; }
+    public RecordingClientProxy ClientProxy
+    {
+        get;
+    }
 
-    public IHubClients Clients { get; }
+    public IHubClients Clients
+    {
+        get;
+    }
 
-    public IGroupManager Groups { get; }
+    public IGroupManager Groups
+    {
+        get;
+    }
 }

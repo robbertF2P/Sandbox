@@ -1,5 +1,5 @@
 using Akka.Actor;
-using Akka.DependencyInjection;
+using Akka.Event;
 using AkkaSignalRVuePoc.Api.Hubs;
 using Microsoft.AspNetCore.SignalR;
 
@@ -7,28 +7,23 @@ namespace AkkaSignalRVuePoc.Api.Actors;
 
 public sealed class SignalRHubPushActor : ReceiveActor
 {
-    public SignalRHubPushActor(
-        IHubContext<LiveMessagesHub> hubContext,
-        ILogger<SignalRHubPushActor> logger)
+    private readonly ILoggingAdapter _log = Context.GetLogger();
+    private readonly IHubContext<LiveMessagesHub> _hubContext;
+
+    public SignalRHubPushActor(IHubContext<LiveMessagesHub> hubContext)
     {
-        ReceiveAsync<PublishActorMessage>(message => PublishAsync(hubContext, logger, message));
+        _hubContext = hubContext;
+
+        ReceiveAsync<PublishActorMessage>(PublishAsync);
     }
 
-    public static Props Props(DependencyResolver resolver) =>
-        resolver.Props<SignalRHubPushActor>();
+    public static Props Props(IHubContext<LiveMessagesHub> hubContext) =>
+        Akka.Actor.Props.Create(() => new SignalRHubPushActor(hubContext));
 
-    public static Props Props(
-        IHubContext<LiveMessagesHub> hubContext,
-        ILogger<SignalRHubPushActor> logger) =>
-        Akka.Actor.Props.Create(() => new SignalRHubPushActor(hubContext, logger));
-
-    private static async Task PublishAsync(
-        IHubContext<LiveMessagesHub> hubContext,
-        ILogger logger,
-        PublishActorMessage message)
+    private async Task PublishAsync(PublishActorMessage message)
     {
-        await hubContext.Clients.All.SendAsync("actorMessage", message.Message);
-        logger.LogInformation(
+        await _hubContext.Clients.All.SendAsync("actorMessage", message.Message);
+        _log.Info(
             "Published actor message {Sequence} to SignalR clients",
             message.Message.Sequence);
     }

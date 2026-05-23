@@ -3,9 +3,7 @@ using AkkaSignalRVuePoc.Api.Hubs;
 using AkkaSignalRVuePoc.Api.Services;
 using Serilog;
 
-Log.Logger = new LoggerConfiguration()
-    .WriteTo.Console()
-    .CreateBootstrapLogger();
+Log.Logger = SerilogLogging.CreateBootstrapLogger();
 
 try
 {
@@ -15,10 +13,9 @@ try
 
     builder.Host.UseSerilog((context, services, loggerConfiguration) =>
     {
-        loggerConfiguration
-            .ReadFrom.Configuration(context.Configuration)
-            .ReadFrom.Services(services)
-            .Enrich.FromLogContext();
+        SerilogLogging.ConfigureShared(loggerConfiguration);
+        SerilogLogging.ConfigureApplicationSinks(loggerConfiguration, context.Configuration);
+        loggerConfiguration.ReadFrom.Services(services);
     });
 
     builder.Services.AddEndpointsApiExplorer();
