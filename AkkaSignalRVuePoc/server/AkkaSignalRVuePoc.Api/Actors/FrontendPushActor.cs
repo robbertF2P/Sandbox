@@ -62,13 +62,4 @@ public sealed class FrontendPushActor : ReceiveActor, IWithTimers
 
         _hubPushActor.Tell(new PublishActorMessage(message));
     }
-
-    private sealed class PushTick
-    {
-        public static readonly PushTick Instance = new();
-
-        private PushTick()
-        {
-        }
-    }
 }

@@ -1,3 +1,6 @@
+using Akka.Actor;
+using Akka.Hosting;
+using AkkaSignalRVuePoc.Api.Actors;
 using AkkaSignalRVuePoc.Api.Models;
 using Microsoft.AspNetCore.SignalR;
 
@@ -5,6 +8,13 @@ namespace AkkaSignalRVuePoc.Api.Hubs;
 
 public sealed class LiveMessagesHub : Hub
 {
+    private readonly IRequiredActor<LiveMessageRootActor> _rootActor;
+
+    public LiveMessagesHub(IRequiredActor<LiveMessageRootActor> rootActor)
+    {
+        _rootActor = rootActor;
+    }
+
     public override async Task OnConnectedAsync()
     {
         await Clients.Caller.SendAsync("serverMessage", new PushMessage(
@@ -14,5 +24,11 @@ public sealed class LiveMessagesHub : Hub
             Source: "SignalR Hub"));
 
         await base.OnConnectedAsync();
+    }
+
+    public Task PostMessage(string text)
+    {
+        _rootActor.ActorRef.Tell(new PublishLiveMessageCommand(text));
+        return Task.CompletedTask;
     }
 }

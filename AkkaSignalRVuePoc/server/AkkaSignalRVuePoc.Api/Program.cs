@@ -1,3 +1,4 @@
+using AkkaSignalRVuePoc.Api.Endpoints;
 using AkkaSignalRVuePoc.Api.Hubs;
 using AkkaSignalRVuePoc.Api.Services;
 using Serilog;
@@ -20,6 +21,19 @@ try
             .Enrich.FromLogContext();
     });
 
+    builder.Services.AddEndpointsApiExplorer();
+    builder.Services.AddSwaggerGen(options =>
+    {
+        options.SwaggerDoc("v1", new()
+        {
+            Title = "Akka SignalR Vue POC API",
+            Version = "v1",
+            Description = "Sample REST API for organisations and projects, plus SignalR live messages."
+        });
+    });
+    builder.Services.AddSingleton<InMemoryCatalogStore>();
+    builder.Services.AddHealthChecks();
+    builder.Services.AddAkkaActors();
     builder.Services.AddSignalR();
     builder.Services.AddCors(options =>
     {
@@ -44,9 +58,15 @@ try
                 .AllowCredentials();
         });
     });
-    builder.Services.AddHostedService<AkkaActorHostedService>();
 
     var app = builder.Build();
+
+    app.UseSwagger();
+    app.UseSwaggerUI(options =>
+    {
+        options.SwaggerEndpoint("v1/swagger.json", "Akka SignalR Vue POC API v1");
+        options.RoutePrefix = "swagger";
+    });
 
     app.UseSerilogRequestLogging();
     app.UseCors("VueDevClient");
@@ -54,10 +74,19 @@ try
     app.MapGet("/", () => Results.Ok(new
     {
         Name = "Akka.NET + SignalR + Vue POC",
+        Swagger = "/swagger",
         Hub = "/hubs/live-messages",
-        Message = "Run the Vue client and watch actorMessage events arrive every five seconds."
+        Organisations = "/api/organisations",
+        Projects = "/api/projects",
+        Messages = "/api/messages",
+        Health = "/health",
+        Message = "Open Swagger to explore the REST API, or run the Vue client for live actor messages."
     }));
 
+    app.MapOrganisationEndpoints();
+    app.MapProjectEndpoints();
+    app.MapMessageEndpoints();
+    app.MapHealthChecks("/health");
     app.MapHub<LiveMessagesHub>("/hubs/live-messages");
 
     app.Run();

@@ -52,4 +52,4 @@ cd AkkaSignalRVuePoc
 dotnet test AkkaSignalRVuePoc.slnx --logger "console;verbosity=detailed"
 ```
 
-The actor tests use xUnit with `Akka.TestKit.Xunit2`. Test loggers are created with Serilog and write to the xUnit output stream via `Serilog.Sinks.XUnit`, so actor logs appear with the same Serilog console-style output template used by the API.
+The actor tests use xUnit v3 with `Akka.TestKit.Xunit`. Test loggers use Serilog and write to the xUnit output stream via `Serilog.Sinks.XUnit3`.
