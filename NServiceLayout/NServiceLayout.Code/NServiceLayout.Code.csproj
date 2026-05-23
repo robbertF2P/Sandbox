@@ -1,0 +1,83 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>8.0.30703</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{05536E9D-7530-4B0C-83A5-18E124C8406E}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>NServiceLayout.Code</RootNamespace>
+    <AssemblyName>NServiceLayout.Code</AssemblyName>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="Microsoft.CSharp" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="HedgeService\HedgeContractProcessor.cs">
+      <SourceModelReference>modelbus://NuPattern.Runtime.Store/NServiceLayout/Element/C:\MySource\SandBox\NServiceLayout\NServiceLayout.slnbldr%252f66bdd336-04f7-49ab-ae57-1c0f5ae12ac6</SourceModelReference>
+      <ItemGuid>f8db69f1-0047-4870-8d2c-3551b3c4cfc1</ItemGuid>
+    </Compile>
+    <Compile Include="Infrastructure\HedgeService\HedgeContractProcessor.cs">
+      <SourceModelReference>modelbus://NuPattern.Runtime.Store/NServiceLayout/Element/C:\MySource\SandBox\NServiceLayout\NServiceLayout.slnbldr%252f66bdd336-04f7-49ab-ae57-1c0f5ae12ac6</SourceModelReference>
+      <ItemGuid>e664c72e-abe1-4b3c-821c-0d1864d25fbd</ItemGuid>
+    </Compile>
+    <Compile Include="Infrastructure\RiskService\PriceContractProcessor.cs">
+      <SourceModelReference>modelbus://NuPattern.Runtime.Store/NServiceLayout/Element/C:\MySource\SandBox\NServiceLayout\NServiceLayout.slnbldr%252ff2f28c75-0bc0-403d-a1e8-fc29bc8417d6</SourceModelReference>
+      <ItemGuid>1eca80e3-173a-4fca-94a1-e8b163f22e43</ItemGuid>
+    </Compile>
+    <Compile Include="Infrastructure\RiskService\PriceContractSender.cs">
+      <SourceModelReference>modelbus://NuPattern.Runtime.Store/NServiceLayout/Element/C:\MySource\SandBox\NServiceLayout\NServiceLayout.slnbldr%252f6c667e85-f2ee-45eb-9b24-2b8e4d894f2c</SourceModelReference>
+      <ItemGuid>1a6b7a5a-fc42-4ed8-881a-5250854d17e3</ItemGuid>
+    </Compile>
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="RiskService\PriceContractProcessor.cs">
+      <SourceModelReference>modelbus://NuPattern.Runtime.Store/NServiceLayout/Element/C:\MySource\SandBox\NServiceLayout\NServiceLayout.slnbldr%252ff2f28c75-0bc0-403d-a1e8-fc29bc8417d6</SourceModelReference>
+      <ItemGuid>62ea495e-1df8-4c58-a68a-144428a50981</ItemGuid>
+    </Compile>
+    <Compile Include="RiskService\PriceContractSender.cs">
+      <SourceModelReference>modelbus://NuPattern.Runtime.Store/NServiceLayout/Element/C:\MySource\SandBox\NServiceLayout\NServiceLayout.slnbldr%252f096541c9-1787-4ec0-ad84-b1d47f8a67d1</SourceModelReference>
+      <ItemGuid>eb21a79d-ee2f-4781-9a37-b0ee93cb06b9</ItemGuid>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\NServiceLayout.Contract\NServiceLayout.Contract.csproj">
+      <Project>{BD809532-B22A-434B-8320-F9EE9C076CEA}</Project>
+      <Name>NServiceLayout.Contract</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\NServiceLayout.InternalMessages\NServiceLayout.InternalMessages.csproj">
+      <Project>{59A6F7D8-CED5-4EDE-A249-A9991A61B5C4}</Project>
+      <Name>NServiceLayout.InternalMessages</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

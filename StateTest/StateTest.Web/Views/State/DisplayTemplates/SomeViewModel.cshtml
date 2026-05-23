@@ -1,0 +1,36 @@
+﻿@model StateTest.Web.Models.SomeViewModel
+@{
+    var first = Model.SubItems.FirstOrDefault();
+}
+<p>
+@Html.DisplayFor(m=> m.Name)
+    <a href="@Url.Action("Edit", new { id = Model.Id })">Edit</a>
+
+    </p>
+    <table>
+	<thead>
+		<tr >
+			<th>@Html.LabelFor(m => first.Name)</th>
+			<th>@Html.LabelFor(m => first.Value)</th>
+
+			<th></th>
+		</tr>
+	</thead>
+	<tbody>
+	@if (Model.SubItems.Any())
+	{
+		foreach (var item in Model.SubItems)
+		{
+			@Html.DisplayFor(m => item)     
+		}
+	}
+	else
+	{
+		<tr>
+			<td colspan="36">
+				niks gevonden
+			</td>
+		</tr>
+	}
+	</tbody>
+</table>

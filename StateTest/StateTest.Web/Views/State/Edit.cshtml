@@ -1,0 +1,25 @@
+﻿@model StateTest.Web.Models.SomeViewModel
+Here you should see a listcan edit
+
+@Html.EditorForModel()
+
+<script language="javascript" type="text/javascript">
+
+    function SubmitForm() {
+        //select and serialize our small form
+        var frm = $("#myForm").serialize();
+       // get form action
+        var action = $("#myForm").attr("action");
+        $.ajax({
+            url:  '@(Url.Action("Reload"))',
+            cache: false,
+            async: true,
+            type: "POST",
+            data: frm, //data to post to server
+            error: function (html) { alert(html); }, //something goes wrong...
+            success: function (data) {
+                $("#myForm").html(data); //replace our form content
+            }
+        });
+    }
+</script>
