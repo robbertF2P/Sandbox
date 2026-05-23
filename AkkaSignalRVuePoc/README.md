@@ -28,6 +28,23 @@ Open the Vite URL, usually `http://localhost:5173`, to see actor messages arrive
 
 To point the client at a different hub URL, copy `.env.example` to `.env.local` and edit `VITE_SIGNALR_HUB_URL`.
 
+
+## Run with Docker Compose
+
+From a machine with Docker Desktop running:
+
+```bash
+cd AkkaSignalRVuePoc
+docker compose up --build
+```
+
+Then open `http://localhost:5173`. The compose file starts:
+
+- `api`: ASP.NET Core, Akka.NET, Serilog, and SignalR on `http://localhost:5000`
+- `client`: the built Vue app served by nginx on `http://localhost:5173`
+
+The Vue image is built with `VITE_SIGNALR_HUB_URL=http://localhost:5000/hubs/live-messages`, which is the URL your browser uses to connect back to the API on your laptop. Stop the stack with `Ctrl+C`, or run `docker compose down` from the same folder.
+
 ## Run the actor tests
 
 ```bash
