@@ -115,4 +115,6 @@ dotnet test path/to/Tests.csproj
 - `AkkaSignalRVuePoc/.cursor/rules/csharp-resharper-style.mdc` — detailed C# and test conventions.
 - `.cursor/rules/terse-agent-communication.mdc` — keep agent responses concise.
 
+For Entity Framework Core (DbContext, migrations, queries), use the `dotnet-ef-core` skill.
+
 For actor systems and Akka.NET-specific work, use the `akka-net` skill instead.
