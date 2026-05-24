@@ -1,0 +1,40 @@
+name: akka-signalr-vue-poc
+
+services:
+  seq:
+    image: datalust/seq:latest
+    environment:
+      ACCEPT_EULA: "Y"
+    ports:
+      - "5341:5341"
+      - "8081:80"
+    volumes:
+      - seq-data:/data
+
+  api:
+    build:
+      context: .
+      dockerfile: server/AkkaSignalRVuePoc.Api/Dockerfile
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      Kestrel__Endpoints__Http__Url: http://0.0.0.0:5000
+      Cors__AllowedOrigins__0: http://localhost:5173
+      Seq__ServerUrl: http://seq:5341
+    depends_on:
+      - seq
+    ports:
+      - "5000:5000"
+
+  client:
+    build:
+      context: .
+      dockerfile: client/Dockerfile
+      args:
+        VITE_SIGNALR_HUB_URL: http://localhost:5000/hubs/live-messages
+    depends_on:
+      - api
+    ports:
+      - "5173:80"
+
+volumes:
+  seq-data:

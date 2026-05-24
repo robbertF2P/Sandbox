@@ -1,0 +1,9 @@
+﻿@model StateTest.Web.Models.SubItemViewModel
+@Html.HiddenFor(m=> m.Id)
+<tr>
+    <td>@Html.EditorFor(m=>m.Name)</td>
+    <td>@Html.EditorFor(m=>m.Value)</td>
+    <td>
+            <a href="@Url.Action("Remove", new { id = Model.Id })">Delete</a>
+    </td>
+</tr>

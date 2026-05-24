@@ -1,0 +1,41 @@
+---
+description: C# coding style aligned with ReSharper defaults
+globs: **/*.cs
+alwaysApply: false
+---
+
+# C# Style (ReSharper-aligned)
+
+Follow JetBrains/ReSharper defaults for this solution.
+
+## Structure
+- One public type per file; file name matches type name.
+- Use file-scoped namespaces.
+- Prefer `sealed` on classes not designed for inheritance.
+- Keep members ordered: constants, fields, constructors, public API, protected, private.
+
+## Naming
+- Types, methods, properties, constants: `PascalCase`.
+- Private fields: `_camelCase`.
+- Async methods: suffix `Async`.
+- Test methods: descriptive `PascalCase_with_underscores`.
+
+## Usings and qualification
+- Sort usings: `System*` first, then third-party, then project namespaces.
+- Remove unused usings.
+- Do not qualify with type name when a `using` exists, unless it resolves ambiguity (e.g. use `Akka.Actor.Props.Create` when the actor also defines a static `Props` factory).
+
+## Style
+- Prefer `var` when the type is apparent; otherwise use explicit types.
+- Always use braces for control flow.
+- Use expression-bodied members only for single-line members.
+- Prefer primary constructors only when they simplify the type without hiding behavior.
+
+## Akka.NET
+- Actor logging: `private readonly ILoggingAdapter _log = Context.GetLogger();`
+- No `Interlocked` for per-actor instance state; the mailbox serializes access.
+- Register actors via static `Props` factories; wire in `AkkaHostingExtensions`.
+
+## Tests
+- Actor tests inherit `ActorTestBase<TTest>`.
+- Use `HubContext`, `CreateHubPushActor()`, and shared Serilog setup from the base class.
