@@ -30,7 +30,7 @@ try
     });
     builder.Services.AddSingleton<InMemoryCatalogStore>();
     builder.Services.AddHealthChecks();
-    builder.Services.AddAkkaActors();
+    builder.Services.AddAkkaActors(builder.Configuration);
     builder.Services.AddSignalR();
     builder.Services.AddCors(options =>
     {
@@ -76,6 +76,7 @@ try
         Organisations = "/api/organisations",
         Projects = "/api/projects",
         Messages = "/api/messages",
+        BackgroundProcess = "/api/background-process/start",
         Health = "/health",
         Message = "Open Swagger to explore the REST API, or run the Vue client for live actor messages."
     }));
@@ -83,6 +84,7 @@ try
     app.MapOrganisationEndpoints();
     app.MapProjectEndpoints();
     app.MapMessageEndpoints();
+    app.MapBackgroundProcessEndpoints();
     app.MapHealthChecks("/health");
     app.MapHub<LiveMessagesHub>("/hubs/live-messages");
 
