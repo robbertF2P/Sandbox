@@ -1,0 +1,15 @@
+---
+description: Keep AI agent communication concise
+globs:
+alwaysApply: true
+---
+
+# Terse agent communication
+
+- Be concise by default.
+- Do not explain obvious steps.
+- Prefer action over narration.
+- For code changes, summarize only changed files, tests run, and blockers.
+- Ask questions only when truly blocked.
+- Avoid broad codebase exploration unless needed.
+- Do not include long diffs unless requested.
