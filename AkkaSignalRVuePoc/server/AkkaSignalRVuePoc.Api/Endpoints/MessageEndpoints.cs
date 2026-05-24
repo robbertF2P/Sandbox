@@ -1,7 +1,8 @@
 using Akka.Actor;
 using Akka.Hosting;
-using AkkaSignalRVuePoc.Api.Actors;
 using AkkaSignalRVuePoc.Api.Models;
+using AkkaSignalRVuePoc.Contracts.Messages;
+using AkkaSignalRVuePoc.Core.Actors;
 
 namespace AkkaSignalRVuePoc.Api.Endpoints;
 

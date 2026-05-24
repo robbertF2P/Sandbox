@@ -14,4 +14,9 @@
     <PackageReference Include="Swashbuckle.AspNetCore" Version="9.0.6" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\AkkaSignalRVuePoc.Contracts\AkkaSignalRVuePoc.Contracts.csproj" />
+    <ProjectReference Include="..\AkkaSignalRVuePoc.Core\AkkaSignalRVuePoc.Core.csproj" />
+  </ItemGroup>
+
 </Project>

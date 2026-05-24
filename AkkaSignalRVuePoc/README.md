@@ -3,6 +3,8 @@
 This proof-of-concept contains:
 
 - `server/AkkaSignalRVuePoc.Api`: an ASP.NET Core executable API host with a SignalR hub at `/hubs/live-messages`.
+- `server/AkkaSignalRVuePoc.Core`: Akka.NET actors and publisher abstractions.
+- `server/AkkaSignalRVuePoc.Contracts`: actor system messages and events that plugins can consume.
 - An Akka.NET actor system started by `AkkaActorHostedService`.
 - `FrontendPushActor`, which publishes an `actorMessage` event to all SignalR clients immediately at startup and then every five seconds.
 - `client`: a Vite + Vue + TypeScript frontend that connects to the hub and renders the live stream.

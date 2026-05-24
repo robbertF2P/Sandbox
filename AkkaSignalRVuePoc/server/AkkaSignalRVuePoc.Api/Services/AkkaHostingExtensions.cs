@@ -1,6 +1,8 @@
 using Akka.DependencyInjection;
 using Akka.Hosting;
-using AkkaSignalRVuePoc.Api.Actors;
+using AkkaSignalRVuePoc.Contracts.Events;
+using AkkaSignalRVuePoc.Core.Actors;
+using AkkaSignalRVuePoc.Core.Publishing;
 
 namespace AkkaSignalRVuePoc.Api.Services;
 
@@ -8,6 +10,8 @@ public static class AkkaHostingExtensions
 {
     public static IServiceCollection AddAkkaActors(this IServiceCollection services)
     {
+        services.AddSingleton<ILiveMessageClientPublisher, SignalRLiveMessageClientPublisher>();
+
         services.AddAkka<AkkaActorHostedService>("akka-signalr-poc", (akka, _) =>
         {
             akka
@@ -33,6 +37,10 @@ public static class AkkaHostingExtensions
                     system.ActorOf(
                         FrontendPushActor.Props(hubPush),
                         "frontend-push");
+
+                    system.EventStream.Publish(new ActorSystemStarted(
+                        system.Name,
+                        DateTimeOffset.UtcNow));
                 });
         });
 

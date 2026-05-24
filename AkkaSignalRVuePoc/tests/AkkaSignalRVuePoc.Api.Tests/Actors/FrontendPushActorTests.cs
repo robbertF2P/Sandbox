@@ -1,95 +1,54 @@
 using Akka.Actor;
 using Akka.TestKit.Xunit;
-using AkkaSignalRVuePoc.Api.Actors;
-using AkkaSignalRVuePoc.Api.Models;
-using AkkaSignalRVuePoc.Api.Tests.TestDoubles;
-using Microsoft.Extensions.Logging;
-using Serilog;
-using Serilog.Extensions.Logging;
-using Serilog.Sinks.XUnit3;
+using AkkaSignalRVuePoc.Contracts.Messages;
+using AkkaSignalRVuePoc.Core.Actors;
 
 namespace AkkaSignalRVuePoc.Api.Tests.Actors;
 
 public sealed class FrontendPushActorTests : TestKit
 {
-    private readonly ITestOutputHelper _output;
-
     public FrontendPushActorTests(ITestOutputHelper output)
         : base(DefaultConfig, nameof(FrontendPushActorTests), output)
     {
-        _output = output;
     }
 
     [Fact]
-    public async Task Publishes_actor_message_when_started()
+    public void Publishes_actor_message_when_started()
     {
-        using var loggerFactory = CreateSerilogLoggerFactory();
-        var hubContext = new RecordingHubContext();
-        var hubPushActor = CreateHubPushActor(hubContext, loggerFactory);
+        var hubPushActor = CreateTestProbe("hub-push");
 
         var actor = Sys.ActorOf(
-            FrontendPushActor.Props(hubPushActor, pushInterval: TimeSpan.FromMinutes(10)),
+            FrontendPushActor.Props(hubPushActor.Ref, pushInterval: TimeSpan.FromMinutes(10)),
             "initial-push-actor");
 
-        var call = await hubContext.ClientProxy.WaitForCallAsync(TimeSpan.FromSeconds(3));
+        var publish = hubPushActor.ExpectMsg<PublishActorMessage>(TimeSpan.FromSeconds(3));
 
-        Assert.Equal("actorMessage", call.Method);
-        var message = Assert.IsType<PushMessage>(Assert.Single(call.Arguments));
+        var message = publish.Message;
         Assert.Equal(1, message.Sequence);
         Assert.Equal("Akka.NET actor heartbeat #1", message.Text);
         Assert.Contains("initial-push-actor", message.Source);
 
-        await actor.GracefulStop(TimeSpan.FromSeconds(3));
+        actor.GracefulStop(TimeSpan.FromSeconds(3)).Wait();
     }
 
     [Fact]
-    public async Task Publishes_actor_messages_on_configured_interval()
+    public void Publishes_actor_messages_on_configured_interval()
     {
-        using var loggerFactory = CreateSerilogLoggerFactory();
-        var hubContext = new RecordingHubContext();
-        var hubPushActor = CreateHubPushActor(hubContext, loggerFactory);
+        var hubPushActor = CreateTestProbe("hub-push");
 
         var actor = Sys.ActorOf(
             FrontendPushActor.Props(
-                hubPushActor,
+                hubPushActor.Ref,
                 pushInterval: TimeSpan.FromMilliseconds(50),
                 publishImmediately: false),
             "periodic-push-actor");
 
-        var firstCall = await hubContext.ClientProxy.WaitForCallAsync(TimeSpan.FromSeconds(3));
-        var secondCall = await hubContext.ClientProxy.WaitForCallAsync(TimeSpan.FromSeconds(3));
+        var firstMessage = hubPushActor.ExpectMsg<PublishActorMessage>(TimeSpan.FromSeconds(3)).Message;
+        var secondMessage = hubPushActor.ExpectMsg<PublishActorMessage>(TimeSpan.FromSeconds(3)).Message;
 
-        Assert.Equal(1, GetMessage(firstCall).Sequence);
-        Assert.Equal(2, GetMessage(secondCall).Sequence);
-        Assert.All(new[] { firstCall, secondCall }, call => Assert.Equal("actorMessage", call.Method));
+        Assert.Equal(1, firstMessage.Sequence);
+        Assert.Equal(2, secondMessage.Sequence);
 
-        await actor.GracefulStop(TimeSpan.FromSeconds(3));
-    }
-
-    private IActorRef CreateHubPushActor(
-        RecordingHubContext hubContext,
-        SerilogLoggerFactory loggerFactory)
-    {
-        return Sys.ActorOf(
-            SignalRHubPushActor.Props(
-                hubContext,
-                loggerFactory.CreateLogger<SignalRHubPushActor>()),
-            "signalr-hub-push");
-    }
-
-    private SerilogLoggerFactory CreateSerilogLoggerFactory()
-    {
-        var logger = new LoggerConfiguration()
-            .MinimumLevel.Debug()
-            .Enrich.FromLogContext()
-            .WriteTo.XUnit3TestOutput()
-            .CreateLogger();
-
-        return new SerilogLoggerFactory(logger, dispose: true);
-    }
-
-    private static PushMessage GetMessage(RecordedHubCall call)
-    {
-        return Assert.IsType<PushMessage>(Assert.Single(call.Arguments));
+        actor.GracefulStop(TimeSpan.FromSeconds(3)).Wait();
     }
 }

@@ -1,4 +1,4 @@
-namespace AkkaSignalRVuePoc.Api.Models;
+namespace AkkaSignalRVuePoc.Contracts.Messages;
 
 public sealed record PushMessage(
     long Sequence,

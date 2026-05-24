@@ -1,4 +1,4 @@
-namespace AkkaSignalRVuePoc.Api.Actors;
+namespace AkkaSignalRVuePoc.Core.Actors;
 
 internal sealed class PushTick
 {

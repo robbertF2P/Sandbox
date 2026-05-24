@@ -1,6 +1,7 @@
 using System.Net.Http.Json;
 using System.Threading.Channels;
 using AkkaSignalRVuePoc.Api.Models;
+using AkkaSignalRVuePoc.Contracts.Messages;
 using Microsoft.AspNetCore.SignalR.Client;
 
 namespace AkkaSignalRVuePoc.Api.Tests.Integration;
