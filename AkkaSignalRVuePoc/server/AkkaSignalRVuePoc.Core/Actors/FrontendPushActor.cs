@@ -24,7 +24,7 @@ public sealed class FrontendPushActor : ReceiveActor, IWithTimers
         _publishImmediately = publishImmediately;
         Context.System.EventStream.Subscribe(Self, typeof(ActorSystemStarted));
 
-        Receive<PushTick>(_ => PublishMessage($"Akka.NET actor heartbeat #{_sequence}"));
+        Receive<PushTick>(_ => PublishHeartbeat());
         Receive<ActorSystemStarted>(msg => PublishMessage("Actor system started"));
     }
 
@@ -64,5 +64,11 @@ public sealed class FrontendPushActor : ReceiveActor, IWithTimers
             Source: Self.Path.ToStringWithoutAddress());
 
         _hubPushActor.Tell(new PublishActorMessage(message));
+    }
+
+    private void PublishHeartbeat()
+    {
+        var sequence = _sequence + 1;
+        PublishMessage($"Akka.NET actor heartbeat #{sequence}");
     }
 }
