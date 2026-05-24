@@ -47,12 +47,7 @@ public sealed class PostLiveMessageIntegrationTests : IAsyncLifetime
             new PostLiveMessageRequest(uniqueText),
             TestContext.Current.CancellationToken);
 
-        response.EnsureSuccessStatusCode();
-        var postedMessage = await response.Content.ReadFromJsonAsync<PushMessage>(
-            cancellationToken: TestContext.Current.CancellationToken);
-        Assert.NotNull(postedMessage);
-        Assert.Equal(uniqueText, postedMessage.Text);
-        Assert.Contains("live-message-root", postedMessage.Source, StringComparison.Ordinal);
+        Assert.Equal(System.Net.HttpStatusCode.Accepted, response.StatusCode);
 
         using var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(10));
         PushMessage? receivedMessage = null;
@@ -67,7 +62,6 @@ public sealed class PostLiveMessageIntegrationTests : IAsyncLifetime
         }
 
         Assert.NotNull(receivedMessage);
-        Assert.Equal(postedMessage.Sequence, receivedMessage.Sequence);
-        Assert.Equal(postedMessage.Source, receivedMessage.Source);
+        Assert.Contains("live-message-root", receivedMessage.Source, StringComparison.Ordinal);
     }
 }
