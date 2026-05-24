@@ -29,5 +29,23 @@ public sealed class ProjectConfiguration : IEntityTypeConfiguration<Project>
 
         builder.HasIndex(project => project.OrganisationId);
         builder.HasIndex(project => project.Name);
+
+        builder.HasData(
+            new Project
+            {
+                Id = CatalogSeedData.CustomerPortalProjectId,
+                OrganisationId = CatalogSeedData.AcmeOrganisationId,
+                Name = "Customer Portal",
+                Description = "Public-facing web application",
+                CreatedAt = CatalogSeedData.SeedCreatedAt
+            },
+            new Project
+            {
+                Id = CatalogSeedData.AkkaPocProjectId,
+                OrganisationId = CatalogSeedData.DrivenItOrganisationId,
+                Name = "Akka SignalR POC",
+                Description = "Demonstration of Akka.NET, SignalR, and Vue",
+                CreatedAt = CatalogSeedData.SeedCreatedAt
+            });
     }
 }

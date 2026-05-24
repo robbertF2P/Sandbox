@@ -20,5 +20,19 @@ public sealed class OrganisationConfiguration : IEntityTypeConfiguration<Organis
             .IsRequired();
 
         builder.HasIndex(organisation => organisation.Name);
+
+        builder.HasData(
+            new Organisation
+            {
+                Id = CatalogSeedData.AcmeOrganisationId,
+                Name = "Acme Corp",
+                CreatedAt = CatalogSeedData.SeedCreatedAt
+            },
+            new Organisation
+            {
+                Id = CatalogSeedData.DrivenItOrganisationId,
+                Name = "Driven IT",
+                CreatedAt = CatalogSeedData.SeedCreatedAt
+            });
     }
 }
