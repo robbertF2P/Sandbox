@@ -1,7 +1,7 @@
 using Akka.Actor;
 using Akka.Hosting;
-using AkkaSignalRVuePoc.Api.Actors;
-using AkkaSignalRVuePoc.Api.Models;
+using AkkaSignalRVuePoc.Contracts.Messages;
+using AkkaSignalRVuePoc.Core.Actors;
 using Microsoft.AspNetCore.SignalR;
 
 namespace AkkaSignalRVuePoc.Api.Hubs;

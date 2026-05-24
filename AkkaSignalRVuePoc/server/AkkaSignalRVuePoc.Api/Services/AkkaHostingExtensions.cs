@@ -1,7 +1,6 @@
 using Akka.Hosting;
-using AkkaSignalRVuePoc.Api.Actors;
-using AkkaSignalRVuePoc.Api.Hubs;
-using Microsoft.AspNetCore.SignalR;
+using AkkaSignalRVuePoc.Core.Actors;
+using AkkaSignalRVuePoc.Core.Publishing;
 
 namespace AkkaSignalRVuePoc.Api.Services;
 
@@ -9,6 +8,8 @@ public static class AkkaHostingExtensions
 {
     public static IServiceCollection AddAkkaActors(this IServiceCollection services)
     {
+        services.AddSingleton<ISignalrHubWrapper, SignalRLiveMessageClientPublisher>();
+
         services.AddAkka<AkkaActorHostedService>("akka-signalr-poc", (builder, sp) =>
         {
             builder
@@ -17,7 +18,7 @@ public static class AkkaHostingExtensions
                 .WithActors((system, registry) =>
                 {
                     var hubPush = system.ActorOf(
-                        SignalRHubPushActor.Props(sp.GetRequiredService<IHubContext<LiveMessagesHub>>()),
+                        SignalRHubActor.Props(sp.GetRequiredService<ISignalrHubWrapper>()),
                         "signalr-hub-push");
                     var rootActor = system.ActorOf(LiveMessageRootActor.Props(hubPush), "live-message-root");
                     registry.Register<LiveMessageRootActor>(rootActor);

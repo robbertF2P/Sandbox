@@ -1,5 +1,5 @@
 using Akka.Actor;
-using AkkaSignalRVuePoc.Api.Actors;
+using AkkaSignalRVuePoc.Core.Actors;
 
 namespace AkkaSignalRVuePoc.Api.Tests.Actors;
 

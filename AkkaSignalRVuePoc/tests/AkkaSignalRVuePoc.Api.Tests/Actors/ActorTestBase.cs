@@ -1,11 +1,11 @@
 using Akka.Actor;
 using Akka.Hosting;
 using Akka.Hosting.TestKit;
-using AkkaSignalRVuePoc.Api.Actors;
 using AkkaSignalRVuePoc.Api.Hubs;
-using AkkaSignalRVuePoc.Api.Models;
 using AkkaSignalRVuePoc.Api.Services;
 using AkkaSignalRVuePoc.Api.Tests.TestDoubles;
+using AkkaSignalRVuePoc.Contracts.Messages;
+using AkkaSignalRVuePoc.Core.Actors;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -46,7 +46,7 @@ public abstract class ActorTestBase<TTest> : TestKit
 
     protected IActorRef CreateHubPushActor(string name = "signalr-hub-push")
     {
-        return Sys.ActorOf(SignalRHubPushActor.Props(HubContext), name);
+        return Sys.ActorOf(SignalRHubActor.Props(new SignalRLiveMessageClientPublisher(HubContext)), name);
     }
 
     protected static PushMessage GetPushMessage(RecordedHubCall call)
