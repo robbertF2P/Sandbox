@@ -2,7 +2,7 @@ using AkkaSignalRVuePoc.Contracts.Messages;
 
 namespace AkkaSignalRVuePoc.Core.Publishing;
 
-public interface ILiveMessageClientPublisher
+public interface ISignalrHubWrapper
 {
     Task PublishActorMessageAsync(PushMessage message);
 }

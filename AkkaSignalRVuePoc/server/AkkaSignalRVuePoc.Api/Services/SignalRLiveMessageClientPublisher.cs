@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.SignalR;
 
 namespace AkkaSignalRVuePoc.Api.Services;
 
-public sealed class SignalRLiveMessageClientPublisher : ILiveMessageClientPublisher
+public sealed class SignalRLiveMessageClientPublisher : ISignalrHubWrapper
 {
     private readonly IHubContext<LiveMessagesHub> _hubContext;
 

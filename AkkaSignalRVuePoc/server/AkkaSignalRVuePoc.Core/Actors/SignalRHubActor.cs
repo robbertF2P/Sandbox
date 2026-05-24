@@ -5,24 +5,24 @@ using AkkaSignalRVuePoc.Core.Publishing;
 
 namespace AkkaSignalRVuePoc.Core.Actors;
 
-public sealed class SignalRHubPushActor : ReceiveActor
+public sealed class SignalRHubActor : ReceiveActor
 {
-    private readonly ILiveMessageClientPublisher _publisher;
-
-    public SignalRHubPushActor(ILiveMessageClientPublisher publisher)
+    private readonly ISignalrHubWrapper _publisher;
+    private readonly ILoggingAdapter _log =  Context.GetLogger();
+    public SignalRHubActor(ISignalrHubWrapper publisher)
     {
         _publisher = publisher;
-
+        _log.Info("SignalRHubActor created");
         ReceiveAsync<PublishActorMessage>(PublishAsync);
     }
 
-    public static Props Props(ILiveMessageClientPublisher publisher) =>
-        Akka.Actor.Props.Create(() => new SignalRHubPushActor(publisher));
+    public static Props Props(ISignalrHubWrapper publisher) =>
+        Akka.Actor.Props.Create(() => new SignalRHubActor(publisher));
 
     private async Task PublishAsync(PublishActorMessage message)
     {
         await _publisher.PublishActorMessageAsync(message.Message);
-        Context.GetLogger().Info(
+       _log.Info(
             "Published actor message {0} to SignalR clients",
             message.Message.Sequence);
     }

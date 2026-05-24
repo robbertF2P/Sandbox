@@ -1,4 +1,5 @@
 using Akka.Actor;
+using AkkaSignalRVuePoc.Contracts.Events;
 using AkkaSignalRVuePoc.Contracts.Messages;
 
 namespace AkkaSignalRVuePoc.Core.Actors;
@@ -21,8 +22,10 @@ public sealed class FrontendPushActor : ReceiveActor, IWithTimers
         _hubPushActor = hubPushActor;
         _pushInterval = pushInterval;
         _publishImmediately = publishImmediately;
+        Context.System.EventStream.Subscribe(Self, typeof(ActorSystemStarted));
 
-        Receive<PushTick>(_ => PublishMessage());
+        Receive<PushTick>(_ => PublishMessage($"Akka.NET actor heartbeat #{_sequence}"));
+        Receive<ActorSystemStarted>(msg => PublishMessage("Actor system started"));
     }
 
     public static Props Props(
@@ -51,12 +54,12 @@ public sealed class FrontendPushActor : ReceiveActor, IWithTimers
         Timers.Cancel(TimerKey);
     }
 
-    private void PublishMessage()
+    private void PublishMessage(string messageText)
     {
         var sequence = ++_sequence;
         var message = new PushMessage(
             Sequence: sequence,
-            Text: $"Akka.NET actor heartbeat #{sequence}",
+            Text: messageText,
             SentAt: DateTimeOffset.UtcNow,
             Source: Self.Path.ToStringWithoutAddress());
 

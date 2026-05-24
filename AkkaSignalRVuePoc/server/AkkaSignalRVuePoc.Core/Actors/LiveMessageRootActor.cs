@@ -1,4 +1,5 @@
 using Akka.Actor;
+using AkkaSignalRVuePoc.Contracts.Events;
 using AkkaSignalRVuePoc.Contracts.Messages;
 
 namespace AkkaSignalRVuePoc.Core.Actors;
@@ -12,6 +13,9 @@ public sealed class LiveMessageRootActor : ReceiveActor
     {
         _hubPushActor = hubPushActor;
 
+        Context.System.EventStream.Publish(new ActorSystemStarted(
+            Context.System.Name,
+            DateTimeOffset.UtcNow));
         Receive<PublishLiveMessageCommand>(HandlePublish);
     }
 
