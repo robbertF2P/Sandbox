@@ -8,7 +8,8 @@ namespace AkkaSignalRVuePoc.Core.Actors;
 public sealed class SignalRHubActor : ReceiveActor
 {
     private readonly ISignalrHubWrapper _publisher;
-    private readonly ILoggingAdapter _log =  Context.GetLogger();
+    private readonly ILoggingAdapter _log = Context.GetLogger();
+
     public SignalRHubActor(ISignalrHubWrapper publisher)
     {
         _publisher = publisher;
@@ -22,7 +23,7 @@ public sealed class SignalRHubActor : ReceiveActor
     private async Task PublishAsync(PublishActorMessage message)
     {
         await _publisher.PublishActorMessageAsync(message.Message);
-       _log.Info(
+        _log.Info(
             "Published actor message {0} to SignalR clients",
             message.Message.Sequence);
     }
