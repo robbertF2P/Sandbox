@@ -10,18 +10,28 @@ public static class ProjectEndpoints
         var group = app.MapGroup("/api/projects")
             .WithTags("Projects");
 
-        group.MapGet("/", (InMemoryCatalogStore store) => store.GetProjects())
+        group.MapGet("/", async (IActorSystemCommandFacade facade, CancellationToken cancellationToken) =>
+        {
+            var projects = await facade.GetProjectsAsync(cancellationToken);
+            return Results.Ok(projects.Select(CatalogModelMapper.ToApiModel));
+        })
             .WithName("ListProjects")
             .WithSummary("List all projects");
 
-        group.MapGet("/{id:guid}", (Guid id, InMemoryCatalogStore store) =>
-            store.GetProject(id) is { } project
-                ? Results.Ok(project)
-                : Results.NotFound())
+        group.MapGet("/{id:guid}", async (Guid id, IActorSystemCommandFacade facade, CancellationToken cancellationToken) =>
+        {
+            var project = await facade.GetProjectAsync(id, cancellationToken);
+            return project is null
+                ? Results.NotFound()
+                : Results.Ok(CatalogModelMapper.ToApiModel(project));
+        })
             .WithName("GetProject")
             .WithSummary("Get a project by id");
 
-        group.MapPost("/", (CreateProjectRequest request, InMemoryCatalogStore store) =>
+        group.MapPost("/", async (
+            CreateProjectRequest request,
+            IActorSystemCommandFacade facade,
+            CancellationToken cancellationToken) =>
         {
             if (string.IsNullOrWhiteSpace(request.Name))
             {
@@ -33,13 +43,23 @@ public static class ProjectEndpoints
                 return Results.BadRequest(new { Error = "OrganisationId is required." });
             }
 
-            var project = store.CreateProject(request);
-            return project is null
-                ? Results.NotFound(new
+            var response = await facade.CreateProjectAsync(
+                request.OrganisationId,
+                request.Name,
+                request.Description,
+                cancellationToken);
+
+            return response switch
+            {
+                { OrganisationExists: false } => Results.NotFound(new
                 {
                     Error = $"Organisation '{request.OrganisationId}' was not found."
-                })
-                : Results.Created($"/api/projects/{project.Id}", project);
+                }),
+                { Project: { } project } => Results.Created(
+                    $"/api/projects/{project.Id}",
+                    CatalogModelMapper.ToApiModel(project)),
+                _ => Results.BadRequest(new { Error = "Project could not be created." })
+            };
         })
             .WithName("CreateProject")
             .WithSummary("Create a project");

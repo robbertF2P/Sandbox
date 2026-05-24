@@ -14,6 +14,8 @@ public sealed class PostLiveMessageIntegrationTests : IAsyncLifetime
 
     public async ValueTask InitializeAsync()
     {
+        _ = _factory.CreateClient();
+
         _connection = new HubConnectionBuilder()
             .WithUrl(
                 new Uri(_factory.Server.BaseAddress!, "hubs/live-messages"),
@@ -22,7 +24,7 @@ public sealed class PostLiveMessageIntegrationTests : IAsyncLifetime
 
         _connection.On<PushMessage>("actorMessage", message => _actorMessages.Writer.TryWrite(message));
 
-        await _connection.StartAsync();
+        await _connection.StartAsync(TestContext.Current.CancellationToken);
     }
 
     public async ValueTask DisposeAsync()

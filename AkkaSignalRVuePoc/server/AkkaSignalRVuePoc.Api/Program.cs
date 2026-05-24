@@ -1,6 +1,7 @@
 using AkkaSignalRVuePoc.Api.Endpoints;
 using AkkaSignalRVuePoc.Api.Hubs;
 using AkkaSignalRVuePoc.Api.Services;
+using AkkaSignalRVuePoc.Data;
 using Serilog;
 
 Log.Logger = SerilogLogging.CreateBootstrapLogger();
@@ -28,7 +29,7 @@ try
             Description = "Sample REST API for organisations and projects, plus SignalR live messages."
         });
     });
-    builder.Services.AddSingleton<InMemoryCatalogStore>();
+    builder.Services.AddCatalogData(builder.Configuration);
     builder.Services.AddHealthChecks();
     builder.Services.AddAkkaActors(builder.Configuration);
     builder.Services.AddSignalR();
@@ -57,6 +58,8 @@ try
     });
 
     var app = builder.Build();
+
+    await CatalogDatabaseInitializer.InitializeAsync(app.Services);
 
     app.UseSwagger();
     app.UseSwaggerUI(options =>
