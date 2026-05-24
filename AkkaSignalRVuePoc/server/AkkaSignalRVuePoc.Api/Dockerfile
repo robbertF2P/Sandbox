@@ -4,11 +4,15 @@ WORKDIR /src
 COPY server/AkkaSignalRVuePoc.Api/AkkaSignalRVuePoc.Api.csproj server/AkkaSignalRVuePoc.Api/
 COPY server/AkkaSignalRVuePoc.Contracts/AkkaSignalRVuePoc.Contracts.csproj server/AkkaSignalRVuePoc.Contracts/
 COPY server/AkkaSignalRVuePoc.Core/AkkaSignalRVuePoc.Core.csproj server/AkkaSignalRVuePoc.Core/
+COPY server/AkkaSignalRVuePoc.Data/AkkaSignalRVuePoc.Data.csproj server/AkkaSignalRVuePoc.Data/
+COPY server/AkkaSignalRVuePoc.Data.Migrations/AkkaSignalRVuePoc.Data.Migrations.csproj server/AkkaSignalRVuePoc.Data.Migrations/
 RUN dotnet restore server/AkkaSignalRVuePoc.Api/AkkaSignalRVuePoc.Api.csproj
 
 COPY server/AkkaSignalRVuePoc.Api/ server/AkkaSignalRVuePoc.Api/
 COPY server/AkkaSignalRVuePoc.Contracts/ server/AkkaSignalRVuePoc.Contracts/
 COPY server/AkkaSignalRVuePoc.Core/ server/AkkaSignalRVuePoc.Core/
+COPY server/AkkaSignalRVuePoc.Data/ server/AkkaSignalRVuePoc.Data/
+COPY server/AkkaSignalRVuePoc.Data.Migrations/ server/AkkaSignalRVuePoc.Data.Migrations/
 RUN dotnet publish server/AkkaSignalRVuePoc.Api/AkkaSignalRVuePoc.Api.csproj \
     --configuration Release \
     --output /app/publish \

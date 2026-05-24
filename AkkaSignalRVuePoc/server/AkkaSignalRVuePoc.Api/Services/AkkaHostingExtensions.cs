@@ -2,6 +2,8 @@ using Akka.Actor;
 using Akka.Hosting;
 using AkkaSignalRVuePoc.Core.Actors;
 using AkkaSignalRVuePoc.Core.Publishing;
+using AkkaSignalRVuePoc.Data;
+using Microsoft.EntityFrameworkCore;
 
 namespace AkkaSignalRVuePoc.Api.Services;
 
@@ -12,7 +14,7 @@ public static class AkkaHostingExtensions
         services.AddSingleton<ISignalrHubWrapper, SignalRLiveMessageClientPublisher>();
         var backgroundProcessTiming = ReadBackgroundProcessTiming(configuration);
 
-        services.AddAkka<AkkaActorHostedService>("akka-signalr-poc", (builder, sp) =>
+        services.AddAkka<AkkaActorHostedService>("akka-signalr-poc", (builder, serviceProvider) =>
         {
             builder
                 .ConfigureSerilogLogging()
@@ -20,10 +22,11 @@ public static class AkkaHostingExtensions
                 .WithActors((system, registry) =>
                 {
                     var hubPush = system.ActorOf(
-                        SignalRHubActor.Props(sp.GetRequiredService<ISignalrHubWrapper>()),
+                        SignalRHubActor.Props(serviceProvider.GetRequiredService<ISignalrHubWrapper>()),
                         "signalr-hub-push");
+                    var dbContextFactory = serviceProvider.GetRequiredService<IDbContextFactory<CatalogDbContext>>();
                     var rootActor = system.ActorOf(
-                        LiveMessageRootActor.Props(hubPush, backgroundProcessTiming),
+                        LiveMessageRootActor.Props(hubPush, dbContextFactory, backgroundProcessTiming),
                         "live-message-root");
                     registry.Register<LiveMessageRootActor>(rootActor);
 
