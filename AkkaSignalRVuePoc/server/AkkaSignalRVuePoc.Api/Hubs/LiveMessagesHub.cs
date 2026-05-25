@@ -8,9 +8,9 @@ namespace AkkaSignalRVuePoc.Api.Hubs;
 
 public sealed class LiveMessagesHub : Hub
 {
-    private readonly IRequiredActor<LiveMessageRootActor> _rootActor;
+    private readonly IRequiredActor<RootActor> _rootActor;
 
-    public LiveMessagesHub(IRequiredActor<LiveMessageRootActor> rootActor)
+    public LiveMessagesHub(IRequiredActor<RootActor> rootActor)
     {
         _rootActor = rootActor;
     }

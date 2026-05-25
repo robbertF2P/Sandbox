@@ -1,6 +1,7 @@
 using Akka.Actor;
 using AkkaSignalRVuePoc.Contracts.Events;
 using AkkaSignalRVuePoc.Contracts.Messages;
+using AkkaSignalRVuePoc.Core.InternalMessages;
 
 namespace AkkaSignalRVuePoc.Core.Actors;
 

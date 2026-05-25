@@ -1,31 +1,22 @@
 using Akka.Actor;
+using AkkaSignalRVuePoc.Api.Tests.Data;
 using AkkaSignalRVuePoc.Contracts.Events;
 using AkkaSignalRVuePoc.Contracts.Messages.Data;
 using AkkaSignalRVuePoc.Contracts.Notifications;
-using AkkaSignalRVuePoc.Core.Actors;
+using AkkaSignalRVuePoc.Core.Actors.Data;
 using AkkaSignalRVuePoc.Data;
 
 namespace AkkaSignalRVuePoc.Api.Tests.Actors;
 
-public sealed class DataEventSignalRTests : ActorTestBase<DataEventSignalRTests>
+public sealed class DataEventSignalRTests : ActorTestBase<DataEventSignalRTests>, IClassFixture<CatalogDatabaseFixture>
 {
     private readonly CatalogDatabaseFixture _database = new();
 
-    public DataEventSignalRTests(ITestOutputHelper output)
+    public DataEventSignalRTests(ITestOutputHelper output, CatalogDatabaseFixture database)
         : base(output)
     {
-    }
+        _database = database;
 
-    public override Task InitializeAsync()
-    {
-        _database.InitializeAsync();
-        return base.InitializeAsync();
-    }
-
-    public override async Task DisposeAsync()
-    {
-        await _database.DisposeAsync();
-        await base.DisposeAsync();
     }
 
     [Fact]
@@ -34,11 +25,10 @@ public sealed class DataEventSignalRTests : ActorTestBase<DataEventSignalRTests>
         var hubPush = CreateHubPushActor();
         var dataManager = Sys.ActorOf(DataManagerActor.Props(_database.Factory), "data-manager");
 
-        var result = await dataManager.Ask<CreateProjectResult>(
-            new CreateProjectCommand(
+        var result = await dataManager.Ask<CreateProjectResult>(new CreateProjectCommand(
                 CatalogSeedData.AcmeOrganisationId,
                 "Event Test Project",
-                "Created for SignalR data event test"));
+                "Created for SignalR data event test"), cancellationToken: TestContext.Current.CancellationToken);
 
         Assert.True(result.OrganisationExists);
         Assert.NotNull(result.Project);

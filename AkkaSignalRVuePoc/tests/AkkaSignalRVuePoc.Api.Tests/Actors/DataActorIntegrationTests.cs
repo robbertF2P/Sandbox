@@ -3,6 +3,7 @@ using AkkaSignalRVuePoc.Contracts.Messages.Data;
 using AkkaSignalRVuePoc.Core.Actors;
 using AkkaSignalRVuePoc.Data;
 using AkkaSignalRVuePoc.Api.Tests.Data;
+using AkkaSignalRVuePoc.Core.Actors.Data;
 
 namespace AkkaSignalRVuePoc.Api.Tests.Actors;
 
@@ -80,11 +81,10 @@ public sealed class DataActorIntegrationTests : ActorTestBase<DataActorIntegrati
     {
         var dataManager = Sys.ActorOf(DataManagerActor.Props(_database.Factory), "data-manager-update");
 
-        var updated = await dataManager.Ask<UpdateProjectResult>(
-            new UpdateProjectCommand(
+        var updated = await dataManager.Ask<UpdateProjectResult>(new UpdateProjectCommand(
                 CatalogSeedData.AkkaPocProjectId,
                 "Renamed Akka POC",
-                "Updated description"));
+                "Updated description"), cancellationToken: TestContext.Current.CancellationToken);
 
         Assert.True(updated.Exists);
         Assert.NotNull(updated.Project);
@@ -97,7 +97,7 @@ public sealed class DataActorIntegrationTests : ActorTestBase<DataActorIntegrati
     {
         var hubPushActor = CreateHubPushActor();
         var root = Sys.ActorOf(
-            LiveMessageRootActor.Props(hubPushActor, _database.Factory),
+            RootActor.Props(hubPushActor, _database.Factory),
             "live-message-root");
 
         var projects = await root.Ask<GetAllProjectsResult>(

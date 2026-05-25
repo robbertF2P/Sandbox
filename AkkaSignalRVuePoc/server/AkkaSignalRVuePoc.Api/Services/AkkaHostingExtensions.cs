@@ -26,9 +26,9 @@ public static class AkkaHostingExtensions
                         "signalr-hub-push");
                     var dbContextFactory = serviceProvider.GetRequiredService<IDbContextFactory<CatalogDbContext>>();
                     var rootActor = system.ActorOf(
-                        LiveMessageRootActor.Props(hubPush, dbContextFactory, backgroundProcessTiming),
+                        RootActor.Props(hubPush, dbContextFactory, backgroundProcessTiming),
                         "live-message-root");
-                    registry.Register<LiveMessageRootActor>(rootActor);
+                    registry.Register<RootActor>(rootActor);
 
                     system.ActorOf(
                         FrontendPushActor.Props(hubPush),
@@ -38,7 +38,7 @@ public static class AkkaHostingExtensions
 
         services.AddSingleton<IActorSystemCommandFacade>(sp =>
         {
-            var rootActor = sp.GetRequiredService<IRequiredActor<LiveMessageRootActor>>().ActorRef;
+            var rootActor = sp.GetRequiredService<IRequiredActor<RootActor>>().ActorRef;
             return new ActorSystemCommandFacade(rootActor);
         });
 

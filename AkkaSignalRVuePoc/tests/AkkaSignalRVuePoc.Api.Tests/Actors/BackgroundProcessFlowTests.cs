@@ -36,7 +36,7 @@ public sealed class BackgroundProcessFlowTests : ActorTestBase<BackgroundProcess
             SignalRHubActor.Props(publisherMock.Object),
             "signalr-hub-push");
         var rootActor = Sys.ActorOf(
-            LiveMessageRootActor.Props(hubPushActor, _database.Factory, TestTiming),
+            RootActor.Props(hubPushActor, _database.Factory, TestTiming),
             "live-message-root");
 
         var commandFacade = new ActorSystemCommandFacade(rootActor);
