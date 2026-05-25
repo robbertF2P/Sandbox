@@ -27,6 +27,7 @@ public sealed class DataManagerActor : ReceiveActor
 
         ReceiveAsync<CreateProjectCommand>(HandleCreateProjectAsync);
         ReceiveAsync<UpdateProjectCommand>(HandleUpdateProjectAsync);
+        ReceiveAsync<DeleteProjectCommand>(HandleDeleteProjectAsync);
     }
 
     public static Props Props(IDbContextFactory<CatalogDbContext> dbContextFactory) =>
@@ -74,5 +75,22 @@ public sealed class DataManagerActor : ReceiveActor
     private void PublishProjectUpdated(ProjectDto project)
     {
         Context.System.EventStream.Publish(new ProjectUpdated(project, DateTimeOffset.UtcNow));
+    }
+
+    private async Task HandleDeleteProjectAsync(DeleteProjectCommand command)
+    {
+        var sender = Sender;
+        var result = await _projectData.Ask<DeleteProjectResult>(command);
+        if (result.Exists && result.Project is { } project)
+        {
+            PublishProjectDeleted(project);
+        }
+
+        sender.Tell(result);
+    }
+
+    private void PublishProjectDeleted(ProjectDto project)
+    {
+        Context.System.EventStream.Publish(new ProjectDeleted(project, DateTimeOffset.UtcNow));
     }
 }

@@ -12,10 +12,16 @@ export interface Project {
   createdAt: string
 }
 
-export type DataEventType = 'ProjectCreated' | 'ProjectUpdated'
+export type DataEventType = 'ProjectCreated' | 'ProjectUpdated' | 'ProjectDeleted'
 
 export interface DataEventNotification {
   eventType: DataEventType
   project: Project
   occurredAt: string
+}
+
+export interface ProjectFormPayload {
+  organisationId: string
+  name: string
+  description: string
 }

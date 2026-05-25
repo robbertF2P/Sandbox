@@ -22,6 +22,7 @@ public sealed class ProjectDataActor : ReceiveActor
         ReceiveAsync<GetProjectsByOrganisationQuery>(HandleGetByOrganisation);
         ReceiveAsync<CreateProjectCommand>(HandleCreate);
         ReceiveAsync<UpdateProjectCommand>(HandleUpdate);
+        ReceiveAsync<DeleteProjectCommand>(HandleDelete);
     }
 
     public static Props Props(IDbContextFactory<CatalogDbContext> dbContextFactory) =>
@@ -159,5 +160,29 @@ public sealed class ProjectDataActor : ReceiveActor
 
         _log.Info("Updated project {ProjectId} ({Name})", project.Id, project.Name);
         Sender.Tell(new UpdateProjectResult(true, CatalogEntityMapper.ToDto(project)));
+    }
+
+    private async Task HandleDelete(DeleteProjectCommand command)
+    {
+        if (command.Id == Guid.Empty)
+        {
+            Sender.Tell(new Status.Failure(new ArgumentException("Id is required.", nameof(command.Id))));
+            return;
+        }
+
+        await using var db = await _dbContextFactory.CreateDbContextAsync();
+        var project = await db.Projects.FirstOrDefaultAsync(entity => entity.Id == command.Id);
+        if (project is null)
+        {
+            Sender.Tell(new DeleteProjectResult(false, null));
+            return;
+        }
+
+        var dto = CatalogEntityMapper.ToDto(project);
+        db.Projects.Remove(project);
+        await db.SaveChangesAsync();
+
+        _log.Info("Deleted project {ProjectId} ({Name})", project.Id, project.Name);
+        Sender.Tell(new DeleteProjectResult(true, dto));
     }
 }

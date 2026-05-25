@@ -112,4 +112,15 @@ public sealed class ActorSystemCommandFacade : IActorSystemCommandFacade
             cancellationToken);
         return new UpdateProjectResponse(result.Exists, result.Project);
     }
+
+    public async Task<DeleteProjectResponse> DeleteProjectAsync(
+        Guid id,
+        CancellationToken cancellationToken = default)
+    {
+        var result = await _rootActor.Ask<DeleteProjectResult>(
+            new DeleteProjectCommand(id),
+            AskTimeout,
+            cancellationToken);
+        return new DeleteProjectResponse(result.Exists, result.Project);
+    }
 }

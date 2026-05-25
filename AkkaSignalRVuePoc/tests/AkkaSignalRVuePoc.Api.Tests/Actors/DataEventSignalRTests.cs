@@ -74,4 +74,34 @@ public sealed class DataEventSignalRTests : ActorTestBase<DataEventSignalRTests>
         Assert.Equal(nameof(ProjectUpdated), notification.EventType);
         Assert.Equal("Updated Portal", notification.Project.Name);
     }
+
+    [Fact]
+    public async Task Deleting_project_publishes_ProjectDeleted_data_event_to_SignalR()
+    {
+        var hubPush = CreateHubPushActor();
+        var dataManager = Sys.ActorOf(DataManagerActor.Props(_database.Factory), "data-manager-delete");
+
+        var created = await dataManager.Ask<CreateProjectResult>(
+            new CreateProjectCommand(
+                CatalogSeedData.AcmeOrganisationId,
+                "Delete Me",
+                null));
+
+        Assert.True(created.OrganisationExists);
+        Assert.NotNull(created.Project);
+
+        _ = await HubContext.ClientProxy.WaitForCallAsync(TimeSpan.FromSeconds(5));
+
+        var deleted = await dataManager.Ask<DeleteProjectResult>(
+            new DeleteProjectCommand(created.Project!.Id));
+
+        Assert.True(deleted.Exists);
+
+        var call = await HubContext.ClientProxy.WaitForCallAsync(TimeSpan.FromSeconds(5));
+        Assert.Equal("dataEvent", call.Method);
+
+        var notification = Assert.IsType<DataEventNotification>(Assert.Single(call.Arguments));
+        Assert.Equal(nameof(ProjectDeleted), notification.EventType);
+        Assert.Equal(created.Project.Id, notification.Project.Id);
+    }
 }

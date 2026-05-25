@@ -91,6 +91,17 @@ public static class ProjectEndpoints
             .WithName("UpdateProject")
             .WithSummary("Update a project");
 
+        group.MapDelete("/{id:guid}", async (
+            Guid id,
+            IActorSystemCommandFacade facade,
+            CancellationToken cancellationToken) =>
+        {
+            var response = await facade.DeleteProjectAsync(id, cancellationToken);
+            return response.Exists ? Results.NoContent() : Results.NotFound();
+        })
+            .WithName("DeleteProject")
+            .WithSummary("Delete a project");
+
         return app;
     }
 }

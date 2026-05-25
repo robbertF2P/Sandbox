@@ -59,6 +59,10 @@ public sealed class SignalRHubActor : ReceiveActor
                 nameof(ProjectUpdated),
                 updated.Project,
                 updated.OccurredAt),
+            ProjectDeleted deleted => new DataEventNotification(
+                nameof(ProjectDeleted),
+                deleted.Project,
+                deleted.OccurredAt),
             _ => null
         };
 

@@ -33,6 +33,8 @@ public interface IActorSystemCommandFacade
         string? name,
         string? description,
         CancellationToken cancellationToken = default);
+
+    Task<DeleteProjectResponse> DeleteProjectAsync(Guid id, CancellationToken cancellationToken = default);
 }
 
 public sealed record GetProjectsByOrganisationResponse(
@@ -42,3 +44,5 @@ public sealed record GetProjectsByOrganisationResponse(
 public sealed record CreateProjectResponse(bool OrganisationExists, ProjectDto? Project);
 
 public sealed record UpdateProjectResponse(bool Exists, ProjectDto? Project);
+
+public sealed record DeleteProjectResponse(bool Exists, ProjectDto? Project);
