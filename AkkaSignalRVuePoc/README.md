@@ -42,7 +42,7 @@ npm run dev
 
 Open the Vite URL, usually `http://localhost:5173`, to see actor messages arrive every five seconds.
 
-To point the client at a different hub URL, copy `.env.example` to `.env.local` and edit `VITE_SIGNALR_HUB_URL`.
+To point the client at a different API host, copy `.env.example` to `.env.local` and edit `VITE_API_BASE_URL` and `VITE_SIGNALR_HUB_URL`.
 
 
 ## Run with Docker Compose

@@ -76,6 +76,23 @@ public sealed class DataActorIntegrationTests : ActorTestBase<DataActorIntegrati
     }
 
     [Fact]
+    public async Task Data_manager_updates_existing_project()
+    {
+        var dataManager = Sys.ActorOf(DataManagerActor.Props(_database.Factory), "data-manager-update");
+
+        var updated = await dataManager.Ask<UpdateProjectResult>(
+            new UpdateProjectCommand(
+                CatalogSeedData.AkkaPocProjectId,
+                "Renamed Akka POC",
+                "Updated description"));
+
+        Assert.True(updated.Exists);
+        Assert.NotNull(updated.Project);
+        Assert.Equal("Renamed Akka POC", updated.Project!.Name);
+        Assert.Equal("Updated description", updated.Project.Description);
+    }
+
+    [Fact]
     public async Task Root_actor_routes_catalog_queries_to_data_manager()
     {
         var hubPushActor = CreateHubPushActor();

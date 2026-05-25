@@ -5,7 +5,9 @@ COPY client/package*.json ./
 RUN npm ci
 
 COPY client/ ./
+ARG VITE_API_BASE_URL=http://localhost:5000
 ARG VITE_SIGNALR_HUB_URL=http://localhost:5000/hubs/live-messages
+ENV VITE_API_BASE_URL=$VITE_API_BASE_URL
 ENV VITE_SIGNALR_HUB_URL=$VITE_SIGNALR_HUB_URL
 RUN npm run build
 

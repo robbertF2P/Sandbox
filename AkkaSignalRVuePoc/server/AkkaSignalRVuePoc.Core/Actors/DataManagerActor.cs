@@ -1,4 +1,6 @@
 using Akka.Actor;
+using AkkaSignalRVuePoc.Contracts.Data;
+using AkkaSignalRVuePoc.Contracts.Events;
 using AkkaSignalRVuePoc.Contracts.Messages.Data;
 using AkkaSignalRVuePoc.Data;
 using Microsoft.EntityFrameworkCore;
@@ -22,7 +24,10 @@ public sealed class DataManagerActor : ReceiveActor
         Receive<GetAllProjectsQuery>(message => _projectData.Forward(message));
         Receive<GetProjectByIdQuery>(message => _projectData.Forward(message));
         Receive<GetProjectsByOrganisationQuery>(message => _projectData.Forward(message));
-        Receive<CreateProjectCommand>(message => _projectData.Forward(message));
+
+        ReceiveAsync<CreateProjectCommand>(HandleCreateProjectAsync);
+        ReceiveAsync<UpdateProjectCommand>(HandleUpdateProjectAsync);
+        ReceiveAsync<DeleteProjectCommand>(HandleDeleteProjectAsync);
     }
 
     public static Props Props(IDbContextFactory<CatalogDbContext> dbContextFactory) =>
@@ -36,5 +41,56 @@ public sealed class DataManagerActor : ReceiveActor
         _projectData = Context.ActorOf(
             ProjectDataActor.Props(_dbContextFactory),
             "project-data");
+    }
+
+    private async Task HandleCreateProjectAsync(CreateProjectCommand command)
+    {
+        var sender = Sender;
+        var result = await _projectData.Ask<CreateProjectResult>(command);
+        if (result.OrganisationExists && result.Project is { } project)
+        {
+            PublishProjectCreated(project);
+        }
+
+        sender.Tell(result);
+    }
+
+    private async Task HandleUpdateProjectAsync(UpdateProjectCommand command)
+    {
+        var sender = Sender;
+        var result = await _projectData.Ask<UpdateProjectResult>(command);
+        if (result.Exists && result.Project is { } project)
+        {
+            PublishProjectUpdated(project);
+        }
+
+        sender.Tell(result);
+    }
+
+    private void PublishProjectCreated(ProjectDto project)
+    {
+        Context.System.EventStream.Publish(new ProjectCreated(project, DateTimeOffset.UtcNow));
+    }
+
+    private void PublishProjectUpdated(ProjectDto project)
+    {
+        Context.System.EventStream.Publish(new ProjectUpdated(project, DateTimeOffset.UtcNow));
+    }
+
+    private async Task HandleDeleteProjectAsync(DeleteProjectCommand command)
+    {
+        var sender = Sender;
+        var result = await _projectData.Ask<DeleteProjectResult>(command);
+        if (result.Exists && result.Project is { } project)
+        {
+            PublishProjectDeleted(project);
+        }
+
+        sender.Tell(result);
+    }
+
+    private void PublishProjectDeleted(ProjectDto project)
+    {
+        Context.System.EventStream.Publish(new ProjectDeleted(project, DateTimeOffset.UtcNow));
     }
 }

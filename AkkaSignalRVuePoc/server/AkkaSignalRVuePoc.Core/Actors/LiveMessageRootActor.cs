@@ -39,6 +39,8 @@ public sealed class LiveMessageRootActor : ReceiveActor
         Receive<GetProjectByIdQuery>(ForwardToDataManager);
         Receive<GetProjectsByOrganisationQuery>(ForwardToDataManager);
         Receive<CreateProjectCommand>(ForwardToDataManager);
+        Receive<UpdateProjectCommand>(ForwardToDataManager);
+        Receive<DeleteProjectCommand>(ForwardToDataManager);
     }
 
     public static Props Props(
