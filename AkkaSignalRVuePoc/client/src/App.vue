@@ -1,9 +1,11 @@
 <script setup lang="ts">
 import { RouterLink, RouterView } from 'vue-router'
+import ToastContainer from './components/ToastContainer.vue'
 </script>
 
 <template>
   <div class="app">
+    <ToastContainer />
     <header class="app-nav">
       <RouterLink to="/" class="app-nav__brand">Akka + SignalR POC</RouterLink>
       <nav class="app-nav__links">

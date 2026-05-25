@@ -1,0 +1,77 @@
+using Akka.Actor;
+using AkkaSignalRVuePoc.Contracts.Events;
+using AkkaSignalRVuePoc.Contracts.Messages.Data;
+using AkkaSignalRVuePoc.Contracts.Notifications;
+using AkkaSignalRVuePoc.Core.Actors;
+using AkkaSignalRVuePoc.Data;
+
+namespace AkkaSignalRVuePoc.Api.Tests.Actors;
+
+public sealed class DataEventSignalRTests : ActorTestBase<DataEventSignalRTests>
+{
+    private readonly CatalogDatabaseFixture _database = new();
+
+    public DataEventSignalRTests(ITestOutputHelper output)
+        : base(output)
+    {
+    }
+
+    public override Task InitializeAsync()
+    {
+        _database.InitializeAsync();
+        return base.InitializeAsync();
+    }
+
+    public override async Task DisposeAsync()
+    {
+        await _database.DisposeAsync();
+        await base.DisposeAsync();
+    }
+
+    [Fact]
+    public async Task Creating_project_publishes_ProjectCreated_data_event_to_SignalR()
+    {
+        var hubPush = CreateHubPushActor();
+        var dataManager = Sys.ActorOf(DataManagerActor.Props(_database.Factory), "data-manager");
+
+        var result = await dataManager.Ask<CreateProjectResult>(
+            new CreateProjectCommand(
+                CatalogSeedData.AcmeOrganisationId,
+                "Event Test Project",
+                "Created for SignalR data event test"));
+
+        Assert.True(result.OrganisationExists);
+        Assert.NotNull(result.Project);
+
+        var call = await HubContext.ClientProxy.WaitForCallAsync(TimeSpan.FromSeconds(5));
+        Assert.Equal("dataEvent", call.Method);
+
+        var notification = Assert.IsType<DataEventNotification>(Assert.Single(call.Arguments));
+        Assert.Equal(nameof(ProjectCreated), notification.EventType);
+        Assert.Equal(result.Project!.Id, notification.Project.Id);
+        Assert.Equal("Event Test Project", notification.Project.Name);
+    }
+
+    [Fact]
+    public async Task Updating_project_publishes_ProjectUpdated_data_event_to_SignalR()
+    {
+        var hubPush = CreateHubPushActor();
+        var dataManager = Sys.ActorOf(DataManagerActor.Props(_database.Factory), "data-manager");
+
+        var updated = await dataManager.Ask<UpdateProjectResult>(
+            new UpdateProjectCommand(
+                CatalogSeedData.CustomerPortalProjectId,
+                "Updated Portal",
+                null));
+
+        Assert.True(updated.Exists);
+        Assert.NotNull(updated.Project);
+
+        var call = await HubContext.ClientProxy.WaitForCallAsync(TimeSpan.FromSeconds(5));
+        Assert.Equal("dataEvent", call.Method);
+
+        var notification = Assert.IsType<DataEventNotification>(Assert.Single(call.Arguments));
+        Assert.Equal(nameof(ProjectUpdated), notification.EventType);
+        Assert.Equal("Updated Portal", notification.Project.Name);
+    }
+}

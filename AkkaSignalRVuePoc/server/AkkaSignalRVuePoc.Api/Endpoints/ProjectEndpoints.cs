@@ -64,6 +64,33 @@ public static class ProjectEndpoints
             .WithName("CreateProject")
             .WithSummary("Create a project");
 
+        group.MapPut("/{id:guid}", async (
+            Guid id,
+            UpdateProjectRequest request,
+            IActorSystemCommandFacade facade,
+            CancellationToken cancellationToken) =>
+        {
+            if (string.IsNullOrWhiteSpace(request.Name) && request.Description is null)
+            {
+                return Results.BadRequest(new { Error = "At least one of Name or Description must be provided." });
+            }
+
+            var response = await facade.UpdateProjectAsync(
+                id,
+                request.Name,
+                request.Description,
+                cancellationToken);
+
+            return response switch
+            {
+                { Exists: false } => Results.NotFound(),
+                { Project: { } project } => Results.Ok(CatalogModelMapper.ToApiModel(project)),
+                _ => Results.BadRequest(new { Error = "Project could not be updated." })
+            };
+        })
+            .WithName("UpdateProject")
+            .WithSummary("Update a project");
+
         return app;
     }
 }

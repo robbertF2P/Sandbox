@@ -21,6 +21,7 @@ public sealed class ProjectDataActor : ReceiveActor
         ReceiveAsync<GetProjectByIdQuery>(HandleGetById);
         ReceiveAsync<GetProjectsByOrganisationQuery>(HandleGetByOrganisation);
         ReceiveAsync<CreateProjectCommand>(HandleCreate);
+        ReceiveAsync<UpdateProjectCommand>(HandleUpdate);
     }
 
     public static Props Props(IDbContextFactory<CatalogDbContext> dbContextFactory) =>
@@ -115,5 +116,48 @@ public sealed class ProjectDataActor : ReceiveActor
 
         _log.Info("Created project {ProjectId} ({Name})", project.Id, project.Name);
         Sender.Tell(new CreateProjectResult(true, CatalogEntityMapper.ToDto(project)));
+    }
+
+    private async Task HandleUpdate(UpdateProjectCommand command)
+    {
+        if (command.Id == Guid.Empty)
+        {
+            Sender.Tell(new Status.Failure(new ArgumentException("Id is required.", nameof(command.Id))));
+            return;
+        }
+
+        var hasName = !string.IsNullOrWhiteSpace(command.Name);
+        var hasDescription = command.Description is not null;
+        if (!hasName && !hasDescription)
+        {
+            Sender.Tell(new Status.Failure(
+                new ArgumentException("At least one of Name or Description must be provided.")));
+            return;
+        }
+
+        await using var db = await _dbContextFactory.CreateDbContextAsync();
+        var project = await db.Projects.FirstOrDefaultAsync(entity => entity.Id == command.Id);
+        if (project is null)
+        {
+            Sender.Tell(new UpdateProjectResult(false, null));
+            return;
+        }
+
+        if (hasName)
+        {
+            project.Name = command.Name!.Trim();
+        }
+
+        if (hasDescription)
+        {
+            project.Description = string.IsNullOrWhiteSpace(command.Description)
+                ? null
+                : command.Description.Trim();
+        }
+
+        await db.SaveChangesAsync();
+
+        _log.Info("Updated project {ProjectId} ({Name})", project.Id, project.Name);
+        Sender.Tell(new UpdateProjectResult(true, CatalogEntityMapper.ToDto(project)));
     }
 }

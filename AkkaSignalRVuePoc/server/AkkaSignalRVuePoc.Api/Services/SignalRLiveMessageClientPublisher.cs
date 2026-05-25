@@ -1,4 +1,5 @@
 using AkkaSignalRVuePoc.Contracts.Messages;
+using AkkaSignalRVuePoc.Contracts.Notifications;
 using AkkaSignalRVuePoc.Core.Publishing;
 using AkkaSignalRVuePoc.Api.Hubs;
 using Microsoft.AspNetCore.SignalR;
@@ -17,5 +18,10 @@ public sealed class SignalRLiveMessageClientPublisher : ISignalrHubWrapper
     public Task PublishActorMessageAsync(PushMessage message)
     {
         return _hubContext.Clients.All.SendAsync("actorMessage", message);
+    }
+
+    public Task PublishDataEventAsync(DataEventNotification notification)
+    {
+        return _hubContext.Clients.All.SendAsync("dataEvent", notification);
     }
 }

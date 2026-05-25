@@ -11,3 +11,11 @@ export interface Project {
   description: string | null
   createdAt: string
 }
+
+export type DataEventType = 'ProjectCreated' | 'ProjectUpdated'
+
+export interface DataEventNotification {
+  eventType: DataEventType
+  project: Project
+  occurredAt: string
+}

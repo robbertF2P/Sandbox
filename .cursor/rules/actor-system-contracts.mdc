@@ -10,3 +10,4 @@ alwaysApply: false
 - Keep actor system messages and events in `AkkaSignalRVuePoc.Contracts`.
 - Declare actor system events as C# `record` types.
 - Name actor system event types in past tense with camel-cased words using C# PascalCase, such as `ActorSystemStarted`.
+- Catalog change events implement `IDataEvent` (extends `IActorSystemEvent`). `SignalRHubActor` subscribes to `IDataEvent` and pushes `dataEvent` notifications to clients.

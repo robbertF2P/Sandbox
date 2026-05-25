@@ -1,22 +1,43 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
 import { getApiBaseUrl, listProjects } from '../api/catalog'
-import type { Project } from '../types/catalog'
+import { useDataEventHub } from '../composables/useDataEventHub'
+import { useToast } from '../composables/useToast'
+import type { DataEventNotification, Project } from '../types/catalog'
 
 const projects = ref<Project[]>([])
 const loading = ref(true)
 const error = ref<string | null>(null)
 const apiBaseUrl = getApiBaseUrl()
+const { showToast } = useToast()
 
-onMounted(async () => {
+async function loadProjects() {
   try {
     projects.value = await listProjects()
+    error.value = null
   } catch (fetchError) {
     error.value =
       fetchError instanceof Error ? fetchError.message : 'Unable to load projects from the API.'
-  } finally {
-    loading.value = false
   }
+}
+
+onMounted(async () => {
+  await loadProjects()
+  loading.value = false
+})
+
+useDataEventHub((notification: DataEventNotification) => {
+  if (notification.eventType !== 'ProjectCreated' && notification.eventType !== 'ProjectUpdated') {
+    return
+  }
+
+  const label =
+    notification.eventType === 'ProjectCreated'
+      ? `Project created: ${notification.project.name}`
+      : `Project updated: ${notification.project.name}`
+
+  showToast(label, 'success')
+  void loadProjects()
 })
 
 function formatDate(value: string) {
@@ -30,7 +51,8 @@ function formatDate(value: string) {
     <h1>Projects</h1>
     <p class="description">
       Projects returned by the Akka.NET data actors via
-      <code>GET /api/projects</code>.
+      <code>GET /api/projects</code>. The list refreshes when
+      <code>ProjectCreated</code> or <code>ProjectUpdated</code> events arrive on SignalR.
     </p>
   </section>
 
