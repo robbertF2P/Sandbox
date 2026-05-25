@@ -16,14 +16,20 @@ public sealed class SignalRHubActor : ReceiveActor
     public SignalRHubActor(ISignalrHubWrapper publisher)
     {
         _publisher = publisher;
-        Context.System.EventStream.Subscribe(Self, typeof(ProcessFinished));
-        Context.System.EventStream.Subscribe(Self, typeof(IDataEvent));
+        Context.System.EventStream.Subscribe<ProcessFinished>(Self);
+        Context.System.EventStream.Subscribe<IDataEvent>(Self);
         _log.Info("SignalRHubActor created");
         ReceiveAsync<PublishActorMessage>(PublishAsync);
         ReceiveAsync<ProcessFinished>(PublishProcessFinishedAsync);
         ReceiveAsync<IDataEvent>(PublishDataEventAsync);
     }
 
+    protected override void PostStop()
+    {
+        Context.System.EventStream.Unsubscribe<ProcessFinished>(Self);
+        Context.System.EventStream.Unsubscribe<IDataEvent>(Self);
+        _log.Info("SignalRHubActor stopped and unsubscribed from event stream");
+    }
     public static Props Props(ISignalrHubWrapper publisher) =>
         Akka.Actor.Props.Create(() => new SignalRHubActor(publisher));
 

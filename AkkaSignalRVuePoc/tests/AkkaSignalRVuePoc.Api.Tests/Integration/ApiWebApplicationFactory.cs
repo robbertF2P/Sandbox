@@ -21,7 +21,7 @@ public sealed class ApiWebApplicationFactory : WebApplicationFactory<Program>
             services.RemoveAll<IDbContextFactory<CatalogDbContext>>();
             services.RemoveAll<DbContextOptions<CatalogDbContext>>();
 
-            _sqliteConnection = new SqliteConnection("Data Source=catalog-api-tests;Mode=Memory;Cache=Shared");
+            _sqliteConnection = new SqliteConnection($"Data Source=catalog-api-tests-{Guid.NewGuid():N};Mode=Memory;Cache=Shared");
             _sqliteConnection.Open();
 
             services.AddSingleton(_sqliteConnection);

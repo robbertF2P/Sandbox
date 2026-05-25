@@ -2,25 +2,21 @@ using Akka.Actor;
 using AkkaSignalRVuePoc.Contracts.Messages.Data;
 using AkkaSignalRVuePoc.Core.Actors;
 using AkkaSignalRVuePoc.Data;
-using AkkaSignalRVuePoc.Api.Tests.Data;
 using AkkaSignalRVuePoc.Core.Actors.Data;
 
 namespace AkkaSignalRVuePoc.Api.Tests.Actors;
 
-public sealed class DataActorIntegrationTests : ActorTestBase<DataActorIntegrationTests>, IClassFixture<CatalogDatabaseFixture>
+public sealed class DataActorIntegrationTests : ActorDatabaseTestBase<DataActorIntegrationTests>
 {
-    private readonly CatalogDatabaseFixture _database;
-
-    public DataActorIntegrationTests(ITestOutputHelper output, CatalogDatabaseFixture database)
+    public DataActorIntegrationTests(ITestOutputHelper output)
         : base(output)
     {
-        _database = database;
     }
 
     [Fact]
     public async Task Data_manager_returns_seeded_organisations()
     {
-        var dataManager = Sys.ActorOf(DataManagerActor.Props(_database.Factory), "data-manager");
+        var dataManager = Sys.ActorOf(DataManagerActor.Props(DatabaseFactory), "data-manager");
 
         var result = await dataManager.Ask<GetAllOrganisationsResult>(
             new GetAllOrganisationsQuery(),
@@ -35,7 +31,7 @@ public sealed class DataActorIntegrationTests : ActorTestBase<DataActorIntegrati
     public async Task Organisation_data_actor_creates_and_reads_organisation()
     {
         var actor = Sys.ActorOf(
-            OrganisationDataActor.Props(_database.Factory),
+            OrganisationDataActor.Props(DatabaseFactory),
             "organisation-data");
 
         var created = await actor.Ask<CreateOrganisationResult>(
@@ -55,7 +51,7 @@ public sealed class DataActorIntegrationTests : ActorTestBase<DataActorIntegrati
     [Fact]
     public async Task Project_data_actor_creates_project_for_existing_organisation()
     {
-        var actor = Sys.ActorOf(ProjectDataActor.Props(_database.Factory), "project-data");
+        var actor = Sys.ActorOf(ProjectDataActor.Props(DatabaseFactory), "project-data");
 
         var created = await actor.Ask<CreateProjectResult>(
             new CreateProjectCommand(
@@ -79,7 +75,7 @@ public sealed class DataActorIntegrationTests : ActorTestBase<DataActorIntegrati
     [Fact]
     public async Task Data_manager_updates_existing_project()
     {
-        var dataManager = Sys.ActorOf(DataManagerActor.Props(_database.Factory), "data-manager-update");
+        var dataManager = Sys.ActorOf(DataManagerActor.Props(DatabaseFactory), "data-manager-update");
 
         var updated = await dataManager.Ask<UpdateProjectResult>(new UpdateProjectCommand(
                 CatalogSeedData.AkkaPocProjectId,
@@ -97,7 +93,7 @@ public sealed class DataActorIntegrationTests : ActorTestBase<DataActorIntegrati
     {
         var hubPushActor = CreateHubPushActor();
         var root = Sys.ActorOf(
-            RootActor.Props(hubPushActor, _database.Factory),
+            RootActor.Props(hubPushActor, DatabaseFactory),
             "live-message-root");
 
         var projects = await root.Ask<GetAllProjectsResult>(

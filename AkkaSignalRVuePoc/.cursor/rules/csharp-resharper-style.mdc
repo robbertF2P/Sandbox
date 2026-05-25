@@ -38,4 +38,5 @@ Follow JetBrains/ReSharper defaults for this solution.
 
 ## Tests
 - Actor tests inherit `ActorTestBase<TTest>`.
+- Database actor tests inherit `ActorDatabaseTestBase<TTest>` for a fresh SQLite database per test method (do not use `IClassFixture` for mutable database state).
 - Use `HubContext`, `CreateHubPushActor()`, and shared Serilog setup from the base class.

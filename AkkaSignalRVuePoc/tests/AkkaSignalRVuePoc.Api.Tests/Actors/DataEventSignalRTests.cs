@@ -1,5 +1,4 @@
 using Akka.Actor;
-using AkkaSignalRVuePoc.Api.Tests.Data;
 using AkkaSignalRVuePoc.Contracts.Events;
 using AkkaSignalRVuePoc.Contracts.Messages.Data;
 using AkkaSignalRVuePoc.Contracts.Notifications;
@@ -8,22 +7,18 @@ using AkkaSignalRVuePoc.Data;
 
 namespace AkkaSignalRVuePoc.Api.Tests.Actors;
 
-public sealed class DataEventSignalRTests : ActorTestBase<DataEventSignalRTests>, IClassFixture<CatalogDatabaseFixture>
+public sealed class DataEventSignalRTests : ActorDatabaseTestBase<DataEventSignalRTests>
 {
-    private readonly CatalogDatabaseFixture _database = new();
-
-    public DataEventSignalRTests(ITestOutputHelper output, CatalogDatabaseFixture database)
+    public DataEventSignalRTests(ITestOutputHelper output)
         : base(output)
     {
-        _database = database;
-
     }
 
     [Fact]
     public async Task Creating_project_publishes_ProjectCreated_data_event_to_SignalR()
     {
         var hubPush = CreateHubPushActor();
-        var dataManager = Sys.ActorOf(DataManagerActor.Props(_database.Factory), "data-manager");
+        var dataManager = Sys.ActorOf(DataManagerActor.Props(DatabaseFactory), "data-manager");
 
         var result = await dataManager.Ask<CreateProjectResult>(new CreateProjectCommand(
                 CatalogSeedData.AcmeOrganisationId,
@@ -46,13 +41,12 @@ public sealed class DataEventSignalRTests : ActorTestBase<DataEventSignalRTests>
     public async Task Updating_project_publishes_ProjectUpdated_data_event_to_SignalR()
     {
         var hubPush = CreateHubPushActor();
-        var dataManager = Sys.ActorOf(DataManagerActor.Props(_database.Factory), "data-manager");
+        var dataManager = Sys.ActorOf(DataManagerActor.Props(DatabaseFactory), "data-manager");
 
-        var updated = await dataManager.Ask<UpdateProjectResult>(
-            new UpdateProjectCommand(
+        var updated = await dataManager.Ask<UpdateProjectResult>(new UpdateProjectCommand(
                 CatalogSeedData.CustomerPortalProjectId,
                 "Updated Portal",
-                null));
+                null), cancellationToken: TestContext.Current.CancellationToken);
 
         Assert.True(updated.Exists);
         Assert.NotNull(updated.Project);
@@ -69,21 +63,19 @@ public sealed class DataEventSignalRTests : ActorTestBase<DataEventSignalRTests>
     public async Task Deleting_project_publishes_ProjectDeleted_data_event_to_SignalR()
     {
         var hubPush = CreateHubPushActor();
-        var dataManager = Sys.ActorOf(DataManagerActor.Props(_database.Factory), "data-manager-delete");
+        var dataManager = Sys.ActorOf(DataManagerActor.Props(DatabaseFactory), "data-manager-delete");
 
-        var created = await dataManager.Ask<CreateProjectResult>(
-            new CreateProjectCommand(
+        var created = await dataManager.Ask<CreateProjectResult>(new CreateProjectCommand(
                 CatalogSeedData.AcmeOrganisationId,
                 "Delete Me",
-                null));
+                null), cancellationToken: TestContext.Current.CancellationToken);
 
         Assert.True(created.OrganisationExists);
         Assert.NotNull(created.Project);
 
         _ = await HubContext.ClientProxy.WaitForCallAsync(TimeSpan.FromSeconds(5));
 
-        var deleted = await dataManager.Ask<DeleteProjectResult>(
-            new DeleteProjectCommand(created.Project!.Id));
+        var deleted = await dataManager.Ask<DeleteProjectResult>(new DeleteProjectCommand(created.Project!.Id), cancellationToken: TestContext.Current.CancellationToken);
 
         Assert.True(deleted.Exists);
 

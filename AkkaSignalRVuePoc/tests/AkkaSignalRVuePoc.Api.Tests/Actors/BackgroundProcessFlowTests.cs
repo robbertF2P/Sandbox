@@ -1,6 +1,5 @@
 using Akka.Actor;
 using AkkaSignalRVuePoc.Api.Services;
-using AkkaSignalRVuePoc.Api.Tests.Data;
 using AkkaSignalRVuePoc.Contracts.Messages;
 using AkkaSignalRVuePoc.Core.Actors;
 using AkkaSignalRVuePoc.Core.Publishing;
@@ -8,18 +7,15 @@ using Moq;
 
 namespace AkkaSignalRVuePoc.Api.Tests.Actors;
 
-public sealed class BackgroundProcessFlowTests : ActorTestBase<BackgroundProcessFlowTests>, IClassFixture<CatalogDatabaseFixture>
+public sealed class BackgroundProcessFlowTests : ActorDatabaseTestBase<BackgroundProcessFlowTests>
 {
     private static readonly BackgroundProcessTiming TestTiming = new(
       Duration: TimeSpan.FromMilliseconds(300),
       BusySignalInterval: TimeSpan.FromMilliseconds(80));
 
-    private readonly CatalogDatabaseFixture _database;
-
-    public BackgroundProcessFlowTests(ITestOutputHelper output, CatalogDatabaseFixture database)
+    public BackgroundProcessFlowTests(ITestOutputHelper output)
         : base(output)
     {
-        _database = database;
     }
 
     [Fact]
@@ -36,7 +32,7 @@ public sealed class BackgroundProcessFlowTests : ActorTestBase<BackgroundProcess
             SignalRHubActor.Props(publisherMock.Object),
             "signalr-hub-push");
         var rootActor = Sys.ActorOf(
-            RootActor.Props(hubPushActor, _database.Factory, TestTiming),
+            RootActor.Props(hubPushActor, DatabaseFactory, TestTiming),
             "live-message-root");
 
         var commandFacade = new ActorSystemCommandFacade(rootActor);
