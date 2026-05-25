@@ -1,6 +1,7 @@
 using AkkaSignalRVuePoc.Contracts.Data;
+using AkkaSignalRVuePoc.Contracts.Models;
 
-namespace AkkaSignalRVuePoc.Api.Services;
+namespace AkkaSignalRVuePoc.Contracts.Interfaces;
 
 public interface IActorSystemCommandFacade
 {
@@ -36,13 +37,3 @@ public interface IActorSystemCommandFacade
 
     Task<DeleteProjectResponse> DeleteProjectAsync(Guid id, CancellationToken cancellationToken = default);
 }
-
-public sealed record GetProjectsByOrganisationResponse(
-    bool OrganisationExists,
-    IReadOnlyList<ProjectDto> Projects);
-
-public sealed record CreateProjectResponse(bool OrganisationExists, ProjectDto? Project);
-
-public sealed record UpdateProjectResponse(bool Exists, ProjectDto? Project);
-
-public sealed record DeleteProjectResponse(bool Exists, ProjectDto? Project);

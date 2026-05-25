@@ -1,5 +1,5 @@
 using AkkaSignalRVuePoc.Api.Models;
-using AkkaSignalRVuePoc.Api.Services;
+using AkkaSignalRVuePoc.Contracts.Interfaces;
 
 namespace AkkaSignalRVuePoc.Api.Endpoints;
 

@@ -1,5 +1,6 @@
 using Akka.Actor;
 using Akka.Hosting;
+using AkkaSignalRVuePoc.Contracts.Interfaces;
 using AkkaSignalRVuePoc.Core.Actors;
 using AkkaSignalRVuePoc.Core.Publishing;
 using AkkaSignalRVuePoc.Data;
@@ -12,7 +13,7 @@ public static class AkkaHostingExtensions
     public static IServiceCollection AddAkkaActors(this IServiceCollection services, IConfiguration configuration)
     {
         services.AddSingleton<ISignalrHubWrapper, SignalRLiveMessageClientPublisher>();
-        var backgroundProcessTiming = ReadBackgroundProcessTiming(configuration);
+        BackgroundProcessTiming backgroundProcessTiming = ReadBackgroundProcessTiming(configuration);
 
         services.AddAkka<AkkaActorHostedService>("akka-signalr-poc", (builder, serviceProvider) =>
         {
@@ -21,11 +22,12 @@ public static class AkkaHostingExtensions
                 .WithActorSystemLivenessCheck()
                 .WithActors((system, registry) =>
                 {
-                    var hubPush = system.ActorOf(
+                    IActorRef? hubPush = system.ActorOf(
                         SignalRHubActor.Props(serviceProvider.GetRequiredService<ISignalrHubWrapper>()),
                         "signalr-hub-push");
-                    var dbContextFactory = serviceProvider.GetRequiredService<IDbContextFactory<CatalogDbContext>>();
-                    var rootActor = system.ActorOf(
+                    IDbContextFactory<CatalogDbContext> dbContextFactory =
+                        serviceProvider.GetRequiredService<IDbContextFactory<CatalogDbContext>>();
+                    IActorRef? rootActor = system.ActorOf(
                         RootActor.Props(hubPush, dbContextFactory, backgroundProcessTiming),
                         "live-message-root");
                     registry.Register<RootActor>(rootActor);
@@ -38,7 +40,7 @@ public static class AkkaHostingExtensions
 
         services.AddSingleton<IActorSystemCommandFacade>(sp =>
         {
-            var rootActor = sp.GetRequiredService<IRequiredActor<RootActor>>().ActorRef;
+            IActorRef rootActor = sp.GetRequiredService<IRequiredActor<RootActor>>().ActorRef;
             return new ActorSystemCommandFacade(rootActor);
         });
 
@@ -47,7 +49,7 @@ public static class AkkaHostingExtensions
 
     private static BackgroundProcessTiming ReadBackgroundProcessTiming(IConfiguration configuration)
     {
-        var section = configuration.GetSection("BackgroundProcess");
+        IConfigurationSection section = configuration.GetSection("BackgroundProcess");
         if (!section.Exists())
         {
             return BackgroundProcessTiming.Default;
@@ -62,8 +64,8 @@ public static class AkkaHostingExtensions
         }
 
         return new BackgroundProcessTiming(
-            Duration: TimeSpan.FromSeconds(durationSeconds ?? BackgroundProcessTiming.Default.Duration.TotalSeconds),
-            BusySignalInterval: TimeSpan.FromSeconds(
+            TimeSpan.FromSeconds(durationSeconds ?? BackgroundProcessTiming.Default.Duration.TotalSeconds),
+            TimeSpan.FromSeconds(
                 busyIntervalSeconds ?? BackgroundProcessTiming.Default.BusySignalInterval.TotalSeconds));
     }
 }

@@ -1,13 +1,15 @@
 using Akka.Actor;
 using AkkaSignalRVuePoc.Contracts.Data;
+using AkkaSignalRVuePoc.Contracts.Interfaces;
 using AkkaSignalRVuePoc.Contracts.Messages;
 using AkkaSignalRVuePoc.Contracts.Messages.Data;
+using AkkaSignalRVuePoc.Contracts.Models;
 
 namespace AkkaSignalRVuePoc.Api.Services;
 
 public sealed class ActorSystemCommandFacade : IActorSystemCommandFacade
 {
-    private static readonly TimeSpan AskTimeout = TimeSpan.FromSeconds(10);
+    private static readonly TimeSpan _askTimeout = TimeSpan.FromSeconds(10);
     private readonly IActorRef _rootActor;
 
     public ActorSystemCommandFacade(IActorRef rootActor)
@@ -30,7 +32,7 @@ public sealed class ActorSystemCommandFacade : IActorSystemCommandFacade
     {
         var result = await _rootActor.Ask<GetAllOrganisationsResult>(
             new GetAllOrganisationsQuery(),
-            AskTimeout,
+            _askTimeout,
             cancellationToken);
         return result.Organisations;
     }
@@ -41,7 +43,7 @@ public sealed class ActorSystemCommandFacade : IActorSystemCommandFacade
     {
         var result = await _rootActor.Ask<GetOrganisationByIdResult>(
             new GetOrganisationByIdQuery(id),
-            AskTimeout,
+            _askTimeout,
             cancellationToken);
         return result.Organisation;
     }
@@ -52,7 +54,7 @@ public sealed class ActorSystemCommandFacade : IActorSystemCommandFacade
     {
         var result = await _rootActor.Ask<CreateOrganisationResult>(
             new CreateOrganisationCommand(name),
-            AskTimeout,
+            _askTimeout,
             cancellationToken);
         return result.Organisation;
     }
@@ -62,7 +64,7 @@ public sealed class ActorSystemCommandFacade : IActorSystemCommandFacade
     {
         var result = await _rootActor.Ask<GetAllProjectsResult>(
             new GetAllProjectsQuery(),
-            AskTimeout,
+            _askTimeout,
             cancellationToken);
         return result.Projects;
     }
@@ -71,7 +73,7 @@ public sealed class ActorSystemCommandFacade : IActorSystemCommandFacade
     {
         var result = await _rootActor.Ask<GetProjectByIdResult>(
             new GetProjectByIdQuery(id),
-            AskTimeout,
+            _askTimeout,
             cancellationToken);
         return result.Project;
     }
@@ -82,7 +84,7 @@ public sealed class ActorSystemCommandFacade : IActorSystemCommandFacade
     {
         var result = await _rootActor.Ask<GetProjectsByOrganisationResult>(
             new GetProjectsByOrganisationQuery(organisationId),
-            AskTimeout,
+            _askTimeout,
             cancellationToken);
         return new GetProjectsByOrganisationResponse(result.OrganisationExists, result.Projects);
     }
@@ -95,7 +97,7 @@ public sealed class ActorSystemCommandFacade : IActorSystemCommandFacade
     {
         var result = await _rootActor.Ask<CreateProjectResult>(
             new CreateProjectCommand(organisationId, name, description),
-            AskTimeout,
+            _askTimeout,
             cancellationToken);
         return new CreateProjectResponse(result.OrganisationExists, result.Project);
     }
@@ -108,7 +110,7 @@ public sealed class ActorSystemCommandFacade : IActorSystemCommandFacade
     {
         var result = await _rootActor.Ask<UpdateProjectResult>(
             new UpdateProjectCommand(id, name, description),
-            AskTimeout,
+            _askTimeout,
             cancellationToken);
         return new UpdateProjectResponse(result.Exists, result.Project);
     }
@@ -119,7 +121,7 @@ public sealed class ActorSystemCommandFacade : IActorSystemCommandFacade
     {
         var result = await _rootActor.Ask<DeleteProjectResult>(
             new DeleteProjectCommand(id),
-            AskTimeout,
+            _askTimeout,
             cancellationToken);
         return new DeleteProjectResponse(result.Exists, result.Project);
     }

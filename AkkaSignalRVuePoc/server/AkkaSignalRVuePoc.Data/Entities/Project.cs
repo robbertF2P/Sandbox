@@ -2,15 +2,27 @@ namespace AkkaSignalRVuePoc.Data.Entities;
 
 public sealed class Project
 {
-    public Guid Id { get; set; }
+    public Guid Id
+    {
+        get; set;
+    }
 
-    public Guid OrganisationId { get; set; }
+    public Guid OrganisationId
+    {
+        get; set;
+    }
 
     public string Name { get; set; } = string.Empty;
 
-    public string? Description { get; set; }
+    public string? Description
+    {
+        get; set;
+    }
 
-    public DateTimeOffset CreatedAt { get; set; }
+    public DateTimeOffset CreatedAt
+    {
+        get; set;
+    }
 
     public Organisation Organisation { get; set; } = null!;
 }
