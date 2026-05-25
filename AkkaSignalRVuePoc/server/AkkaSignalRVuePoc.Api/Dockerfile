@@ -1,6 +1,7 @@
 FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 WORKDIR /src
 
+COPY Directory.Build.props Directory.Packages.props ./
 COPY server/AkkaSignalRVuePoc.Api/AkkaSignalRVuePoc.Api.csproj server/AkkaSignalRVuePoc.Api/
 COPY server/AkkaSignalRVuePoc.Contracts/AkkaSignalRVuePoc.Contracts.csproj server/AkkaSignalRVuePoc.Contracts/
 COPY server/AkkaSignalRVuePoc.Core/AkkaSignalRVuePoc.Core.csproj server/AkkaSignalRVuePoc.Core/
