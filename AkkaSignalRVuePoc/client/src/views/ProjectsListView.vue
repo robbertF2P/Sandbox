@@ -90,14 +90,12 @@ async function handleSave(payload: ProjectFormPayload) {
         name: payload.name,
         description: payload.description || null,
       })
-      showToast(`Project updated: ${payload.name}`, 'success')
     } else {
       await createProject({
         organisationId: payload.organisationId,
         name: payload.name,
         description: payload.description || null,
       })
-      showToast(`Project created: ${payload.name}`, 'success')
     }
 
     closeForm()
@@ -123,7 +121,6 @@ async function handleDelete(project: Project) {
     if (editingProject.value?.id === project.id) {
       closeForm()
     }
-    showToast(`Project deleted: ${project.name}`, 'success')
     await loadProjects()
   } catch (deleteError) {
     error.value = deleteError instanceof Error ? deleteError.message : 'Unable to delete the project.'

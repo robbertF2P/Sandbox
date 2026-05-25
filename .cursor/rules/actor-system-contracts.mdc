@@ -11,3 +11,11 @@ alwaysApply: false
 - Declare actor system events as C# `record` types.
 - Name actor system event types in past tense with camel-cased words using C# PascalCase, such as `ActorSystemStarted`.
 - Catalog change events implement `IDataEvent` (extends `IActorSystemEvent`). `SignalRHubActor` subscribes to `IDataEvent` and pushes `dataEvent` notifications to clients.
+
+## Actor messaging
+
+- **Inside the actor system, actors must never call `Ask`.** Use `Tell` or `Forward` only.
+- Use `Forward` when a child actor should reply directly to the original sender (queries routed through `RootActor` / `DataManagerActor`).
+- Use `Tell` for fire-and-forget commands and for explicit replies via `Sender.Tell(...)`.
+- When an actor must wait for a child result, use a temporary `Become`/`Unbecome` handler that receives the child reply and then `Tell`s the original sender — do not block with `Ask`.
+- `Ask` is allowed **outside** actors at system boundaries (HTTP facades, integration tests) when a request/response is required.

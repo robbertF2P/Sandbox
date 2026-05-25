@@ -35,6 +35,7 @@ Follow JetBrains/ReSharper defaults for this solution.
 - Actor logging: `private readonly ILoggingAdapter _log = Context.GetLogger();`
 - No `Interlocked` for per-actor instance state; the mailbox serializes access.
 - Register actors via static `Props` factories; wire in `AkkaHostingExtensions`.
+- **Actors never use `Ask`** — only `Tell` / `Forward`; reply with `Sender.Tell(...)`. Reserve `Ask` for non-actor callers (API facade, tests).
 
 ## Tests
 - Actor tests inherit `ActorTestBase<TTest>`.

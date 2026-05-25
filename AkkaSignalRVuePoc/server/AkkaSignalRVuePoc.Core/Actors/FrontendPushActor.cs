@@ -1,4 +1,5 @@
 using Akka.Actor;
+using Akka.Event;
 using AkkaSignalRVuePoc.Contracts.Events;
 using AkkaSignalRVuePoc.Contracts.Messages;
 using AkkaSignalRVuePoc.Core.InternalMessages;
@@ -11,7 +12,7 @@ namespace AkkaSignalRVuePoc.Core.Actors;
 public sealed class FrontendPushActor : ReceiveActor, IWithTimers
 {
     private const string TimerKey = "frontend-message-push";
-    private static readonly TimeSpan DefaultPushInterval = TimeSpan.FromSeconds(5);
+    private static readonly TimeSpan _defaultPushInterval = TimeSpan.FromSeconds(5);
 
     private readonly IActorRef _hubPushActor;
     private readonly TimeSpan _pushInterval;
@@ -26,7 +27,7 @@ public sealed class FrontendPushActor : ReceiveActor, IWithTimers
         _hubPushActor = hubPushActor;
         _pushInterval = pushInterval;
         _publishImmediately = publishImmediately;
-        Context.System.EventStream.Subscribe(Self, typeof(ActorSystemStarted));
+        Context.System.EventStream.Subscribe<ActorSystemStarted>(Self);
 
         Receive<PushTick>(_ => PublishHeartbeat());
         Receive<ActorSystemStarted>(msg => PublishMessage("Actor system started"));
@@ -37,7 +38,7 @@ public sealed class FrontendPushActor : ReceiveActor, IWithTimers
         TimeSpan? pushInterval = null,
         bool publishImmediately = true)
     {
-        var interval = pushInterval ?? DefaultPushInterval;
+        var interval = pushInterval ?? _defaultPushInterval;
         return Akka.Actor.Props.Create(() => new FrontendPushActor(hubPushActor, interval, publishImmediately));
     }
 
