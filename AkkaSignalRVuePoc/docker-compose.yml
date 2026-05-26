@@ -5,6 +5,7 @@ services:
     image: datalust/seq:latest
     environment:
       ACCEPT_EULA: "Y"
+      SEQ_FIRSTRUN_NOAUTHENTICATION: "true"
     ports:
       - "5341:5341"
       - "8081:80"
@@ -18,7 +19,7 @@ services:
       MSSQL_SA_PASSWORD: "Your_strong_password123"
       MSSQL_PID: Developer
     ports:
-      - "1433:1433"
+      - "1400:1433"
     volumes:
       - sqlserver-data:/var/opt/mssql
     healthcheck:
