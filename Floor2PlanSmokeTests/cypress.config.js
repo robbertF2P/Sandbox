@@ -7,7 +7,7 @@ module.exports = defineConfig({
     specPattern: 'cypress/e2e/**/*.cy.js',
     supportFile: false,
     defaultCommandTimeout: 10000,
-    pageLoadTimeout: 60000,
+    pageLoadTimeout: Number(process.env.CYPRESS_PAGE_LOAD_TIMEOUT || 60000),
     retries: {
       runMode: 1,
       openMode: 0,
@@ -18,7 +18,8 @@ module.exports = defineConfig({
   },
   env: {
     targetUrls: process.env.TARGET_URLS || process.env.TARGET_URL || defaultTargetUrl,
-    smokeEmail: process.env.SMOKE_EMAIL || 'smoke@example.com',
+    homeTileSelector: process.env.SMOKE_HOME_TILE_SELECTOR || '',
+    minHomeTiles: Number(process.env.SMOKE_MIN_HOME_TILES || 2),
     visualSettleMs: Number(process.env.SMOKE_VISUAL_SETTLE_MS || 0),
   },
   screenshotsFolder: 'artifacts/screenshots',
