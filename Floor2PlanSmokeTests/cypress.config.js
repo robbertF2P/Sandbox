@@ -2,6 +2,17 @@ const { defineConfig } = require('cypress');
 
 const defaultTargetUrl = 'https://2025-14-patch.floor2plan.com/Account/Login';
 
+const replaceBrowserArg = (args, name, value) => {
+  const prefix = `${name}=`;
+  const index = args.findIndex((arg) => arg.startsWith(prefix));
+
+  if (index >= 0) {
+    args[index] = `${prefix}${value}`;
+  } else {
+    args.push(`${prefix}${value}`);
+  }
+};
+
 module.exports = defineConfig({
   e2e: {
     specPattern: 'cypress/e2e/**/*.cy.js',
@@ -12,8 +23,21 @@ module.exports = defineConfig({
       runMode: 1,
       openMode: 0,
     },
-    setupNodeEvents() {
-      // Node event hooks can be added here without changing the spec contract.
+    setupNodeEvents(on) {
+      on('before:browser:launch', (browser, launchOptions) => {
+        const edgeUserDataDir = process.env.CYPRESS_EDGE_USER_DATA_DIR;
+        const edgeProfileDirectory = process.env.CYPRESS_EDGE_PROFILE_DIRECTORY;
+
+        if (browser.family === 'chromium' && browser.name === 'edge' && edgeUserDataDir) {
+          replaceBrowserArg(launchOptions.args, '--user-data-dir', edgeUserDataDir);
+        }
+
+        if (browser.family === 'chromium' && browser.name === 'edge' && edgeProfileDirectory) {
+          replaceBrowserArg(launchOptions.args, '--profile-directory', edgeProfileDirectory);
+        }
+
+        return launchOptions;
+      });
     },
   },
   env: {

@@ -6,6 +6,7 @@
   "scripts": {
     "test": "cypress run --spec cypress/e2e/login_smoke.cy.js",
     "test:smoke": "cypress run --spec cypress/e2e/login_smoke.cy.js",
+    "test:smoke:edge": "cypress run --browser edge --headed --spec cypress/e2e/login_smoke.cy.js",
     "test:xunit": "dotnet test Floor2PlanSmokeTests.csproj"
   },
   "keywords": [],
