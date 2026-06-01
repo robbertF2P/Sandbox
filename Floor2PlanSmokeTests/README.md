@@ -50,6 +50,8 @@ Build the container:
 docker build -t floor2plan-smoke-tests .
 ```
 
+The image installs Microsoft Edge Stable so `npm run test:smoke:edge` can run inside the container.
+
 Run against the default target:
 
 ```sh
