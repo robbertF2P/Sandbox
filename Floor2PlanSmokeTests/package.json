@@ -1,0 +1,17 @@
+{
+  "name": "floor2plan-smoke-tests",
+  "version": "1.0.0",
+  "description": "Cypress smoke test harness for Floor2Plan login pages.",
+  "private": true,
+  "scripts": {
+    "test": "cypress run --spec cypress/e2e/login_smoke.cy.js",
+    "test:smoke": "cypress run --spec cypress/e2e/login_smoke.cy.js",
+    "test:xunit": "dotnet test Floor2PlanSmokeTests.csproj"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "cypress": "^15.16.0"
+  }
+}
