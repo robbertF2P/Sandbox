@@ -90,6 +90,26 @@ const navigationArtifactName = (targetUrl, testTitle) =>
 
 const slotNumbers = (count) => Array.from({ length: count }, (_, index) => index);
 
+const numberEnv = (name, defaultValue) => {
+  const value = Cypress.env(name);
+
+  if (value === undefined || value === null || value === '') {
+    return defaultValue;
+  }
+
+  return Number(value);
+};
+
+const nonNegativeIntegerEnv = (name, defaultValue) => {
+  const value = numberEnv(name, defaultValue);
+
+  if (!Number.isFinite(value)) {
+    return defaultValue;
+  }
+
+  return Math.max(0, Math.floor(value));
+};
+
 const hrefFor = (element) => {
   const link = element.closest('a[href]') || element.querySelector?.('a[href]');
   return link?.getAttribute('href') || '';
@@ -157,7 +177,7 @@ const assertPageLoaded = (name) => {
 };
 
 const assertHomeTiles = () => {
-  const minHomeTiles = Number(Cypress.env('minHomeTiles') || 2);
+  const minHomeTiles = numberEnv('minHomeTiles', 2);
 
   cy.get(homeTileSelector(), { timeout: 30000 })
     .filter(':visible')
@@ -313,8 +333,8 @@ splitTargetUrls().forEach((targetUrl) => {
   describe(`Floor2Plan smoke test: ${targetUrl}`, () => {
     let consoleEntries;
     let navigationEntries;
-    const tileSlotLimit = Number(Cypress.env('tileClickLimit') || 20);
-    const menuSlotLimit = Number(Cypress.env('menuClickLimit') || 40);
+    const tileSlotLimit = nonNegativeIntegerEnv('tileClickLimit', 20);
+    const menuSlotLimit = nonNegativeIntegerEnv('menuClickLimit', 40);
 
     beforeEach(() => {
       consoleEntries = [];
@@ -392,8 +412,8 @@ splitTargetUrls().forEach((targetUrl) => {
       });
     });
 
-    slotNumbers(menuSlotLimit).forEach((index) => {
-      it(`opens upper-left menu page ${index + 1}`, () => {
+    if (menuSlotLimit > 0) {
+      it(`opens discovered upper-left menu pages up to ${menuSlotLimit}`, () => {
         loginToHome(targetUrl);
 
         cy.location('href').then((homeUrl) => {
@@ -401,40 +421,35 @@ splitTargetUrls().forEach((targetUrl) => {
 
           openUpperLeftMenu();
           collectMenuItems(menuSlotLimit, appOrigin).then((items) => {
-            const item = items[index];
+            expect(
+              items.length,
+              `upper-left menu pages matching ${menuItemSelector()}`,
+            ).to.be.greaterThan(0);
 
-            if (!item) {
-              navigationEntries.push({
-                type: 'menu',
-                index: index + 1,
-                status: 'not-found',
-              });
-              cy.log(`No visible upper-left menu page found at slot ${index + 1}`);
-              return;
-            }
-
-            visitHome(homeUrl);
-            openUpperLeftMenu();
-            clickMenuItem(item, appOrigin);
-            assertPageLoaded(`menu item ${item.label}`);
-            cy.location('href').then((href) => {
-              navigationEntries.push({
-                type: 'menu',
-                index: index + 1,
-                label: item.label,
-                href: item.href,
-                url: href,
-                status: 'opened',
+            items.forEach((item, index) => {
+              visitHome(homeUrl);
+              openUpperLeftMenu();
+              clickMenuItem(item, appOrigin);
+              assertPageLoaded(`menu item ${item.label}`);
+              cy.location('href').then((href) => {
+                navigationEntries.push({
+                  type: 'menu',
+                  index: index + 1,
+                  label: item.label,
+                  href: item.href,
+                  url: href,
+                  status: 'opened',
+                });
               });
             });
           });
         });
 
-        const visualSettleMs = Number(Cypress.env('visualSettleMs') || 0);
+        const visualSettleMs = numberEnv('visualSettleMs', 0);
         if (visualSettleMs > 0) {
           cy.wait(visualSettleMs);
         }
       });
-    });
+    }
   });
 });
