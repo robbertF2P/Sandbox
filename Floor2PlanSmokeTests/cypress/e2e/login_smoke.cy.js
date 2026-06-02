@@ -44,6 +44,7 @@ const menuItemSelectors = [
 const homeTileSelector = () => Cypress.env('homeTileSelector') || tileSelectors;
 const menuButtonSelector = () => Cypress.env('menuButtonSelector') || menuButtonSelectors;
 const menuItemSelector = () => Cypress.env('menuItemSelector') || menuItemSelectors;
+const loginMode = () => (Cypress.env('loginMode') || 'service').toString().toLowerCase();
 
 const visibleElements = ($root, selector) => Cypress.$($root)
   .find(selector)
@@ -67,6 +68,9 @@ const safeName = (value) => value
   .replace(/[^a-z0-9]+/g, '-')
   .replace(/(^-|-$)/g, '')
   .slice(0, 80) || 'page';
+
+const consoleArtifactName = (targetUrl, testTitle) =>
+  `artifacts/console/${safeName(targetUrl)}-${safeName(testTitle)}.json`;
 
 const hrefFor = (element) => {
   const link = element.closest('a[href]') || element.querySelector?.('a[href]');
@@ -140,6 +144,64 @@ const assertHomeTiles = () => {
   cy.get(homeTileSelector(), { timeout: 30000 })
     .filter(':visible')
     .should('have.length.at.least', minHomeTiles);
+};
+
+const assertLoggedInHome = (targetUrl) => {
+  cy.location('pathname', { timeout: 30000 }).should('not.include', '/Account/Login');
+  cy.location('hostname').should('eq', new URL(targetUrl).hostname);
+  assertHomeTiles();
+};
+
+const loginThroughLogo = (targetUrl) => {
+  cy.log('Click lower-right Floorganise logo');
+  cy.get('#azure-login img[alt="Floorganise logo"]')
+    .should('be.visible')
+    .click({ force: true });
+
+  assertLoggedInHome(targetUrl);
+};
+
+const loginThroughServiceForm = (targetUrl) => {
+  const username = Cypress.env('serviceUsername');
+  const password = Cypress.env('servicePassword');
+
+  expect(username, 'SMOKE_SERVICE_USERNAME').to.be.a('string').and.not.equal('');
+  expect(password, 'SMOKE_SERVICE_PASSWORD').to.be.a('string').and.not.equal('');
+
+  cy.log('Log in with service credentials');
+  cy.get(Cypress.env('serviceUsernameSelector'), { timeout: 30000 })
+    .should('be.visible')
+    .clear()
+    .type(username);
+  cy.get(Cypress.env('servicePasswordSelector'), { timeout: 30000 })
+    .should('be.visible')
+    .clear()
+    .type(password, { log: false });
+  cy.get(Cypress.env('serviceSubmitSelector'), { timeout: 30000 })
+    .filter(':visible')
+    .first()
+    .click({ force: true });
+
+  assertLoggedInHome(targetUrl);
+};
+
+const loginToHome = (targetUrl) => {
+  cy.visit(targetUrl);
+
+  cy.location('href', { timeout: 30000 }).should('include', '/Account/Login');
+  cy.get('body').should('be.visible').and('not.be.empty');
+
+  if (loginMode() === 'logo') {
+    loginThroughLogo(targetUrl);
+    return;
+  }
+
+  if (loginMode() === 'service') {
+    loginThroughServiceForm(targetUrl);
+    return;
+  }
+
+  throw new Error(`Unsupported SMOKE_LOGIN_MODE: ${Cypress.env('loginMode')}`);
 };
 
 const visitHome = (homeUrl) => {
@@ -230,7 +292,7 @@ const clickMenuItem = (item, appOrigin) => {
 };
 
 splitTargetUrls().forEach((targetUrl) => {
-  describe(`Floor2Plan login smoke test: ${targetUrl}`, () => {
+  describe(`Floor2Plan smoke test: ${targetUrl}`, () => {
     let consoleEntries;
 
     beforeEach(() => {
@@ -242,7 +304,7 @@ splitTargetUrls().forEach((targetUrl) => {
     });
 
     afterEach(() => {
-      const consoleArtifact = `artifacts/console/${safeName(targetUrl)}.json`;
+      const consoleArtifact = consoleArtifactName(targetUrl, Cypress.currentTest.title);
 
       cy.writeFile(consoleArtifact, consoleEntries, { log: true }).then(() => {
         const consoleErrors = consoleEntries.filter((entry) => entry.level === 'error');
@@ -255,69 +317,63 @@ splitTargetUrls().forEach((targetUrl) => {
       });
     });
 
-    it('enters through the logo, opens tile pages, opens menu pages, and records console output', () => {
+    it('logs in with service credentials and renders home tiles', () => {
       cy.on('fail', (error) => {
         if (error.message.includes('remote page to load')) {
           throw new Error(
-            'The Floorganise logo started Azure AD navigation, but this runner does not have an authenticated Microsoft SSO session for the target application. Home tiles can only be verified when that session is available.',
+            'The Floorganise logo started Azure AD navigation, but this runner does not have an authenticated Microsoft SSO session for the target application. Use SMOKE_LOGIN_MODE=service with SMOKE_SERVICE_USERNAME and SMOKE_SERVICE_PASSWORD for service login.',
           );
         }
 
         throw error;
       });
 
-      cy.visit(targetUrl);
-
-      cy.location('href', { timeout: 30000 }).should('include', '/Account/Login');
-      cy.get('body').should('be.visible').and('not.be.empty');
-
-      cy.log('Click lower-right Floorganise logo');
-      cy.get('#azure-login img[alt="Floorganise logo"]')
-        .should('be.visible')
-        .click({ force: true });
-
-      cy.location('pathname', { timeout: 30000 }).should('not.include', '/Account/Login');
-      cy.location('hostname').should('eq', new URL(targetUrl).hostname);
-      assertHomeTiles();
-
+      loginToHome(targetUrl);
       cy.screenshot('home-tiles-rendered');
+    });
+
+    it('opens visible home tile pages and records console output', () => {
+      loginToHome(targetUrl);
+
+      cy.location('href').then((homeUrl) => {
+        const tileClickLimit = Number(Cypress.env('tileClickLimit') || 6);
+
+        collectTiles(tileClickLimit).then((tiles) => {
+          expect(tiles.length, 'home tiles to open').to.be.greaterThan(0);
+
+          tiles.forEach((tile) => {
+            visitHome(homeUrl);
+            clickVisibleByIndex(homeTileSelector(), tile.index, `tile ${tile.index + 1}`);
+            assertPageLoaded(`tile ${tile.index + 1}`);
+          });
+        });
+      });
+    });
+
+    it('opens upper-left menu pages and records console output', () => {
+      loginToHome(targetUrl);
 
       cy.location('href').then((homeUrl) => {
         const appOrigin = new URL(homeUrl).origin;
-        const tileClickLimit = Number(Cypress.env('tileClickLimit') || 6);
         const menuClickLimit = Number(Cypress.env('menuClickLimit') || 10);
 
-        collectTiles(tileClickLimit)
-          .then((tiles) => {
-            expect(tiles.length, 'home tiles to open').to.be.greaterThan(0);
+        openUpperLeftMenu();
+        collectMenuItems(menuClickLimit, appOrigin).then((items) => {
+          expect(items.length, 'upper-left menu pages to open').to.be.greaterThan(0);
 
-            tiles.forEach((tile) => {
-              visitHome(homeUrl);
-              clickVisibleByIndex(homeTileSelector(), tile.index, `tile ${tile.index + 1}`);
-              assertPageLoaded(`tile ${tile.index + 1}`);
-            });
-          })
-          .then(() => {
+          items.forEach((item) => {
             visitHome(homeUrl);
             openUpperLeftMenu();
-            collectMenuItems(menuClickLimit, appOrigin).then((items) => {
-              expect(items.length, 'upper-left menu pages to open').to.be.greaterThan(0);
-
-              items.forEach((item) => {
-                visitHome(homeUrl);
-                openUpperLeftMenu();
-                clickMenuItem(item, appOrigin);
-                assertPageLoaded(`menu item ${item.label}`);
-              });
-            });
-          })
-          .then(() => {
-            const visualSettleMs = Number(Cypress.env('visualSettleMs') || 0);
-            if (visualSettleMs > 0) {
-              cy.wait(visualSettleMs);
-            }
+            clickMenuItem(item, appOrigin);
+            assertPageLoaded(`menu item ${item.label}`);
           });
+        });
       });
+
+      const visualSettleMs = Number(Cypress.env('visualSettleMs') || 0);
+      if (visualSettleMs > 0) {
+        cy.wait(visualSettleMs);
+      }
     });
   });
 });
