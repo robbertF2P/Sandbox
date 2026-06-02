@@ -36,4 +36,5 @@ RUN dotnet restore Floor2PlanSmokeTests.csproj
 
 COPY . .
 
+ENTRYPOINT []
 CMD ["dotnet", "test", "Floor2PlanSmokeTests.csproj", "--logger", "console;verbosity=normal"]
