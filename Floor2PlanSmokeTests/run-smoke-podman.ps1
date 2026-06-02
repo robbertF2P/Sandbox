@@ -40,8 +40,6 @@ if ($Rebuild -or -not $imageExists) {
 $envMap = [ordered]@{}
 
 foreach ($name in @(
-    "TARGET_URL",
-    "TARGET_URLS",
     "SMOKE_HOME_TILE_SELECTOR",
     "SMOKE_MIN_HOME_TILES",
     "SMOKE_VISUAL_SETTLE_MS",
@@ -55,12 +53,17 @@ foreach ($name in @(
     }
 }
 
-if (-not [string]::IsNullOrWhiteSpace($TargetUrl)) {
-    $envMap["TARGET_URL"] = $TargetUrl
-}
-
 if (-not [string]::IsNullOrWhiteSpace($TargetUrls)) {
     $envMap["TARGET_URLS"] = $TargetUrls
+} elseif (-not [string]::IsNullOrWhiteSpace($TargetUrl)) {
+    $envMap["TARGET_URL"] = $TargetUrl
+} else {
+    foreach ($name in @("TARGET_URLS", "TARGET_URL")) {
+        $value = [Environment]::GetEnvironmentVariable($name)
+        if (-not [string]::IsNullOrWhiteSpace($value)) {
+            $envMap[$name] = $value
+        }
+    }
 }
 
 $runArgs = @("run", "--rm")

@@ -99,8 +99,6 @@ forward_env() {
 }
 
 for name in \
-  TARGET_URL \
-  TARGET_URLS \
   SMOKE_HOME_TILE_SELECTOR \
   SMOKE_MIN_HOME_TILES \
   SMOKE_VISUAL_SETTLE_MS \
@@ -110,12 +108,13 @@ for name in \
   forward_env "$name"
 done
 
-if [[ -n "$target_url" ]]; then
-  run_args+=(-e "TARGET_URL=${target_url}")
-fi
-
 if [[ -n "$target_urls" ]]; then
   run_args+=(-e "TARGET_URLS=${target_urls}")
+elif [[ -n "$target_url" ]]; then
+  run_args+=(-e "TARGET_URL=${target_url}")
+else
+  forward_env TARGET_URLS
+  forward_env TARGET_URL
 fi
 
 container_command=()
