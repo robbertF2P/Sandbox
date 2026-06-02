@@ -83,8 +83,7 @@ foreach ($entry in $envMap.GetEnumerator()) {
     $runArgs += @("-e", "$($entry.Key)=$($entry.Value)")
 }
 
-$entrypoint = "dotnet"
-$containerCommand = @("test", "Floor2PlanSmokeTests.csproj", "--logger", "console;verbosity=normal")
+$containerCommand = @("--spec", "cypress/e2e/login_smoke.cy.js")
 
 if ($UseEdgeProfile) {
     if (-not (Test-Path -LiteralPath $EdgeUserDataDir -PathType Container)) {
@@ -97,11 +96,8 @@ if ($UseEdgeProfile) {
         "-e", "CYPRESS_EDGE_PROFILE_DIRECTORY=$EdgeProfileDirectory",
         "-v", "${EdgeUserDataDir}:/edge-profile"
     )
-    $entrypoint = "npm"
-    $containerCommand = @("run", "test:smoke:edge")
+    $containerCommand = @("--browser", "edge", "--headed", "--spec", "cypress/e2e/login_smoke.cy.js")
 }
-
-$runArgs += @("--entrypoint", $entrypoint)
 
 & podman @runArgs $ImageName @containerCommand
 if ($LASTEXITCODE -ne 0) {

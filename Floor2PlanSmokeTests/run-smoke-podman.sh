@@ -127,8 +127,7 @@ else
   forward_env TARGET_URL
 fi
 
-entrypoint=dotnet
-container_command=(test Floor2PlanSmokeTests.csproj --logger "console;verbosity=normal")
+container_command=(--spec cypress/e2e/login_smoke.cy.js)
 
 if [[ "$use_edge_profile" == "1" ]]; then
   if [[ ! -d "$edge_user_data_dir" ]]; then
@@ -142,10 +141,7 @@ if [[ "$use_edge_profile" == "1" ]]; then
     -e "CYPRESS_EDGE_PROFILE_DIRECTORY=${edge_profile_directory}"
     -v "${edge_user_data_dir}:/edge-profile"
   )
-  entrypoint=npm
-  container_command=(run test:smoke:edge)
+  container_command=(--browser edge --headed --spec cypress/e2e/login_smoke.cy.js)
 fi
-
-run_args+=(--entrypoint "$entrypoint")
 
 podman "${run_args[@]}" "$image_name" "${container_command[@]}"
