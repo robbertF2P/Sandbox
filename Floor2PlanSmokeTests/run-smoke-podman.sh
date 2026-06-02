@@ -88,7 +88,7 @@ if [[ "$rebuild" == "1" ]] || ! podman image exists "$image_name" >/dev/null 2>&
   podman build -t "$image_name" "$script_dir"
 fi
 
-run_args=(run --rm --entrypoint=)
+run_args=(run --rm)
 
 forward_env() {
   local name="$1"
@@ -127,7 +127,8 @@ else
   forward_env TARGET_URL
 fi
 
-container_command=()
+entrypoint=dotnet
+container_command=(test Floor2PlanSmokeTests.csproj --logger "console;verbosity=normal")
 
 if [[ "$use_edge_profile" == "1" ]]; then
   if [[ ! -d "$edge_user_data_dir" ]]; then
@@ -141,7 +142,10 @@ if [[ "$use_edge_profile" == "1" ]]; then
     -e "CYPRESS_EDGE_PROFILE_DIRECTORY=${edge_profile_directory}"
     -v "${edge_user_data_dir}:/edge-profile"
   )
-  container_command=(npm run test:smoke:edge)
+  entrypoint=npm
+  container_command=(run test:smoke:edge)
 fi
+
+run_args+=(--entrypoint "$entrypoint")
 
 podman "${run_args[@]}" "$image_name" "${container_command[@]}"

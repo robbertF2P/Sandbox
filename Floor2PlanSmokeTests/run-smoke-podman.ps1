@@ -77,13 +77,14 @@ if (-not [string]::IsNullOrWhiteSpace($TargetUrls)) {
     }
 }
 
-$runArgs = @("run", "--rm", "--entrypoint=")
+$runArgs = @("run", "--rm")
 
 foreach ($entry in $envMap.GetEnumerator()) {
     $runArgs += @("-e", "$($entry.Key)=$($entry.Value)")
 }
 
-$containerCommand = @()
+$entrypoint = "dotnet"
+$containerCommand = @("test", "Floor2PlanSmokeTests.csproj", "--logger", "console;verbosity=normal")
 
 if ($UseEdgeProfile) {
     if (-not (Test-Path -LiteralPath $EdgeUserDataDir -PathType Container)) {
@@ -96,8 +97,11 @@ if ($UseEdgeProfile) {
         "-e", "CYPRESS_EDGE_PROFILE_DIRECTORY=$EdgeProfileDirectory",
         "-v", "${EdgeUserDataDir}:/edge-profile"
     )
-    $containerCommand = @("npm", "run", "test:smoke:edge")
+    $entrypoint = "npm"
+    $containerCommand = @("run", "test:smoke:edge")
 }
+
+$runArgs += @("--entrypoint", $entrypoint)
 
 & podman @runArgs $ImageName @containerCommand
 if ($LASTEXITCODE -ne 0) {
