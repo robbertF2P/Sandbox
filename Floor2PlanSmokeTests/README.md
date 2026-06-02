@@ -42,6 +42,36 @@ dotnet test Floor2PlanSmokeTests.csproj
 
 The xUnit test launches the same Cypress spec and fails when Cypress fails.
 
+## Run with Podman helper scripts
+
+The helper scripts build the local image when it is missing, forward the smoke-test environment variables, and run the Cypress test inside Podman.
+
+Linux/macOS:
+
+```sh
+./run-smoke-podman.sh
+./run-smoke-podman.sh --target-url https://example.com/Account/Login
+```
+
+Windows PowerShell:
+
+```powershell
+.\run-smoke-podman.ps1
+.\run-smoke-podman.ps1 -TargetUrl https://example.com/Account/Login
+```
+
+To reuse an existing Microsoft Edge SSO session, close Edge first and mount the profile:
+
+```sh
+./run-smoke-podman.sh --use-edge-profile
+```
+
+```powershell
+.\run-smoke-podman.ps1 -UseEdgeProfile
+```
+
+Use `--rebuild` or `-Rebuild` to force a fresh image build.
+
 ## Run with Docker
 
 Build the container:
