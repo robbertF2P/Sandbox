@@ -77,7 +77,7 @@ if (-not [string]::IsNullOrWhiteSpace($TargetUrls)) {
     }
 }
 
-$runArgs = @("run", "--rm")
+$runArgs = @("run", "--rm", "--entrypoint=")
 
 foreach ($entry in $envMap.GetEnumerator()) {
     $runArgs += @("-e", "$($entry.Key)=$($entry.Value)")

@@ -88,7 +88,7 @@ if [[ "$rebuild" == "1" ]] || ! podman image exists "$image_name" >/dev/null 2>&
   podman build -t "$image_name" "$script_dir"
 fi
 
-run_args=(run --rm)
+run_args=(run --rm --entrypoint=)
 
 forward_env() {
   local name="$1"
