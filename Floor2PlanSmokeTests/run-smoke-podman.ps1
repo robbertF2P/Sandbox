@@ -83,7 +83,7 @@ foreach ($entry in $envMap.GetEnumerator()) {
     $runArgs += @("-e", "$($entry.Key)=$($entry.Value)")
 }
 
-$containerCommand = @()
+$containerCommand = @("--spec", "cypress/e2e/login_smoke.cy.js")
 
 if ($UseEdgeProfile) {
     if (-not (Test-Path -LiteralPath $EdgeUserDataDir -PathType Container)) {
@@ -96,7 +96,7 @@ if ($UseEdgeProfile) {
         "-e", "CYPRESS_EDGE_PROFILE_DIRECTORY=$EdgeProfileDirectory",
         "-v", "${EdgeUserDataDir}:/edge-profile"
     )
-    $containerCommand = @("npm", "run", "test:smoke:edge")
+    $containerCommand = @("--browser", "edge", "--headed", "--spec", "cypress/e2e/login_smoke.cy.js")
 }
 
 & podman @runArgs $ImageName @containerCommand
