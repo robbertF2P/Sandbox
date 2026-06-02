@@ -42,6 +42,41 @@ dotnet test Floor2PlanSmokeTests.csproj
 
 The xUnit test launches the same Cypress spec and fails when Cypress fails.
 
+## Run with npm and Podman
+
+Create a local credentials file:
+
+```sh
+cp .env.smoke.example .env.smoke.local
+```
+
+Edit `.env.smoke.local` and set:
+
+```text
+SMOKE_SERVICE_USERNAME=your-service-user
+SMOKE_SERVICE_PASSWORD=your-service-password
+```
+
+Run the smoke test:
+
+```sh
+npm run test:smoke
+```
+
+Force a fresh image build:
+
+```sh
+npm run test:smoke:rebuild
+```
+
+Run against a specific target:
+
+```sh
+npm run test:smoke -- --target-url https://example.com/Account/Login
+```
+
+The npm script runs the Podman helper for your OS and forwards `SMOKE_*`, `TARGET_URL`, `TARGET_URLS`, and viewport settings.
+
 ## Run with Podman helper scripts
 
 The helper scripts build the local image when it is missing, forward the smoke-test environment variables, and run the Cypress test inside Podman.
