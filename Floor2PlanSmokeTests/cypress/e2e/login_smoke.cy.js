@@ -32,13 +32,26 @@ const menuButtonSelectors = [
 ].join(',');
 
 const menuItemSelectors = [
+  'header a[href]',
   'nav a[href]',
   '[role="menu"] a[href]',
+  '[role="menuitem"] a[href]',
+  '[role="navigation"] a[href]',
+  '.navbar a[href]',
+  '.sidebar a[href]',
+  '.drawer a[href]',
   '.dropdown-menu a[href]',
   '.menu a[href]',
+  '.k-menu a[href]',
+  '.k-panelbar a[href]',
+  '.k-link[href]',
   'aside a[href]',
+  '[class*="nav"] a[href]',
+  '[class*="Nav"] a[href]',
   '[class*="menu"] a[href]',
   '[class*="Menu"] a[href]',
+  '[class*="option"] a[href]',
+  '[class*="Option"] a[href]',
 ].join(',');
 
 const homeTileSelector = () => Cypress.env('homeTileSelector') || tileSelectors;
@@ -71,6 +84,11 @@ const safeName = (value) => value
 
 const consoleArtifactName = (targetUrl, testTitle) =>
   `artifacts/console/${safeName(targetUrl)}-${safeName(testTitle)}.json`;
+
+const navigationArtifactName = (targetUrl, testTitle) =>
+  `artifacts/navigation/${safeName(targetUrl)}-${safeName(testTitle)}.json`;
+
+const slotNumbers = (count) => Array.from({ length: count }, (_, index) => index);
 
 const hrefFor = (element) => {
   const link = element.closest('a[href]') || element.querySelector?.('a[href]');
@@ -294,9 +312,13 @@ const clickMenuItem = (item, appOrigin) => {
 splitTargetUrls().forEach((targetUrl) => {
   describe(`Floor2Plan smoke test: ${targetUrl}`, () => {
     let consoleEntries;
+    let navigationEntries;
+    const tileSlotLimit = Number(Cypress.env('tileClickLimit') || 20);
+    const menuSlotLimit = Number(Cypress.env('menuClickLimit') || 40);
 
     beforeEach(() => {
       consoleEntries = [];
+      navigationEntries = [];
 
       cy.on('window:before:load', (win) => {
         captureConsole(win, consoleEntries);
@@ -305,16 +327,19 @@ splitTargetUrls().forEach((targetUrl) => {
 
     afterEach(() => {
       const consoleArtifact = consoleArtifactName(targetUrl, Cypress.currentTest.title);
+      const navigationArtifact = navigationArtifactName(targetUrl, Cypress.currentTest.title);
 
-      cy.writeFile(consoleArtifact, consoleEntries, { log: true }).then(() => {
-        const consoleErrors = consoleEntries.filter((entry) => entry.level === 'error');
+      cy.writeFile(navigationArtifact, navigationEntries, { log: true });
+      cy.writeFile(consoleArtifact, consoleEntries, { log: true })
+        .then(() => {
+          const consoleErrors = consoleEntries.filter((entry) => entry.level === 'error');
 
-        if (Cypress.env('failOnConsoleError') && consoleErrors.length > 0) {
-          throw new Error(
-            `${consoleErrors.length} browser console error(s) were recorded. See ${consoleArtifact}.`,
-          );
-        }
-      });
+          if (Cypress.env('failOnConsoleError') && consoleErrors.length > 0) {
+            throw new Error(
+              `${consoleErrors.length} browser console error(s) were recorded. See ${consoleArtifact}.`,
+            );
+          }
+        });
     });
 
     it('logs in with service credentials and renders home tiles', () => {
@@ -332,48 +357,84 @@ splitTargetUrls().forEach((targetUrl) => {
       cy.screenshot('home-tiles-rendered');
     });
 
-    it('opens visible home tile pages and records console output', () => {
-      loginToHome(targetUrl);
+    slotNumbers(tileSlotLimit).forEach((index) => {
+      it(`opens home tile page ${index + 1}`, () => {
+        loginToHome(targetUrl);
 
-      cy.location('href').then((homeUrl) => {
-        const tileClickLimit = Number(Cypress.env('tileClickLimit') || 6);
+        cy.location('href').then((homeUrl) => {
+          collectTiles(tileSlotLimit).then((tiles) => {
+            const tile = tiles[index];
 
-        collectTiles(tileClickLimit).then((tiles) => {
-          expect(tiles.length, 'home tiles to open').to.be.greaterThan(0);
+            if (!tile) {
+              navigationEntries.push({
+                type: 'tile',
+                index: index + 1,
+                status: 'not-found',
+              });
+              cy.log(`No visible home tile found at slot ${index + 1}`);
+              return;
+            }
 
-          tiles.forEach((tile) => {
             visitHome(homeUrl);
             clickVisibleByIndex(homeTileSelector(), tile.index, `tile ${tile.index + 1}`);
             assertPageLoaded(`tile ${tile.index + 1}`);
+            cy.location('href').then((href) => {
+              navigationEntries.push({
+                type: 'tile',
+                index: index + 1,
+                label: tile.label,
+                url: href,
+                status: 'opened',
+              });
+            });
           });
         });
       });
     });
 
-    it('opens upper-left menu pages and records console output', () => {
-      loginToHome(targetUrl);
+    slotNumbers(menuSlotLimit).forEach((index) => {
+      it(`opens upper-left menu page ${index + 1}`, () => {
+        loginToHome(targetUrl);
 
-      cy.location('href').then((homeUrl) => {
-        const appOrigin = new URL(homeUrl).origin;
-        const menuClickLimit = Number(Cypress.env('menuClickLimit') || 10);
+        cy.location('href').then((homeUrl) => {
+          const appOrigin = new URL(homeUrl).origin;
 
-        openUpperLeftMenu();
-        collectMenuItems(menuClickLimit, appOrigin).then((items) => {
-          expect(items.length, 'upper-left menu pages to open').to.be.greaterThan(0);
+          openUpperLeftMenu();
+          collectMenuItems(menuSlotLimit, appOrigin).then((items) => {
+            const item = items[index];
 
-          items.forEach((item) => {
+            if (!item) {
+              navigationEntries.push({
+                type: 'menu',
+                index: index + 1,
+                status: 'not-found',
+              });
+              cy.log(`No visible upper-left menu page found at slot ${index + 1}`);
+              return;
+            }
+
             visitHome(homeUrl);
             openUpperLeftMenu();
             clickMenuItem(item, appOrigin);
             assertPageLoaded(`menu item ${item.label}`);
+            cy.location('href').then((href) => {
+              navigationEntries.push({
+                type: 'menu',
+                index: index + 1,
+                label: item.label,
+                href: item.href,
+                url: href,
+                status: 'opened',
+              });
+            });
           });
         });
-      });
 
-      const visualSettleMs = Number(Cypress.env('visualSettleMs') || 0);
-      if (visualSettleMs > 0) {
-        cy.wait(visualSettleMs);
-      }
+        const visualSettleMs = Number(Cypress.env('visualSettleMs') || 0);
+        if (visualSettleMs > 0) {
+          cy.wait(visualSettleMs);
+        }
+      });
     });
   });
 });

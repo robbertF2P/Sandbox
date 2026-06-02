@@ -36,4 +36,4 @@ RUN dotnet restore Floor2PlanSmokeTests.csproj
 
 COPY . .
 
-CMD ["--spec", "cypress/e2e/login_smoke.cy.js"]
+CMD ["--browser", "edge", "--headed", "--spec", "cypress/e2e/login_smoke.cy.js"]
