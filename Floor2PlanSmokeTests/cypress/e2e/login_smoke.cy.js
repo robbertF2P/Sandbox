@@ -18,6 +18,12 @@ const tileSelectors = [
 ].join(',');
 
 const menuButtonSelectors = [
+  '#module-dropdown-button',
+  '.f2ps-icon-layout-module',
+  '[class*="layout-module"]',
+  '.navbar-toggler',
+  '[class*="navigation-menu"]',
+  '[aria-label*="navigation"]',
   '[aria-label*="menu"]',
   '[aria-label*="Menu"]',
   '[title*="menu"]',
@@ -32,6 +38,8 @@ const menuButtonSelectors = [
 ].join(',');
 
 const menuItemSelectors = [
+  'a.dropdown-menu-item[href]',
+  '[data-test-id*="module-dropdown"]',
   'header a[href]',
   'nav a[href]',
   '[role="menu"] a[href]',
