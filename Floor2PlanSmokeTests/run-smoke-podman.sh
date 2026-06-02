@@ -127,7 +127,7 @@ else
   forward_env TARGET_URL
 fi
 
-container_command=(--spec cypress/e2e/login_smoke.cy.js)
+container_command=(--browser edge --headed --spec cypress/e2e/login_smoke.cy.js)
 
 if [[ "$use_edge_profile" == "1" ]]; then
   if [[ ! -d "$edge_user_data_dir" ]]; then
@@ -141,7 +141,6 @@ if [[ "$use_edge_profile" == "1" ]]; then
     -e "CYPRESS_EDGE_PROFILE_DIRECTORY=${edge_profile_directory}"
     -v "${edge_user_data_dir}:/edge-profile"
   )
-  container_command=(--browser edge --headed --spec cypress/e2e/login_smoke.cy.js)
 fi
 
 podman "${run_args[@]}" "$image_name" "${container_command[@]}"
