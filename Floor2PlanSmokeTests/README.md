@@ -120,8 +120,15 @@ Host Edge profile reuse in Docker can be limited by OS keychain encryption and p
 - `CYPRESS_EDGE_PROFILE_DIRECTORY`: Edge profile directory, for example `Default` or `Profile 1`.
 - `SMOKE_HOME_TILE_SELECTOR`: optional CSS selector for home-page tiles. Defaults to common tile selectors.
 - `SMOKE_MIN_HOME_TILES`: minimum visible tiles expected on the home page. Defaults to `2`.
+- `SMOKE_TILE_CLICK_LIMIT`: maximum number of visible home tiles to open. Defaults to `6`.
+- `SMOKE_MENU_CLICK_LIMIT`: maximum number of upper-left menu pages to open. Defaults to `10`.
+- `SMOKE_MENU_BUTTON_SELECTOR`: optional CSS selector for the upper-left menu button. Defaults to common menu button selectors.
+- `SMOKE_MENU_ITEM_SELECTOR`: optional CSS selector for menu page links. Defaults to common menu link selectors.
+- `SMOKE_FAIL_ON_CONSOLE_ERROR`: set to `false` to record browser console errors without failing the smoke test. Defaults to failing on console errors.
 - `SMOKE_VISUAL_SETTLE_MS`: optional wait after the smoke assertion for video capture. Defaults to `0`.
 - `CYPRESS_VIEWPORT_WIDTH`: viewport width. Defaults to `1280`.
 - `CYPRESS_VIEWPORT_HEIGHT`: viewport height. Defaults to `720`.
+
+Console warnings and errors are written to `artifacts/console/*.json` for each target URL.
 
 The logo login path uses Azure AD. The runner must have a valid Microsoft SSO session for the target application; otherwise the smoke test will stop before the home tiles can render.
