@@ -6,14 +6,14 @@ ENV DOTNET_ROOT=/usr/share/dotnet \
     PATH="/usr/share/dotnet:${PATH}" \
     TARGET_URLS="https://2025-14-patch.floor2plan.com/Account/Login"
 
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends ca-certificates curl gnupg \
+    && rm -rf /var/lib/apt/lists/*
+
 RUN curl -fsSL https://dot.net/v1/dotnet-install.sh -o /tmp/dotnet-install.sh \
     && bash /tmp/dotnet-install.sh --channel 8.0 --install-dir /usr/share/dotnet \
     && ln -s /usr/share/dotnet/dotnet /usr/bin/dotnet \
     && rm /tmp/dotnet-install.sh
-
-RUN apt-get update \
-    && apt-get install -y --no-install-recommends ca-certificates curl gnupg \
-    && rm -rf /var/lib/apt/lists/*
 
 RUN install -d -m 0755 /etc/apt/keyrings \
     && curl -fsSL https://packages.microsoft.com/keys/microsoft.asc \
