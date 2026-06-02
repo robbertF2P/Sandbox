@@ -170,7 +170,7 @@ Host Edge profile reuse in Docker can be limited by OS keychain encryption and p
 - `SMOKE_HOME_TILE_SELECTOR`: optional CSS selector for home-page tiles. Defaults to common tile selectors.
 - `SMOKE_MIN_HOME_TILES`: minimum visible tiles expected on the home page. Defaults to `2`.
 - `SMOKE_TILE_CLICK_LIMIT`: maximum number of visible home tile slots to test. Defaults to `20`.
-- `SMOKE_MENU_CLICK_LIMIT`: maximum number of upper-left menu page slots to test. Defaults to `40`.
+- `SMOKE_MENU_CLICK_LIMIT`: maximum number of discovered upper-left menu pages to test. Defaults to `40`.
 - `SMOKE_MENU_BUTTON_SELECTOR`: optional CSS selector for the upper-left menu button. Defaults to common menu button selectors.
 - `SMOKE_MENU_ITEM_SELECTOR`: optional CSS selector for menu page links. Defaults to common menu link selectors.
 - `SMOKE_FAIL_ON_CONSOLE_ERROR`: set to `false` to record browser console errors without failing the smoke test. Defaults to failing on console errors.
