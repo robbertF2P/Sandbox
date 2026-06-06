@@ -85,17 +85,15 @@ Google Calendar → secret iCal URL → Val Town env `FAMILY_ICAL_URL`
 
 ---
 
-## Database seed (SQL files)
+## Database seed (one-click on Val Town)
 
-Stored in **`family-butler/database/`**:
+**No manual SQL.** Follow [`valtown/SETUP.md`](valtown/SETUP.md):
 
-| File | Contents |
-|------|----------|
-| `schema.sql` | Table definitions |
-| `seed.sql` | Config + chore rotations (Milan, Eva, Anna, Mylo, Pepsi, Kyana, Rosa) |
-| `README.md` | How to apply on Val Town |
+1. Paste [`valtown/seedDatabase.ts`](valtown/seedDatabase.ts) into a Val Town val
+2. Click **Run ▶**
 
-One-shot Val Town runner: `valtown/seedDatabase.example.ts`
+SQL source (for edits): `database/schema.sql` + `database/seed.sql` → regenerate with  
+`node family-butler/scripts/generate-seed-val.mjs`
 
 ## Cron schedule (adjust timezone → UTC via crongpt.com)
 
