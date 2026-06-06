@@ -1,24 +1,22 @@
 # Family butler — database seed
 
-SQL files for the Val Town SQLite database (`std/sqlite/global.ts`).
+SQL source files (edit these, then regenerate the Val Town runner):
 
 | File | Purpose |
 |------|---------|
-| `schema.sql` | Creates `config`, `meals`, `chore_log`, `rotation` |
-| `seed.sql` | Household names, animals, chore rotations |
+| `schema.sql` | Table definitions |
+| `seed.sql` | Household config + chore rotations |
 
-## Apply on Val Town
+## Apply on Val Town — no manual SQL
 
-**Option A — paste in Val Town SQL sidebar**  
-Run `schema.sql`, then `seed.sql`.
+**Use [`../valtown/seedDatabase.ts`](../valtown/seedDatabase.ts)** — paste into a Val Town val and click **Run**.
 
-**Option B — HTTP seed val**  
-Copy `valtown/seedDatabase.example.ts` into your val, set env `SEED_SECRET`, hit the endpoint once.
+Full steps: [`../valtown/SETUP.md`](../valtown/SETUP.md)
 
-**Option C — from Cursor with Val Town MCP**  
-Ask the agent to run the contents of these files against your `family-butler` val database.
+## Regenerate after editing SQL
 
-## Edit before go-live
+```bash
+node family-butler/scripts/generate-seed-val.mjs
+```
 
-- `seed.sql` → `timezone`, `briefing_language`, trash days
-- Add your name to `config` when ready (`parent_1`)
+This rewrites `valtown/seedDatabase.ts` from `schema.sql` + `seed.sql`.
