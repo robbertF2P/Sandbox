@@ -1,5 +1,5 @@
 // Val Town — run once to init DB (HTTP trigger).
-// Paste schema + seed SQL from family-butler/sql/ into your val, or use this file as-is.
+// Paste schema + seed SQL from family-butler/database/ into your val, or use this file as-is.
 // Optional env: SEED_SECRET — require Authorization: Bearer <secret>
 
 import sqlite from "https://esm.town/v/std/sqlite/global.ts";

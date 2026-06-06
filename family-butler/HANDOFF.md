@@ -87,7 +87,7 @@ Google Calendar → secret iCal URL → Val Town env `FAMILY_ICAL_URL`
 
 ## Database seed (SQL files)
 
-Stored in **`family-butler/sql/`**:
+Stored in **`family-butler/database/`**:
 
 | File | Contents |
 |------|----------|
