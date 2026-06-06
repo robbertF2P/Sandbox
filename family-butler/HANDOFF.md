@@ -85,24 +85,17 @@ Google Calendar → secret iCal URL → Val Town env `FAMILY_ICAL_URL`
 
 ---
 
-## Household config (seed data)
+## Database seed (SQL files)
 
-```sql
-INSERT INTO config (key, value) VALUES
-  ('parent_2', 'Anna'),
-  ('kid_1', 'Milan'),
-  ('kid_2', 'Eva'),
-  ('dog_name', 'Mylo'),
-  ('dog_owner', 'Milan'),
-  ('dog_walk_time', '16:00'),
-  ('cat_name', 'Pepsi'),
-  ('horse_name', 'Kyana'),
-  ('horse_rider', 'Anna'),
-  ('horse_boarded', 'true'),
-  ('pony_name', 'Rosa'),
-  ('pony_owner', 'Eva'),
-  ('pony_boarded', 'true');
-```
+Stored in **`family-butler/sql/`**:
+
+| File | Contents |
+|------|----------|
+| `schema.sql` | Table definitions |
+| `seed.sql` | Config + chore rotations (Milan, Eva, Anna, Mylo, Pepsi, Kyana, Rosa) |
+| `README.md` | How to apply on Val Town |
+
+One-shot Val Town runner: `valtown/seedDatabase.example.ts`
 
 ## Cron schedule (adjust timezone → UTC via crongpt.com)
 
