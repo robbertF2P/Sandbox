@@ -22,6 +22,9 @@ public sealed class ProjectConfiguration : IEntityTypeConfiguration<Project>
         builder.Property(project => project.CreatedAt)
             .IsRequired();
 
+        builder.Property(project => project.EstimatedHours)
+            .HasHoursColumn();
+
         builder.HasOne(project => project.Organisation)
             .WithMany(organisation => organisation.Projects)
             .HasForeignKey(project => project.OrganisationId)
