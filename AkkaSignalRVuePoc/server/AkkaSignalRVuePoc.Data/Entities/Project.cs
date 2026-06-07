@@ -1,5 +1,3 @@
-using AkkaSignalRVuePoc.Data.Values;
-
 namespace AkkaSignalRVuePoc.Data.Entities;
 
 public sealed class Project
@@ -25,8 +23,6 @@ public sealed class Project
     {
         get; set;
     }
-
-    public Hours EstimatedHours { get; set; } = Hours.Zero;
 
     public Organisation Organisation { get; set; } = null!;
 }

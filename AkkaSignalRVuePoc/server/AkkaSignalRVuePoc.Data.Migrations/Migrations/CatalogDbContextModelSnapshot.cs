@@ -17,7 +17,7 @@ namespace AkkaSignalRVuePoc.Data.Migrations.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "10.0.8")
+                .HasAnnotation("ProductVersion", "10.0.0")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
@@ -70,9 +70,6 @@ namespace AkkaSignalRVuePoc.Data.Migrations.Migrations
                         .HasMaxLength(2000)
                         .HasColumnType("nvarchar(2000)");
 
-                    b.Property<float>("EstimatedHours")
-                        .HasColumnType("real");
-
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(200)
@@ -95,7 +92,6 @@ namespace AkkaSignalRVuePoc.Data.Migrations.Migrations
                             Id = new Guid("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"),
                             CreatedAt = new DateTimeOffset(new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
                             Description = "Public-facing web application",
-                            EstimatedHours = 0f,
                             Name = "Customer Portal",
                             OrganisationId = new Guid("11111111-1111-1111-1111-111111111111")
                         },
@@ -104,7 +100,6 @@ namespace AkkaSignalRVuePoc.Data.Migrations.Migrations
                             Id = new Guid("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb"),
                             CreatedAt = new DateTimeOffset(new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
                             Description = "Demonstration of Akka.NET, SignalR, and Vue",
-                            EstimatedHours = 0f,
                             Name = "Akka SignalR POC",
                             OrganisationId = new Guid("22222222-2222-2222-2222-222222222222")
                         });

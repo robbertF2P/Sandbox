@@ -1,6 +1,6 @@
-using AkkaSignalRVuePoc.Data.Values;
+using EfCoreHoursNormalization.Values;
 
-namespace AkkaSignalRVuePoc.Api.Tests.Data;
+namespace EfCoreHoursNormalization.Tests;
 
 public sealed class HoursTests
 {
