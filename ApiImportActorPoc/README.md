@@ -20,6 +20,10 @@ Proof of concept modeled on `AkkaSignalRVuePoc`: Akka.NET actors import a **ship
 - **Subsequent imports update** existing rows when any external id matches (upsert, not duplicate insert).
 - Activity relations may reference `system:value` (e.g. `"PLM:ACT-WELD"`).
 
+## Actor persistence
+
+Import build stays in memory (`ImportSessionActor` → `ImportManagerActor`). When the model is ready to save, `RootActor` forwards to `DataManagerActor`, which delegates database work to `ProjectImportDataActor` — the only actor that opens `ImportDbContext` for import persistence. Components are ordered **templates first** among siblings at every tree level before upsert. `DataManagerActor` publishes `ImportPersisted` when the save completes.
+
 ## Stack
 
 - .NET 10, Akka.NET, ASP.NET Core minimal API, SignalR
@@ -106,7 +110,7 @@ Open `http://localhost:5174`. Copy `.env.example` to `.env.local` to override AP
 | POST | `/api/assignments/{id}/hours` | Book worked hours on an assignment |
 | POST | `/api/import` | Start import (JSON body = project payload) |
 | GET | `/api/import/{sessionId}/model` | Get built in-memory model as JSON |
-| POST | `/api/import/{sessionId}/persist` | Save model to EF Core database |
+| POST | `/api/import/{sessionId}/persist` | Save model via `DataManagerActor` (templates first, then tree) |
 
 SignalR event: `importEvent` — `ImportStarted`, `ImportProgressUpdated`, `ImportCompleted`, `ImportFailed`, `ImportPersisted`.
 
