@@ -1,0 +1,152 @@
+{
+  "client": "Thunder Client",
+  "collectionName": "Shipbuilding Import POC",
+  "dateExported": "2026-06-12T00:00:00.000Z",
+  "version": "1.1",
+  "folders": [],
+  "requests": [
+    {
+      "name": "Health",
+      "url": "{{baseUrl}}/health",
+      "method": "GET",
+      "sortNum": 10000,
+      "headers": [],
+      "params": [],
+      "body": {
+        "type": "json",
+        "raw": "",
+        "form": []
+      }
+    },
+    {
+      "name": "API root",
+      "url": "{{baseUrl}}/",
+      "method": "GET",
+      "sortNum": 20000,
+      "headers": [],
+      "params": [],
+      "body": {
+        "type": "json",
+        "raw": "",
+        "form": []
+      }
+    },
+    {
+      "name": "List projects",
+      "url": "{{baseUrl}}/api/projects",
+      "method": "GET",
+      "sortNum": 30000,
+      "headers": [],
+      "params": [],
+      "body": {
+        "type": "json",
+        "raw": "",
+        "form": []
+      }
+    },
+    {
+      "name": "Get project",
+      "url": "{{baseUrl}}/api/projects/{{projectId}}",
+      "method": "GET",
+      "sortNum": 40000,
+      "headers": [],
+      "params": [],
+      "body": {
+        "type": "json",
+        "raw": "",
+        "form": []
+      }
+    },
+    {
+      "name": "Export project (import payload)",
+      "url": "{{baseUrl}}/api/projects/{{projectId}}/export",
+      "method": "GET",
+      "sortNum": 50000,
+      "headers": [],
+      "params": [],
+      "body": {
+        "type": "json",
+        "raw": "",
+        "form": []
+      }
+    },
+    {
+      "name": "Start import",
+      "url": "{{baseUrl}}/api/import",
+      "method": "POST",
+      "sortNum": 60000,
+      "headers": [],
+      "params": [],
+      "body": {
+        "type": "json",
+        "raw": "{\n  \"name\": \"MV Northern Star — Hull 247\",\n  \"components\": [\n    {\n      \"id\": \"c-block-204\",\n      \"name\": \"Hull Block 204\",\n      \"childComponents\": [\n        {\n          \"id\": \"c-engine-room\",\n          \"name\": \"Engine Room Module\",\n          \"activities\": [\n            {\n              \"id\": \"a-erection\",\n              \"name\": \"Block Erection\",\n              \"assignments\": [\n                {\n                  \"personName\": \"Marco van Berg\",\n                  \"description\": \"Crane supervisor\"\n                }\n              ],\n              \"relations\": [\n                {\n                  \"relatedActivityId\": \"a-welding\",\n                  \"type\": \"Successor\"\n                }\n              ]\n            },\n            {\n              \"id\": \"a-welding\",\n              \"name\": \"Structural Welding\",\n              \"assignments\": [\n                {\n                  \"personName\": \"Elena Petrov\",\n                  \"description\": \"Certified welder\"\n                }\n              ],\n              \"relations\": [\n                {\n                  \"relatedActivityId\": \"a-erection\",\n                  \"type\": \"Predecessor\"\n                }\n              ]\n            }\n          ]\n        }\n      ]\n    }\n  ]\n}",
+        "form": []
+      }
+    },
+    {
+      "name": "Get import model",
+      "url": "{{baseUrl}}/api/import/{{sessionId}}/model",
+      "method": "GET",
+      "sortNum": 70000,
+      "headers": [],
+      "params": [],
+      "body": {
+        "type": "json",
+        "raw": "",
+        "form": []
+      }
+    },
+    {
+      "name": "Persist import",
+      "url": "{{baseUrl}}/api/import/{{sessionId}}/persist",
+      "method": "POST",
+      "sortNum": 80000,
+      "headers": [],
+      "params": [],
+      "body": {
+        "type": "json",
+        "raw": "",
+        "form": []
+      }
+    },
+    {
+      "name": "Get project progress",
+      "url": "{{baseUrl}}/api/projects/{{projectId}}/progress",
+      "method": "GET",
+      "sortNum": 90000,
+      "headers": [],
+      "params": [],
+      "body": {
+        "type": "json",
+        "raw": "",
+        "form": []
+      }
+    },
+    {
+      "name": "List assignments",
+      "url": "{{baseUrl}}/api/assignments",
+      "method": "GET",
+      "sortNum": 100000,
+      "headers": [],
+      "params": [],
+      "body": {
+        "type": "json",
+        "raw": "",
+        "form": []
+      }
+    },
+    {
+      "name": "Book hours",
+      "url": "{{baseUrl}}/api/assignments/{{assignmentId}}/hours",
+      "method": "POST",
+      "sortNum": 110000,
+      "headers": [],
+      "params": [],
+      "body": {
+        "type": "json",
+        "raw": "{\n  \"hours\": 8,\n  \"notes\": \"Day shift\"\n}",
+        "form": []
+      }
+    }
+  ]
+}

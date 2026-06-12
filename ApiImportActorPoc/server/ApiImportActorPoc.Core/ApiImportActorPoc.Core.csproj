@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Akka" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\ApiImportActorPoc.Contracts\ApiImportActorPoc.Contracts.csproj" />
+    <ProjectReference Include="..\ApiImportActorPoc.Data\ApiImportActorPoc.Data.csproj" />
+  </ItemGroup>
+
+</Project>
