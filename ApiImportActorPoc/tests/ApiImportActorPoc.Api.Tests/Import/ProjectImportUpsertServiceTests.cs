@@ -1,40 +1,26 @@
-using ApiImportActorPoc.Contracts.Models;
+using ApiImportActorPoc.Api.Tests.Infrastructure;
 using ApiImportActorPoc.Contracts.Models.Import;
-using ApiImportActorPoc.Contracts.Values;
 using ApiImportActorPoc.Core.Import;
 using ApiImportActorPoc.Data;
-using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 
 namespace ApiImportActorPoc.Api.Tests.Import;
 
 public sealed class ProjectImportUpsertServiceTests : IAsyncLifetime
 {
-    private SqliteConnection _connection = null!;
-    private IDbContextFactory<ImportDbContext> _dbContextFactory = null!;
+    private SqlServerTestDatabase _database = null!;
     private ProjectImportUpsertService _upsertService = null!;
 
     public async ValueTask InitializeAsync()
     {
-        _connection = new SqliteConnection("Data Source=:memory:");
-        await _connection.OpenAsync();
-
-        var options = new DbContextOptionsBuilder<ImportDbContext>()
-            .UseSqlite(_connection)
-            .Options;
-
-        await using (var db = new ImportDbContext(options))
-        {
-            await db.Database.EnsureCreatedAsync();
-        }
-
-        _dbContextFactory = new TestDbContextFactory(options);
-        _upsertService = new ProjectImportUpsertService(_dbContextFactory);
+        _database = new SqlServerTestDatabase();
+        await _database.InitializeAsync();
+        _upsertService = new ProjectImportUpsertService(_database.Factory);
     }
 
     public async ValueTask DisposeAsync()
     {
-        await _connection.DisposeAsync();
+        await _database.DisposeAsync();
     }
 
     [Fact]
@@ -62,7 +48,7 @@ public sealed class ProjectImportUpsertServiceTests : IAsyncLifetime
         Assert.Equal(createResult.ProjectId, updateResult.ProjectId);
         Assert.True(createResult.ProjectId > 0);
 
-        await using var db = await _dbContextFactory.CreateDbContextAsync();
+        await using var db = await _database.Factory.CreateDbContextAsync();
         var project = await db.Projects.SingleAsync();
         Assert.Equal("MV Alpha Updated", project.Name);
 
@@ -71,7 +57,7 @@ public sealed class ProjectImportUpsertServiceTests : IAsyncLifetime
         Assert.Equal("Block Erection Revised", activity.Name);
 
         var assignment = await db.Assignments.SingleAsync();
-        Assert.Equal(PersonName.From("Elena Petrov"), assignment.PersonName);
+        Assert.Equal(Contracts.Values.PersonName.From("Elena Petrov"), assignment.PersonName);
 
         var externalIds = await db.EntityExternalIds.CountAsync();
         Assert.Equal(4, externalIds);
@@ -135,12 +121,4 @@ public sealed class ProjectImportUpsertServiceTests : IAsyncLifetime
                     new Dictionary<string, string> { ["PLM"] = "BLOCK-204" })
             ],
             new Dictionary<string, string> { ["PLM"] = "HULL-247" });
-
-    private sealed class TestDbContextFactory(DbContextOptions<ImportDbContext> options) : IDbContextFactory<ImportDbContext>
-    {
-        public ImportDbContext CreateDbContext() => new(options);
-
-        public Task<ImportDbContext> CreateDbContextAsync(CancellationToken cancellationToken = default) =>
-            Task.FromResult(CreateDbContext());
-    }
 }

@@ -145,14 +145,15 @@ Command (ImportProject, BookHours, RecalculatePlan)
 </pre>
 <p><strong>What Akka is NOT for:</strong> simple CRUD, DbContext in every actor, or replacing a disciplined domain model. Use actors at <strong>boundaries</strong>.</p>
 
-<h2>8. Data model strategy</h2>
+<h2>8. Data model strategy (avoid per-client schema forks)</h2>
 <ol>
-<li>One canonical schema for all customers.</li>
-<li>Governed extension data for rare attributes.</li>
-<li>External ID mapping for integrations.</li>
-<li>Read models / projections for client-specific reporting.</li>
+<li><strong>One canonical schema</strong> for all customers on <strong>SQL Server</strong> (production and on-prem standard).</li>
+<li><strong>Governed extension data</strong> for rare attributes (registry + validation).</li>
+<li><strong>External ID mapping</strong> — source systems map to internal entities without alternate keys.</li>
+<li><strong>Read models / projections</strong> for client-specific reporting.</li>
 </ol>
-<p>Customize <strong>behavior and mappings</strong>, not per-client OLTP schemas.</p>
+<p>Customize <strong>behavior and mappings</strong>, not the physics of the database except through extension points.</p>
+<p><strong>Datastore:</strong> SQL Server only — no SQLite or per-client schema forks. Shared-database tenants use <code>TenantId</code> + indexes; enterprise tenants may use dedicated SQL Server instances (same schema, different connection).</p>
 
 <h2>9. Cloud and on-prem</h2>
 <p>Same binary; differences are <strong>configuration and enabled packs</strong> (identity, messaging, storage, updates, offline file import/export).</p>
@@ -188,11 +189,82 @@ The proposed rebuild shifts to a <strong>platform-and-packs architecture</strong
 This restores predictable delivery, reduces support matrix size, protects professional services margin, and gives customers a credible upgrade path without forking the product for each engagement.
 </blockquote>
 
-<h2>15. Decision requested</h2>
+<h2>16. Performance and large projects (40–50,000 activities)</h2>
+<p>Customers range from small projects (~40 activities) to large programmes (~50,000 activities). Responsiveness is a <strong>product architecture</strong> requirement, not only a hardware decision.</p>
+
+<h3>Design principle</h3>
+<blockquote>Interactive paths stay small; heavy work runs asynchronously on bounded slices.</blockquote>
+<table>
+<tr><th>Path</th><th>Target</th><th>Pattern</th></tr>
+<tr><td>Open project / browse WBS</td><td>&lt; 500 ms</td><td>Paginate, lazy-load tree, summaries</td></tr>
+<tr><td>Edit one activity</td><td>&lt; 100 ms</td><td>Targeted read/write</td></tr>
+<tr><td>Full plan recalculation (large project)</td><td>Seconds, background</td><td>Planning actor + progress events</td></tr>
+<tr><td>Gantt view</td><td>Smooth scroll</td><td>Virtualized rows + visible time window</td></tr>
+<tr><td>Bulk import</td><td>Minutes OK</td><td>Actor pipeline + batched upsert + progress</td></tr>
+</table>
+
+<h3>Database (SQL Server)</h3>
+<ul>
+<li><strong>Never load full project tree by default</strong> — lazy expansion, cursor pagination, search endpoints.</li>
+<li><strong>Indexes:</strong> <code>(TenantId, ProjectId)</code>, <code>(ComponentId)</code>, <code>(ActivityId)</code>, assignment and relation FKs.</li>
+<li><strong>Component-level rollups</strong> — cached budgeted hours, % complete, date ranges.</li>
+<li><strong>Dedicated SQL Server</strong> for large enterprise tenants (isolation tier).</li>
+</ul>
+
+<h3>API tiers</h3>
+<table>
+<tr><th>Endpoint style</th><th>Purpose</th></tr>
+<tr><td><code>/projects/{id}/summary</code></td><td>Counts, dates, rollups only</td></tr>
+<tr><td><code>/components?parentId=</code></td><td>One tree level at a time</td></tr>
+<tr><td><code>/activities?projectId=&amp;cursor=</code></td><td>Paginated flat list / search</td></tr>
+<tr><td><code>/projects/{id}/plan?from=&amp;to=</code></td><td>Windowed Gantt data</td></tr>
+</table>
+<p>Return <strong>projections</strong>, not full entity graphs, to the UI.</p>
+
+<h3>Planning at scale</h3>
+<ul>
+<li><strong>Store schedule snapshots</strong> — UI reads persisted plan; does not recalculate on every page load.</li>
+<li><strong>Async recalculation</strong> via <code>PlanningCoordinatorActor</code> for projects above threshold (e.g. 500 activities).</li>
+<li><strong>Incremental scheduling</strong> — on single edit, recalculate affected subgraph only; full recompute on import or bulk relation change.</li>
+<li><strong>Never block HTTP</strong> on full 50k-activity forward pass.</li>
+</ul>
+
+<h3>UI</h3>
+<ul>
+<li>Virtual scrolling for Gantt and activity lists.</li>
+<li>Time-windowed Gantt (load visible months, fetch more on pan).</li>
+<li>Component-level aggregation with expand-for-detail.</li>
+<li>Debounced plan triggers (one background job per burst of edits).</li>
+</ul>
+
+<h3>Imports</h3>
+<ul>
+<li>Batched upsert (e.g. 500 rows per transaction) through import actor pipeline.</li>
+<li>Progress events (<code>ImportProgressUpdated</code>) for UI feedback.</li>
+<li>Idempotent external IDs for safe retry.</li>
+</ul>
+
+<h3>Multi-tenant isolation</h3>
+<ul>
+<li><strong>Performance tiers</strong> in tenant profile: <code>standard</code> vs <code>large</code>.</li>
+<li>Rate limits and fair queuing for heavy jobs (import, replan).</li>
+<li>Large tenants: dedicated DB + worker capacity.</li>
+</ul>
+
+<h3>SLOs (proposal targets)</h3>
+<ul>
+<li>Up to <strong>500 activities:</strong> interactive edits &lt; 1 second.</li>
+<li>Up to <strong>50,000 activities:</strong> browse and edit remain interactive; full replan in background with progress within minutes.</li>
+<li>Load-test gates at <strong>40, 500, 5,000, and 50,000</strong> activities before major client migrations.</li>
+</ul>
+
+<h2>17. Decision requested</h2>
 <ol>
 <li>Approve <strong>Platform 2.0</strong> program charter and dedicated team.</li>
 <li>Fund <strong>discovery + foundation + one pilot domain</strong>.</li>
 <li>Enforce <strong>no new submodules / handler workflows</strong>.</li>
+<li>Standardize on <strong>SQL Server</strong> for cloud and on-prem data stores.</li>
+<li>Adopt <strong>performance SLOs</strong> for large projects (Section 16).</li>
 <li>Name <strong>executive sponsor</strong> (engineering + product + commercial).</li>
 <li>Select <strong>pilot customer</strong> or internal flagship project for first cutover.</li>
 </ol>

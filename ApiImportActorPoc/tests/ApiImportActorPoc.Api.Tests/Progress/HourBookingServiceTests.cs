@@ -1,43 +1,30 @@
+using ApiImportActorPoc.Api.Tests.Infrastructure;
 using ApiImportActorPoc.Api.Services;
 using ApiImportActorPoc.Contracts.Models;
 using ApiImportActorPoc.Contracts.Models.Import;
 using ApiImportActorPoc.Contracts.Values;
 using ApiImportActorPoc.Core.Import;
-using ApiImportActorPoc.Data;
-using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 
 namespace ApiImportActorPoc.Api.Tests.Progress;
 
 public sealed class HourBookingServiceTests : IAsyncLifetime
 {
-    private SqliteConnection _connection = null!;
-    private IDbContextFactory<ImportDbContext> _dbContextFactory = null!;
+    private SqlServerTestDatabase _database = null!;
     private ProjectImportUpsertService _upsertService = null!;
     private HourBookingService _hourBookingService = null!;
 
     public async ValueTask InitializeAsync()
     {
-        _connection = new SqliteConnection("Data Source=:memory:");
-        await _connection.OpenAsync();
-
-        var options = new DbContextOptionsBuilder<ImportDbContext>()
-            .UseSqlite(_connection)
-            .Options;
-
-        await using (var db = new ImportDbContext(options))
-        {
-            await db.Database.EnsureCreatedAsync();
-        }
-
-        _dbContextFactory = new TestDbContextFactory(options);
-        _upsertService = new ProjectImportUpsertService(_dbContextFactory);
-        _hourBookingService = new HourBookingService(_dbContextFactory);
+        _database = new SqlServerTestDatabase();
+        await _database.InitializeAsync();
+        _upsertService = new ProjectImportUpsertService(_database.Factory);
+        _hourBookingService = new HourBookingService(_database.Factory);
     }
 
     public async ValueTask DisposeAsync()
     {
-        await _connection.DisposeAsync();
+        await _database.DisposeAsync();
     }
 
     [Fact]
@@ -65,7 +52,7 @@ public sealed class HourBookingServiceTests : IAsyncLifetime
         var model = ProjectModelBuilder.Build(payload).Model;
         await _upsertService.UpsertAsync(model);
 
-        await using var db = await _dbContextFactory.CreateDbContextAsync();
+        await using var db = await _database.Factory.CreateDbContextAsync();
         var assignmentId = await db.Assignments.Select(assignment => assignment.Id).SingleAsync();
 
         var booking = await _hourBookingService.BookHoursAsync(
@@ -87,13 +74,5 @@ public sealed class HourBookingServiceTests : IAsyncLifetime
     {
         await Assert.ThrowsAsync<ArgumentOutOfRangeException>(() =>
             _hourBookingService.BookHoursAsync(1, new BookHoursRequest(Hours.Zero, null)));
-    }
-
-    private sealed class TestDbContextFactory(DbContextOptions<ImportDbContext> options) : IDbContextFactory<ImportDbContext>
-    {
-        public ImportDbContext CreateDbContext() => new(options);
-
-        public Task<ImportDbContext> CreateDbContextAsync(CancellationToken cancellationToken = default) =>
-            Task.FromResult(CreateDbContext());
     }
 }

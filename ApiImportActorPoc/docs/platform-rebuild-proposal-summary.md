@@ -152,12 +152,14 @@ Use actors at **boundaries**; keep core business rules in plain, tested modules.
 
 Actors do not justify per-client OLTP schemas.
 
-1. **One canonical schema** for all customers.
+1. **One canonical schema** for all customers on **SQL Server** (production and on-prem standard).
 2. **Governed extension data** for rare attributes (registry + validation).
 3. **External ID mapping** — source systems map to internal entities without alternate keys.
 4. **Read models / projections** for client-specific reporting.
 
 Customize **behavior and mappings**, not the physics of the database except through extension points.
+
+**Datastore:** SQL Server only — no SQLite or per-client schema forks. Shared-database tenants use `TenantId` + indexes; enterprise tenants may use dedicated SQL Server instances (same schema, different connection).
 
 ---
 
@@ -273,13 +275,83 @@ This restores predictable delivery, reduces support matrix size, protects profes
 
 ---
 
-## 16. Decision requested
+## 16. Performance and large projects (40–50,000 activities)
+
+Customers range from small projects (~40 activities) to large programmes (~50,000 activities). Responsiveness is a **product architecture** requirement, not only a hardware decision.
+
+### Design principle
+
+> **Interactive paths stay small; heavy work runs asynchronously on bounded slices.**
+
+| Path | Target | Pattern |
+|------|--------|---------|
+| Open project / browse WBS | < 500 ms | Paginate, lazy-load tree, summaries |
+| Edit one activity | < 100 ms | Targeted read/write |
+| Full plan recalculation (large project) | Seconds, background | Planning actor + progress events |
+| Gantt view | Smooth scroll | Virtualized rows + visible time window |
+| Bulk import | Minutes OK | Actor pipeline + batched upsert + progress |
+
+### Database (SQL Server)
+
+- **Never load full project tree by default** — lazy expansion, cursor pagination, search endpoints.
+- **Indexes:** `(TenantId, ProjectId)`, `(ComponentId)`, `(ActivityId)`, assignment and relation FKs.
+- **Component-level rollups** — cached budgeted hours, % complete, date ranges.
+- **Dedicated SQL Server** for large enterprise tenants (isolation tier).
+
+### API tiers
+
+| Endpoint style | Purpose |
+|----------------|---------|
+| `/projects/{id}/summary` | Counts, dates, rollups only |
+| `/components?parentId=` | One tree level at a time |
+| `/activities?projectId=&cursor=` | Paginated flat list / search |
+| `/projects/{id}/plan?from=&to=` | Windowed Gantt data |
+
+Return **projections**, not full entity graphs, to the UI.
+
+### Planning at scale
+
+- **Store schedule snapshots** — UI reads persisted plan; does not recalculate on every page load.
+- **Async recalculation** via `PlanningCoordinatorActor` for projects above threshold (e.g. 500 activities).
+- **Incremental scheduling** — on single edit, recalculate affected subgraph only; full recompute on import or bulk relation change.
+- **Never block HTTP** on full 50k-activity forward pass.
+
+### UI
+
+- Virtual scrolling for Gantt and activity lists.
+- Time-windowed Gantt (load visible months, fetch more on pan).
+- Component-level aggregation with expand-for-detail.
+- Debounced plan triggers (one background job per burst of edits).
+
+### Imports
+
+- Batched upsert (e.g. 500 rows per transaction) through import actor pipeline.
+- Progress events (`ImportProgressUpdated`) for UI feedback.
+- Idempotent external IDs for safe retry.
+
+### Multi-tenant isolation
+
+- **Performance tiers** in tenant profile: `standard` vs `large`.
+- Rate limits and fair queuing for heavy jobs (import, replan).
+- Large tenants: dedicated DB + worker capacity.
+
+### SLOs (proposal targets)
+
+- Up to **500 activities:** interactive edits < 1 second.
+- Up to **50,000 activities:** browse and edit remain interactive; full replan in background with progress within minutes.
+- Load-test gates at **40, 500, 5,000, and 50,000** activities before major client migrations.
+
+---
+
+## 17. Decision requested
 
 1. Approve **Platform 2.0** program charter and dedicated team.
 2. Fund **discovery + foundation + one pilot domain**.
 3. Enforce **no new submodules / handler workflows**.
-4. Name **executive sponsor** (engineering + product + commercial).
-5. Select **pilot customer** or internal flagship project for first cutover.
+4. Standardize on **SQL Server** for cloud and on-prem data stores.
+5. Adopt **performance SLOs** for large projects (Section 16).
+6. Name **executive sponsor** (engineering + product + commercial).
+7. Select **pilot customer** or internal flagship project for first cutover.
 
 ---
 
