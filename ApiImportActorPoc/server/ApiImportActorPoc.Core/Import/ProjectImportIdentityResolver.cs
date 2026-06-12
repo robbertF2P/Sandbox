@@ -4,13 +4,13 @@ namespace ApiImportActorPoc.Core.Import;
 
 public static class ProjectImportIdentityResolver
 {
-    public sealed record ExistingExternalId(ImportEntityKind EntityKind, Guid InternalEntityId);
+    public sealed record ExistingExternalId(ImportEntityKind EntityKind, int InternalEntityId);
 
     public static ProjectModel Resolve(
         ProjectModel model,
         IReadOnlyDictionary<string, ExistingExternalId> existingExternalIds)
     {
-        var idMap = new Dictionary<Guid, Guid>();
+        var idMap = new Dictionary<int, int>();
 
         var projectId = ResolveInternalId(
             ImportEntityKind.Project,
@@ -29,7 +29,7 @@ public static class ProjectImportIdentityResolver
     private static ComponentModel ResolveComponent(
         ComponentModel component,
         IReadOnlyDictionary<string, ExistingExternalId> existingExternalIds,
-        Dictionary<Guid, Guid> idMap)
+        Dictionary<int, int> idMap)
     {
         var componentId = ResolveInternalId(
             ImportEntityKind.Component,
@@ -57,7 +57,7 @@ public static class ProjectImportIdentityResolver
     private static ActivityModel ResolveActivity(
         ActivityModel activity,
         IReadOnlyDictionary<string, ExistingExternalId> existingExternalIds,
-        Dictionary<Guid, Guid> idMap)
+        Dictionary<int, int> idMap)
     {
         var activityId = ResolveInternalId(
             ImportEntityKind.Activity,
@@ -91,14 +91,14 @@ public static class ProjectImportIdentityResolver
         return activity with { Id = activityId, Assignments = assignments, Relations = relations };
     }
 
-    private static Guid ResolveInternalId(
+    private static int ResolveInternalId(
         ImportEntityKind entityKind,
-        Guid proposedId,
+        int proposedId,
         IReadOnlyDictionary<string, string> externalIds,
         IReadOnlyDictionary<string, ExistingExternalId> existingExternalIds,
-        Dictionary<Guid, Guid> idMap)
+        Dictionary<int, int> idMap)
     {
-        Guid? resolvedId = null;
+        int? resolvedId = null;
 
         foreach (var (system, value) in externalIds)
         {

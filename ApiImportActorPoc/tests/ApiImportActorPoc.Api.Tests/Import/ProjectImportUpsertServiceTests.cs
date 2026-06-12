@@ -59,6 +59,7 @@ public sealed class ProjectImportUpsertServiceTests : IAsyncLifetime
 
         Assert.False(updateResult.Created);
         Assert.Equal(createResult.ProjectId, updateResult.ProjectId);
+        Assert.True(createResult.ProjectId > 0);
 
         await using var db = await _dbContextFactory.CreateDbContextAsync();
         var project = await db.Projects.SingleAsync();

@@ -1,3 +1,3 @@
 namespace ApiImportActorPoc.Contracts.Models;
 
-public sealed record ProjectSummary(Guid Id, string Name);
+public sealed record ProjectSummary(int Id, string Name);

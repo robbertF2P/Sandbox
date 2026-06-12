@@ -9,7 +9,7 @@ public static class ProjectModelBuilder
 
     public sealed record BuildProgress(int Step, int TotalSteps, string Message);
 
-    private sealed record PendingRelation(Guid SourceActivityId, ActivityRelationImportPayload Relation);
+    private sealed record PendingRelation(int SourceActivityId, ActivityRelationImportPayload Relation);
 
     private sealed class BuildProgressTracker(int totalSteps, Action<BuildProgress>? onProgress)
     {
@@ -31,15 +31,16 @@ public static class ProjectModelBuilder
 
         var totalSteps = CountSteps(payload) + 1;
         var progress = new BuildProgressTracker(totalSteps, onProgress);
+        var tempIds = new TempIdAllocator();
         var activityReferences = new ActivityReferenceIndex();
         var pendingRelations = new List<PendingRelation>();
 
         progress.Report("Creating project");
 
-        var projectId = Guid.NewGuid();
+        var projectId = tempIds.Next();
         var projectExternalIds = ExternalIdHelper.Normalize(payload.ExternalIds);
         var components = payload.Components
-            .Select(component => BuildComponent(component, progress, activityReferences, pendingRelations))
+            .Select(component => BuildComponent(component, progress, tempIds, activityReferences, pendingRelations))
             .ToList();
 
         progress.Report("Validating activity relations");
@@ -86,6 +87,7 @@ public static class ProjectModelBuilder
     private static ComponentModel BuildComponent(
         ComponentImportPayload payload,
         BuildProgressTracker progress,
+        TempIdAllocator tempIds,
         ActivityReferenceIndex activityReferences,
         List<PendingRelation> pendingRelations)
     {
@@ -93,10 +95,10 @@ public static class ProjectModelBuilder
 
         progress.Report($"Building component '{payload.Name.Trim()}'");
 
-        var componentId = Guid.NewGuid();
+        var componentId = tempIds.Next();
         var externalIds = ExternalIdHelper.Normalize(payload.ExternalIds);
         var childComponents = payload.ChildComponents?
-            .Select(child => BuildComponent(child, progress, activityReferences, pendingRelations))
+            .Select(child => BuildComponent(child, progress, tempIds, activityReferences, pendingRelations))
             .ToList() ?? [];
 
         var activities = new List<ActivityModel>();
@@ -105,7 +107,7 @@ public static class ProjectModelBuilder
             foreach (var activityPayload in payload.Activities)
             {
                 progress.Report($"Building activity '{activityPayload.Name.Trim()}'");
-                activities.Add(BuildActivity(activityPayload, activityReferences, pendingRelations));
+                activities.Add(BuildActivity(activityPayload, tempIds, activityReferences, pendingRelations));
             }
         }
 
@@ -114,12 +116,13 @@ public static class ProjectModelBuilder
 
     private static ActivityModel BuildActivity(
         ActivityImportPayload payload,
+        TempIdAllocator tempIds,
         ActivityReferenceIndex activityReferences,
         List<PendingRelation> pendingRelations)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(payload.Name);
 
-        var activityId = Guid.NewGuid();
+        var activityId = tempIds.Next();
         var externalIds = ExternalIdHelper.Normalize(payload.ExternalIds);
         activityReferences.Register(activityId, payload.Id, externalIds);
 
@@ -128,7 +131,7 @@ public static class ProjectModelBuilder
             {
                 ArgumentException.ThrowIfNullOrWhiteSpace(assignment.PersonName);
                 return new AssignmentModel(
-                    Guid.NewGuid(),
+                    tempIds.Next(),
                     assignment.PersonName.Trim(),
                     assignment.Description?.Trim(),
                     ExternalIdHelper.Normalize(assignment.ExternalIds));
@@ -146,11 +149,11 @@ public static class ProjectModelBuilder
         return new ActivityModel(activityId, payload.Name.Trim(), assignments, [], externalIds);
     }
 
-    private static Dictionary<Guid, List<ActivityRelationModel>> ValidateAndResolveRelations(
+    private static Dictionary<int, List<ActivityRelationModel>> ValidateAndResolveRelations(
         ActivityReferenceIndex activityReferences,
         List<PendingRelation> pendingRelations)
     {
-        var resolved = new Dictionary<Guid, List<ActivityRelationModel>>();
+        var resolved = new Dictionary<int, List<ActivityRelationModel>>();
 
         foreach (var pending in pendingRelations)
         {
@@ -191,7 +194,7 @@ public static class ProjectModelBuilder
     private static bool TryResolveActivityReference(
         ActivityReferenceIndex activityReferences,
         string reference,
-        out Guid activityId)
+        out int activityId)
     {
         var trimmed = reference.Trim();
         if (activityReferences.TryResolve(trimmed, out activityId))
@@ -213,7 +216,7 @@ public static class ProjectModelBuilder
 
     private static ProjectModel AttachRelations(
         ProjectModel project,
-        Dictionary<Guid, List<ActivityRelationModel>> relationsByActivity)
+        Dictionary<int, List<ActivityRelationModel>> relationsByActivity)
     {
         var components = project.Components
             .Select(component => AttachComponentRelations(component, relationsByActivity))
@@ -224,7 +227,7 @@ public static class ProjectModelBuilder
 
     private static ComponentModel AttachComponentRelations(
         ComponentModel component,
-        Dictionary<Guid, List<ActivityRelationModel>> relationsByActivity)
+        Dictionary<int, List<ActivityRelationModel>> relationsByActivity)
     {
         var activities = component.Activities
             .Select(activity =>

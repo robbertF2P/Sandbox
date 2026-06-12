@@ -1,3 +1,3 @@
 namespace ApiImportActorPoc.Contracts.Messages.Import;
 
-public sealed record PersistImportResult(bool Success, Guid? ProjectId, string? ErrorMessage);
+public sealed record PersistImportResult(bool Success, int? ProjectId, string? ErrorMessage);

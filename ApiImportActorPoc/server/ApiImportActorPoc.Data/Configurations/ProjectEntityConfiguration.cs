@@ -10,6 +10,7 @@ public sealed class ProjectEntityConfiguration : IEntityTypeConfiguration<Projec
     {
         builder.ToTable("Projects");
         builder.HasKey(project => project.Id);
+        builder.Property(project => project.Id).UseIdentityColumn();
         builder.Property(project => project.Name).HasMaxLength(256).IsRequired();
         builder.HasMany(project => project.Components)
             .WithOne(component => component.Project)

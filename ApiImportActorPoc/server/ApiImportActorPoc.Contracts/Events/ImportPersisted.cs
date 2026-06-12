@@ -2,5 +2,5 @@ namespace ApiImportActorPoc.Contracts.Events;
 
 public sealed record ImportPersisted(
     Guid SessionId,
-    Guid ProjectId,
+    int ProjectId,
     DateTimeOffset OccurredAt) : IDataEvent;

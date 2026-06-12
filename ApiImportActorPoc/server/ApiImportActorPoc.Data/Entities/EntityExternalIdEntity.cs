@@ -4,7 +4,7 @@ namespace ApiImportActorPoc.Data.Entities;
 
 public sealed class EntityExternalIdEntity
 {
-    public Guid Id { get; set; }
+    public int Id { get; set; }
 
     public string System { get; set; } = string.Empty;
 
@@ -12,5 +12,5 @@ public sealed class EntityExternalIdEntity
 
     public ImportEntityKind EntityKind { get; set; }
 
-    public Guid InternalEntityId { get; set; }
+    public int InternalEntityId { get; set; }
 }

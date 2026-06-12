@@ -2,11 +2,11 @@ namespace ApiImportActorPoc.Data.Entities;
 
 public sealed class ComponentEntity
 {
-    public Guid Id { get; set; }
+    public int Id { get; set; }
 
-    public Guid ProjectId { get; set; }
+    public int ProjectId { get; set; }
 
-    public Guid? ParentComponentId { get; set; }
+    public int? ParentComponentId { get; set; }
 
     public string Name { get; set; } = string.Empty;
 

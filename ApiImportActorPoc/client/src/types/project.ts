@@ -1,12 +1,13 @@
 export interface ProjectSummary {
-  id: string
+  id: number
   name: string
 }
 
 export interface EditableAssignment {
-  id: string
+  id: number
   personName: string
   description: string
+  externalIds: Record<string, string>
 }
 
 export interface EditableRelation {
@@ -15,39 +16,43 @@ export interface EditableRelation {
 }
 
 export interface EditableActivity {
-  id: string
+  id: number
   name: string
   assignments: EditableAssignment[]
   relations: EditableRelation[]
+  externalIds: Record<string, string>
 }
 
 export interface EditableComponent {
-  id: string
+  id: number
   name: string
   childComponents: EditableComponent[]
   activities: EditableActivity[]
+  externalIds: Record<string, string>
 }
 
 export interface EditableProject {
   name: string
+  externalIds: Record<string, string>
   components: EditableComponent[]
 }
 
 export interface ImportPayload {
   name: string
+  externalIds?: Record<string, string>
   components: ImportComponentPayload[]
 }
 
 export interface ImportComponentPayload {
-  id?: string
   name: string
+  externalIds?: Record<string, string>
   childComponents?: ImportComponentPayload[]
   activities?: ImportActivityPayload[]
 }
 
 export interface ImportActivityPayload {
-  id?: string
   name: string
-  assignments?: { id?: string; personName: string; description?: string }[]
+  externalIds?: Record<string, string>
+  assignments?: { personName: string; description?: string; externalIds?: Record<string, string> }[]
   relations?: { relatedActivityId: string; type: string }[]
 }

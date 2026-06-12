@@ -1,21 +1,37 @@
-﻿using System;
-using Microsoft.EntityFrameworkCore.Migrations;
+﻿using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
 namespace ApiImportActorPoc.Data.Migrations.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialImport : Migration
+    public partial class InitialImportIntIds : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
+                name: "EntityExternalIds",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    System = table.Column<string>(type: "TEXT", maxLength: 128, nullable: false),
+                    Value = table.Column<string>(type: "TEXT", maxLength: 256, nullable: false),
+                    EntityKind = table.Column<string>(type: "TEXT", maxLength: 32, nullable: false),
+                    InternalEntityId = table.Column<int>(type: "INTEGER", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_EntityExternalIds", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Projects",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(type: "TEXT", nullable: false),
+                    Id = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
                     Name = table.Column<string>(type: "TEXT", maxLength: 256, nullable: false)
                 },
                 constraints: table =>
@@ -27,9 +43,10 @@ namespace ApiImportActorPoc.Data.Migrations.Migrations
                 name: "Components",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(type: "TEXT", nullable: false),
-                    ProjectId = table.Column<Guid>(type: "TEXT", nullable: false),
-                    ParentComponentId = table.Column<Guid>(type: "TEXT", nullable: true),
+                    Id = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    ProjectId = table.Column<int>(type: "INTEGER", nullable: false),
+                    ParentComponentId = table.Column<int>(type: "INTEGER", nullable: true),
                     Name = table.Column<string>(type: "TEXT", maxLength: 256, nullable: false)
                 },
                 constraints: table =>
@@ -53,8 +70,9 @@ namespace ApiImportActorPoc.Data.Migrations.Migrations
                 name: "Activities",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(type: "TEXT", nullable: false),
-                    ComponentId = table.Column<Guid>(type: "TEXT", nullable: false),
+                    Id = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    ComponentId = table.Column<int>(type: "INTEGER", nullable: false),
                     Name = table.Column<string>(type: "TEXT", maxLength: 256, nullable: false)
                 },
                 constraints: table =>
@@ -72,9 +90,10 @@ namespace ApiImportActorPoc.Data.Migrations.Migrations
                 name: "ActivityRelations",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(type: "TEXT", nullable: false),
-                    SourceActivityId = table.Column<Guid>(type: "TEXT", nullable: false),
-                    TargetActivityId = table.Column<Guid>(type: "TEXT", nullable: false),
+                    Id = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    SourceActivityId = table.Column<int>(type: "INTEGER", nullable: false),
+                    TargetActivityId = table.Column<int>(type: "INTEGER", nullable: false),
                     RelationType = table.Column<string>(type: "TEXT", maxLength: 32, nullable: false)
                 },
                 constraints: table =>
@@ -98,8 +117,9 @@ namespace ApiImportActorPoc.Data.Migrations.Migrations
                 name: "Assignments",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(type: "TEXT", nullable: false),
-                    ActivityId = table.Column<Guid>(type: "TEXT", nullable: false),
+                    Id = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    ActivityId = table.Column<int>(type: "INTEGER", nullable: false),
                     PersonName = table.Column<string>(type: "TEXT", maxLength: 256, nullable: false),
                     Description = table.Column<string>(type: "TEXT", maxLength: 1024, nullable: true)
                 },
@@ -143,6 +163,17 @@ namespace ApiImportActorPoc.Data.Migrations.Migrations
                 name: "IX_Components_ProjectId",
                 table: "Components",
                 column: "ProjectId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_EntityExternalIds_InternalEntityId",
+                table: "EntityExternalIds",
+                column: "InternalEntityId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_EntityExternalIds_System_Value",
+                table: "EntityExternalIds",
+                columns: new[] { "System", "Value" },
+                unique: true);
         }
 
         /// <inheritdoc />
@@ -153,6 +184,9 @@ namespace ApiImportActorPoc.Data.Migrations.Migrations
 
             migrationBuilder.DropTable(
                 name: "Assignments");
+
+            migrationBuilder.DropTable(
+                name: "EntityExternalIds");
 
             migrationBuilder.DropTable(
                 name: "Activities");

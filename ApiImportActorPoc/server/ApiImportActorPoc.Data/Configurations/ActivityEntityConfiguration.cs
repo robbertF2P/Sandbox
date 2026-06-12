@@ -10,6 +10,7 @@ public sealed class ActivityEntityConfiguration : IEntityTypeConfiguration<Activ
     {
         builder.ToTable("Activities");
         builder.HasKey(activity => activity.Id);
+        builder.Property(activity => activity.Id).UseIdentityColumn();
         builder.Property(activity => activity.Name).HasMaxLength(256).IsRequired();
         builder.HasMany(activity => activity.Assignments)
             .WithOne(assignment => assignment.Activity)

@@ -1,7 +1,7 @@
 namespace ApiImportActorPoc.Contracts.Models;
 
 public sealed record ActivityModel(
-    Guid Id,
+    int Id,
     string Name,
     IReadOnlyList<AssignmentModel> Assignments,
     IReadOnlyList<ActivityRelationModel> Relations,

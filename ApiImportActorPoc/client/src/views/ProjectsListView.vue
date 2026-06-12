@@ -34,7 +34,7 @@ onMounted(async () => {
     <ul v-else class="entity-list">
       <li v-for="project in projects" :key="project.id">
         <RouterLink :to="`/projects/${project.id}`">{{ project.name }}</RouterLink>
-        <span class="id-chip">{{ project.id.slice(0, 8) }}</span>
+        <span class="id-chip">#{{ project.id }}</span>
       </li>
     </ul>
     <p v-if="!loading && !error && projects.length === 0" class="muted">

@@ -10,6 +10,7 @@ public sealed class AssignmentEntityConfiguration : IEntityTypeConfiguration<Ass
     {
         builder.ToTable("Assignments");
         builder.HasKey(assignment => assignment.Id);
+        builder.Property(assignment => assignment.Id).UseIdentityColumn();
         builder.Property(assignment => assignment.PersonName).HasMaxLength(256).IsRequired();
         builder.Property(assignment => assignment.Description).HasMaxLength(1024);
     }

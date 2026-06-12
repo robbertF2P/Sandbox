@@ -9,7 +9,7 @@ public static class ProjectEntityReader
     public static ProjectModel ToModel(
         ProjectEntity project,
         IReadOnlyList<ComponentEntity> allComponents,
-        IReadOnlyDictionary<Guid, IReadOnlyDictionary<string, string>> externalIdsByInternalId)
+        IReadOnlyDictionary<int, IReadOnlyDictionary<string, string>> externalIdsByInternalId)
     {
         var roots = allComponents
             .Where(component => component.ParentComponentId is null)
@@ -32,16 +32,16 @@ public static class ProjectEntityReader
             CopyExternalIds(model.ExternalIds));
     }
 
-    private static Dictionary<Guid, string> BuildActivityReferenceLookup(ProjectModel model)
+    private static Dictionary<int, string> BuildActivityReferenceLookup(ProjectModel model)
     {
-        var lookup = new Dictionary<Guid, string>();
+        var lookup = new Dictionary<int, string>();
         CollectActivityReferences(model.Components, lookup);
         return lookup;
     }
 
     private static void CollectActivityReferences(
         IReadOnlyList<ComponentModel> components,
-        Dictionary<Guid, string> lookup)
+        Dictionary<int, string> lookup)
     {
         foreach (var component in components)
         {
@@ -60,7 +60,7 @@ public static class ProjectEntityReader
     private static ComponentModel ToComponentModel(
         ComponentEntity component,
         IReadOnlyList<ComponentEntity> allComponents,
-        IReadOnlyDictionary<Guid, IReadOnlyDictionary<string, string>> externalIdsByInternalId)
+        IReadOnlyDictionary<int, IReadOnlyDictionary<string, string>> externalIdsByInternalId)
     {
         var children = allComponents
             .Where(child => child.ParentComponentId == component.Id)
@@ -81,7 +81,7 @@ public static class ProjectEntityReader
 
     private static ActivityModel ToActivityModel(
         ActivityEntity activity,
-        IReadOnlyDictionary<Guid, IReadOnlyDictionary<string, string>> externalIdsByInternalId)
+        IReadOnlyDictionary<int, IReadOnlyDictionary<string, string>> externalIdsByInternalId)
     {
         var assignments = activity.Assignments
             .Select(assignment => new AssignmentModel(
@@ -107,7 +107,7 @@ public static class ProjectEntityReader
 
     private static ComponentImportPayload ToComponentPayload(
         ComponentModel model,
-        IReadOnlyDictionary<Guid, string> activityReferences) =>
+        IReadOnlyDictionary<int, string> activityReferences) =>
         new(
             null,
             model.Name,
@@ -121,7 +121,7 @@ public static class ProjectEntityReader
 
     private static ActivityImportPayload ToActivityPayload(
         ActivityModel model,
-        IReadOnlyDictionary<Guid, string> activityReferences) =>
+        IReadOnlyDictionary<int, string> activityReferences) =>
         new(
             null,
             model.Name,

@@ -69,7 +69,7 @@ function removeRelation(current: EditableActivity[], activityIndex: number, rela
           placeholder="Activity name"
           @input="patchActivity(activities, index, { name: ($event.target as HTMLInputElement).value })"
         />
-        <span class="id-chip">{{ activity.id.slice(0, 8) }}</span>
+        <span class="id-chip">#{{ activity.id }}</span>
         <button type="button" class="btn-danger" @click="removeActivity(activities, index)">Remove</button>
       </div>
 

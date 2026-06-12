@@ -52,7 +52,7 @@ function patchComponent(
           placeholder="Component name (block, module, zone)"
           @input="patchComponent(components, index, { name: ($event.target as HTMLInputElement).value })"
         />
-        <span class="id-chip">{{ component.id.slice(0, 8) }}</span>
+        <span class="id-chip">#{{ component.id }}</span>
         <button type="button" class="btn-danger" @click="removeComponent(components, index)">Remove</button>
       </div>
 

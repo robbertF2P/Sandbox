@@ -1,7 +1,7 @@
 namespace ApiImportActorPoc.Contracts.Models;
 
 public sealed record ComponentModel(
-    Guid Id,
+    int Id,
     string Name,
     IReadOnlyList<ComponentModel> ChildComponents,
     IReadOnlyList<ActivityModel> Activities,

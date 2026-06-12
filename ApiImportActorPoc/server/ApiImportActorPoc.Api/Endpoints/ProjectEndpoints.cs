@@ -13,8 +13,8 @@ public static class ProjectEndpoints
             .WithName("ListProjects")
             .WithSummary("List persisted vessel projects");
 
-        group.MapGet("/{projectId:guid}", async (
-            Guid projectId,
+        group.MapGet("/{projectId:int}", async (
+            int projectId,
             ProjectQueryService service,
             CancellationToken cancellationToken) =>
         {
@@ -24,8 +24,8 @@ public static class ProjectEndpoints
         .WithName("GetProject")
         .WithSummary("Get a vessel project with nested components, activities, and assignments");
 
-        group.MapGet("/{projectId:guid}/export", async (
-            Guid projectId,
+        group.MapGet("/{projectId:int}/export", async (
+            int projectId,
             ProjectQueryService service,
             CancellationToken cancellationToken) =>
         {

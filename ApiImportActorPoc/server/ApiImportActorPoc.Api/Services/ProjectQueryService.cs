@@ -19,7 +19,7 @@ public sealed class ProjectQueryService(IDbContextFactory<ImportDbContext> dbCon
             .ToListAsync(cancellationToken);
     }
 
-    public async Task<ProjectModel?> GetProjectAsync(Guid projectId, CancellationToken cancellationToken = default)
+    public async Task<ProjectModel?> GetProjectAsync(int projectId, CancellationToken cancellationToken = default)
     {
         await using var db = await dbContextFactory.CreateDbContextAsync(cancellationToken);
 
@@ -46,7 +46,7 @@ public sealed class ProjectQueryService(IDbContextFactory<ImportDbContext> dbCon
     }
 
     public async Task<ProjectImportPayload?> GetImportPayloadAsync(
-        Guid projectId,
+        int projectId,
         CancellationToken cancellationToken = default)
     {
         var model = await GetProjectAsync(projectId, cancellationToken);

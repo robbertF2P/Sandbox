@@ -1,13 +1,11 @@
-using ApiImportActorPoc.Contracts.Models;
 using ApiImportActorPoc.Data;
-using ApiImportActorPoc.Data.Entities;
 using Microsoft.EntityFrameworkCore;
 
 namespace ApiImportActorPoc.Core.Import;
 
 public static class ExternalIdLoader
 {
-    public static async Task<IReadOnlyDictionary<Guid, IReadOnlyDictionary<string, string>>> LoadByInternalIdAsync(
+    public static async Task<IReadOnlyDictionary<int, IReadOnlyDictionary<string, string>>> LoadByInternalIdAsync(
         ImportDbContext db,
         CancellationToken cancellationToken = default)
     {
@@ -23,8 +21,8 @@ public static class ExternalIdLoader
     }
 
     public static IReadOnlyDictionary<string, string> ForEntity(
-        Guid internalEntityId,
-        IReadOnlyDictionary<Guid, IReadOnlyDictionary<string, string>> lookup) =>
+        int internalEntityId,
+        IReadOnlyDictionary<int, IReadOnlyDictionary<string, string>> lookup) =>
         lookup.TryGetValue(internalEntityId, out var externalIds)
             ? externalIds
             : new Dictionary<string, string>();

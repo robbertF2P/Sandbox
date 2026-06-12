@@ -4,9 +4,9 @@ namespace ApiImportActorPoc.Core.Import;
 
 public sealed class ActivityReferenceIndex
 {
-    private readonly Dictionary<string, Guid> _references = new(StringComparer.OrdinalIgnoreCase);
+    private readonly Dictionary<string, int> _references = new(StringComparer.OrdinalIgnoreCase);
 
-    public void Register(Guid activityId, string? legacyId, IReadOnlyDictionary<string, string> externalIds)
+    public void Register(int activityId, string? legacyId, IReadOnlyDictionary<string, string> externalIds)
     {
         _references[activityId.ToString()] = activityId;
 
@@ -22,10 +22,10 @@ public sealed class ActivityReferenceIndex
         }
     }
 
-    public bool TryResolve(string reference, out Guid activityId) =>
+    public bool TryResolve(string reference, out int activityId) =>
         _references.TryGetValue(reference.Trim(), out activityId);
 
-    private void RegisterAlias(string alias, Guid activityId)
+    private void RegisterAlias(string alias, int activityId)
     {
         if (_references.TryGetValue(alias, out var existing) && existing != activityId)
         {

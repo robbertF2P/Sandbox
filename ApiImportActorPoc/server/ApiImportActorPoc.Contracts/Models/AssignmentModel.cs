@@ -1,7 +1,7 @@
 namespace ApiImportActorPoc.Contracts.Models;
 
 public sealed record AssignmentModel(
-    Guid Id,
+    int Id,
     string PersonName,
     string? Description,
     IReadOnlyDictionary<string, string> ExternalIds);

@@ -10,6 +10,7 @@ public sealed class EntityExternalIdEntityConfiguration : IEntityTypeConfigurati
     {
         builder.ToTable("EntityExternalIds");
         builder.HasKey(externalId => externalId.Id);
+        builder.Property(externalId => externalId.Id).UseIdentityColumn();
         builder.Property(externalId => externalId.System).HasMaxLength(128).IsRequired();
         builder.Property(externalId => externalId.Value).HasMaxLength(256).IsRequired();
         builder.Property(externalId => externalId.EntityKind).HasConversion<string>().HasMaxLength(32);

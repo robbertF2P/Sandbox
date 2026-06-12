@@ -10,6 +10,7 @@ public sealed class ActivityRelationEntityConfiguration : IEntityTypeConfigurati
     {
         builder.ToTable("ActivityRelations");
         builder.HasKey(relation => relation.Id);
+        builder.Property(relation => relation.Id).UseIdentityColumn();
         builder.Property(relation => relation.RelationType).HasMaxLength(32).IsRequired();
         builder.HasOne(relation => relation.TargetActivity)
             .WithMany()
