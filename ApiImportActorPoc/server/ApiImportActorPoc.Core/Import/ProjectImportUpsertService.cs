@@ -121,6 +121,7 @@ public sealed class ProjectImportUpsertService(IDbContextFactory<ImportDbContext
         {
             var existing = await db.Components.FirstAsync(component => component.Id == model.Id, cancellationToken);
             existing.Name = model.Name;
+            existing.IsTemplate = model.IsTemplate;
             existing.ProjectId = projectId;
             existing.ParentComponentId = parentComponentId;
             idMap[model.Id] = existing.Id;
@@ -131,7 +132,8 @@ public sealed class ProjectImportUpsertService(IDbContextFactory<ImportDbContext
         {
             ProjectId = projectId,
             ParentComponentId = parentComponentId,
-            Name = model.Name
+            Name = model.Name,
+            IsTemplate = model.IsTemplate
         };
         db.Components.Add(component);
         await db.SaveChangesAsync(cancellationToken);

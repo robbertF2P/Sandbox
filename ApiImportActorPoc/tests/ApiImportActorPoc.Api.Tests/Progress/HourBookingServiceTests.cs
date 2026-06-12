@@ -49,6 +49,7 @@ public sealed class HourBookingServiceTests : IAsyncLifetime
                     null,
                     "Block",
                     null,
+                    null,
                     [
                         new ActivityImportPayload(
                             null,

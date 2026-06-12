@@ -12,6 +12,7 @@ public sealed class ComponentEntityConfiguration : IEntityTypeConfiguration<Comp
         builder.HasKey(component => component.Id);
         builder.Property(component => component.Id).UseIdentityColumn();
         builder.Property(component => component.Name).HasMaxLength(256).IsRequired();
+        builder.Property(component => component.IsTemplate).HasDefaultValue(false);
         builder.HasOne(component => component.ParentComponent)
             .WithMany(component => component.ChildComponents)
             .HasForeignKey(component => component.ParentComponentId)

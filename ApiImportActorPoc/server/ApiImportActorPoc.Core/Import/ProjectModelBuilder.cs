@@ -111,7 +111,13 @@ public static class ProjectModelBuilder
             }
         }
 
-        return new ComponentModel(componentId, payload.Name.Trim(), childComponents, activities, externalIds);
+        return new ComponentModel(
+            componentId,
+            payload.Name.Trim(),
+            payload.IsTemplate ?? false,
+            childComponents,
+            activities,
+            externalIds);
     }
 
     private static ActivityModel BuildActivity(
@@ -127,16 +133,12 @@ public static class ProjectModelBuilder
         activityReferences.Register(activityId, payload.Id, externalIds);
 
         var assignments = payload.Assignments?
-            .Select(assignment =>
-            {
-                ArgumentException.ThrowIfNullOrWhiteSpace(assignment.PersonName);
-                return new AssignmentModel(
+            .Select(assignment => new AssignmentModel(
                     tempIds.Next(),
-                    assignment.PersonName.Trim(),
+                    assignment.PersonName?.Trim() ?? string.Empty,
                     assignment.Description?.Trim(),
                     assignment.BudgetedHours ?? 0,
-                    ExternalIdHelper.Normalize(assignment.ExternalIds));
-            })
+                    ExternalIdHelper.Normalize(assignment.ExternalIds)))
             .ToList() ?? [];
 
         if (payload.Relations is not null)

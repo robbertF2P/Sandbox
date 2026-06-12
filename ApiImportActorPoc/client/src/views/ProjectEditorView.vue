@@ -2,6 +2,7 @@
 import { onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import ComponentTreeEditor from '../components/ComponentTreeEditor.vue'
+import { fetchComponentTemplates, type ComponentTemplateSummary } from '../api/components'
 import { fetchProject } from '../api/projects'
 import type { EditableProject } from '../types/project'
 import { createEmptyProject, downloadJson, fromApiModel, toImportPayload } from '../utils/projectEditor'
@@ -12,24 +13,30 @@ const project = ref<EditableProject>(createEmptyProject())
 const loading = ref(false)
 const error = ref('')
 const exportMessage = ref('')
+const templates = ref<ComponentTemplateSummary[]>([])
 
 const isNew = () => route.params.id === 'new'
 
-onMounted(async () => {
+async function loadProject() {
   if (isNew()) {
     return
   }
 
   loading.value = true
+  error.value = ''
   try {
-    const model = await fetchProject(route.params.id as string)
+    const projectId = route.params.id as string
+    const model = await fetchProject(projectId)
     project.value = fromApiModel(model)
+    templates.value = await fetchComponentTemplates(projectId)
   } catch {
     error.value = 'Project not found.'
   } finally {
     loading.value = false
   }
-})
+}
+
+onMounted(loadProject)
 
 function exportProject() {
   const payload = toImportPayload(project.value)
@@ -56,7 +63,7 @@ function goToImport() {
     <div class="page-header">
       <div>
         <h1>{{ isNew() ? 'New vessel project' : 'Edit project' }}</h1>
-        <p class="muted">Edit components, activities, and assignments. Export to test the import round-trip.</p>
+        <p class="muted">Edit components, activities, and assignments. Mark components as templates to spawn new ones with open assignments and budgeted hours.</p>
       </div>
       <div class="button-row">
         <button type="button" @click="exportProject">Export JSON</button>
@@ -76,7 +83,10 @@ function goToImport() {
 
     <ComponentTreeEditor
       :components="project.components"
+      :project-id="isNew() ? undefined : String(route.params.id)"
+      :templates="templates"
       @update="project.components = $event"
+      @reload="loadProject"
     />
   </section>
 </template>

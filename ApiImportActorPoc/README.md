@@ -5,7 +5,7 @@ Proof of concept modeled on `AkkaSignalRVuePoc`: Akka.NET actors import a **ship
 ## Domain model (shipbuilding)
 
 - **Project** — a vessel new-build or refit (e.g. hull number, ship name)
-- **Component** — hull blocks, sections, zones, or modules; components can nest (block → section → outfitting zone)
+- **Component** — hull blocks, sections, zones, or modules; components can nest (block → section → outfitting zone). A component can be marked as a **template** and used to spawn a new component with the same activities and assignments (open, no person linked, budgeted hours copied, no hours worked)
 - **Activity** — construction or outfitting work (erection, welding, piping, painting, trials prep)
 - **Assignment** — trade or role performing the work (welder, pipefitter, electrician, surveyor)
 - **Activity relations** — scheduling links: child (sub-task), predecessor, successor (e.g. block erection before welding)
@@ -98,6 +98,9 @@ Open `http://localhost:5174`. Copy `.env.example` to `.env.local` to override AP
 | GET | `/api/projects` | List persisted vessel projects |
 | GET | `/api/projects/{id}` | Full project tree (components, activities, assignments) |
 | GET | `/api/projects/{id}/export` | Export as import JSON (round-trip test) |
+| GET | `/api/projects/{id}/component-templates` | List components marked as templates |
+| PATCH | `/api/components/{id}/template` | Mark or unmark a component as template |
+| POST | `/api/components/{id}/instantiate` | Create component from template (open assignments, budgeted hours) |
 | GET | `/api/projects/{id}/progress` | Budgeted vs worked hours rolled up to project |
 | GET | `/api/assignments` | List assignments with project context |
 | POST | `/api/assignments/{id}/hours` | Book worked hours on an assignment |

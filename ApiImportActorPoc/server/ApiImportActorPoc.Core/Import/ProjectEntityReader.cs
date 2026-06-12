@@ -57,7 +57,7 @@ public static class ProjectEntityReader
         }
     }
 
-    private static ComponentModel ToComponentModel(
+    public static ComponentModel ToComponentModel(
         ComponentEntity component,
         IReadOnlyList<ComponentEntity> allComponents,
         IReadOnlyDictionary<int, IReadOnlyDictionary<string, string>> externalIdsByInternalId)
@@ -74,6 +74,7 @@ public static class ProjectEntityReader
         return new ComponentModel(
             component.Id,
             component.Name,
+            component.IsTemplate,
             children,
             activities,
             ExternalIdLoader.ForEntity(component.Id, externalIdsByInternalId));
@@ -112,6 +113,7 @@ public static class ProjectEntityReader
         new(
             null,
             model.Name,
+            model.IsTemplate ? true : null,
             model.ChildComponents.Count > 0
                 ? model.ChildComponents.Select(child => ToComponentPayload(child, activityReferences)).ToList()
                 : null,

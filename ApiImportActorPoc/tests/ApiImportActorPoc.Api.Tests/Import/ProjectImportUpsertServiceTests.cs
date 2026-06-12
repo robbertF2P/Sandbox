@@ -95,6 +95,7 @@ public sealed class ProjectImportUpsertServiceTests : IAsyncLifetime
                     "Other block",
                     null,
                     null,
+                    null,
                     new Dictionary<string, string> { ["PLM"] = "HULL-247" })
             ]);
 
@@ -113,6 +114,7 @@ public sealed class ProjectImportUpsertServiceTests : IAsyncLifetime
                 new ComponentImportPayload(
                     null,
                     blockName,
+                    null,
                     null,
                     [
                         new ActivityImportPayload(
