@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Platform Rebuild Proposal — Executive Summary</title>
+  <style>
+    @page { margin: 2cm; }
+    body {
+      font-family: "Segoe UI", Helvetica, Arial, sans-serif;
+      font-size: 11pt;
+      line-height: 1.45;
+      color: #1a1a1a;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 24px;
+    }
+    h1 { font-size: 22pt; border-bottom: 2px solid #2563eb; padding-bottom: 8px; margin-top: 0; }
+    h2 { font-size: 14pt; color: #1e40af; margin-top: 1.6em; page-break-after: avoid; }
+    h3 { font-size: 12pt; margin-top: 1.2em; }
+    p, li { orphans: 3; widows: 3; }
+    table { border-collapse: collapse; width: 100%; margin: 12px 0; font-size: 10pt; }
+    th, td { border: 1px solid #cbd5e1; padding: 6px 8px; text-align: left; vertical-align: top; }
+    th { background: #f1f5f9; font-weight: 600; }
+    code, pre { font-family: Consolas, monospace; font-size: 9pt; background: #f8fafc; }
+    pre {
+      border: 1px solid #e2e8f0;
+      padding: 10px 12px;
+      white-space: pre-wrap;
+      line-height: 1.35;
+    }
+    hr { border: none; border-top: 1px solid #e2e8f0; margin: 24px 0; }
+    strong { color: #0f172a; }
+    .meta { color: #64748b; font-size: 10pt; margin-bottom: 24px; }
+    blockquote {
+      border-left: 4px solid #2563eb;
+      margin: 16px 0;
+      padding: 8px 16px;
+      background: #f8fafc;
+      font-style: italic;
+    }
+  </style>
+</head>
+<body>
+<h1>Platform Rebuild Proposal — Executive Summary</h1>
+<p class="meta"><strong>Purpose:</strong> Convince management to approve an incremental platform rebuild that reduces version sprawl, speeds delivery, and makes client customization and integrations sustainable.<br>
+<strong>Audience:</strong> Executive leadership, product, engineering, professional services, support.<br>
+<strong>Date:</strong> June 2026</p>
+
+<h2>1. Core recommendation</h2>
+<p>Rebuild the platform <strong>incrementally</strong> using a <strong>strangler-fig</strong> approach: a single canonical core with <strong>versioned extension and integration packs</strong> — not a big-bang rewrite and not continued forking per client.</p>
+<p><strong>Ask:</strong></p>
+<ul>
+<li>Charter a <strong>Platform 2.0</strong> program with dedicated capacity (not 20% time).</li>
+<li>Approve a <strong>3–6 month foundation + pilot</strong> phase with measurable exit criteria.</li>
+<li>Adopt policy: <strong>no new git submodules, no new core forks, no new SaveChanges workflow handlers.</strong></li>
+</ul>
+
+<h2>2. The problem (in business terms)</h2>
+<p>We do not have a feature problem. We have a <strong>variant problem</strong>.</p>
+<table>
+<tr><th>Symptom</th><th>Business impact</th></tr>
+<tr><td>Simple changes take weeks</td><td>Missed commitments, unhappy customers</td></tr>
+<tr><td>Regressions in unrelated areas</td><td>Support load, emergency releases</td></tr>
+<tr><td>Integrations behave differently per client</td><td>High PS cost, slow onboarding</td></tr>
+<tr><td>Cloud + on-prem + customized builds</td><td>Too many versions to test and support</td></tr>
+<tr><td>“Which version is running?”</td><td>Long incidents, risky upgrades</td></tr>
+<tr><td>New hires slow to contribute</td><td>Delivery does not scale with headcount</td></tr>
+</table>
+<p><strong>One line:</strong> <em>We are paying a growing tax on every feature because customization and integrations were implemented as compile-time forks, not runtime configuration.</em></p>
+
+<h2>3. Root technical causes</h2>
+<ol>
+<li><strong>Git submodules and client-specific code branches</strong> multiply release combinations.</li>
+<li><strong>Class inheritance for services</strong> spreads logic across opaque override trees.</li>
+<li><strong>Per-client data model forks</strong> make migrations, APIs, and reporting unsustainable.</li>
+<li><strong>EF SaveChanges change handlers</strong> implement hidden workflows (legacy of Access DB + stored procedures).</li>
+<li><strong>Hangfire jobs</strong> duplicate and defer logic that should be explicit orchestration.</li>
+<li><strong>Weak domain boundaries</strong> — WBS, planning, hours, imports, and integrations are coupled.</li>
+</ol>
+<p>This is normal debt from years of shipping under pressure. It is not a people problem.</p>
+
+<h2>4. Strategic goal: one platform, many configurations</h2>
+<table>
+<tr><th>Dimension</th><th>Target</th></tr>
+<tr><td><strong>Deployment</strong></td><td>Same product artifact for cloud SaaS and on-prem (profile-driven config).</td></tr>
+<tr><td><strong>Integration</strong></td><td>Connector packs (SAP, PLM, HR, file, etc.) — not core forks.</td></tr>
+<tr><td><strong>Customization</strong></td><td>Configuration, policy hooks, and extension actors — not submodules.</td></tr>
+</table>
+<p><strong>Success criterion:</strong> A new client integration or customization ships as a <strong>versioned pack</strong> enabled per tenant, not as a separate product build.</p>
+
+<h2>5. Why the current customization model fails</h2>
+<table>
+<tr><th>Approach</th><th>Long-term result</th></tr>
+<tr><td>Git submodules per client/integration</td><td>Version matrix explosion, merge hell</td></tr>
+<tr><td>Subclassing services</td><td>Fragile base classes, hard-to-find overrides</td></tr>
+<tr><td>Custom EF models per client</td><td>Forked migrations, APIs, reports, upgrades</td></tr>
+<tr><td>if (tenant == X) in core</td><td>Accidental complexity, untestable branches</td></tr>
+</table>
+<p><strong>Replacement principle:</strong> <em>Professional services may customize behavior, not the core release artifact.</em></p>
+
+<h2>6. Target architecture: platform core + packs</h2>
+<pre>
+                 API / UI
+                    │
+           ┌────────┴────────┐
+           │  Platform Core   │
+           │  WBS · Hours ·   │
+           │  Planning · Auth │
+           └────────┬────────┘
+                    │ messages / events
+     ┌──────────────┼──────────────┐
+     ▼              ▼              ▼
+Integration   Customization   Deployment
+   Pack            Pack          Profile
+(SAP, PLM…)   (rules, actors) (cloud / on-prem)
+</pre>
+<p><strong>Core owns:</strong> canonical domain, invariants, APIs, persistence boundaries, external ID registry.</p>
+<p><strong>Packs own:</strong> client- or system-specific mapping, validation, enrichment, connectors, and policy steps.</p>
+
+<h2>7. Akka.NET: why it fits (orchestration, not fashion)</h2>
+<p>Akka.NET is proposed because our hardest problems are <strong>workflows</strong>, not CRUD: import/export pipelines, integration retries, long-running recalculations, and tenant-specific processing steps.</p>
+
+<h3>Actors vs. inheritance / submodules</h3>
+<table>
+<tr><th>Legacy</th><th>Akka approach</th></tr>
+<tr><td>AcmeImportService : ImportService</td><td>ImportPipeline → [MapActor, AcmeRulesActor, PersistActor]</td></tr>
+<tr><td>Client submodule</td><td>Tenant profile registers actor pack</td></tr>
+<tr><td>Hidden handler chain</td><td>Explicit message pipeline with correlation ID</td></tr>
+</table>
+
+<h3>Actors vs. SaveChanges handlers + Hangfire</h3>
+<table>
+<tr><th>Legacy pattern</th><th>Problem</th><th>Akka replacement</th></tr>
+<tr><td>EF change handlers on save</td><td>Implicit order, nested saves, hard to test</td><td>Command → orchestrator actor → persist actor</td></tr>
+<tr><td>Hangfire jobs with business logic</td><td>Two workflow systems, duplicated rules</td><td>Supervised connector/workflow actors</td></tr>
+<tr><td>Scheduled sync</td><td>Job-centric observability</td><td>Scheduler triggers actor message</td></tr>
+</table>
+<p><strong>Rule:</strong> SaveChanges is for <strong>persistence</strong>, not for <strong>business process orchestration</strong>.</p>
+<pre>
+Command (ImportProject, BookHours, RecalculatePlan)
+    → Orchestrator actor
+        → Persist actor (sole EF boundary for that workflow)
+        → Integration / rollup / notification actors
+        → Domain events (ImportPersisted, PlanRecalculated)
+</pre>
+<p><strong>What Akka is NOT for:</strong> simple CRUD, DbContext in every actor, or replacing a disciplined domain model. Use actors at <strong>boundaries</strong>.</p>
+
+<h2>8. Data model strategy</h2>
+<ol>
+<li>One canonical schema for all customers.</li>
+<li>Governed extension data for rare attributes.</li>
+<li>External ID mapping for integrations.</li>
+<li>Read models / projections for client-specific reporting.</li>
+</ol>
+<p>Customize <strong>behavior and mappings</strong>, not per-client OLTP schemas.</p>
+
+<h2>9. Cloud and on-prem</h2>
+<p>Same binary; differences are <strong>configuration and enabled packs</strong> (identity, messaging, storage, updates, offline file import/export).</p>
+
+<h2>10. Proof of concept</h2>
+<p>An internal POC demonstrates: external IDs, actor-orchestrated persistence, template-first ordering, planning with FS/SS/FF/SF + lag, domain value types, and automated tests.</p>
+<p><strong>Message:</strong> We are asking to scale an approach that already produced working vertical slices.</p>
+
+<h2>11. Phased migration</h2>
+<ul>
+<li><strong>Phase 0:</strong> Inventory handlers, jobs, submodules; define parity and packs.</li>
+<li><strong>Phase 1:</strong> Contracts, actor registry, tenant profiles; freeze new handlers/submodules.</li>
+<li><strong>Phase 2:</strong> Pilot domain in production (import/WBS); retire one legacy path.</li>
+<li><strong>Phase 3:</strong> Expand domains; publish compatibility matrix.</li>
+</ul>
+<p>Hangfire may remain temporarily as a <strong>scheduler trigger</strong> only during migration.</p>
+
+<h2>12. Metrics</h2>
+<p>Track: active forks, lead time, change failure rate, time to add integration, “unknown version” tickets, on-prem upgrade rate, % work delivered as packs vs forks.</p>
+
+<h2>13. Options</h2>
+<table>
+<tr><th>Option</th><th>Verdict</th></tr>
+<tr><td>A. Status quo</td><td>Cheapest now; cost accelerates</td></tr>
+<tr><td><strong>B. Incremental rebuild (recommended)</strong></td><td>Balanced risk; continuous delivery</td></tr>
+<tr><td>C. Big-bang rewrite</td><td>Highest revenue and execution risk</td></tr>
+</table>
+
+<h2>14. Executive summary</h2>
+<blockquote>
+Our product’s complexity is driven less by feature count than by years of client-specific customizations and integrations, delivered through git submodules, service inheritance, customized data models, EF change handlers, and Hangfire jobs — patterns inherited from an earlier Access/stored-procedure architecture. Combined with cloud and on-prem delivery, this created too many de facto product versions to test, upgrade, and support.<br><br>
+The proposed rebuild shifts to a <strong>platform-and-packs architecture</strong>: a stable canonical core; integrations as connector packs; customizations as tenant-configured actor pipelines; deployment profiles for cloud versus on-prem from the <strong>same build</strong>. Long-running work moves from implicit SaveChanges side effects and background jobs into <strong>explicit, supervised Akka.NET workflows</strong> with clear message contracts.<br><br>
+This restores predictable delivery, reduces support matrix size, protects professional services margin, and gives customers a credible upgrade path without forking the product for each engagement.
+</blockquote>
+
+<h2>15. Decision requested</h2>
+<ol>
+<li>Approve <strong>Platform 2.0</strong> program charter and dedicated team.</li>
+<li>Fund <strong>discovery + foundation + one pilot domain</strong>.</li>
+<li>Enforce <strong>no new submodules / handler workflows</strong>.</li>
+<li>Name <strong>executive sponsor</strong> (engineering + product + commercial).</li>
+<li>Select <strong>pilot customer</strong> or internal flagship project for first cutover.</li>
+</ol>
+
+<hr>
+<p><em>Document generated from engineering strategy discussions. Internal use.</em></p>
+</body>
+</html>
