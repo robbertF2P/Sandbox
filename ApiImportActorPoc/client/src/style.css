@@ -203,7 +203,7 @@ a {
 }
 
 .list-row:has(select) {
-  grid-template-columns: 1fr 10rem auto;
+  grid-template-columns: 1fr 11rem 4rem auto;
 }
 
 .id-chip {

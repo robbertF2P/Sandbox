@@ -239,7 +239,8 @@ public sealed class PlanningService(IDbContextFactory<ImportDbContext> dbContext
         var relations = activity.OutgoingRelations
             .Select(relation => new ActivityRelationModel(
                 relation.TargetActivityId,
-                Enum.Parse<ActivityRelationType>(relation.RelationType, ignoreCase: true)))
+                Enum.Parse<ActivityRelationType>(relation.RelationType, ignoreCase: true),
+                relation.LagDays))
             .ToList();
 
         return new PlanningActivitySnapshot(

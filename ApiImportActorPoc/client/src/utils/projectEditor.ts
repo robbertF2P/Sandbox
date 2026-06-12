@@ -62,7 +62,8 @@ export function createEmptyAssignment(): EditableAssignment {
 export function createEmptyRelation(): EditableRelation {
   return {
     relatedActivityId: '',
-    type: 'Successor',
+    type: 'FinishToStart',
+    lagDays: 0,
   }
 }
 
@@ -103,6 +104,7 @@ function mapActivity(activity: any): EditableActivity {
     relations: (activity.relations ?? []).map((relation: any) => ({
       relatedActivityId: String(relation.relatedActivityId),
       type: relation.type,
+      lagDays: relation.lagDays ?? 0,
     })),
   }
 }
@@ -145,6 +147,7 @@ function toActivityPayload(activity: EditableActivity): ImportActivityPayload {
       ? activity.relations.map((relation) => ({
           relatedActivityId: relation.relatedActivityId,
           type: relation.type,
+          lagDays: relation.lagDays > 0 ? relation.lagDays : undefined,
         }))
       : undefined,
   }

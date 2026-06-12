@@ -8,7 +8,7 @@ Proof of concept modeled on `AkkaSignalRVuePoc`: Akka.NET actors import a **ship
 - **Component** — hull blocks, sections, zones, or modules; components can nest (block → section → outfitting zone). A component can be marked as a **template** and used to spawn a new component with the same activities and assignments (open, no person linked, budgeted hours copied, no hours worked)
 - **Activity** — construction or outfitting work (erection, welding, piping, painting, trials prep)
 - **Assignment** — trade or role performing the work (welder, pipefitter, electrician, surveyor)
-- **Activity relations** — scheduling links: child (sub-task), predecessor, successor (e.g. block erection before welding)
+- **Activity relations** — structural `Child` links, plus scheduling dependencies: finish-to-start, start-to-start, finish-to-finish, start-to-finish (with optional lag days). Legacy `Predecessor`/`Successor` map to finish-to-start.
 - **External ids** — flexible key/value pairs per entity (`"PLM": "BLOCK-204"`, `"SAP": "..."`) for cross-system identity
 - **Planning** (separate model) — assignment durations, activity dependency scheduling, milestones, and Gantt timeline recalculation when start dates or durations change
 

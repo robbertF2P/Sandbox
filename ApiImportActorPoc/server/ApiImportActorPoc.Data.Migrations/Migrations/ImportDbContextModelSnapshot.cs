@@ -51,6 +51,11 @@ namespace ApiImportActorPoc.Data.Migrations.Migrations
                         .HasAnnotation("SqlServer:IdentitySeed", 1L)
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
+                    b.Property<int>("LagDays")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER")
+                        .HasDefaultValue(0);
+
                     b.Property<string>("RelationType")
                         .IsRequired()
                         .HasMaxLength(32)

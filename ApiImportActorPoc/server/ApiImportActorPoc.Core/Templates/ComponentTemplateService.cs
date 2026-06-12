@@ -146,7 +146,8 @@ public sealed class ComponentTemplateService(IDbContextFactory<ImportDbContext> 
                 {
                     SourceActivityId = sourceActivityId,
                     TargetActivityId = targetActivityId,
-                    RelationType = relation.RelationType
+                    RelationType = relation.RelationType,
+                    LagDays = relation.LagDays
                 });
             }
         }

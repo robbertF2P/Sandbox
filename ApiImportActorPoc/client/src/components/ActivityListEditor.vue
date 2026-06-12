@@ -37,12 +37,17 @@ function updateRelation(
   current: EditableActivity[],
   activityIndex: number,
   relationIndex: number,
-  field: 'relatedActivityId' | 'type',
+  field: 'relatedActivityId' | 'type' | 'lagDays',
   value: string,
 ) {
   const activity = current[activityIndex]
   const relations = activity.relations.map((relation, i) =>
-    i === relationIndex ? { ...relation, [field]: value } : relation,
+    i === relationIndex
+      ? {
+          ...relation,
+          [field]: field === 'lagDays' ? Number(value) : value,
+        }
+      : relation,
   )
   patchActivity(current, activityIndex, { relations })
 }
@@ -97,10 +102,23 @@ function removeRelation(current: EditableActivity[], activityIndex: number, rela
             :value="relation.type"
             @change="updateRelation(activities, index, relationIndex, 'type', ($event.target as HTMLSelectElement).value)"
           >
-            <option value="Child">Child</option>
-            <option value="Predecessor">Predecessor</option>
-            <option value="Successor">Successor</option>
+            <option value="Child">Child (structure)</option>
+            <option value="FinishToStart">Finish-to-start</option>
+            <option value="StartToStart">Start-to-start</option>
+            <option value="FinishToFinish">Finish-to-finish</option>
+            <option value="StartToFinish">Start-to-finish</option>
+            <option value="Predecessor">Predecessor (FS legacy)</option>
+            <option value="Successor">Successor (FS legacy)</option>
           </select>
+          <input
+            type="number"
+            min="0"
+            step="1"
+            :value="relation.lagDays"
+            title="Lag days"
+            placeholder="Lag"
+            @input="updateRelation(activities, index, relationIndex, 'lagDays', ($event.target as HTMLInputElement).value)"
+          />
           <button type="button" class="btn-danger" @click="removeRelation(activities, index, relationIndex)">
             Remove
           </button>

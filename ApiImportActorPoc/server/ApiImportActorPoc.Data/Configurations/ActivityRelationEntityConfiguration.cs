@@ -12,6 +12,7 @@ public sealed class ActivityRelationEntityConfiguration : IEntityTypeConfigurati
         builder.HasKey(relation => relation.Id);
         builder.Property(relation => relation.Id).UseIdentityColumn();
         builder.Property(relation => relation.RelationType).HasMaxLength(32).IsRequired();
+        builder.Property(relation => relation.LagDays).HasDefaultValue(0);
         builder.HasOne(relation => relation.TargetActivity)
             .WithMany()
             .HasForeignKey(relation => relation.TargetActivityId)

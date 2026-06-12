@@ -64,49 +64,93 @@ public static class PlanningCalculator
                     ? MinimumDurationDays
                     : activity.Assignments.Max(assignment => assignment.DurationDays)));
 
-        var predecessors = BuildPredecessorMap(activities);
+        var constraintsBySuccessor = BuildConstraints(activities);
+        var predecessors = BuildPredecessorMap(constraintsBySuccessor);
         var schedule = new Dictionary<int, (DateOnly Start, DateOnly End)>();
         var ordered = TopologicalOrder(activities, predecessors);
 
         foreach (var activityId in ordered)
         {
-            var start = projectStart;
-            if (predecessors.TryGetValue(activityId, out var requiredPredecessors) && requiredPredecessors.Count > 0)
+            var duration = durations[activityId];
+            var earliestStart = projectStart;
+
+            if (constraintsBySuccessor.TryGetValue(activityId, out var constraints))
             {
-                start = requiredPredecessors
-                    .Select(predecessorId => schedule[predecessorId].End)
-                    .Max()
-                    .AddDays(1);
+                foreach (var constraint in constraints)
+                {
+                    var (predecessorStart, predecessorEnd) = schedule[constraint.PredecessorActivityId];
+                    var requiredStart = RequiredStartDate(
+                        constraint.DependencyType,
+                        predecessorStart,
+                        predecessorEnd,
+                        duration,
+                        constraint.LagDays);
+                    if (requiredStart > earliestStart)
+                    {
+                        earliestStart = requiredStart;
+                    }
+                }
             }
 
-            var end = AddWorkingDuration(start, durations[activityId]);
-            schedule[activityId] = (start, end);
+            var end = AddWorkingDuration(earliestStart, duration);
+            schedule[activityId] = (earliestStart, end);
         }
 
         return schedule;
     }
 
-    private static Dictionary<int, HashSet<int>> BuildPredecessorMap(IReadOnlyList<PlanningActivitySnapshot> activities)
+    private static Dictionary<int, List<SchedulingConstraint>> BuildConstraints(
+        IReadOnlyList<PlanningActivitySnapshot> activities)
     {
-        var predecessors = activities.ToDictionary(activity => activity.Id, _ => new HashSet<int>());
+        var constraintsBySuccessor = activities.ToDictionary(activity => activity.Id, _ => new List<SchedulingConstraint>());
 
         foreach (var activity in activities)
         {
             foreach (var relation in activity.Relations)
             {
-                switch (relation.Type)
-                {
-                    case ActivityRelationType.Predecessor:
-                        predecessors[activity.Id].Add(relation.RelatedActivityId);
-                        break;
-                    case ActivityRelationType.Successor:
-                        predecessors[relation.RelatedActivityId].Add(activity.Id);
-                        break;
-                }
+                ActivityRelationScheduling.AddSchedulingConstraints(
+                    activity.Id,
+                    relation,
+                    constraintsBySuccessor);
+            }
+        }
+
+        return constraintsBySuccessor;
+    }
+
+    private static Dictionary<int, HashSet<int>> BuildPredecessorMap(
+        IReadOnlyDictionary<int, List<SchedulingConstraint>> constraintsBySuccessor)
+    {
+        var predecessors = constraintsBySuccessor.Keys.ToDictionary(id => id, _ => new HashSet<int>());
+
+        foreach (var (successorId, constraints) in constraintsBySuccessor)
+        {
+            foreach (var constraint in constraints)
+            {
+                predecessors[successorId].Add(constraint.PredecessorActivityId);
             }
         }
 
         return predecessors;
+    }
+
+    private static DateOnly RequiredStartDate(
+        SchedulingDependencyType dependencyType,
+        DateOnly predecessorStart,
+        DateOnly predecessorEnd,
+        decimal successorDurationDays,
+        int lagDays)
+    {
+        var spanDays = (int)Math.Max(1, Math.Ceiling(successorDurationDays));
+
+        return dependencyType switch
+        {
+            SchedulingDependencyType.FinishToStart => predecessorEnd.AddDays(1 + lagDays),
+            SchedulingDependencyType.StartToStart => predecessorStart.AddDays(lagDays),
+            SchedulingDependencyType.FinishToFinish => predecessorEnd.AddDays(lagDays).AddDays(-(spanDays - 1)),
+            SchedulingDependencyType.StartToFinish => predecessorStart.AddDays(lagDays).AddDays(-(spanDays - 1)),
+            _ => predecessorEnd.AddDays(1 + lagDays)
+        };
     }
 
     private static List<int> TopologicalOrder(

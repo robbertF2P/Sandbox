@@ -96,7 +96,8 @@ public static class ProjectEntityReader
         var relations = activity.OutgoingRelations
             .Select(relation => new ActivityRelationModel(
                 relation.TargetActivityId,
-                Enum.Parse<ActivityRelationType>(relation.RelationType, ignoreCase: true)))
+                Enum.Parse<ActivityRelationType>(relation.RelationType, ignoreCase: true),
+                relation.LagDays))
             .ToList();
 
         return new ActivityModel(
@@ -141,7 +142,8 @@ public static class ProjectEntityReader
                     activityReferences.TryGetValue(relation.RelatedActivityId, out var reference)
                         ? reference
                         : relation.RelatedActivityId.ToString(),
-                    relation.Type.ToString())).ToList()
+                    relation.Type.ToString(),
+                    relation.LagDays > 0 ? relation.LagDays : null)).ToList()
                 : null,
             CopyExternalIds(model.ExternalIds));
 

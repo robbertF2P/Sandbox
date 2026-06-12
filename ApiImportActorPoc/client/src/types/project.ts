@@ -11,9 +11,19 @@ export interface EditableAssignment {
   externalIds: Record<string, string>
 }
 
+export type ActivityRelationKind =
+  | 'Child'
+  | 'Predecessor'
+  | 'Successor'
+  | 'FinishToStart'
+  | 'StartToStart'
+  | 'FinishToFinish'
+  | 'StartToFinish'
+
 export interface EditableRelation {
   relatedActivityId: string
-  type: 'Child' | 'Predecessor' | 'Successor'
+  type: ActivityRelationKind
+  lagDays: number
 }
 
 export interface EditableActivity {
@@ -57,5 +67,5 @@ export interface ImportActivityPayload {
   name: string
   externalIds?: Record<string, string>
   assignments?: { personName: string; description?: string; budgetedHours?: number; externalIds?: Record<string, string> }[]
-  relations?: { relatedActivityId: string; type: string }[]
+  relations?: { relatedActivityId: string; type: string; lagDays?: number }[]
 }

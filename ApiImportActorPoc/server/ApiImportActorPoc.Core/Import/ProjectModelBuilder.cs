@@ -174,7 +174,7 @@ public static class ProjectModelBuilder
             if (!Enum.TryParse<ActivityRelationType>(pending.Relation.Type, ignoreCase: true, out var relationType))
             {
                 throw new ArgumentException(
-                    $"Unknown relation type '{pending.Relation.Type}'. Expected Child, Predecessor, or Successor.");
+                    $"Unknown relation type '{pending.Relation.Type}'. Expected Child, Predecessor, Successor, FinishToStart, StartToStart, FinishToFinish, or StartToFinish.");
             }
 
             if (relationType == ActivityRelationType.Child && relatedId == pending.SourceActivityId)
@@ -188,7 +188,7 @@ public static class ProjectModelBuilder
                 resolved[pending.SourceActivityId] = relations;
             }
 
-            relations.Add(new ActivityRelationModel(relatedId, relationType));
+            relations.Add(new ActivityRelationModel(relatedId, relationType, pending.Relation.LagDays ?? 0));
         }
 
         return resolved;

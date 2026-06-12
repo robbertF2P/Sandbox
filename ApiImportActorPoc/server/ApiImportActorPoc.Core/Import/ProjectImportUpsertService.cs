@@ -267,7 +267,8 @@ public sealed class ProjectImportUpsertService(IDbContextFactory<ImportDbContext
             {
                 SourceActivityId = sourceActivityId,
                 TargetActivityId = targetActivityId,
-                RelationType = relation.Type.ToString()
+                RelationType = relation.Type.ToString(),
+                LagDays = relation.LagDays
             });
         }
 
