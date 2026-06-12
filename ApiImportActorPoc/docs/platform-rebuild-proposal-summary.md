@@ -32,21 +32,36 @@ We do not have a feature problem. We have a **variant problem**.
 | Cloud + on-prem + customized builds | Too many versions to test and support |
 | “Which version is running?” | Long incidents, risky upgrades |
 | New hires slow to contribute | Delivery does not scale with headcount |
+| High cognitive load per change; long code reviews | Low throughput, senior time in archaeology, team fatigue |
 
 **One line:** *We are paying a growing tax on every feature because customization and integrations were implemented as compile-time forks, not runtime configuration.*
+
+### Architecture exceeded its intended envelope
+
+The original **layered architecture** was a reasonable choice for a smaller product with narrower client differences. It has since **expanded beyond what it was designed to carry**. Client-specific behavior now lives in **git submodules**, service inheritance, and schema forks — so “the product” is effectively many variants sharing a name. Features such as **workflows** and **Hangfire** added a second, implicit orchestration layer on top of EF change handlers. We are not struggling because the domain is inherently impossible; we are carrying **two kinds of diversity at once** — a rich project-management domain *and* per-client implementation diversity — without a clear boundary between platform and customization.
+
+Those choices were rational under past delivery pressure. The toll is visible now: every change requires reconstructing hidden context before it can be implemented or reviewed safely.
+
+### Developer productivity and cognitive load
+
+The highest day-to-day cost on this codebase is often not missing features — it is **cognitive load**: how much context an engineer must hold to change one thing without breaking another. A small PR may require understanding tenant-specific branches, handler chains, background jobs, and data-model variants before anyone can judge risk. That shows up as **long code reviews**, slow iteration, and reluctance to touch areas that look unrelated.
+
+This is a **delivery and retention** issue, not a preference for greenfield work. The ask is not to throw away what we have. It is to **stop extending the submodule-and-handler model** and fund incremental simplification — one domain at a time, with parity tests and a pilot — so that most engineering energy goes into the domain problem, not archaeology.
 
 ---
 
 ## 3. Root technical causes
 
-1. **Git submodules and client-specific code branches** multiply release combinations.
-2. **Class inheritance for services** (`ClientXService : BaseService`) spreads logic across opaque override trees.
+The stack reflects **scope creep on the architecture**: patterns that worked at one scale now compound each other.
+
+1. **Git submodules and client-specific code branches** — the decision to customize per client via submodules made sense early on; it now multiplies release combinations and merge cost.
+2. **Class inheritance for services** (`ClientXService : BaseService`) spreads logic across opaque override trees within an already layered stack.
 3. **Per-client data model forks** make migrations, APIs, and reporting unsustainable.
 4. **EF `SaveChanges` change handlers** implement hidden workflows (legacy of Access DB + stored procedures).
-5. **Hangfire jobs** duplicate and defer logic that should be explicit orchestration.
-6. **Weak domain boundaries** — WBS, planning, hours, imports, and integrations are coupled.
+5. **Hangfire jobs and workflow features** duplicate and defer logic — a **parallel workflow system** alongside handlers, harder to trace than either alone.
+6. **Weak domain boundaries** — WBS, planning, hours, imports, and integrations are coupled while client variance cuts across every layer.
 
-This is normal debt from years of shipping under pressure. It is not a people problem.
+This is normal debt from years of shipping under pressure. It is not a people problem — and it is **not an argument for a big-bang rewrite**. It is an argument for a controlled boundary between core and customization going forward.
 
 ---
 
@@ -240,6 +255,8 @@ Hangfire may remain temporarily as a **scheduler trigger** only.
 | Support tickets “unknown version” | Operational pain |
 | On-prem upgrade completion rate | Enterprise risk |
 | % custom work delivered as packs vs forks | Program adoption |
+| Median PR review time / time-to-first-review | Cognitive load proxy; team throughput |
+| Context switches per feature (submodules touched) | Variant tax per change |
 
 ---
 
@@ -267,11 +284,11 @@ Hangfire may remain temporarily as a **scheduler trigger** only.
 
 ## 15. Executive summary (paste-ready)
 
-Our product’s complexity is driven less by feature count than by **years of client-specific customizations and integrations**, delivered through git submodules, service inheritance, customized data models, EF change handlers, and Hangfire jobs — patterns inherited from an earlier Access/stored-procedure architecture. Combined with cloud and on-prem delivery, this created too many de facto product versions to test, upgrade, and support.
+Our product’s complexity is driven less by feature count than by **years of client-specific customizations and integrations**, delivered through git submodules, service inheritance, customized data models, EF change handlers, and Hangfire jobs — patterns inherited from an earlier Access/stored-procedure architecture. The **layered design and submodule-based customization** were fit for an earlier scope; the product has outgrown that envelope. Workflows and background jobs added implicit orchestration on top of an already diverse domain and diverse clients. Combined with cloud and on-prem delivery, this created too many de facto product versions to test, upgrade, and support — and a **high cognitive load** that slows delivery and lengthens code review even for experienced engineers.
 
 The proposed rebuild shifts to a **platform-and-packs architecture**: a stable canonical core; integrations as connector packs; customizations as tenant-configured actor pipelines and policy hooks; and deployment profiles for cloud versus on-prem from the **same build**. Long-running and reactive work moves from implicit SaveChanges side effects and background jobs into **explicit, supervised Akka.NET workflows** with clear message contracts.
 
-This restores predictable delivery, reduces support matrix size, protects professional services margin, and gives customers a credible upgrade path without forking the product for each engagement.
+This restores predictable delivery, reduces support matrix size, protects professional services margin, and gives customers a credible upgrade path without forking the product for each engagement — **without** a big-bang rewrite.
 
 ---
 
