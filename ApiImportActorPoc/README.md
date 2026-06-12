@@ -10,6 +10,7 @@ Proof of concept modeled on `AkkaSignalRVuePoc`: Akka.NET actors import a **ship
 - **Assignment** — trade or role performing the work (welder, pipefitter, electrician, surveyor)
 - **Activity relations** — scheduling links: child (sub-task), predecessor, successor (e.g. block erection before welding)
 - **External ids** — flexible key/value pairs per entity (`"PLM": "BLOCK-204"`, `"SAP": "..."`) for cross-system identity
+- **Planning** (separate model) — assignment durations, activity dependency scheduling, milestones, and Gantt timeline recalculation when start dates or durations change
 
 ### External id rules
 
@@ -105,6 +106,10 @@ Open `http://localhost:5174`. Copy `.env.example` to `.env.local` to override AP
 | GET | `/api/projects/{id}/component-templates` | List components marked as templates |
 | PATCH | `/api/components/{id}/template` | Mark or unmark a component as template |
 | POST | `/api/components/{id}/instantiate` | Create component from template (open assignments, budgeted hours) |
+| GET | `/api/projects/{id}/plan` | Calculated Gantt plan |
+| PUT | `/api/projects/{id}/plan/start` | Set project start and recalculate |
+| PUT | `/api/assignments/{id}/duration` | Set planning duration (days) and recalculate |
+| POST | `/api/projects/{id}/plan/milestones` | Add milestone |
 | GET | `/api/projects/{id}/progress` | Budgeted vs worked hours rolled up to project |
 | GET | `/api/assignments` | List assignments with project context |
 | POST | `/api/assignments/{id}/hours` | Book worked hours on an assignment |
@@ -123,6 +128,7 @@ SignalR event: `importEvent` — `ImportStarted`, `ImportProgressUpdated`, `Impo
 | `/projects/new` | Create/edit a project structure in memory |
 | `/projects/{id}` | Edit lists + **Export JSON** for import testing |
 | `/projects/{id}/progress` | Progress bars: budgeted vs worked hours at every level |
+| `/projects/{id}/plan` | Gantt chart: activities, assignments, milestones |
 | `/book-hours` | Book hours on any assignment |
 | `/projects/{id}/book-hours` | Book hours filtered to one project |
 

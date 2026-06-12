@@ -1,4 +1,5 @@
 using ApiImportActorPoc.Data.Entities;
+using ApiImportActorPoc.Data.Planning.Entities;
 using Microsoft.EntityFrameworkCore;
 
 namespace ApiImportActorPoc.Data;
@@ -18,6 +19,12 @@ public sealed class ImportDbContext(DbContextOptions<ImportDbContext> options) :
     public DbSet<EntityExternalIdEntity> EntityExternalIds => Set<EntityExternalIdEntity>();
 
     public DbSet<HourBookingEntity> HourBookings => Set<HourBookingEntity>();
+
+    public DbSet<ProjectPlanEntity> ProjectPlans => Set<ProjectPlanEntity>();
+
+    public DbSet<AssignmentPlanEntity> AssignmentPlans => Set<AssignmentPlanEntity>();
+
+    public DbSet<MilestoneEntity> Milestones => Set<MilestoneEntity>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

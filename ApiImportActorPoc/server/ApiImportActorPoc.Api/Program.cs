@@ -1,6 +1,7 @@
 using ApiImportActorPoc.Api.Endpoints;
 using ApiImportActorPoc.Api.Hubs;
 using ApiImportActorPoc.Api.Services;
+using ApiImportActorPoc.Core.Planning;
 using ApiImportActorPoc.Core.Templates;
 using ApiImportActorPoc.Data;
 using Serilog;
@@ -40,6 +41,7 @@ try
     builder.Services.AddSingleton<ProgressQueryService>();
     builder.Services.AddSingleton<HourBookingService>();
     builder.Services.AddSingleton<ComponentTemplateService>();
+    builder.Services.AddSingleton<PlanningService>();
     builder.Services.AddHealthChecks();
     builder.Services.AddAkkaActors();
     builder.Services.AddSignalR();
@@ -97,6 +99,7 @@ try
     app.MapProgressEndpoints();
     app.MapAssignmentEndpoints();
     app.MapComponentEndpoints();
+    app.MapPlanningEndpoints();
     app.MapHealthChecks("/health");
     app.MapHub<ImportHub>("/hubs/import");
 
