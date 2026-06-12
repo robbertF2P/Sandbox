@@ -18,12 +18,58 @@ Proof of concept modeled on `AkkaSignalRVuePoc`: Akka.NET actors import a **ship
 
 ## Run the API
 
+Local development uses SQLite (`import.db`) by default. Serilog writes to the console and, when configured, to [Seq](https://datalust.co/seq).
+
 ```bash
 cd ApiImportActorPoc/server/ApiImportActorPoc.Api
 dotnet run
 ```
 
 API: `http://localhost:5001` — Swagger at `/swagger`, SignalR hub at `/hubs/import`.
+
+### Serilog + Seq (local)
+
+Start only Seq from compose (or full stack below):
+
+```bash
+cd ApiImportActorPoc
+docker compose up seq -d
+```
+
+Seq UI: `http://localhost:8082` — log ingest: `http://localhost:5342` (set in `appsettings.Development.json`).
+
+### SQL Server (local)
+
+```bash
+docker compose up sqlserver -d
+```
+
+Then set in `appsettings.Development.json` (or user secrets):
+
+```json
+"ConnectionStrings": {
+  "Import": "Server=localhost,1401;Database=ApiImportPoc;User Id=sa;Password=Your_strong_password123;TrustServerCertificate=True"
+},
+"Database": { "Provider": "SqlServer" }
+```
+
+## Run with Docker Compose
+
+Starts Seq, SQL Server 2022 (Linux), API, and Vue client:
+
+```bash
+cd ApiImportActorPoc
+docker compose up --build
+```
+
+| Service | URL |
+|---------|-----|
+| Vue client | http://localhost:5174 |
+| API | http://localhost:5001 |
+| Seq UI | http://localhost:8082 |
+| SQL Server | `localhost,1401` (sa / `Your_strong_password123`) |
+
+The API logs to Seq at `http://seq:5341` inside the compose network. Migrations run automatically on startup.
 
 ## Run the Vue client
 

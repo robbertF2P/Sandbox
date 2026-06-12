@@ -23,6 +23,7 @@
     <ProjectReference Include="..\ApiImportActorPoc.Contracts\ApiImportActorPoc.Contracts.csproj" />
     <ProjectReference Include="..\ApiImportActorPoc.Core\ApiImportActorPoc.Core.csproj" />
     <ProjectReference Include="..\ApiImportActorPoc.Data\ApiImportActorPoc.Data.csproj" />
+    <ProjectReference Include="..\ApiImportActorPoc.Data.Migrations\ApiImportActorPoc.Data.Migrations.csproj" />
   </ItemGroup>
 
 </Project>

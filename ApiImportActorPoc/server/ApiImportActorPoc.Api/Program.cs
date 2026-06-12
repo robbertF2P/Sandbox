@@ -4,7 +4,12 @@ using ApiImportActorPoc.Api.Services;
 using ApiImportActorPoc.Data;
 using Serilog;
 
-Log.Logger = SerilogLogging.CreateBootstrapLogger();
+var bootstrapConfiguration = new ConfigurationBuilder()
+    .AddJsonFile("appsettings.json", optional: true)
+    .AddJsonFile($"appsettings.{Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Production"}.json", optional: true)
+    .AddEnvironmentVariables()
+    .Build();
+Log.Logger = SerilogLogging.CreateBootstrapLogger(bootstrapConfiguration);
 
 try
 {

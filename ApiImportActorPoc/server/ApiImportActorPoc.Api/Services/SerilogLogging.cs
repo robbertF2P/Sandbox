@@ -29,10 +29,17 @@ public static class SerilogLogging
         return configuration;
     }
 
-    public static Serilog.ILogger CreateBootstrapLogger()
+    public static Serilog.ILogger CreateBootstrapLogger(IConfiguration? configuration = null)
     {
-        return ConfigureShared(new LoggerConfiguration())
-            .WriteTo.Console()
-            .CreateBootstrapLogger();
+        var loggerConfiguration = ConfigureShared(new LoggerConfiguration())
+            .WriteTo.Console();
+
+        var seqUrl = configuration?["Seq:ServerUrl"];
+        if (!string.IsNullOrWhiteSpace(seqUrl))
+        {
+            loggerConfiguration.WriteTo.Seq(seqUrl);
+        }
+
+        return loggerConfiguration.CreateBootstrapLogger();
     }
 }

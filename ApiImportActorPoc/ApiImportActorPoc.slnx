@@ -4,6 +4,7 @@
     <Project Path="server/ApiImportActorPoc.Contracts/ApiImportActorPoc.Contracts.csproj" />
     <Project Path="server/ApiImportActorPoc.Core/ApiImportActorPoc.Core.csproj" />
     <Project Path="server/ApiImportActorPoc.Data/ApiImportActorPoc.Data.csproj" />
+    <Project Path="server/ApiImportActorPoc.Data.Migrations/ApiImportActorPoc.Data.Migrations.csproj" />
   </Folder>
   <Folder Name="/tests/">
     <Project Path="tests/ApiImportActorPoc.Api.Tests/ApiImportActorPoc.Api.Tests.csproj" />
