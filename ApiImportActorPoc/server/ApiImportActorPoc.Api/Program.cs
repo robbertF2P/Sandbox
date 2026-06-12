@@ -30,6 +30,7 @@ try
         });
     });
     builder.Services.AddImportData(builder.Configuration);
+    builder.Services.AddSingleton<ProjectQueryService>();
     builder.Services.AddHealthChecks();
     builder.Services.AddAkkaActors();
     builder.Services.AddSignalR();
@@ -46,7 +47,7 @@ try
 
             if (allowedOrigins.Length == 0)
             {
-                allowedOrigins = ["http://localhost:5173"];
+                allowedOrigins = ["http://localhost:5173", "http://localhost:5174"];
             }
 
             policy
@@ -77,10 +78,12 @@ try
         Swagger = "/swagger",
         Hub = "/hubs/import",
         Import = "/api/import",
+        Projects = "/api/projects",
         Health = "/health"
     }));
 
     app.MapImportEndpoints();
+    app.MapProjectEndpoints();
     app.MapHealthChecks("/health");
     app.MapHub<ImportHub>("/hubs/import");
 

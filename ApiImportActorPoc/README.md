@@ -39,11 +39,39 @@ Open `http://localhost:5174`. Copy `.env.example` to `.env.local` to override AP
 
 | Method | Path | Description |
 |--------|------|-------------|
+| GET | `/api/projects` | List persisted vessel projects |
+| GET | `/api/projects/{id}` | Full project tree (components, activities, assignments) |
+| GET | `/api/projects/{id}/export` | Export as import JSON (round-trip test) |
 | POST | `/api/import` | Start import (JSON body = project payload) |
 | GET | `/api/import/{sessionId}/model` | Get built in-memory model as JSON |
 | POST | `/api/import/{sessionId}/persist` | Save model to EF Core database |
 
 SignalR event: `importEvent` — `ImportStarted`, `ImportProgressUpdated`, `ImportCompleted`, `ImportFailed`, `ImportPersisted`.
+
+## Vue client pages
+
+| Route | Purpose |
+|-------|---------|
+| `/` | Import JSON, watch actor progress, persist |
+| `/projects` | List persisted projects |
+| `/projects/new` | Create/edit a project structure in memory |
+| `/projects/{id}` | Edit lists + **Export JSON** for import testing |
+
+Round-trip: edit on **Projects** → Export → **Import** → Persist → view on **Projects** again.
+
+## Thunder Client (VS Code)
+
+Install the [Thunder Client](https://marketplace.visualstudio.com/items?itemName=rangav.vscode-thunder-client) extension.
+
+This repo includes a ready-made collection in `thunder-tests/`:
+
+1. Open the `ApiImportActorPoc` folder in VS Code.
+2. Thunder Client should pick up `thunder-tests/thunderCollection.json` when workspace save is enabled (see `.vscode/settings.json`).
+3. Or use **Collections → Menu → Import** and select `thunder-tests/thunderCollection.json`.
+4. Select the **Local API** environment (`baseUrl` = `http://localhost:5001`).
+5. Run **Start import** → copy `sessionId` from the response into the `sessionId` env var → **Get import model** / **Persist import**.
+
+Replace `projectId` in the environment after listing or persisting a project.
 
 ## Tests
 

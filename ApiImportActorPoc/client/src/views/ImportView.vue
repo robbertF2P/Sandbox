@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { onMounted, ref } from 'vue'
 import { getImportModel, persistImport, startImport } from '../api/import'
 import { useImportHub } from '../composables/useImportHub'
 import type { ImportEventNotification } from '../types/import'
@@ -35,6 +35,14 @@ const samplePayload = {
 }
 
 const jsonInput = ref(JSON.stringify(samplePayload, null, 2))
+
+onMounted(() => {
+  const stored = sessionStorage.getItem('importPayload')
+  if (stored) {
+    jsonInput.value = JSON.stringify(JSON.parse(stored), null, 2)
+    sessionStorage.removeItem('importPayload')
+  }
+})
 const sessionId = ref<string | null>(null)
 const progress = ref<string[]>([])
 const modelJson = ref('')

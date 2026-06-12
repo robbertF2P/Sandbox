@@ -11,8 +11,24 @@ body {
 }
 
 button,
-textarea {
+textarea,
+input,
+select {
   font: inherit;
+}
+
+input,
+select {
+  width: 100%;
+  padding: 0.55rem 0.7rem;
+  border-radius: 0.6rem;
+  border: 1px solid rgba(148, 163, 184, 0.25);
+  background: rgba(2, 6, 23, 0.65);
+  color: #e5eefb;
+}
+
+a {
+  color: #93c5fd;
 }
 
 .app {
@@ -38,6 +54,142 @@ textarea {
   color: #fff;
   font-weight: 800;
   text-decoration: none;
+}
+
+.app-nav__links {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.app-nav__links a {
+  padding: 0.5rem 0.85rem;
+  border: 1px solid rgba(148, 163, 184, 0.24);
+  border-radius: 999px;
+  text-decoration: none;
+  color: #bfdbfe;
+  background: rgba(15, 23, 42, 0.55);
+}
+
+.app-nav__links a.router-link-active {
+  color: #fff;
+  border-color: rgba(147, 197, 253, 0.55);
+  background: rgba(37, 99, 235, 0.35);
+}
+
+.page-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.button-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.button-row button {
+  margin-top: 0;
+}
+
+.btn-secondary {
+  background: rgba(51, 65, 85, 0.9);
+}
+
+.btn-danger {
+  background: #b91c1c;
+  width: auto;
+  margin-top: 0;
+  padding: 0.45rem 0.7rem;
+}
+
+.btn-link {
+  display: inline-block;
+  padding: 0.65rem 1rem;
+  border-radius: 0.75rem;
+  background: #2563eb;
+  color: #fff;
+  text-decoration: none;
+}
+
+.entity-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.entity-list li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.75rem 0;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.12);
+}
+
+.field {
+  display: grid;
+  gap: 0.35rem;
+  margin-bottom: 1rem;
+}
+
+.field span {
+  font-size: 0.9rem;
+  color: #cbd5e1;
+}
+
+.sub-list {
+  margin-top: 0.75rem;
+}
+
+.sub-list__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 0.5rem;
+}
+
+.sub-list__header h3,
+.sub-list__header h4 {
+  margin: 0;
+}
+
+.nested-card {
+  margin-top: 0.75rem;
+  padding: 0.85rem;
+  border: 1px solid rgba(148, 163, 184, 0.16);
+  border-radius: 0.75rem;
+  background: rgba(2, 6, 23, 0.35);
+}
+
+.list-row {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  gap: 0.5rem;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.list-row:has(select) {
+  grid-template-columns: 1fr 10rem auto;
+}
+
+.id-chip {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.75rem;
+  color: #94a3b8;
+}
+
+.muted {
+  color: #94a3b8;
+}
+
+.editor {
+  width: min(1200px, calc(100vw - 2rem));
 }
 
 .panel {
