@@ -1,11 +1,12 @@
 using ApiImportActorPoc.Contracts.Models;
+using ApiImportActorPoc.Contracts.Values;
 
 namespace ApiImportActorPoc.Core.Planning;
 
 public sealed record PlanningAssignmentSnapshot(
     int Id,
     string Label,
-    decimal DurationDays);
+    DurationDays DurationDays);
 
 public sealed record PlanningActivitySnapshot(
     int Id,

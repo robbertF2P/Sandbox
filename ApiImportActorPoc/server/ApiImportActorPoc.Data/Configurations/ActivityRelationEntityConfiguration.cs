@@ -1,3 +1,5 @@
+using ApiImportActorPoc.Contracts.Values;
+using ApiImportActorPoc.Data.Conversions;
 using ApiImportActorPoc.Data.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
@@ -12,7 +14,7 @@ public sealed class ActivityRelationEntityConfiguration : IEntityTypeConfigurati
         builder.HasKey(relation => relation.Id);
         builder.Property(relation => relation.Id).UseIdentityColumn();
         builder.Property(relation => relation.RelationType).HasMaxLength(32).IsRequired();
-        builder.Property(relation => relation.LagDays).HasDefaultValue(0);
+        builder.Property(relation => relation.LagDays).HasLagDaysColumn();
         builder.HasOne(relation => relation.TargetActivity)
             .WithMany()
             .HasForeignKey(relation => relation.TargetActivityId)

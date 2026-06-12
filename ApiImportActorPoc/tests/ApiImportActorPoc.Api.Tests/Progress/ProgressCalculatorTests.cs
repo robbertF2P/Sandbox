@@ -1,4 +1,5 @@
 using ApiImportActorPoc.Contracts.Models;
+using ApiImportActorPoc.Contracts.Values;
 using ApiImportActorPoc.Core.Progress;
 using ApiImportActorPoc.Data.Entities;
 
@@ -16,13 +17,13 @@ public sealed class ProgressCalculatorTests
         {
             Id = 1000,
             ActivityId = 100,
-            PersonName = "Marco",
-            BudgetedHours = 40,
+            PersonName = PersonName.From("Marco"),
+            BudgetedHours = Hours.From(40),
             Activity = activity,
             HourBookings =
             [
-                new HourBookingEntity { Hours = 12 },
-                new HourBookingEntity { Hours = 8 }
+                new HourBookingEntity { Hours = Hours.From(12) },
+                new HourBookingEntity { Hours = Hours.From(8) }
             ]
         };
 
@@ -32,16 +33,16 @@ public sealed class ProgressCalculatorTests
 
         var progress = ProgressCalculator.ToProjectProgress(project, [block]);
 
-        Assert.Equal(40, progress.Progress.BudgetedHours);
-        Assert.Equal(20, progress.Progress.HoursWorked);
+        Assert.Equal(40, progress.Progress.BudgetedHours.Value);
+        Assert.Equal(20, progress.Progress.HoursWorked.Value);
         Assert.Equal(50, progress.Progress.PercentComplete);
-        Assert.Equal(20, progress.Components[0].Activities[0].Assignments[0].Progress.HoursWorked);
+        Assert.Equal(20, progress.Components[0].Activities[0].Assignments[0].Progress.HoursWorked.Value);
     }
 
     [Fact]
     public void Sum_ReturnsZeroPercentWhenNoBudget()
     {
-        var summary = ProgressCalculator.Sum([new ProgressSummary(0, 0)]);
+        var summary = ProgressCalculator.Sum([new ProgressSummary(Hours.Zero, Hours.Zero)]);
         Assert.Equal(0, summary.PercentComplete);
     }
 }

@@ -1,17 +1,17 @@
 using ApiImportActorPoc.Contracts.Models;
 using ApiImportActorPoc.Contracts.Models.Planning;
+using ApiImportActorPoc.Contracts.Values;
 
 namespace ApiImportActorPoc.Core.Planning;
 
 public static class PlanningCalculator
 {
-    private const decimal DefaultHoursPerDay = 8m;
-    private const decimal MinimumDurationDays = 0.5m;
+    private static readonly DurationDays MinimumDuration = DurationDays.From(0.5m);
 
     public static GanttProjectPlanDto Calculate(
         int projectId,
         string projectName,
-        DateOnly plannedStartDate,
+        ScheduleDate plannedStartDate,
         IReadOnlyList<PlanningActivitySnapshot> activities,
         IReadOnlyList<GanttMilestoneDto> milestones,
         DateTimeOffset calculatedAt)
@@ -31,7 +31,7 @@ public static class PlanningCalculator
         var activityEnds = ScheduleActivities(plannedStartDate, activities);
         var rows = activities
             .Select(activity => ToActivityRow(activity, activityEnds[activity.Id]))
-            .OrderBy(row => row.StartDate)
+            .OrderBy(row => row.StartDate.Value)
             .ThenBy(row => row.ActivityName, StringComparer.OrdinalIgnoreCase)
             .ToList();
 
@@ -47,26 +47,24 @@ public static class PlanningCalculator
             milestones);
     }
 
-    public static decimal ResolveDurationDays(decimal? plannedDurationDays, decimal budgetedHours) =>
-        plannedDurationDays is > 0
-            ? plannedDurationDays.Value
-            : Math.Max(MinimumDurationDays, Math.Round(budgetedHours / DefaultHoursPerDay, 2));
+    public static DurationDays ResolveDurationDays(DurationDays? plannedDuration, Hours budgetedHours) =>
+        plannedDuration is { Value: > 0 }
+            ? plannedDuration.Value
+            : DurationDays.FromBudgetedHours(budgetedHours);
 
-    private static Dictionary<int, (DateOnly Start, DateOnly End)> ScheduleActivities(
-        DateOnly projectStart,
+    private static Dictionary<int, (ScheduleDate Start, ScheduleDate End)> ScheduleActivities(
+        ScheduleDate projectStart,
         IReadOnlyList<PlanningActivitySnapshot> activities)
     {
         var durations = activities.ToDictionary(
             activity => activity.Id,
-            activity => Math.Max(
-                MinimumDurationDays,
-                activity.Assignments.Count == 0
-                    ? MinimumDurationDays
-                    : activity.Assignments.Max(assignment => assignment.DurationDays)));
+            activity => activity.Assignments.Count == 0
+                ? MinimumDuration
+                : activity.Assignments.Max(assignment => assignment.DurationDays));
 
         var constraintsBySuccessor = BuildConstraints(activities);
         var predecessors = BuildPredecessorMap(constraintsBySuccessor);
-        var schedule = new Dictionary<int, (DateOnly Start, DateOnly End)>();
+        var schedule = new Dictionary<int, (ScheduleDate Start, ScheduleDate End)>();
         var ordered = TopologicalOrder(activities, predecessors);
 
         foreach (var activityId in ordered)
@@ -85,10 +83,14 @@ public static class PlanningCalculator
                         predecessorEnd,
                         duration,
                         constraint.LagDays);
-                    if (requiredStart > earliestStart)
+
+                    earliestStart = constraint.DependencyType switch
                     {
-                        earliestStart = requiredStart;
-                    }
+                        SchedulingDependencyType.StartToFinish when requiredStart < earliestStart => requiredStart,
+                        SchedulingDependencyType.StartToFinish => earliestStart,
+                        _ when requiredStart > earliestStart => requiredStart,
+                        _ => earliestStart
+                    };
                 }
             }
 
@@ -134,22 +136,22 @@ public static class PlanningCalculator
         return predecessors;
     }
 
-    private static DateOnly RequiredStartDate(
+    public static ScheduleDate RequiredStartDate(
         SchedulingDependencyType dependencyType,
-        DateOnly predecessorStart,
-        DateOnly predecessorEnd,
-        decimal successorDurationDays,
-        int lagDays)
+        ScheduleDate predecessorStart,
+        ScheduleDate predecessorEnd,
+        DurationDays successorDuration,
+        LagDays lagDays)
     {
-        var spanDays = (int)Math.Max(1, Math.Ceiling(successorDurationDays));
+        var spanDays = (int)Math.Max(1, Math.Ceiling(successorDuration.Value));
 
         return dependencyType switch
         {
-            SchedulingDependencyType.FinishToStart => predecessorEnd.AddDays(1 + lagDays),
-            SchedulingDependencyType.StartToStart => predecessorStart.AddDays(lagDays),
-            SchedulingDependencyType.FinishToFinish => predecessorEnd.AddDays(lagDays).AddDays(-(spanDays - 1)),
-            SchedulingDependencyType.StartToFinish => predecessorStart.AddDays(lagDays).AddDays(-(spanDays - 1)),
-            _ => predecessorEnd.AddDays(1 + lagDays)
+            SchedulingDependencyType.FinishToStart => predecessorEnd.AddDays(1 + lagDays.Value),
+            SchedulingDependencyType.StartToStart => predecessorStart.AddDays(lagDays.Value),
+            SchedulingDependencyType.FinishToFinish => predecessorEnd.AddDays(lagDays.Value).AddDays(-(spanDays - 1)),
+            SchedulingDependencyType.StartToFinish => predecessorStart.AddDays(lagDays.Value).AddDays(-(spanDays - 1)),
+            _ => predecessorEnd.AddDays(1 + lagDays.Value)
         };
     }
 
@@ -202,11 +204,7 @@ public static class PlanningCalculator
 
         if (ordered.Count != activities.Count)
         {
-            var remaining = activities
-                .Select(activity => activity.Id)
-                .Except(ordered)
-                .OrderBy(id => id);
-            ordered.AddRange(remaining);
+            ordered.AddRange(activities.Select(activity => activity.Id).Except(ordered).OrderBy(id => id));
         }
 
         return ordered;
@@ -214,7 +212,7 @@ public static class PlanningCalculator
 
     private static GanttActivityRowDto ToActivityRow(
         PlanningActivitySnapshot activity,
-        (DateOnly Start, DateOnly End) schedule)
+        (ScheduleDate Start, ScheduleDate End) schedule)
     {
         var assignmentRows = activity.Assignments
             .Select(assignment => new GanttAssignmentRowDto(
@@ -234,9 +232,9 @@ public static class PlanningCalculator
             assignmentRows);
     }
 
-    private static DateOnly AddWorkingDuration(DateOnly start, decimal durationDays)
+    private static ScheduleDate AddWorkingDuration(ScheduleDate start, DurationDays durationDays)
     {
-        var spanDays = (int)Math.Max(1, Math.Ceiling(durationDays));
+        var spanDays = (int)Math.Max(1, Math.Ceiling(durationDays.Value));
         return start.AddDays(spanDays - 1);
     }
 }

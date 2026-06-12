@@ -1,5 +1,6 @@
 using ApiImportActorPoc.Contracts.Models;
 using ApiImportActorPoc.Contracts.Models.Import;
+using ApiImportActorPoc.Contracts.Values;
 
 namespace ApiImportActorPoc.Core.Import;
 
@@ -135,9 +136,9 @@ public static class ProjectModelBuilder
         var assignments = payload.Assignments?
             .Select(assignment => new AssignmentModel(
                     tempIds.Next(),
-                    assignment.PersonName?.Trim() ?? string.Empty,
+                    PersonName.From(assignment.PersonName),
                     assignment.Description?.Trim(),
-                    assignment.BudgetedHours ?? 0,
+                    Hours.From(assignment.BudgetedHours ?? 0),
                     ExternalIdHelper.Normalize(assignment.ExternalIds)))
             .ToList() ?? [];
 
@@ -188,7 +189,7 @@ public static class ProjectModelBuilder
                 resolved[pending.SourceActivityId] = relations;
             }
 
-            relations.Add(new ActivityRelationModel(relatedId, relationType, pending.Relation.LagDays ?? 0));
+            relations.Add(new ActivityRelationModel(relatedId, relationType, LagDays.From(pending.Relation.LagDays ?? 0)));
         }
 
         return resolved;

@@ -19,12 +19,14 @@ public sealed class ComponentPersistOrdererTests
                 Component(20, "Template block", true),
                 Component(30, "Another regular", false)
             ],
-            []);
+            new Dictionary<string, string>());
 
         var ordered = ComponentPersistOrderer.OrderTemplatesFirst(model);
 
-        Assert.Equal([20, 10, 30], ordered.Components.Select(component => component.Id));
-        Assert.Equal([12, 11], ordered.Components[1].ChildComponents.Select(component => component.Id));
+        Assert.Equal([20, 30, 10], ordered.Components.Select(component => component.Id));
+
+        var regularBlock = ordered.Components.Single(component => component.Id == 10);
+        Assert.Equal([12, 11], regularBlock.ChildComponents.Select(component => component.Id));
     }
 
     private static ComponentModel Component(

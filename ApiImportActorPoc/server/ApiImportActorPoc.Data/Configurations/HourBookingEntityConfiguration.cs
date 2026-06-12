@@ -1,3 +1,4 @@
+using ApiImportActorPoc.Data.Conversions;
 using ApiImportActorPoc.Data.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
@@ -11,7 +12,7 @@ public sealed class HourBookingEntityConfiguration : IEntityTypeConfiguration<Ho
         builder.ToTable("HourBookings");
         builder.HasKey(booking => booking.Id);
         builder.Property(booking => booking.Id).UseIdentityColumn();
-        builder.Property(booking => booking.Hours).HasPrecision(18, 2);
+        builder.Property(booking => booking.Hours).HasHoursColumn();
         builder.Property(booking => booking.Notes).HasMaxLength(512);
         builder.HasOne(booking => booking.Assignment)
             .WithMany(assignment => assignment.HourBookings)

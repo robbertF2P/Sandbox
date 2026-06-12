@@ -34,7 +34,7 @@ public sealed class ProjectImportDataActor : ReceiveActor
                     progress.TotalSteps,
                     progress.Message,
                     DateTimeOffset.UtcNow)),
-                Context.CancellationToken);
+                default);
 
             Sender.Tell(new PersistProjectImportDataResult(true, result.ProjectId, result.Created, null));
             _log.Info(

@@ -1,5 +1,6 @@
 using ApiImportActorPoc.Contracts.Models;
 using ApiImportActorPoc.Contracts.Models.Import;
+using ApiImportActorPoc.Contracts.Values;
 using ApiImportActorPoc.Core.Import;
 using ApiImportActorPoc.Core.Templates;
 using ApiImportActorPoc.Data;
@@ -27,8 +28,6 @@ public sealed class ComponentTemplateServiceTests : IAsyncLifetime
         await using (var db = new ImportDbContext(options))
         {
             await db.Database.EnsureCreatedAsync();
-            await db.Database.ExecuteSqlRawAsync(
-                "ALTER TABLE Components ADD COLUMN IsTemplate INTEGER NOT NULL DEFAULT 0");
         }
 
         _dbContextFactory = new TestDbContextFactory(options);
@@ -94,9 +93,9 @@ public sealed class ComponentTemplateServiceTests : IAsyncLifetime
 
         var assignments = newComponent.Activities.Single().Assignments.OrderBy(assignment => assignment.BudgetedHours).ToList();
         Assert.Equal(2, assignments.Count);
-        Assert.All(assignments, assignment => Assert.Equal(string.Empty, assignment.PersonName));
-        Assert.Equal(16, assignments[0].BudgetedHours);
-        Assert.Equal(24, assignments[1].BudgetedHours);
+        Assert.All(assignments, assignment => Assert.Equal(PersonName.Open, assignment.PersonName));
+        Assert.Equal(16, assignments[0].BudgetedHours.Value);
+        Assert.Equal(24, assignments[1].BudgetedHours.Value);
         Assert.All(assignments, assignment => Assert.Empty(assignment.HourBookings));
     }
 

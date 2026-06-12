@@ -1,6 +1,7 @@
 using ApiImportActorPoc.Api.Services;
 using ApiImportActorPoc.Contracts.Models;
 using ApiImportActorPoc.Contracts.Models.Import;
+using ApiImportActorPoc.Contracts.Values;
 using ApiImportActorPoc.Core.Import;
 using ApiImportActorPoc.Data;
 using Microsoft.Data.Sqlite;
@@ -69,15 +70,15 @@ public sealed class HourBookingServiceTests : IAsyncLifetime
 
         var booking = await _hourBookingService.BookHoursAsync(
             assignmentId,
-            new BookHoursRequest(6.5m, "Morning shift"));
+            new BookHoursRequest(Hours.From(6.5m), "Morning shift"));
 
         Assert.NotNull(booking);
-        Assert.Equal(6.5m, booking.Hours);
+        Assert.Equal(6.5m, booking.Hours.Value);
 
         var assignments = await _hourBookingService.ListAssignmentsAsync();
         Assert.Single(assignments);
-        Assert.Equal(6.5m, assignments[0].HoursWorked);
-        Assert.Equal(32, assignments[0].BudgetedHours);
+        Assert.Equal(6.5m, assignments[0].HoursWorked.Value);
+        Assert.Equal(32, assignments[0].BudgetedHours.Value);
         Assert.Equal("MV Alpha", assignments[0].ProjectName);
     }
 
@@ -85,7 +86,7 @@ public sealed class HourBookingServiceTests : IAsyncLifetime
     public async Task BookHoursAsync_RejectsNonPositiveHours()
     {
         await Assert.ThrowsAsync<ArgumentOutOfRangeException>(() =>
-            _hourBookingService.BookHoursAsync(1, new BookHoursRequest(0, null)));
+            _hourBookingService.BookHoursAsync(1, new BookHoursRequest(Hours.Zero, null)));
     }
 
     private sealed class TestDbContextFactory(DbContextOptions<ImportDbContext> options) : IDbContextFactory<ImportDbContext>

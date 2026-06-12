@@ -24,8 +24,6 @@ public sealed class ProjectImportTemplateOrderTests : IAsyncLifetime
         await using (var db = new ImportDbContext(options))
         {
             await db.Database.EnsureCreatedAsync();
-            await db.Database.ExecuteSqlRawAsync(
-                "ALTER TABLE Components ADD COLUMN IsTemplate INTEGER NOT NULL DEFAULT 0");
         }
 
         _dbContextFactory = new TestDbContextFactory(options);

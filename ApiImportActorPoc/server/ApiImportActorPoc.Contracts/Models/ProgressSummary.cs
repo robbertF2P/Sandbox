@@ -1,10 +1,12 @@
+using ApiImportActorPoc.Contracts.Values;
+
 namespace ApiImportActorPoc.Contracts.Models;
 
 public sealed record ProgressSummary(
-    decimal BudgetedHours,
-    decimal HoursWorked)
+    Hours BudgetedHours,
+    Hours HoursWorked)
 {
-    public decimal PercentComplete => BudgetedHours <= 0
-        ? (HoursWorked > 0 ? 100 : 0)
-        : Math.Round(HoursWorked / BudgetedHours * 100, 1);
+    public decimal PercentComplete => BudgetedHours.Value <= 0
+        ? (HoursWorked.Value > 0 ? 100 : 0)
+        : Math.Round(HoursWorked.Value / BudgetedHours.Value * 100, 1);
 }

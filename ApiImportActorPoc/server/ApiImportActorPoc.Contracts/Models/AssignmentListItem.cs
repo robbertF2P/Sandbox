@@ -1,3 +1,5 @@
+using ApiImportActorPoc.Contracts.Values;
+
 namespace ApiImportActorPoc.Contracts.Models;
 
 public sealed record AssignmentListItem(
@@ -6,6 +8,6 @@ public sealed record AssignmentListItem(
     string ProjectName,
     string ComponentPath,
     string ActivityName,
-    string PersonName,
-    decimal BudgetedHours,
-    decimal HoursWorked);
+    PersonName PersonName,
+    Hours BudgetedHours,
+    Hours HoursWorked);

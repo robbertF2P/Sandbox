@@ -1,4 +1,5 @@
 using ApiImportActorPoc.Contracts.Models;
+using ApiImportActorPoc.Contracts.Values;
 
 namespace ApiImportActorPoc.Core.Planning;
 
@@ -13,7 +14,7 @@ public enum SchedulingDependencyType
 public sealed record SchedulingConstraint(
     int PredecessorActivityId,
     SchedulingDependencyType DependencyType,
-    int LagDays);
+    LagDays LagDays);
 
 public static class ActivityRelationScheduling
 {

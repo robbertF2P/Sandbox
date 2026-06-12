@@ -1,3 +1,4 @@
+using ApiImportActorPoc.Data.Conversions;
 using ApiImportActorPoc.Data.Planning.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
@@ -10,7 +11,7 @@ public sealed class AssignmentPlanEntityConfiguration : IEntityTypeConfiguration
     {
         builder.ToTable("AssignmentPlans");
         builder.HasKey(plan => plan.AssignmentId);
-        builder.Property(plan => plan.DurationDays).HasPrecision(18, 2);
+        builder.Property(plan => plan.DurationDays).HasDurationDaysColumn();
         builder.HasOne(plan => plan.Assignment)
             .WithOne()
             .HasForeignKey<AssignmentPlanEntity>(plan => plan.AssignmentId)

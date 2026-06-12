@@ -1,4 +1,5 @@
 using ApiImportActorPoc.Contracts.Models;
+using ApiImportActorPoc.Contracts.Values;
 using ApiImportActorPoc.Core.Import;
 using ApiImportActorPoc.Data;
 using ApiImportActorPoc.Data.Entities;
@@ -118,7 +119,7 @@ public sealed class ComponentTemplateService(IDbContextFactory<ImportDbContext> 
                 db.Assignments.Add(new AssignmentEntity
                 {
                     ActivityId = activity.Id,
-                    PersonName = string.Empty,
+                    PersonName = PersonName.Open,
                     Description = templateAssignment.Description,
                     BudgetedHours = templateAssignment.BudgetedHours
                 });

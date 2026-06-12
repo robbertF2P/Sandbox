@@ -1,3 +1,4 @@
+using ApiImportActorPoc.Data.Conversions;
 using ApiImportActorPoc.Data.Planning.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
@@ -10,7 +11,7 @@ public sealed class ProjectPlanEntityConfiguration : IEntityTypeConfiguration<Pr
     {
         builder.ToTable("ProjectPlans");
         builder.HasKey(plan => plan.ProjectId);
-        builder.Property(plan => plan.PlannedStartDate).HasColumnType("TEXT");
+        builder.Property(plan => plan.PlannedStartDate).HasScheduleDateColumn();
         builder.Property(plan => plan.LastCalculatedAt).IsRequired();
         builder.HasOne(plan => plan.Project)
             .WithOne()

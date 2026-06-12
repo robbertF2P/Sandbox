@@ -1,3 +1,4 @@
+using ApiImportActorPoc.Contracts.Values;
 using ApiImportActorPoc.Data.Entities;
 
 namespace ApiImportActorPoc.Data.Planning.Entities;
@@ -10,7 +11,7 @@ public sealed class MilestoneEntity
 
     public string Name { get; set; } = string.Empty;
 
-    public DateOnly TargetDate { get; set; }
+    public ScheduleDate TargetDate { get; set; }
 
     public int? ActivityId { get; set; }
 

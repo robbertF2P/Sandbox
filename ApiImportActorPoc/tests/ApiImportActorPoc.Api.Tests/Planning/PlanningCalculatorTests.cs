@@ -1,5 +1,6 @@
 using ApiImportActorPoc.Contracts.Models;
 using ApiImportActorPoc.Contracts.Models.Planning;
+using ApiImportActorPoc.Contracts.Values;
 using ApiImportActorPoc.Core.Planning;
 
 namespace ApiImportActorPoc.Api.Tests.Planning;
@@ -22,10 +23,10 @@ public sealed class PlanningCalculatorTests
         var erection = plan.Activities.Single(row => row.ActivityId == 1);
         var welding = plan.Activities.Single(row => row.ActivityId == 2);
 
-        Assert.Equal(new DateOnly(2026, 1, 6), erection.StartDate);
-        Assert.Equal(new DateOnly(2026, 1, 8), erection.EndDate);
-        Assert.Equal(new DateOnly(2026, 1, 9), welding.StartDate);
-        Assert.Equal(new DateOnly(2026, 1, 10), welding.EndDate);
+        Assert.Equal(new DateOnly(2026, 1, 6), erection.StartDate.Value);
+        Assert.Equal(new DateOnly(2026, 1, 8), erection.EndDate.Value);
+        Assert.Equal(new DateOnly(2026, 1, 9), welding.StartDate.Value);
+        Assert.Equal(new DateOnly(2026, 1, 10), welding.EndDate.Value);
     }
 
     [Fact]
@@ -35,15 +36,15 @@ public sealed class PlanningCalculatorTests
         {
             Activity(1, "Prep", "Block", 5, []),
             Activity(2, "Parallel support", "Block", 2, [
-                new ActivityRelationModel(1, ActivityRelationType.StartToStart, lagDays: 2)
+                new ActivityRelationModel(1, ActivityRelationType.StartToStart, LagDays.From(2))
             ])
         };
 
         var plan = Calculate(activities);
         var support = plan.Activities.Single(row => row.ActivityId == 2);
 
-        Assert.Equal(new DateOnly(2026, 1, 8), support.StartDate);
-        Assert.Equal(new DateOnly(2026, 1, 9), support.EndDate);
+        Assert.Equal(new DateOnly(2026, 1, 8), support.StartDate.Value);
+        Assert.Equal(new DateOnly(2026, 1, 9), support.EndDate.Value);
     }
 
     [Fact]
@@ -61,9 +62,9 @@ public sealed class PlanningCalculatorTests
         var longTask = plan.Activities.Single(row => row.ActivityId == 1);
         var closeout = plan.Activities.Single(row => row.ActivityId == 2);
 
-        Assert.Equal(new DateOnly(2026, 1, 10), longTask.EndDate);
-        Assert.Equal(new DateOnly(2026, 1, 10), closeout.EndDate);
-        Assert.Equal(new DateOnly(2026, 1, 9), closeout.StartDate);
+        Assert.Equal(new DateOnly(2026, 1, 10), longTask.EndDate.Value);
+        Assert.Equal(new DateOnly(2026, 1, 10), closeout.EndDate.Value);
+        Assert.Equal(new DateOnly(2026, 1, 9), closeout.StartDate.Value);
     }
 
     [Fact]
@@ -80,8 +81,8 @@ public sealed class PlanningCalculatorTests
         var plan = Calculate(activities);
         var shutdown = plan.Activities.Single(row => row.ActivityId == 2);
 
-        Assert.Equal(new DateOnly(2026, 1, 6), shutdown.EndDate);
-        Assert.Equal(new DateOnly(2026, 1, 4), shutdown.StartDate);
+        Assert.Equal(new DateOnly(2026, 1, 6), shutdown.EndDate.Value);
+        Assert.Equal(new DateOnly(2026, 1, 4), shutdown.StartDate.Value);
     }
 
     [Fact]
@@ -98,7 +99,7 @@ public sealed class PlanningCalculatorTests
         var plan = Calculate(activities);
         var second = plan.Activities.Single(row => row.ActivityId == 2);
 
-        Assert.Equal(new DateOnly(2026, 1, 9), second.StartDate);
+        Assert.Equal(new DateOnly(2026, 1, 8), second.StartDate.Value);
     }
 
     [Fact]
@@ -112,7 +113,7 @@ public sealed class PlanningCalculatorTests
         var early = PlanningCalculator.Calculate(
             1,
             "MV Beta",
-            new DateOnly(2026, 2, 1),
+            ScheduleDate.From(new DateOnly(2026, 2, 1)),
             activities,
             [],
             DateTimeOffset.UtcNow);
@@ -120,19 +121,19 @@ public sealed class PlanningCalculatorTests
         var later = PlanningCalculator.Calculate(
             1,
             "MV Beta",
-            new DateOnly(2026, 3, 1),
+            ScheduleDate.From(new DateOnly(2026, 3, 1)),
             activities,
             [],
             DateTimeOffset.UtcNow);
 
-        Assert.Equal(28, later.Activities[0].StartDate.DayNumber - early.Activities[0].StartDate.DayNumber);
+        Assert.Equal(28, later.Activities[0].StartDate.Value.DayNumber - early.Activities[0].StartDate.Value.DayNumber);
     }
 
     private static GanttProjectPlanDto Calculate(IReadOnlyList<PlanningActivitySnapshot> activities) =>
         PlanningCalculator.Calculate(
             1,
             "MV Alpha",
-            new DateOnly(2026, 1, 6),
+            ScheduleDate.From(new DateOnly(2026, 1, 6)),
             activities,
             [],
             DateTimeOffset.UtcNow);
@@ -147,6 +148,6 @@ public sealed class PlanningCalculatorTests
             id,
             name,
             component,
-            [new PlanningAssignmentSnapshot(id * 10, "Trade", durationDays)],
+            [new PlanningAssignmentSnapshot(id * 10, "Trade", DurationDays.From(durationDays))],
             relations);
 }

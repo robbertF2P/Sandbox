@@ -1,5 +1,4 @@
 using Akka.Actor;
-using Akka.TestKit;
 using ApiImportActorPoc.Contracts.Events;
 using ApiImportActorPoc.Contracts.Messages.Import;
 using ApiImportActorPoc.Contracts.Models.Import;
@@ -11,48 +10,33 @@ using Microsoft.EntityFrameworkCore;
 
 namespace ApiImportActorPoc.Api.Tests.Actors;
 
-public sealed class DataManagerActorTests : ActorTestBase<DataManagerActorTests>, IAsyncLifetime
+public sealed class DataManagerActorTests : ActorTestBase<DataManagerActorTests>
 {
-    private SqliteConnection _connection = null!;
-    private IDbContextFactory<ImportDbContext> _dbContextFactory = null!;
-
     public DataManagerActorTests(ITestOutputHelper output)
         : base(output)
     {
     }
 
-    public async ValueTask InitializeAsync()
+    [Fact]
+    public async Task PersistImportWithModelCommand_PublishesImportPersistedAndReplies()
     {
-        _connection = new SqliteConnection("Data Source=:memory:");
-        await _connection.OpenAsync();
+        await using var connection = new SqliteConnection("Data Source=:memory:");
+        await connection.OpenAsync();
 
         var options = new DbContextOptionsBuilder<ImportDbContext>()
-            .UseSqlite(_connection)
+            .UseSqlite(connection)
             .Options;
 
         await using (var db = new ImportDbContext(options))
         {
             await db.Database.EnsureCreatedAsync();
-            await db.Database.ExecuteSqlRawAsync(
-                "ALTER TABLE Components ADD COLUMN IsTemplate INTEGER NOT NULL DEFAULT 0");
         }
 
-        _dbContextFactory = new TestDbContextFactory(options);
-    }
-
-    public async ValueTask DisposeAsync()
-    {
-        await _connection.DisposeAsync();
-        await ShutdownAsync();
-    }
-
-    [Fact]
-    public async Task PersistImportWithModelCommand_PublishesImportPersistedAndReplies()
-    {
+        var dbContextFactory = new TestDbContextFactory(options);
         var probe = CreateTestProbe();
         Sys.EventStream.Subscribe(probe.Ref, typeof(ImportPersisted));
 
-        var dataManager = Sys.ActorOf(DataManagerActor.Props(_dbContextFactory), "data-manager");
+        var dataManager = Sys.ActorOf(DataManagerActor.Props(dbContextFactory), "data-manager");
         var sessionId = Guid.NewGuid();
         var model = ProjectModelBuilder.Build(new ProjectImportPayload(
             "MV Actor Persist",

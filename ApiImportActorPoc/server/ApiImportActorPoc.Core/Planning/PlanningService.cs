@@ -1,5 +1,6 @@
 using ApiImportActorPoc.Contracts.Models;
 using ApiImportActorPoc.Contracts.Models.Planning;
+using ApiImportActorPoc.Contracts.Values;
 using ApiImportActorPoc.Data;
 using ApiImportActorPoc.Data.Entities;
 using ApiImportActorPoc.Data.Planning.Entities;
@@ -9,7 +10,7 @@ namespace ApiImportActorPoc.Core.Planning;
 
 public sealed class PlanningService(IDbContextFactory<ImportDbContext> dbContextFactory)
 {
-    private static readonly DateOnly DefaultStartDate = new(2026, 1, 6);
+    private static readonly ScheduleDate DefaultStartDate = ScheduleDate.From(new DateOnly(2026, 1, 6));
 
     public async Task<GanttProjectPlanDto?> GetPlanAsync(int projectId, CancellationToken cancellationToken = default)
     {
@@ -20,7 +21,7 @@ public sealed class PlanningService(IDbContextFactory<ImportDbContext> dbContext
 
     public async Task<GanttProjectPlanDto?> SetProjectStartAsync(
         int projectId,
-        DateOnly plannedStartDate,
+        ScheduleDate plannedStartDate,
         CancellationToken cancellationToken = default)
     {
         await using var db = await dbContextFactory.CreateDbContextAsync(cancellationToken);
@@ -52,14 +53,9 @@ public sealed class PlanningService(IDbContextFactory<ImportDbContext> dbContext
 
     public async Task<GanttProjectPlanDto?> SetAssignmentDurationAsync(
         int assignmentId,
-        decimal durationDays,
+        DurationDays durationDays,
         CancellationToken cancellationToken = default)
     {
-        if (durationDays <= 0)
-        {
-            throw new ArgumentOutOfRangeException(nameof(durationDays), "Duration must be positive.");
-        }
-
         await using var db = await dbContextFactory.CreateDbContextAsync(cancellationToken);
         var assignment = await db.Assignments
             .AsNoTracking()
@@ -151,7 +147,7 @@ public sealed class PlanningService(IDbContextFactory<ImportDbContext> dbContext
     private sealed record PlanningContext(
         int ProjectId,
         string ProjectName,
-        DateOnly PlannedStartDate,
+        ScheduleDate PlannedStartDate,
         IReadOnlyList<PlanningActivitySnapshot> Activities,
         IReadOnlyList<GanttMilestoneDto> Milestones);
 
@@ -172,7 +168,7 @@ public sealed class PlanningService(IDbContextFactory<ImportDbContext> dbContext
         var plannedStart = await db.ProjectPlans
             .AsNoTracking()
             .Where(plan => plan.ProjectId == projectId)
-            .Select(plan => (DateOnly?)plan.PlannedStartDate)
+            .Select(plan => (ScheduleDate?)plan.PlannedStartDate)
             .FirstOrDefaultAsync(cancellationToken) ?? DefaultStartDate;
 
         var components = await db.Components
@@ -191,7 +187,7 @@ public sealed class PlanningService(IDbContextFactory<ImportDbContext> dbContext
             .ToHashSet();
 
         var assignmentPlans = assignmentIds.Count == 0
-            ? new Dictionary<int, decimal>()
+            ? new Dictionary<int, DurationDays>()
             : await db.AssignmentPlans
                 .AsNoTracking()
                 .Where(plan => assignmentIds.Contains(plan.AssignmentId))
@@ -200,7 +196,7 @@ public sealed class PlanningService(IDbContextFactory<ImportDbContext> dbContext
         var milestones = await db.Milestones
             .AsNoTracking()
             .Where(milestone => milestone.ProjectId == projectId)
-            .OrderBy(milestone => milestone.TargetDate)
+            .OrderBy(milestone => milestone.TargetDate.Value)
             .Select(milestone => new GanttMilestoneDto(
                 milestone.Id,
                 milestone.Name,
@@ -218,20 +214,20 @@ public sealed class PlanningService(IDbContextFactory<ImportDbContext> dbContext
     private static PlanningActivitySnapshot ToSnapshot(
         ComponentEntity component,
         ActivityEntity activity,
-        IReadOnlyDictionary<int, decimal> assignmentPlans)
+        IReadOnlyDictionary<int, DurationDays> assignmentPlans)
     {
         var assignments = activity.Assignments
             .Select(assignment =>
             {
                 assignmentPlans.TryGetValue(assignment.Id, out var plannedDuration);
-                var label = string.IsNullOrWhiteSpace(assignment.PersonName)
+                var label = assignment.PersonName.IsOpen
                     ? assignment.Description ?? $"Assignment #{assignment.Id}"
-                    : assignment.PersonName;
+                    : assignment.PersonName.Value;
                 return new PlanningAssignmentSnapshot(
                     assignment.Id,
                     label,
                     PlanningCalculator.ResolveDurationDays(
-                        plannedDuration > 0 ? plannedDuration : null,
+                        assignmentPlans.ContainsKey(assignment.Id) ? plannedDuration : null,
                         assignment.BudgetedHours));
             })
             .ToList();

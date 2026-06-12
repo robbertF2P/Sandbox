@@ -61,7 +61,10 @@ public static class PlanningEndpoints
         {
             try
             {
-                var plan = await service.SetAssignmentDurationAsync(assignmentId, request.DurationDays, cancellationToken);
+                var plan = await service.SetAssignmentDurationAsync(
+                    assignmentId,
+                    request.DurationDays,
+                    cancellationToken);
                 return plan is null ? Results.NotFound() : Results.Ok(plan);
             }
             catch (ArgumentOutOfRangeException exception)
