@@ -4,4 +4,5 @@ public sealed record ComponentImportPayload(
     string? Id,
     string Name,
     IReadOnlyList<ComponentImportPayload>? ChildComponents,
-    IReadOnlyList<ActivityImportPayload>? Activities);
+    IReadOnlyList<ActivityImportPayload>? Activities,
+    IReadOnlyDictionary<string, string>? ExternalIds = null);

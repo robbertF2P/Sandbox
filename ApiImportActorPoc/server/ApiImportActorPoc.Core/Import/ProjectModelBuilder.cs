@@ -27,23 +27,29 @@ public static class ProjectModelBuilder
             throw new ArgumentException("At least one component is required.", nameof(payload));
         }
 
+        ExternalIdUniquenessValidator.ValidateImportPayload(payload);
+
         var totalSteps = CountSteps(payload) + 1;
         var progress = new BuildProgressTracker(totalSteps, onProgress);
-        var activityIds = new Dictionary<string, Guid>(StringComparer.OrdinalIgnoreCase);
+        var activityReferences = new ActivityReferenceIndex();
         var pendingRelations = new List<PendingRelation>();
 
         progress.Report("Creating project");
 
         var projectId = Guid.NewGuid();
+        var projectExternalIds = ExternalIdHelper.Normalize(payload.ExternalIds);
         var components = payload.Components
-            .Select(component => BuildComponent(component, progress, activityIds, pendingRelations))
+            .Select(component => BuildComponent(component, progress, activityReferences, pendingRelations))
             .ToList();
 
         progress.Report("Validating activity relations");
 
-        var resolvedRelations = ValidateAndResolveRelations(activityIds, pendingRelations);
-        var modelWithRelations = AttachRelations(new ProjectModel(projectId, payload.Name.Trim(), components), resolvedRelations);
+        var resolvedRelations = ValidateAndResolveRelations(activityReferences, pendingRelations);
+        var modelWithRelations = AttachRelations(
+            new ProjectModel(projectId, payload.Name.Trim(), components, projectExternalIds),
+            resolvedRelations);
 
+        ExternalIdUniquenessValidator.ValidateModel(modelWithRelations);
         return new BuildResult(modelWithRelations, totalSteps);
     }
 
@@ -80,16 +86,17 @@ public static class ProjectModelBuilder
     private static ComponentModel BuildComponent(
         ComponentImportPayload payload,
         BuildProgressTracker progress,
-        Dictionary<string, Guid> activityIds,
+        ActivityReferenceIndex activityReferences,
         List<PendingRelation> pendingRelations)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(payload.Name);
 
         progress.Report($"Building component '{payload.Name.Trim()}'");
 
-        var componentId = ParseOrCreateId(payload.Id);
+        var componentId = Guid.NewGuid();
+        var externalIds = ExternalIdHelper.Normalize(payload.ExternalIds);
         var childComponents = payload.ChildComponents?
-            .Select(child => BuildComponent(child, progress, activityIds, pendingRelations))
+            .Select(child => BuildComponent(child, progress, activityReferences, pendingRelations))
             .ToList() ?? [];
 
         var activities = new List<ActivityModel>();
@@ -98,31 +105,33 @@ public static class ProjectModelBuilder
             foreach (var activityPayload in payload.Activities)
             {
                 progress.Report($"Building activity '{activityPayload.Name.Trim()}'");
-                activities.Add(BuildActivity(activityPayload, activityIds, pendingRelations));
+                activities.Add(BuildActivity(activityPayload, activityReferences, pendingRelations));
             }
         }
 
-        return new ComponentModel(componentId, payload.Name.Trim(), childComponents, activities);
+        return new ComponentModel(componentId, payload.Name.Trim(), childComponents, activities, externalIds);
     }
 
     private static ActivityModel BuildActivity(
         ActivityImportPayload payload,
-        Dictionary<string, Guid> activityIds,
+        ActivityReferenceIndex activityReferences,
         List<PendingRelation> pendingRelations)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(payload.Name);
 
-        var activityId = ParseOrCreateId(payload.Id);
-        RegisterActivityId(payload.Id, activityId, activityIds);
+        var activityId = Guid.NewGuid();
+        var externalIds = ExternalIdHelper.Normalize(payload.ExternalIds);
+        activityReferences.Register(activityId, payload.Id, externalIds);
 
         var assignments = payload.Assignments?
             .Select(assignment =>
             {
                 ArgumentException.ThrowIfNullOrWhiteSpace(assignment.PersonName);
                 return new AssignmentModel(
-                    ParseOrCreateId(assignment.Id),
+                    Guid.NewGuid(),
                     assignment.PersonName.Trim(),
-                    assignment.Description?.Trim());
+                    assignment.Description?.Trim(),
+                    ExternalIdHelper.Normalize(assignment.ExternalIds));
             })
             .ToList() ?? [];
 
@@ -134,28 +143,11 @@ public static class ProjectModelBuilder
             }
         }
 
-        return new ActivityModel(activityId, payload.Name.Trim(), assignments, []);
-    }
-
-    private static void RegisterActivityId(string? externalId, Guid activityId, Dictionary<string, Guid> activityIds)
-    {
-        if (string.IsNullOrWhiteSpace(externalId))
-        {
-            activityIds[activityId.ToString()] = activityId;
-            return;
-        }
-
-        var key = externalId.Trim();
-        if (activityIds.TryGetValue(key, out var existing) && existing != activityId)
-        {
-            throw new InvalidOperationException($"Duplicate activity id '{key}'.");
-        }
-
-        activityIds[key] = activityId;
+        return new ActivityModel(activityId, payload.Name.Trim(), assignments, [], externalIds);
     }
 
     private static Dictionary<Guid, List<ActivityRelationModel>> ValidateAndResolveRelations(
-        Dictionary<string, Guid> activityIds,
+        ActivityReferenceIndex activityReferences,
         List<PendingRelation> pendingRelations)
     {
         var resolved = new Dictionary<Guid, List<ActivityRelationModel>>();
@@ -167,7 +159,7 @@ public static class ProjectModelBuilder
                 throw new ArgumentException("Related activity id is required for relations.");
             }
 
-            if (!activityIds.TryGetValue(pending.Relation.RelatedActivityId.Trim(), out var relatedId))
+            if (!TryResolveActivityReference(activityReferences, pending.Relation.RelatedActivityId, out var relatedId))
             {
                 throw new InvalidOperationException(
                     $"Activity '{pending.SourceActivityId}' references unknown activity '{pending.Relation.RelatedActivityId}'.");
@@ -194,6 +186,29 @@ public static class ProjectModelBuilder
         }
 
         return resolved;
+    }
+
+    private static bool TryResolveActivityReference(
+        ActivityReferenceIndex activityReferences,
+        string reference,
+        out Guid activityId)
+    {
+        var trimmed = reference.Trim();
+        if (activityReferences.TryResolve(trimmed, out activityId))
+        {
+            return true;
+        }
+
+        var separatorIndex = trimmed.IndexOf(':');
+        if (separatorIndex > 0 && separatorIndex < trimmed.Length - 1)
+        {
+            var composite = ExternalIdHelper.CompositeKey(
+                trimmed[..separatorIndex],
+                trimmed[(separatorIndex + 1)..]);
+            return activityReferences.TryResolve(composite, out activityId);
+        }
+
+        return false;
     }
 
     private static ProjectModel AttachRelations(
@@ -224,15 +239,5 @@ public static class ProjectModelBuilder
             .ToList();
 
         return component with { Activities = activities, ChildComponents = children };
-    }
-
-    private static Guid ParseOrCreateId(string? value)
-    {
-        if (string.IsNullOrWhiteSpace(value))
-        {
-            return Guid.NewGuid();
-        }
-
-        return Guid.TryParse(value, out var parsed) ? parsed : Guid.NewGuid();
     }
 }

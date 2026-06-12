@@ -15,6 +15,8 @@ public sealed class ImportDbContext(DbContextOptions<ImportDbContext> options) :
 
     public DbSet<ActivityRelationEntity> ActivityRelations => Set<ActivityRelationEntity>();
 
+    public DbSet<EntityExternalIdEntity> EntityExternalIds => Set<EntityExternalIdEntity>();
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(ImportDbContext).Assembly);

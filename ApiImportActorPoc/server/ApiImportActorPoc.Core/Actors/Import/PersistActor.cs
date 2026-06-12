@@ -2,10 +2,8 @@ using Akka.Actor;
 using Akka.Event;
 using ApiImportActorPoc.Contracts.Events;
 using ApiImportActorPoc.Contracts.Messages.Import;
-using ApiImportActorPoc.Contracts.Models;
 using ApiImportActorPoc.Core.Import;
 using ApiImportActorPoc.Data;
-using ApiImportActorPoc.Data.Entities;
 using Microsoft.EntityFrameworkCore;
 
 namespace ApiImportActorPoc.Core.Actors.Import;
@@ -13,11 +11,11 @@ namespace ApiImportActorPoc.Core.Actors.Import;
 public sealed class PersistActor : ReceiveActor
 {
     private readonly ILoggingAdapter _log = Context.GetLogger();
-    private readonly IDbContextFactory<ImportDbContext> _dbContextFactory;
+    private readonly ProjectImportUpsertService _upsertService;
 
     public PersistActor(IDbContextFactory<ImportDbContext> dbContextFactory)
     {
-        _dbContextFactory = dbContextFactory;
+        _upsertService = new ProjectImportUpsertService(dbContextFactory);
         ReceiveAsync<PersistImportWithModelCommand>(HandlePersistAsync);
     }
 
@@ -28,14 +26,15 @@ public sealed class PersistActor : ReceiveActor
     {
         try
         {
-            await using var db = await _dbContextFactory.CreateDbContextAsync();
-            var entity = ProjectEntityMapper.ToEntity(command.Model);
-            db.Projects.Add(entity);
-            await db.SaveChangesAsync();
+            var result = await _upsertService.UpsertAsync(command.Model);
 
-            Context.System.EventStream.Publish(new ImportPersisted(command.SessionId, entity.Id, DateTimeOffset.UtcNow));
-            Sender.Tell(new PersistImportResult(true, entity.Id, null));
-            _log.Info("Persisted import session {0} as project {1}", command.SessionId, entity.Id);
+            Context.System.EventStream.Publish(new ImportPersisted(command.SessionId, result.ProjectId, DateTimeOffset.UtcNow));
+            Sender.Tell(new PersistImportResult(true, result.ProjectId, null));
+            _log.Info(
+                "Persisted import session {0} as project {1} ({2})",
+                command.SessionId,
+                result.ProjectId,
+                result.Created ? "created" : "updated");
         }
         catch (Exception exception)
         {

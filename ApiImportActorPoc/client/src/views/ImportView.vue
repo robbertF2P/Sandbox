@@ -6,26 +6,27 @@ import type { ImportEventNotification } from '../types/import'
 
 const samplePayload = {
   name: 'MV Northern Star — Hull 247',
+  externalIds: { PLM: 'HULL-247' },
   components: [
     {
-      id: 'c-block-204',
       name: 'Hull Block 204',
+      externalIds: { PLM: 'BLOCK-204' },
       childComponents: [
         {
-          id: 'c-engine-room',
           name: 'Engine Room Module',
+          externalIds: { PLM: 'MOD-ERM' },
           activities: [
             {
-              id: 'a-erection',
               name: 'Block Erection',
-              assignments: [{ personName: 'Marco van Berg', description: 'Crane supervisor' }],
-              relations: [{ relatedActivityId: 'a-welding', type: 'Successor' }],
+              externalIds: { PLM: 'ACT-ERECT' },
+              assignments: [{ personName: 'Marco van Berg', description: 'Crane supervisor', externalIds: { HR: 'PERSON-1' } }],
+              relations: [{ relatedActivityId: 'PLM:ACT-WELD', type: 'Successor' }],
             },
             {
-              id: 'a-welding',
               name: 'Structural Welding',
-              assignments: [{ personName: 'Elena Petrov', description: 'Certified welder' }],
-              relations: [{ relatedActivityId: 'a-erection', type: 'Predecessor' }],
+              externalIds: { PLM: 'ACT-WELD' },
+              assignments: [{ personName: 'Elena Petrov', description: 'Certified welder', externalIds: { HR: 'PERSON-2' } }],
+              relations: [{ relatedActivityId: 'PLM:ACT-ERECT', type: 'Predecessor' }],
             },
           ],
         },

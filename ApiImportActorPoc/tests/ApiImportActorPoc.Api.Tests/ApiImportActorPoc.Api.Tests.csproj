@@ -9,6 +9,8 @@
 
   <ItemGroup>
     <PackageReference Include="Akka.Hosting.TestKit" />
+    <PackageReference Include="Microsoft.Data.Sqlite" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" />
     <PackageReference Include="xunit.v3" />
     <PackageReference Include="xunit.runner.visualstudio" />
@@ -21,6 +23,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\server\ApiImportActorPoc.Core\ApiImportActorPoc.Core.csproj" />
+    <ProjectReference Include="..\..\server\ApiImportActorPoc.Data\ApiImportActorPoc.Data.csproj" />
     <ProjectReference Include="..\..\server\ApiImportActorPoc.Contracts\ApiImportActorPoc.Contracts.csproj" />
   </ItemGroup>
 

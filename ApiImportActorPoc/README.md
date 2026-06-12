@@ -9,6 +9,15 @@ Proof of concept modeled on `AkkaSignalRVuePoc`: Akka.NET actors import a **ship
 - **Activity** — construction or outfitting work (erection, welding, piping, painting, trials prep)
 - **Assignment** — trade or role performing the work (welder, pipefitter, electrician, surveyor)
 - **Activity relations** — scheduling links: child (sub-task), predecessor, successor (e.g. block erection before welding)
+- **External ids** — flexible key/value pairs per entity (`"PLM": "BLOCK-204"`, `"SAP": "..."`) for cross-system identity
+
+### External id rules
+
+- Every entity (project, component, activity, assignment) may carry `externalIds: { "SystemName": "value" }`.
+- Each `system:value` pair must be **unique across the entire model** (validated on import).
+- After the first persist, entities keep an internal `Guid`; external ids are stored separately.
+- **Subsequent imports update** existing rows when any external id matches (upsert, not duplicate insert).
+- Activity relations may reference `system:value` (e.g. `"PLM:ACT-WELD"`).
 
 ## Stack
 

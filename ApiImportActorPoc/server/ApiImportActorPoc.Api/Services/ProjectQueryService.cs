@@ -41,7 +41,8 @@ public sealed class ProjectQueryService(IDbContextFactory<ImportDbContext> dbCon
                 .ThenInclude(activity => activity.OutgoingRelations)
             .ToListAsync(cancellationToken);
 
-        return ProjectEntityReader.ToModel(project, components);
+        var externalIds = await ExternalIdLoader.LoadByInternalIdAsync(db, cancellationToken);
+        return ProjectEntityReader.ToModel(project, components, externalIds);
     }
 
     public async Task<ProjectImportPayload?> GetImportPayloadAsync(
