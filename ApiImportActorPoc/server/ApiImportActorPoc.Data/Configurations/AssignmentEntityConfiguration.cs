@@ -13,5 +13,7 @@ public sealed class AssignmentEntityConfiguration : IEntityTypeConfiguration<Ass
         builder.Property(assignment => assignment.Id).UseIdentityColumn();
         builder.Property(assignment => assignment.PersonName).HasMaxLength(256).IsRequired();
         builder.Property(assignment => assignment.Description).HasMaxLength(1024);
+        builder.Property(assignment => assignment.BudgetedHours).HasPrecision(18, 2);
     }
 }
+

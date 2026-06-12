@@ -17,6 +17,8 @@ public sealed class ImportDbContext(DbContextOptions<ImportDbContext> options) :
 
     public DbSet<EntityExternalIdEntity> EntityExternalIds => Set<EntityExternalIdEntity>();
 
+    public DbSet<HourBookingEntity> HourBookings => Set<HourBookingEntity>();
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(ImportDbContext).Assembly);

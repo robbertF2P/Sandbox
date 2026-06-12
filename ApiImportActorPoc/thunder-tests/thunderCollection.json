@@ -108,6 +108,45 @@
         "raw": "",
         "form": []
       }
+    },
+    {
+      "name": "Get project progress",
+      "url": "{{baseUrl}}/api/projects/{{projectId}}/progress",
+      "method": "GET",
+      "sortNum": 90000,
+      "headers": [],
+      "params": [],
+      "body": {
+        "type": "json",
+        "raw": "",
+        "form": []
+      }
+    },
+    {
+      "name": "List assignments",
+      "url": "{{baseUrl}}/api/assignments",
+      "method": "GET",
+      "sortNum": 100000,
+      "headers": [],
+      "params": [],
+      "body": {
+        "type": "json",
+        "raw": "",
+        "form": []
+      }
+    },
+    {
+      "name": "Book hours",
+      "url": "{{baseUrl}}/api/assignments/{{assignmentId}}/hours",
+      "method": "POST",
+      "sortNum": 110000,
+      "headers": [],
+      "params": [],
+      "body": {
+        "type": "json",
+        "raw": "{\n  \"hours\": 8,\n  \"notes\": \"Day shift\"\n}",
+        "form": []
+      }
     }
   ]
 }

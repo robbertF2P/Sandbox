@@ -36,6 +36,8 @@ try
     });
     builder.Services.AddImportData(builder.Configuration);
     builder.Services.AddSingleton<ProjectQueryService>();
+    builder.Services.AddSingleton<ProgressQueryService>();
+    builder.Services.AddSingleton<HourBookingService>();
     builder.Services.AddHealthChecks();
     builder.Services.AddAkkaActors();
     builder.Services.AddSignalR();
@@ -84,11 +86,14 @@ try
         Hub = "/hubs/import",
         Import = "/api/import",
         Projects = "/api/projects",
+        Assignments = "/api/assignments",
         Health = "/health"
     }));
 
     app.MapImportEndpoints();
     app.MapProjectEndpoints();
+    app.MapProgressEndpoints();
+    app.MapAssignmentEndpoints();
     app.MapHealthChecks("/health");
     app.MapHub<ImportHub>("/hubs/import");
 

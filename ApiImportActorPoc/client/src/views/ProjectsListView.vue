@@ -35,6 +35,7 @@ onMounted(async () => {
       <li v-for="project in projects" :key="project.id">
         <RouterLink :to="`/projects/${project.id}`">{{ project.name }}</RouterLink>
         <span class="id-chip">#{{ project.id }}</span>
+        <RouterLink class="btn-link btn-link--small" :to="`/projects/${project.id}/progress`">Progress</RouterLink>
       </li>
     </ul>
     <p v-if="!loading && !error && projects.length === 0" class="muted">

@@ -123,6 +123,7 @@ public sealed class ProjectImportUpsertServiceTests : IAsyncLifetime
                                     null,
                                     personName,
                                     "Trade",
+                                    40,
                                     new Dictionary<string, string> { ["HR"] = "PERSON-1" })
                             ],
                             null,

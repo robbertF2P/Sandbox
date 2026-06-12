@@ -4,6 +4,8 @@ import type {
   EditableComponent,
   EditableProject,
   EditableRelation,
+  ImportActivityPayload,
+  ImportComponentPayload,
   ImportPayload,
 } from '../types/project'
 
@@ -109,7 +111,7 @@ export function toImportPayload(project: EditableProject): ImportPayload {
   }
 }
 
-function toComponentPayload(component: EditableComponent) {
+function toComponentPayload(component: EditableComponent): ImportComponentPayload {
   return {
     name: component.name,
     externalIds: Object.keys(component.externalIds).length ? component.externalIds : undefined,
@@ -122,7 +124,7 @@ function toComponentPayload(component: EditableComponent) {
   }
 }
 
-function toActivityPayload(activity: EditableActivity) {
+function toActivityPayload(activity: EditableActivity): ImportActivityPayload {
   return {
     name: activity.name,
     externalIds: Object.keys(activity.externalIds).length ? activity.externalIds : undefined,

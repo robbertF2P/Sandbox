@@ -88,6 +88,7 @@ public static class ProjectEntityReader
                 assignment.Id,
                 assignment.PersonName,
                 assignment.Description,
+                assignment.BudgetedHours,
                 ExternalIdLoader.ForEntity(assignment.Id, externalIdsByInternalId)))
             .ToList();
 
@@ -130,6 +131,7 @@ public static class ProjectEntityReader
                     null,
                     assignment.PersonName,
                     assignment.Description,
+                    assignment.BudgetedHours,
                     CopyExternalIds(assignment.ExternalIds))).ToList()
                 : null,
             model.Relations.Count > 0

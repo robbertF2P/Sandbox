@@ -134,6 +134,7 @@ public static class ProjectModelBuilder
                     tempIds.Next(),
                     assignment.PersonName.Trim(),
                     assignment.Description?.Trim(),
+                    assignment.BudgetedHours ?? 0,
                     ExternalIdHelper.Normalize(assignment.ExternalIds));
             })
             .ToList() ?? [];

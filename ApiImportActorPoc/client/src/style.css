@@ -271,3 +271,88 @@ button:disabled {
 .success {
   color: #86efac;
 }
+
+.btn-link--small {
+  padding: 0.35rem 0.65rem;
+  font-size: 0.85rem;
+}
+
+.book-hours-form {
+  display: grid;
+  gap: 1rem;
+  max-width: 40rem;
+}
+
+.book-hours-form label {
+  display: grid;
+  gap: 0.35rem;
+}
+
+.progress-block {
+  margin: 0.75rem 0 1rem;
+}
+
+.progress-block__label {
+  margin-bottom: 0.35rem;
+  font-size: 0.9rem;
+  color: #cbd5e1;
+}
+
+.progress-block__meta {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 0.35rem;
+  font-size: 0.85rem;
+  color: #94a3b8;
+}
+
+.progress-bar {
+  height: 0.65rem;
+  border-radius: 999px;
+  background: rgba(148, 163, 184, 0.2);
+  overflow: hidden;
+}
+
+.progress-bar__fill {
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #2563eb, #38bdf8);
+}
+
+.progress-tree {
+  list-style: none;
+  padding-left: 0;
+  margin: 0.5rem 0 0;
+}
+
+.progress-tree--root {
+  margin-top: 1rem;
+}
+
+.progress-tree details {
+  margin-bottom: 0.75rem;
+  padding: 0.75rem;
+  border: 1px solid rgba(148, 163, 184, 0.14);
+  border-radius: 0.75rem;
+  background: rgba(2, 6, 23, 0.25);
+}
+
+.progress-tree summary {
+  cursor: pointer;
+  margin-bottom: 0.35rem;
+}
+
+.progress-tree__name {
+  font-weight: 600;
+}
+
+.progress-tree--assignments {
+  padding-left: 0.75rem;
+}
+
+.progress-tree__assignment {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 0.25rem;
+}

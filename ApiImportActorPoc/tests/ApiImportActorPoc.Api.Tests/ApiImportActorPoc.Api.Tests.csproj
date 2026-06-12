@@ -22,6 +22,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\server\ApiImportActorPoc.Api\ApiImportActorPoc.Api.csproj" />
     <ProjectReference Include="..\..\server\ApiImportActorPoc.Core\ApiImportActorPoc.Core.csproj" />
     <ProjectReference Include="..\..\server\ApiImportActorPoc.Data\ApiImportActorPoc.Data.csproj" />
     <ProjectReference Include="..\..\server\ApiImportActorPoc.Contracts\ApiImportActorPoc.Contracts.csproj" />

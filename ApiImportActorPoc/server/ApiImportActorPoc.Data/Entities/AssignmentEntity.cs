@@ -10,5 +10,9 @@ public sealed class AssignmentEntity
 
     public string? Description { get; set; }
 
+    public decimal BudgetedHours { get; set; }
+
     public ActivityEntity Activity { get; set; } = null!;
+
+    public ICollection<HourBookingEntity> HourBookings { get; set; } = [];
 }

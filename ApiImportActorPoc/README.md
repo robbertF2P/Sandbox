@@ -98,6 +98,9 @@ Open `http://localhost:5174`. Copy `.env.example` to `.env.local` to override AP
 | GET | `/api/projects` | List persisted vessel projects |
 | GET | `/api/projects/{id}` | Full project tree (components, activities, assignments) |
 | GET | `/api/projects/{id}/export` | Export as import JSON (round-trip test) |
+| GET | `/api/projects/{id}/progress` | Budgeted vs worked hours rolled up to project |
+| GET | `/api/assignments` | List assignments with project context |
+| POST | `/api/assignments/{id}/hours` | Book worked hours on an assignment |
 | POST | `/api/import` | Start import (JSON body = project payload) |
 | GET | `/api/import/{sessionId}/model` | Get built in-memory model as JSON |
 | POST | `/api/import/{sessionId}/persist` | Save model to EF Core database |
@@ -112,6 +115,9 @@ SignalR event: `importEvent` — `ImportStarted`, `ImportProgressUpdated`, `Impo
 | `/projects` | List persisted projects |
 | `/projects/new` | Create/edit a project structure in memory |
 | `/projects/{id}` | Edit lists + **Export JSON** for import testing |
+| `/projects/{id}/progress` | Progress bars: budgeted vs worked hours at every level |
+| `/book-hours` | Book hours on any assignment |
+| `/projects/{id}/book-hours` | Book hours filtered to one project |
 
 Round-trip: edit on **Projects** → Export → **Import** → Persist → view on **Projects** again.
 

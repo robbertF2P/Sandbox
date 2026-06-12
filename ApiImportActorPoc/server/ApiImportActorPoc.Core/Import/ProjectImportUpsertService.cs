@@ -210,6 +210,7 @@ public sealed class ProjectImportUpsertService(IDbContextFactory<ImportDbContext
                     cancellationToken);
                 existing.PersonName = assignmentModel.PersonName;
                 existing.Description = assignmentModel.Description;
+                existing.BudgetedHours = assignmentModel.BudgetedHours;
                 existing.ActivityId = activityId;
                 idMap[assignmentModel.Id] = existing.Id;
                 continue;
@@ -219,7 +220,8 @@ public sealed class ProjectImportUpsertService(IDbContextFactory<ImportDbContext
             {
                 ActivityId = activityId,
                 PersonName = assignmentModel.PersonName,
-                Description = assignmentModel.Description
+                Description = assignmentModel.Description,
+                BudgetedHours = assignmentModel.BudgetedHours
             };
             db.Assignments.Add(assignment);
             await db.SaveChangesAsync(cancellationToken);

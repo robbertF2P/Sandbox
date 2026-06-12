@@ -19,13 +19,13 @@ const samplePayload = {
             {
               name: 'Block Erection',
               externalIds: { PLM: 'ACT-ERECT' },
-              assignments: [{ personName: 'Marco van Berg', description: 'Crane supervisor', externalIds: { HR: 'PERSON-1' } }],
+              assignments: [{ personName: 'Marco van Berg', description: 'Crane supervisor', budgetedHours: 40, externalIds: { HR: 'PERSON-1' } }],
               relations: [{ relatedActivityId: 'PLM:ACT-WELD', type: 'Successor' }],
             },
             {
               name: 'Structural Welding',
               externalIds: { PLM: 'ACT-WELD' },
-              assignments: [{ personName: 'Elena Petrov', description: 'Certified welder', externalIds: { HR: 'PERSON-2' } }],
+              assignments: [{ personName: 'Elena Petrov', description: 'Certified welder', budgetedHours: 56, externalIds: { HR: 'PERSON-2' } }],
               relations: [{ relatedActivityId: 'PLM:ACT-ERECT', type: 'Predecessor' }],
             },
           ],
