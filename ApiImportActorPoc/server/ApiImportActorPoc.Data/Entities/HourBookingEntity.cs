@@ -1,3 +1,5 @@
+using ApiImportActorPoc.Contracts.Values;
+
 namespace ApiImportActorPoc.Data.Entities;
 
 public sealed class HourBookingEntity
@@ -6,7 +8,7 @@ public sealed class HourBookingEntity
 
     public int AssignmentId { get; set; }
 
-    public decimal Hours { get; set; }
+    public Hours Hours { get; set; } = Hours.Zero;
 
     public DateTimeOffset BookedAt { get; set; }
 

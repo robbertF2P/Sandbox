@@ -40,13 +40,21 @@ function patchAssignment(
     <div v-for="(assignment, index) in assignments" :key="assignment.id" class="list-row">
       <input
         :value="assignment.personName"
-        placeholder="Person / trade"
+        placeholder="Person / trade (empty = open)"
         @input="patchAssignment(assignments, index, { personName: ($event.target as HTMLInputElement).value })"
       />
       <input
         :value="assignment.description"
         placeholder="Description"
         @input="patchAssignment(assignments, index, { description: ($event.target as HTMLInputElement).value })"
+      />
+      <input
+        type="number"
+        min="0"
+        step="0.5"
+        :value="assignment.budgetedHours"
+        placeholder="Budgeted h"
+        @input="patchAssignment(assignments, index, { budgetedHours: Number(($event.target as HTMLInputElement).value) })"
       />
       <button type="button" class="btn-danger" @click="removeAssignment(assignments, index)">Remove</button>
     </div>

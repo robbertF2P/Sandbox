@@ -51,6 +51,11 @@ namespace ApiImportActorPoc.Data.Migrations.Migrations
                         .HasAnnotation("SqlServer:IdentitySeed", 1L)
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
+                    b.Property<int>("LagDays")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER")
+                        .HasDefaultValue(0);
+
                     b.Property<string>("RelationType")
                         .IsRequired()
                         .HasMaxLength(32)
@@ -111,6 +116,11 @@ namespace ApiImportActorPoc.Data.Migrations.Migrations
                         .HasAnnotation("SqlServer:IdentityIncrement", 1)
                         .HasAnnotation("SqlServer:IdentitySeed", 1L)
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<bool>("IsTemplate")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER")
+                        .HasDefaultValue(false);
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -218,6 +228,70 @@ namespace ApiImportActorPoc.Data.Migrations.Migrations
                     b.ToTable("Projects", (string)null);
                 });
 
+            modelBuilder.Entity("ApiImportActorPoc.Data.Planning.Entities.AssignmentPlanEntity", b =>
+                {
+                    b.Property<int>("AssignmentId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<decimal>("DurationDays")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("AssignmentId");
+
+                    b.ToTable("AssignmentPlans", (string)null);
+                });
+
+            modelBuilder.Entity("ApiImportActorPoc.Data.Planning.Entities.MilestoneEntity", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER")
+                        .HasAnnotation("SqlServer:IdentityIncrement", 1)
+                        .HasAnnotation("SqlServer:IdentitySeed", 1L)
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<int?>("ActivityId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(256)
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("ProjectId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("TargetDate")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ActivityId");
+
+                    b.HasIndex("ProjectId");
+
+                    b.ToTable("Milestones", (string)null);
+                });
+
+            modelBuilder.Entity("ApiImportActorPoc.Data.Planning.Entities.ProjectPlanEntity", b =>
+                {
+                    b.Property<int>("ProjectId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTimeOffset>("LastCalculatedAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("PlannedStartDate")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("ProjectId");
+
+                    b.ToTable("ProjectPlans", (string)null);
+                });
+
             modelBuilder.Entity("ApiImportActorPoc.Data.Entities.ActivityEntity", b =>
                 {
                     b.HasOne("ApiImportActorPoc.Data.Entities.ComponentEntity", "Component")
@@ -286,6 +360,46 @@ namespace ApiImportActorPoc.Data.Migrations.Migrations
                         .IsRequired();
 
                     b.Navigation("Assignment");
+                });
+
+            modelBuilder.Entity("ApiImportActorPoc.Data.Planning.Entities.AssignmentPlanEntity", b =>
+                {
+                    b.HasOne("ApiImportActorPoc.Data.Entities.AssignmentEntity", "Assignment")
+                        .WithOne()
+                        .HasForeignKey("ApiImportActorPoc.Data.Planning.Entities.AssignmentPlanEntity", "AssignmentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Assignment");
+                });
+
+            modelBuilder.Entity("ApiImportActorPoc.Data.Planning.Entities.MilestoneEntity", b =>
+                {
+                    b.HasOne("ApiImportActorPoc.Data.Entities.ActivityEntity", "Activity")
+                        .WithMany()
+                        .HasForeignKey("ActivityId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.HasOne("ApiImportActorPoc.Data.Entities.ProjectEntity", "Project")
+                        .WithMany()
+                        .HasForeignKey("ProjectId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Activity");
+
+                    b.Navigation("Project");
+                });
+
+            modelBuilder.Entity("ApiImportActorPoc.Data.Planning.Entities.ProjectPlanEntity", b =>
+                {
+                    b.HasOne("ApiImportActorPoc.Data.Entities.ProjectEntity", "Project")
+                        .WithOne()
+                        .HasForeignKey("ApiImportActorPoc.Data.Planning.Entities.ProjectPlanEntity", "ProjectId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Project");
                 });
 
             modelBuilder.Entity("ApiImportActorPoc.Data.Entities.ActivityEntity", b =>

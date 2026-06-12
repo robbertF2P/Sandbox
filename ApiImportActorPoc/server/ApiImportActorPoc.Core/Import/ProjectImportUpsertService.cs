@@ -9,20 +9,36 @@ public sealed class ProjectImportUpsertService(IDbContextFactory<ImportDbContext
 {
     public sealed record UpsertResult(int ProjectId, bool Created);
 
-    public async Task<UpsertResult> UpsertAsync(ProjectModel model, CancellationToken cancellationToken = default)
+    public sealed record PersistProgress(int Step, int TotalSteps, string Message);
+
+    public Task<UpsertResult> UpsertAsync(ProjectModel model, CancellationToken cancellationToken = default) =>
+        UpsertAsync(model, onProgress: null, cancellationToken);
+
+    public async Task<UpsertResult> UpsertAsync(
+        ProjectModel model,
+        Action<PersistProgress>? onProgress,
+        CancellationToken cancellationToken = default)
     {
+        const int totalSteps = 4;
+        var step = 0;
+        void Report(string message) => onProgress?.Invoke(new PersistProgress(++step, totalSteps, message));
+
         ExternalIdUniquenessValidator.ValidateModel(model);
 
         await using var db = await dbContextFactory.CreateDbContextAsync(cancellationToken);
         var existingExternalIds = await LoadExistingExternalIdsAsync(db, cancellationToken);
-        var resolvedModel = ProjectImportIdentityResolver.Resolve(model, existingExternalIds);
+        var resolvedModel = ComponentPersistOrderer.OrderTemplatesFirst(
+            ProjectImportIdentityResolver.Resolve(model, existingExternalIds));
         var idMap = new Dictionary<int, int>();
         var deferredRelations = new List<(int SourceActivityModelId, ActivityRelationModel Relation)>();
 
         var created = resolvedModel.Id <= 0
                       || !await db.Projects.AnyAsync(project => project.Id == resolvedModel.Id, cancellationToken);
 
+        Report("Persisting project");
         var projectId = await UpsertProjectAsync(db, resolvedModel, idMap, cancellationToken);
+
+        Report("Persisting components (templates first)");
         await UpsertComponentsAsync(
             db,
             projectId,
@@ -32,7 +48,10 @@ public sealed class ProjectImportUpsertService(IDbContextFactory<ImportDbContext
             deferredRelations,
             cancellationToken);
 
+        Report("Applying activity relations");
         await ApplyDeferredRelationsAsync(db, idMap, deferredRelations, cancellationToken);
+
+        Report("Saving external ids");
         await ReplaceExternalIdsAsync(db, resolvedModel, idMap, cancellationToken);
         await db.SaveChangesAsync(cancellationToken);
 
@@ -121,6 +140,7 @@ public sealed class ProjectImportUpsertService(IDbContextFactory<ImportDbContext
         {
             var existing = await db.Components.FirstAsync(component => component.Id == model.Id, cancellationToken);
             existing.Name = model.Name;
+            existing.IsTemplate = model.IsTemplate;
             existing.ProjectId = projectId;
             existing.ParentComponentId = parentComponentId;
             idMap[model.Id] = existing.Id;
@@ -131,7 +151,8 @@ public sealed class ProjectImportUpsertService(IDbContextFactory<ImportDbContext
         {
             ProjectId = projectId,
             ParentComponentId = parentComponentId,
-            Name = model.Name
+            Name = model.Name,
+            IsTemplate = model.IsTemplate
         };
         db.Components.Add(component);
         await db.SaveChangesAsync(cancellationToken);
@@ -246,7 +267,8 @@ public sealed class ProjectImportUpsertService(IDbContextFactory<ImportDbContext
             {
                 SourceActivityId = sourceActivityId,
                 TargetActivityId = targetActivityId,
-                RelationType = relation.Type.ToString()
+                RelationType = relation.Type.ToString(),
+                LagDays = relation.LagDays
             });
         }
 

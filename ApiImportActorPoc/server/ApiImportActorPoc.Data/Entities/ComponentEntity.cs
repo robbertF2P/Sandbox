@@ -10,6 +10,8 @@ public sealed class ComponentEntity
 
     public string Name { get; set; } = string.Empty;
 
+    public bool IsTemplate { get; set; }
+
     public ProjectEntity Project { get; set; } = null!;
 
     public ComponentEntity? ParentComponent { get; set; }

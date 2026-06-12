@@ -1,4 +1,5 @@
 using ApiImportActorPoc.Contracts.Models;
+using ApiImportActorPoc.Contracts.Values;
 using ApiImportActorPoc.Data;
 using ApiImportActorPoc.Data.Entities;
 using Microsoft.EntityFrameworkCore;
@@ -17,8 +18,11 @@ public sealed class HourBookingService(IDbContextFactory<ImportDbContext> dbCont
             .Include(assignment => assignment.HourBookings)
             .Include(assignment => assignment.Activity)
                 .ThenInclude(activity => activity.Component)
-            .OrderBy(assignment => assignment.PersonName)
             .ToListAsync(cancellationToken);
+
+        assignments = assignments
+            .OrderBy(assignment => assignment.PersonName.Value, StringComparer.OrdinalIgnoreCase)
+            .ToList();
 
         if (assignments.Count == 0)
         {
@@ -45,7 +49,7 @@ public sealed class HourBookingService(IDbContextFactory<ImportDbContext> dbCont
             {
                 var component = assignment.Activity.Component;
                 var project = projects[component.ProjectId];
-                var hoursWorked = assignment.HourBookings.Sum(booking => booking.Hours);
+                var hoursWorked = assignment.HourBookings.Aggregate(Hours.Zero, (total, booking) => total + booking.Hours);
 
                 return new AssignmentListItem(
                     assignment.Id,
@@ -65,7 +69,7 @@ public sealed class HourBookingService(IDbContextFactory<ImportDbContext> dbCont
         BookHoursRequest request,
         CancellationToken cancellationToken = default)
     {
-        if (request.Hours <= 0)
+        if (request.Hours <= Hours.Zero)
         {
             throw new ArgumentOutOfRangeException(nameof(request), "Hours must be greater than zero.");
         }

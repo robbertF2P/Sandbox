@@ -1,8 +1,10 @@
+using ApiImportActorPoc.Contracts.Values;
+
 namespace ApiImportActorPoc.Contracts.Models;
 
 public sealed record AssignmentModel(
     int Id,
-    string PersonName,
+    PersonName PersonName,
     string? Description,
-    decimal BudgetedHours,
+    Hours BudgetedHours,
     IReadOnlyDictionary<string, string> ExternalIds);

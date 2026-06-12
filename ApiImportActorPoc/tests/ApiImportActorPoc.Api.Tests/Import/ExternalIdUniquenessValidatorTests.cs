@@ -15,6 +15,7 @@ public sealed class ExternalIdUniquenessValidatorTests
                     null,
                     "Block",
                     null,
+                    null,
                     [
                         new ActivityImportPayload(
                             null,

@@ -1,6 +1,7 @@
 using Akka.Actor;
 using ApiImportActorPoc.Contracts.Events;
 using ApiImportActorPoc.Contracts.Messages.Import;
+using ApiImportActorPoc.Core.Actors.Data;
 using ApiImportActorPoc.Data;
 using Microsoft.EntityFrameworkCore;
 
@@ -10,7 +11,7 @@ public sealed class RootActor : ReceiveActor
 {
     private readonly IDbContextFactory<ImportDbContext> _dbContextFactory;
     private IActorRef _importManager = ActorRefs.Nobody;
-    private IActorRef _persistActor = ActorRefs.Nobody;
+    private IActorRef _dataManager = ActorRefs.Nobody;
 
     public RootActor(IDbContextFactory<ImportDbContext> dbContextFactory)
     {
@@ -29,7 +30,7 @@ public sealed class RootActor : ReceiveActor
     protected override void PreStart()
     {
         _importManager = Context.ActorOf(Import.ImportManagerActor.Props(), "import-manager");
-        _persistActor = Context.ActorOf(Import.PersistActor.Props(_dbContextFactory), "persist");
+        _dataManager = Context.ActorOf(DataManagerActor.Props(_dbContextFactory), "data-manager");
     }
 
     private void Ready()
@@ -54,7 +55,7 @@ public sealed class RootActor : ReceiveActor
                 return;
             }
 
-            _persistActor.Tell(new PersistImportWithModelCommand(sessionId, result.Model));
+            _dataManager.Tell(new PersistImportWithModelCommand(sessionId, result.Model));
             Become(() => WaitForPersistResult(originalSender));
         });
     }

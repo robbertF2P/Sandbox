@@ -32,6 +32,7 @@ export function createEmptyComponent(name = 'Component'): EditableComponent {
   return {
     id: newTempId(),
     name,
+    isTemplate: false,
     externalIds: {},
     childComponents: [],
     activities: [],
@@ -53,6 +54,7 @@ export function createEmptyAssignment(): EditableAssignment {
     id: newTempId(),
     personName: '',
     description: '',
+    budgetedHours: 0,
     externalIds: {},
   }
 }
@@ -60,7 +62,8 @@ export function createEmptyAssignment(): EditableAssignment {
 export function createEmptyRelation(): EditableRelation {
   return {
     relatedActivityId: '',
-    type: 'Successor',
+    type: 'FinishToStart',
+    lagDays: 0,
   }
 }
 
@@ -78,6 +81,7 @@ function mapComponent(component: any): EditableComponent {
   return {
     id: component.id,
     name: component.name,
+    isTemplate: component.isTemplate ?? false,
     externalIds: component.externalIds ?? {},
     childComponents: (component.childComponents ?? []).map(mapComponent),
     activities: (component.activities ?? []).map(mapActivity),
@@ -94,11 +98,13 @@ function mapActivity(activity: any): EditableActivity {
       id: assignment.id,
       personName: assignment.personName,
       description: assignment.description ?? '',
+      budgetedHours: assignment.budgetedHours ?? 0,
       externalIds: assignment.externalIds ?? {},
     })),
     relations: (activity.relations ?? []).map((relation: any) => ({
       relatedActivityId: String(relation.relatedActivityId),
       type: relation.type,
+      lagDays: relation.lagDays ?? 0,
     })),
   }
 }
@@ -114,6 +120,7 @@ export function toImportPayload(project: EditableProject): ImportPayload {
 function toComponentPayload(component: EditableComponent): ImportComponentPayload {
   return {
     name: component.name,
+    isTemplate: component.isTemplate ? true : undefined,
     externalIds: Object.keys(component.externalIds).length ? component.externalIds : undefined,
     childComponents: component.childComponents.length
       ? component.childComponents.map(toComponentPayload)
@@ -132,6 +139,7 @@ function toActivityPayload(activity: EditableActivity): ImportActivityPayload {
       ? activity.assignments.map((assignment) => ({
           personName: assignment.personName,
           description: assignment.description || undefined,
+          budgetedHours: assignment.budgetedHours || undefined,
           externalIds: Object.keys(assignment.externalIds).length ? assignment.externalIds : undefined,
         }))
       : undefined,
@@ -139,6 +147,7 @@ function toActivityPayload(activity: EditableActivity): ImportActivityPayload {
       ? activity.relations.map((relation) => ({
           relatedActivityId: relation.relatedActivityId,
           type: relation.type,
+          lagDays: relation.lagDays > 0 ? relation.lagDays : undefined,
         }))
       : undefined,
   }

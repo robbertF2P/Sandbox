@@ -1,3 +1,5 @@
+using ApiImportActorPoc.Contracts.Values;
+
 namespace ApiImportActorPoc.Data.Entities;
 
 public sealed class ActivityRelationEntity
@@ -9,6 +11,8 @@ public sealed class ActivityRelationEntity
     public int TargetActivityId { get; set; }
 
     public string RelationType { get; set; } = string.Empty;
+
+    public LagDays LagDays { get; set; } = LagDays.Zero;
 
     public ActivityEntity SourceActivity { get; set; } = null!;
 

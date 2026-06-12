@@ -1,5 +1,6 @@
 using ApiImportActorPoc.Contracts.Models;
 using ApiImportActorPoc.Contracts.Models.Progress;
+using ApiImportActorPoc.Contracts.Values;
 using ApiImportActorPoc.Data.Entities;
 
 namespace ApiImportActorPoc.Core.Progress;
@@ -8,8 +9,8 @@ public static class ProgressCalculator
 {
     public static ProgressSummary Sum(IEnumerable<ProgressSummary> summaries)
     {
-        var budgeted = 0m;
-        var worked = 0m;
+        var budgeted = Hours.Zero;
+        var worked = Hours.Zero;
         foreach (var summary in summaries)
         {
             budgeted += summary.BudgetedHours;
@@ -74,10 +75,10 @@ public static class ProgressCalculator
 
     public static AssignmentProgressDto ToAssignmentProgress(AssignmentEntity assignment)
     {
-        var hoursWorked = assignment.HourBookings.Sum(booking => booking.Hours);
+        var hoursWorked = assignment.HourBookings.Aggregate(Hours.Zero, (total, booking) => total + booking.Hours);
         return new AssignmentProgressDto(
             assignment.Id,
-            assignment.PersonName,
+            assignment.PersonName.DisplayLabel,
             assignment.Description,
             new ProgressSummary(assignment.BudgetedHours, hoursWorked));
     }

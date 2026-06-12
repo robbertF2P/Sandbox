@@ -1,5 +1,6 @@
 using ApiImportActorPoc.Contracts.Models;
 using ApiImportActorPoc.Contracts.Models.Import;
+using ApiImportActorPoc.Contracts.Values;
 
 namespace ApiImportActorPoc.Core.Import;
 
@@ -111,7 +112,13 @@ public static class ProjectModelBuilder
             }
         }
 
-        return new ComponentModel(componentId, payload.Name.Trim(), childComponents, activities, externalIds);
+        return new ComponentModel(
+            componentId,
+            payload.Name.Trim(),
+            payload.IsTemplate ?? false,
+            childComponents,
+            activities,
+            externalIds);
     }
 
     private static ActivityModel BuildActivity(
@@ -127,16 +134,12 @@ public static class ProjectModelBuilder
         activityReferences.Register(activityId, payload.Id, externalIds);
 
         var assignments = payload.Assignments?
-            .Select(assignment =>
-            {
-                ArgumentException.ThrowIfNullOrWhiteSpace(assignment.PersonName);
-                return new AssignmentModel(
+            .Select(assignment => new AssignmentModel(
                     tempIds.Next(),
-                    assignment.PersonName.Trim(),
+                    PersonName.From(assignment.PersonName),
                     assignment.Description?.Trim(),
-                    assignment.BudgetedHours ?? 0,
-                    ExternalIdHelper.Normalize(assignment.ExternalIds));
-            })
+                    Hours.From(assignment.BudgetedHours ?? 0),
+                    ExternalIdHelper.Normalize(assignment.ExternalIds)))
             .ToList() ?? [];
 
         if (payload.Relations is not null)
@@ -172,7 +175,7 @@ public static class ProjectModelBuilder
             if (!Enum.TryParse<ActivityRelationType>(pending.Relation.Type, ignoreCase: true, out var relationType))
             {
                 throw new ArgumentException(
-                    $"Unknown relation type '{pending.Relation.Type}'. Expected Child, Predecessor, or Successor.");
+                    $"Unknown relation type '{pending.Relation.Type}'. Expected Child, Predecessor, Successor, FinishToStart, StartToStart, FinishToFinish, or StartToFinish.");
             }
 
             if (relationType == ActivityRelationType.Child && relatedId == pending.SourceActivityId)
@@ -186,7 +189,7 @@ public static class ProjectModelBuilder
                 resolved[pending.SourceActivityId] = relations;
             }
 
-            relations.Add(new ActivityRelationModel(relatedId, relationType));
+            relations.Add(new ActivityRelationModel(relatedId, relationType, LagDays.From(pending.Relation.LagDays ?? 0)));
         }
 
         return resolved;

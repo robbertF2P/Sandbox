@@ -1,4 +1,5 @@
 using ApiImportActorPoc.Api.Services;
+using ApiImportActorPoc.Core.Templates;
 
 namespace ApiImportActorPoc.Api.Endpoints;
 
@@ -34,6 +35,14 @@ public static class ProjectEndpoints
         })
         .WithName("ExportProject")
         .WithSummary("Export project in import payload format (round-trip test)");
+
+        group.MapGet("/{projectId:int}/component-templates", async (
+            int projectId,
+            ComponentTemplateService service,
+            CancellationToken cancellationToken) =>
+            Results.Ok(await service.ListTemplatesAsync(projectId, cancellationToken)))
+        .WithName("ListComponentTemplates")
+        .WithSummary("List components marked as templates in a project");
 
         return app;
     }

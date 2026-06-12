@@ -5,11 +5,12 @@ Proof of concept modeled on `AkkaSignalRVuePoc`: Akka.NET actors import a **ship
 ## Domain model (shipbuilding)
 
 - **Project** — a vessel new-build or refit (e.g. hull number, ship name)
-- **Component** — hull blocks, sections, zones, or modules; components can nest (block → section → outfitting zone)
+- **Component** — hull blocks, sections, zones, or modules; components can nest (block → section → outfitting zone). A component can be marked as a **template** and used to spawn a new component with the same activities and assignments (open, no person linked, budgeted hours copied, no hours worked)
 - **Activity** — construction or outfitting work (erection, welding, piping, painting, trials prep)
 - **Assignment** — trade or role performing the work (welder, pipefitter, electrician, surveyor)
-- **Activity relations** — scheduling links: child (sub-task), predecessor, successor (e.g. block erection before welding)
+- **Activity relations** — structural `Child` links, plus scheduling dependencies: finish-to-start, start-to-start, finish-to-finish, start-to-finish (with optional lag days). Legacy `Predecessor`/`Successor` map to finish-to-start.
 - **External ids** — flexible key/value pairs per entity (`"PLM": "BLOCK-204"`, `"SAP": "..."`) for cross-system identity
+- **Planning** (separate model) — assignment durations, activity dependency scheduling, milestones, and Gantt timeline recalculation when start dates or durations change
 
 ### External id rules
 
@@ -19,6 +20,10 @@ Proof of concept modeled on `AkkaSignalRVuePoc`: Akka.NET actors import a **ship
 - Import **sessions** still use `Guid` (ephemeral, in-memory only).
 - **Subsequent imports update** existing rows when any external id matches (upsert, not duplicate insert).
 - Activity relations may reference `system:value` (e.g. `"PLM:ACT-WELD"`).
+
+## Actor persistence
+
+Import build stays in memory (`ImportSessionActor` → `ImportManagerActor`). When the model is ready to save, `RootActor` forwards to `DataManagerActor`, which delegates database work to `ProjectImportDataActor` — the only actor that opens `ImportDbContext` for import persistence. Components are ordered **templates first** among siblings at every tree level before upsert. `DataManagerActor` publishes `ImportPersisted` when the save completes.
 
 ## Stack
 
@@ -98,12 +103,19 @@ Open `http://localhost:5174`. Copy `.env.example` to `.env.local` to override AP
 | GET | `/api/projects` | List persisted vessel projects |
 | GET | `/api/projects/{id}` | Full project tree (components, activities, assignments) |
 | GET | `/api/projects/{id}/export` | Export as import JSON (round-trip test) |
+| GET | `/api/projects/{id}/component-templates` | List components marked as templates |
+| PATCH | `/api/components/{id}/template` | Mark or unmark a component as template |
+| POST | `/api/components/{id}/instantiate` | Create component from template (open assignments, budgeted hours) |
+| GET | `/api/projects/{id}/plan` | Calculated Gantt plan |
+| PUT | `/api/projects/{id}/plan/start` | Set project start and recalculate |
+| PUT | `/api/assignments/{id}/duration` | Set planning duration (days) and recalculate |
+| POST | `/api/projects/{id}/plan/milestones` | Add milestone |
 | GET | `/api/projects/{id}/progress` | Budgeted vs worked hours rolled up to project |
 | GET | `/api/assignments` | List assignments with project context |
 | POST | `/api/assignments/{id}/hours` | Book worked hours on an assignment |
 | POST | `/api/import` | Start import (JSON body = project payload) |
 | GET | `/api/import/{sessionId}/model` | Get built in-memory model as JSON |
-| POST | `/api/import/{sessionId}/persist` | Save model to EF Core database |
+| POST | `/api/import/{sessionId}/persist` | Save model via `DataManagerActor` (templates first, then tree) |
 
 SignalR event: `importEvent` — `ImportStarted`, `ImportProgressUpdated`, `ImportCompleted`, `ImportFailed`, `ImportPersisted`.
 
@@ -116,6 +128,7 @@ SignalR event: `importEvent` — `ImportStarted`, `ImportProgressUpdated`, `Impo
 | `/projects/new` | Create/edit a project structure in memory |
 | `/projects/{id}` | Edit lists + **Export JSON** for import testing |
 | `/projects/{id}/progress` | Progress bars: budgeted vs worked hours at every level |
+| `/projects/{id}/plan` | Gantt chart: activities, assignments, milestones |
 | `/book-hours` | Book hours on any assignment |
 | `/projects/{id}/book-hours` | Book hours filtered to one project |
 

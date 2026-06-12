@@ -7,12 +7,23 @@ export interface EditableAssignment {
   id: number
   personName: string
   description: string
+  budgetedHours: number
   externalIds: Record<string, string>
 }
 
+export type ActivityRelationKind =
+  | 'Child'
+  | 'Predecessor'
+  | 'Successor'
+  | 'FinishToStart'
+  | 'StartToStart'
+  | 'FinishToFinish'
+  | 'StartToFinish'
+
 export interface EditableRelation {
   relatedActivityId: string
-  type: 'Child' | 'Predecessor' | 'Successor'
+  type: ActivityRelationKind
+  lagDays: number
 }
 
 export interface EditableActivity {
@@ -26,6 +37,7 @@ export interface EditableActivity {
 export interface EditableComponent {
   id: number
   name: string
+  isTemplate: boolean
   childComponents: EditableComponent[]
   activities: EditableActivity[]
   externalIds: Record<string, string>
@@ -45,6 +57,7 @@ export interface ImportPayload {
 
 export interface ImportComponentPayload {
   name: string
+  isTemplate?: boolean
   externalIds?: Record<string, string>
   childComponents?: ImportComponentPayload[]
   activities?: ImportActivityPayload[]
@@ -53,6 +66,6 @@ export interface ImportComponentPayload {
 export interface ImportActivityPayload {
   name: string
   externalIds?: Record<string, string>
-  assignments?: { personName: string; description?: string; externalIds?: Record<string, string> }[]
-  relations?: { relatedActivityId: string; type: string }[]
+  assignments?: { personName: string; description?: string; budgetedHours?: number; externalIds?: Record<string, string> }[]
+  relations?: { relatedActivityId: string; type: string; lagDays?: number }[]
 }

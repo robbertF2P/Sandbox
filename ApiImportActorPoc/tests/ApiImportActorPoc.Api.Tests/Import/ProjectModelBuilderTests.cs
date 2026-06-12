@@ -15,10 +15,12 @@ public sealed class ProjectModelBuilderTests
                 new ComponentImportPayload(
                     null,
                     "Hull Block 204",
+                    null,
                     [
                         new ComponentImportPayload(
                             null,
                             "Engine Room Module",
+                            null,
                             null,
                             [
                                 new ActivityImportPayload(
@@ -64,6 +66,7 @@ public sealed class ProjectModelBuilderTests
                     null,
                     "Root",
                     null,
+                    null,
                     [
                         new ActivityImportPayload(
                             null,
@@ -85,6 +88,7 @@ public sealed class ProjectModelBuilderTests
                 new ComponentImportPayload(
                     null,
                     "Root",
+                    null,
                     null,
                     [
                         new ActivityImportPayload(

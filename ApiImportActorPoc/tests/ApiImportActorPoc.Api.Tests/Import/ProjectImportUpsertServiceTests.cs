@@ -1,5 +1,6 @@
 using ApiImportActorPoc.Contracts.Models;
 using ApiImportActorPoc.Contracts.Models.Import;
+using ApiImportActorPoc.Contracts.Values;
 using ApiImportActorPoc.Core.Import;
 using ApiImportActorPoc.Data;
 using Microsoft.Data.Sqlite;
@@ -70,7 +71,7 @@ public sealed class ProjectImportUpsertServiceTests : IAsyncLifetime
         Assert.Equal("Block Erection Revised", activity.Name);
 
         var assignment = await db.Assignments.SingleAsync();
-        Assert.Equal("Elena Petrov", assignment.PersonName);
+        Assert.Equal(PersonName.From("Elena Petrov"), assignment.PersonName);
 
         var externalIds = await db.EntityExternalIds.CountAsync();
         Assert.Equal(4, externalIds);
@@ -95,6 +96,7 @@ public sealed class ProjectImportUpsertServiceTests : IAsyncLifetime
                     "Other block",
                     null,
                     null,
+                    null,
                     new Dictionary<string, string> { ["PLM"] = "HULL-247" })
             ]);
 
@@ -113,6 +115,7 @@ public sealed class ProjectImportUpsertServiceTests : IAsyncLifetime
                 new ComponentImportPayload(
                     null,
                     blockName,
+                    null,
                     null,
                     [
                         new ActivityImportPayload(

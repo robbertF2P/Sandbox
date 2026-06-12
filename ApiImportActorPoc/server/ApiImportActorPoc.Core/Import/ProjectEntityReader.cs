@@ -1,5 +1,6 @@
 using ApiImportActorPoc.Contracts.Models;
 using ApiImportActorPoc.Contracts.Models.Import;
+using ApiImportActorPoc.Contracts.Values;
 using ApiImportActorPoc.Data.Entities;
 
 namespace ApiImportActorPoc.Core.Import;
@@ -57,7 +58,7 @@ public static class ProjectEntityReader
         }
     }
 
-    private static ComponentModel ToComponentModel(
+    public static ComponentModel ToComponentModel(
         ComponentEntity component,
         IReadOnlyList<ComponentEntity> allComponents,
         IReadOnlyDictionary<int, IReadOnlyDictionary<string, string>> externalIdsByInternalId)
@@ -74,6 +75,7 @@ public static class ProjectEntityReader
         return new ComponentModel(
             component.Id,
             component.Name,
+            component.IsTemplate,
             children,
             activities,
             ExternalIdLoader.ForEntity(component.Id, externalIdsByInternalId));
@@ -95,7 +97,8 @@ public static class ProjectEntityReader
         var relations = activity.OutgoingRelations
             .Select(relation => new ActivityRelationModel(
                 relation.TargetActivityId,
-                Enum.Parse<ActivityRelationType>(relation.RelationType, ignoreCase: true)))
+                Enum.Parse<ActivityRelationType>(relation.RelationType, ignoreCase: true),
+                relation.LagDays))
             .ToList();
 
         return new ActivityModel(
@@ -112,6 +115,7 @@ public static class ProjectEntityReader
         new(
             null,
             model.Name,
+            model.IsTemplate ? true : null,
             model.ChildComponents.Count > 0
                 ? model.ChildComponents.Select(child => ToComponentPayload(child, activityReferences)).ToList()
                 : null,
@@ -129,9 +133,9 @@ public static class ProjectEntityReader
             model.Assignments.Count > 0
                 ? model.Assignments.Select(assignment => new AssignmentImportPayload(
                     null,
-                    assignment.PersonName,
+                    assignment.PersonName.Value,
                     assignment.Description,
-                    assignment.BudgetedHours,
+                    assignment.BudgetedHours.IsZero ? null : assignment.BudgetedHours.Value,
                     CopyExternalIds(assignment.ExternalIds))).ToList()
                 : null,
             model.Relations.Count > 0
@@ -139,7 +143,8 @@ public static class ProjectEntityReader
                     activityReferences.TryGetValue(relation.RelatedActivityId, out var reference)
                         ? reference
                         : relation.RelatedActivityId.ToString(),
-                    relation.Type.ToString())).ToList()
+                    relation.Type.ToString(),
+                    relation.LagDays.Value > 0 ? relation.LagDays.Value : null)).ToList()
                 : null,
             CopyExternalIds(model.ExternalIds));
 
