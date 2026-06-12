@@ -1,0 +1,11 @@
+<Solution>
+  <Folder Name="/server/">
+    <Project Path="server/ApiImportActorPoc.Api/ApiImportActorPoc.Api.csproj" />
+    <Project Path="server/ApiImportActorPoc.Contracts/ApiImportActorPoc.Contracts.csproj" />
+    <Project Path="server/ApiImportActorPoc.Core/ApiImportActorPoc.Core.csproj" />
+    <Project Path="server/ApiImportActorPoc.Data/ApiImportActorPoc.Data.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/ApiImportActorPoc.Api.Tests/ApiImportActorPoc.Api.Tests.csproj" />
+  </Folder>
+</Solution>
