@@ -5,27 +5,27 @@ import { useImportHub } from '../composables/useImportHub'
 import type { ImportEventNotification } from '../types/import'
 
 const samplePayload = {
-  name: 'Office Fit-out',
+  name: 'MV Northern Star — Hull 247',
   components: [
     {
-      id: 'c-building',
-      name: 'Building',
+      id: 'c-block-204',
+      name: 'Hull Block 204',
       childComponents: [
         {
-          id: 'c-floor-1',
-          name: 'Floor 1',
+          id: 'c-engine-room',
+          name: 'Engine Room Module',
           activities: [
             {
-              id: 'a-demo',
-              name: 'Demolition',
-              assignments: [{ personName: 'Alex', description: 'Lead' }],
-              relations: [{ relatedActivityId: 'a-frame', type: 'Successor' }],
+              id: 'a-erection',
+              name: 'Block Erection',
+              assignments: [{ personName: 'Marco van Berg', description: 'Crane supervisor' }],
+              relations: [{ relatedActivityId: 'a-welding', type: 'Successor' }],
             },
             {
-              id: 'a-frame',
-              name: 'Framing',
-              assignments: [{ personName: 'Sam' }],
-              relations: [{ relatedActivityId: 'a-demo', type: 'Predecessor' }],
+              id: 'a-welding',
+              name: 'Structural Welding',
+              assignments: [{ personName: 'Elena Petrov', description: 'Certified welder' }],
+              relations: [{ relatedActivityId: 'a-erection', type: 'Predecessor' }],
             },
           ],
         },
@@ -139,10 +139,10 @@ async function runPersist() {
 <template>
   <div class="grid">
     <section class="panel">
-      <h1>Import project structure</h1>
+      <h1>Import shipbuilding work breakdown</h1>
       <p>
-        Project → components (nested) → activities → assignments.
-        Activities may relate as child, predecessor, or successor.
+        Vessel project → hull blocks / modules (nested) → outfitting activities → trade assignments.
+        Activities may relate as child, predecessor, or successor on the build schedule.
       </p>
       <textarea v-model="jsonInput" spellcheck="false" />
       <button :disabled="busy" @click="runImport">Start import</button>

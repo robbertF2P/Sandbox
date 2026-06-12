@@ -20,7 +20,7 @@ public static class ImportEndpoints
             return Results.Accepted($"/api/import/{result.SessionId}", result);
         })
         .WithName("StartImport")
-        .WithSummary("Start importing a project structure into memory");
+        .WithSummary("Start importing a shipbuilding work breakdown into memory");
 
         group.MapGet("/{sessionId:guid}/model", async (Guid sessionId, IActorSystemCommandFacade facade) =>
         {
@@ -28,7 +28,7 @@ public static class ImportEndpoints
             return result.Found ? Results.Ok(result.Model) : Results.NotFound();
         })
         .WithName("GetImportModel")
-        .WithSummary("Get the in-memory project model built by actors");
+        .WithSummary("Get the in-memory vessel model built by actors");
 
         group.MapPost("/{sessionId:guid}/persist", async (Guid sessionId, IActorSystemCommandFacade facade) =>
         {

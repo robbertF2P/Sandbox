@@ -13,26 +13,26 @@ public sealed class ProjectModelBuilderTests
         var activityB = "a2";
 
         var payload = new ProjectImportPayload(
-            "Office Fit-out",
+            "MV Northern Star — Hull 247",
             [
                 new ComponentImportPayload(
                     "c1",
-                    "Building",
+                    "Hull Block 204",
                     [
                         new ComponentImportPayload(
                             "c2",
-                            "Floor 1",
+                            "Engine Room Module",
                             null,
                             [
                                 new ActivityImportPayload(
                                     activityA,
-                                    "Demolition",
-                                    [new AssignmentImportPayload(null, "Alex", "Lead")],
+                                    "Block Erection",
+                                    [new AssignmentImportPayload(null, "Marco van Berg", "Crane supervisor")],
                                     [new ActivityRelationImportPayload(activityB, "Successor")]),
                                 new ActivityImportPayload(
                                     activityB,
-                                    "Framing",
-                                    [new AssignmentImportPayload(null, "Sam", null)],
+                                    "Structural Welding",
+                                    [new AssignmentImportPayload(null, "Elena Petrov", "Certified welder")],
                                     [new ActivityRelationImportPayload(activityA, "Predecessor")])
                             ])
                     ],
@@ -41,18 +41,18 @@ public sealed class ProjectModelBuilderTests
 
         var result = ProjectModelBuilder.Build(payload);
 
-        Assert.Equal("Office Fit-out", result.Model.Name);
+        Assert.Equal("MV Northern Star — Hull 247", result.Model.Name);
         Assert.Single(result.Model.Components);
-        Assert.Equal("Building", result.Model.Components[0].Name);
+        Assert.Equal("Hull Block 204", result.Model.Components[0].Name);
         Assert.Single(result.Model.Components[0].ChildComponents);
         Assert.Equal(2, result.Model.Components[0].ChildComponents[0].Activities.Count);
 
-        ActivityModel demolition = result.Model.Components[0].ChildComponents[0].Activities
-            .Single(activity => activity.Name == "Demolition");
-        Assert.Single(demolition.Assignments);
-        Assert.Equal("Alex", demolition.Assignments[0].PersonName);
+        ActivityModel erection = result.Model.Components[0].ChildComponents[0].Activities
+            .Single(activity => activity.Name == "Block Erection");
+        Assert.Single(erection.Assignments);
+        Assert.Equal("Marco van Berg", erection.Assignments[0].PersonName);
         Assert.Contains(
-            demolition.Relations,
+            erection.Relations,
             relation => relation.Type == ActivityRelationType.Successor);
     }
 

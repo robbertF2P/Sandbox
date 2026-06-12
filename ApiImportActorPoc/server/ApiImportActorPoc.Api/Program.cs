@@ -26,7 +26,7 @@ try
         {
             Title = "API Import Actor POC",
             Version = "v1",
-            Description = "Import complex project structures via Akka.NET actors, expose as JSON, persist with EF Core."
+            Description = "Import shipbuilding work breakdowns (vessel, blocks, activities) via Akka.NET actors, expose as JSON, persist with EF Core."
         });
     });
     builder.Services.AddImportData(builder.Configuration);
@@ -73,7 +73,7 @@ try
 
     app.MapGet("/", () => Results.Ok(new
     {
-        Name = "API Import Actor POC",
+        Name = "Shipbuilding Import Actor POC",
         Swagger = "/swagger",
         Hub = "/hubs/import",
         Import = "/api/import",

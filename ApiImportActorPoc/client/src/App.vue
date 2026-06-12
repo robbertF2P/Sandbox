@@ -5,7 +5,7 @@ import { RouterLink, RouterView } from 'vue-router'
 <template>
   <div class="app">
     <header class="app-nav">
-      <RouterLink to="/" class="app-nav__brand">API Import Actor POC</RouterLink>
+      <RouterLink to="/" class="app-nav__brand">Shipbuilding Import POC</RouterLink>
     </header>
     <main class="shell">
       <RouterView />

@@ -1,14 +1,14 @@
-# API Import Actor POC
+# API Import Actor POC — Shipbuilding
 
-Proof of concept modeled on `AkkaSignalRVuePoc`: Akka.NET actors build a complex project structure entirely in memory, expose it as JSON, and optionally persist it with EF Core.
+Proof of concept modeled on `AkkaSignalRVuePoc`: Akka.NET actors import a **shipbuilding** work breakdown entirely in memory, expose it as JSON, and optionally persist it with EF Core.
 
-## Domain model
+## Domain model (shipbuilding)
 
-- **Project** — top-level container
-- **Component** — one or more per project; components can nest (composition)
-- **Activity** — one or more per component
-- **Assignment** — work a person performs on an activity
-- **Activity relations** — child, predecessor, or successor links between activities
+- **Project** — a vessel new-build or refit (e.g. hull number, ship name)
+- **Component** — hull blocks, sections, zones, or modules; components can nest (block → section → outfitting zone)
+- **Activity** — construction or outfitting work (erection, welding, piping, painting, trials prep)
+- **Assignment** — trade or role performing the work (welder, pipefitter, electrician, surveyor)
+- **Activity relations** — scheduling links: child (sub-task), predecessor, successor (e.g. block erection before welding)
 
 ## Stack
 
