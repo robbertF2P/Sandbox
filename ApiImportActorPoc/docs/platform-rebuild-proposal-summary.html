@@ -65,19 +65,29 @@
 <tr><td>Cloud + on-prem + customized builds</td><td>Too many versions to test and support</td></tr>
 <tr><td>“Which version is running?”</td><td>Long incidents, risky upgrades</td></tr>
 <tr><td>New hires slow to contribute</td><td>Delivery does not scale with headcount</td></tr>
+<tr><td>High cognitive load per change; long code reviews</td><td>Low throughput, senior time in archaeology, team fatigue</td></tr>
 </table>
 <p><strong>One line:</strong> <em>We are paying a growing tax on every feature because customization and integrations were implemented as compile-time forks, not runtime configuration.</em></p>
 
+<h3>Architecture exceeded its intended envelope</h3>
+<p>The original <strong>layered architecture</strong> was a reasonable choice for a smaller product with narrower client differences. It has since <strong>expanded beyond what it was designed to carry</strong>. Client-specific behavior now lives in <strong>git submodules</strong>, service inheritance, and schema forks — so “the product” is effectively many variants sharing a name. Features such as <strong>workflows</strong> and <strong>Hangfire</strong> added a second, implicit orchestration layer on top of EF change handlers. We are not struggling because the domain is inherently impossible; we are carrying <strong>two kinds of diversity at once</strong> — a rich project-management domain <em>and</em> per-client implementation diversity — without a clear boundary between platform and customization.</p>
+<p>Those choices were rational under past delivery pressure. The toll is visible now: every change requires reconstructing hidden context before it can be implemented or reviewed safely.</p>
+
+<h3>Developer productivity and cognitive load</h3>
+<p>The highest day-to-day cost on this codebase is often not missing features — it is <strong>cognitive load</strong>: how much context an engineer must hold to change one thing without breaking another. A small PR may require understanding tenant-specific branches, handler chains, background jobs, and data-model variants before anyone can judge risk. That shows up as <strong>long code reviews</strong>, slow iteration, and reluctance to touch areas that look unrelated.</p>
+<p>This is a <strong>delivery and retention</strong> issue, not a preference for greenfield work. The ask is not to throw away what we have. It is to <strong>stop extending the submodule-and-handler model</strong> and fund incremental simplification — one domain at a time, with parity tests and a pilot — so that most engineering energy goes into the domain problem, not archaeology.</p>
+
 <h2>3. Root technical causes</h2>
+<p>The stack reflects <strong>scope creep on the architecture</strong>: patterns that worked at one scale now compound each other.</p>
 <ol>
-<li><strong>Git submodules and client-specific code branches</strong> multiply release combinations.</li>
-<li><strong>Class inheritance for services</strong> spreads logic across opaque override trees.</li>
+<li><strong>Git submodules and client-specific code branches</strong> — the decision to customize per client via submodules made sense early on; it now multiplies release combinations and merge cost.</li>
+<li><strong>Class inheritance for services</strong> spreads logic across opaque override trees within an already layered stack.</li>
 <li><strong>Per-client data model forks</strong> make migrations, APIs, and reporting unsustainable.</li>
 <li><strong>EF SaveChanges change handlers</strong> implement hidden workflows (legacy of Access DB + stored procedures).</li>
-<li><strong>Hangfire jobs</strong> duplicate and defer logic that should be explicit orchestration.</li>
-<li><strong>Weak domain boundaries</strong> — WBS, planning, hours, imports, and integrations are coupled.</li>
+<li><strong>Hangfire jobs and workflow features</strong> duplicate and defer logic — a <strong>parallel workflow system</strong> alongside handlers, harder to trace than either alone.</li>
+<li><strong>Weak domain boundaries</strong> — WBS, planning, hours, imports, and integrations are coupled while client variance cuts across every layer.</li>
 </ol>
-<p>This is normal debt from years of shipping under pressure. It is not a people problem.</p>
+<p>This is normal debt from years of shipping under pressure. It is not a people problem — and it is <strong>not an argument for a big-bang rewrite</strong>. It is an argument for a controlled boundary between core and customization going forward.</p>
 
 <h2>4. Strategic goal: one platform, many configurations</h2>
 <table>
@@ -145,14 +155,15 @@ Command (ImportProject, BookHours, RecalculatePlan)
 </pre>
 <p><strong>What Akka is NOT for:</strong> simple CRUD, DbContext in every actor, or replacing a disciplined domain model. Use actors at <strong>boundaries</strong>.</p>
 
-<h2>8. Data model strategy</h2>
+<h2>8. Data model strategy (avoid per-client schema forks)</h2>
 <ol>
-<li>One canonical schema for all customers.</li>
-<li>Governed extension data for rare attributes.</li>
-<li>External ID mapping for integrations.</li>
-<li>Read models / projections for client-specific reporting.</li>
+<li><strong>One canonical schema</strong> for all customers on <strong>SQL Server</strong> (production and on-prem standard).</li>
+<li><strong>Governed extension data</strong> for rare attributes (registry + validation).</li>
+<li><strong>External ID mapping</strong> — source systems map to internal entities without alternate keys.</li>
+<li><strong>Read models / projections</strong> for client-specific reporting.</li>
 </ol>
-<p>Customize <strong>behavior and mappings</strong>, not per-client OLTP schemas.</p>
+<p>Customize <strong>behavior and mappings</strong>, not the physics of the database except through extension points.</p>
+<p><strong>Datastore:</strong> SQL Server only — no SQLite or per-client schema forks. Shared-database tenants use <code>TenantId</code> + indexes; enterprise tenants may use dedicated SQL Server instances (same schema, different connection).</p>
 
 <h2>9. Cloud and on-prem</h2>
 <p>Same binary; differences are <strong>configuration and enabled packs</strong> (identity, messaging, storage, updates, offline file import/export).</p>
@@ -171,7 +182,7 @@ Command (ImportProject, BookHours, RecalculatePlan)
 <p>Hangfire may remain temporarily as a <strong>scheduler trigger</strong> only during migration.</p>
 
 <h2>12. Metrics</h2>
-<p>Track: active forks, lead time, change failure rate, time to add integration, “unknown version” tickets, on-prem upgrade rate, % work delivered as packs vs forks.</p>
+<p>Track: active forks, lead time, change failure rate, time to add integration, “unknown version” tickets, on-prem upgrade rate, % work delivered as packs vs forks, <strong>median PR review time</strong> (cognitive load proxy), and <strong>context switches per feature</strong> (submodules/repos touched).</p>
 
 <h2>13. Options</h2>
 <table>
@@ -183,16 +194,87 @@ Command (ImportProject, BookHours, RecalculatePlan)
 
 <h2>14. Executive summary</h2>
 <blockquote>
-Our product’s complexity is driven less by feature count than by years of client-specific customizations and integrations, delivered through git submodules, service inheritance, customized data models, EF change handlers, and Hangfire jobs — patterns inherited from an earlier Access/stored-procedure architecture. Combined with cloud and on-prem delivery, this created too many de facto product versions to test, upgrade, and support.<br><br>
+Our product’s complexity is driven less by feature count than by years of client-specific customizations and integrations, delivered through git submodules, service inheritance, customized data models, EF change handlers, and Hangfire jobs — patterns inherited from an earlier Access/stored-procedure architecture. The <strong>layered design and submodule-based customization</strong> were fit for an earlier scope; the product has outgrown that envelope. Workflows and background jobs added implicit orchestration on top of an already diverse domain and diverse clients. Combined with cloud and on-prem delivery, this created too many de facto product versions to test, upgrade, and support — and a <strong>high cognitive load</strong> that slows delivery and lengthens code review even for experienced engineers.<br><br>
 The proposed rebuild shifts to a <strong>platform-and-packs architecture</strong>: a stable canonical core; integrations as connector packs; customizations as tenant-configured actor pipelines; deployment profiles for cloud versus on-prem from the <strong>same build</strong>. Long-running work moves from implicit SaveChanges side effects and background jobs into <strong>explicit, supervised Akka.NET workflows</strong> with clear message contracts.<br><br>
-This restores predictable delivery, reduces support matrix size, protects professional services margin, and gives customers a credible upgrade path without forking the product for each engagement.
+This restores predictable delivery, reduces support matrix size, protects professional services margin, and gives customers a credible upgrade path without forking the product for each engagement — <strong>without</strong> a big-bang rewrite.
 </blockquote>
 
-<h2>15. Decision requested</h2>
+<h2>16. Performance and large projects (40–50,000 activities)</h2>
+<p>Customers range from small projects (~40 activities) to large programmes (~50,000 activities). Responsiveness is a <strong>product architecture</strong> requirement, not only a hardware decision.</p>
+
+<h3>Design principle</h3>
+<blockquote>Interactive paths stay small; heavy work runs asynchronously on bounded slices.</blockquote>
+<table>
+<tr><th>Path</th><th>Target</th><th>Pattern</th></tr>
+<tr><td>Open project / browse WBS</td><td>&lt; 500 ms</td><td>Paginate, lazy-load tree, summaries</td></tr>
+<tr><td>Edit one activity</td><td>&lt; 100 ms</td><td>Targeted read/write</td></tr>
+<tr><td>Full plan recalculation (large project)</td><td>Seconds, background</td><td>Planning actor + progress events</td></tr>
+<tr><td>Gantt view</td><td>Smooth scroll</td><td>Virtualized rows + visible time window</td></tr>
+<tr><td>Bulk import</td><td>Minutes OK</td><td>Actor pipeline + batched upsert + progress</td></tr>
+</table>
+
+<h3>Database (SQL Server)</h3>
+<ul>
+<li><strong>Never load full project tree by default</strong> — lazy expansion, cursor pagination, search endpoints.</li>
+<li><strong>Indexes:</strong> <code>(TenantId, ProjectId)</code>, <code>(ComponentId)</code>, <code>(ActivityId)</code>, assignment and relation FKs.</li>
+<li><strong>Component-level rollups</strong> — cached budgeted hours, % complete, date ranges.</li>
+<li><strong>Dedicated SQL Server</strong> for large enterprise tenants (isolation tier).</li>
+</ul>
+
+<h3>API tiers</h3>
+<table>
+<tr><th>Endpoint style</th><th>Purpose</th></tr>
+<tr><td><code>/projects/{id}/summary</code></td><td>Counts, dates, rollups only</td></tr>
+<tr><td><code>/components?parentId=</code></td><td>One tree level at a time</td></tr>
+<tr><td><code>/activities?projectId=&amp;cursor=</code></td><td>Paginated flat list / search</td></tr>
+<tr><td><code>/projects/{id}/plan?from=&amp;to=</code></td><td>Windowed Gantt data</td></tr>
+</table>
+<p>Return <strong>projections</strong>, not full entity graphs, to the UI.</p>
+
+<h3>Planning at scale</h3>
+<ul>
+<li><strong>Store schedule snapshots</strong> — UI reads persisted plan; does not recalculate on every page load.</li>
+<li><strong>Async recalculation</strong> via <code>PlanningCoordinatorActor</code> for projects above threshold (e.g. 500 activities).</li>
+<li><strong>Incremental scheduling</strong> — on single edit, recalculate affected subgraph only; full recompute on import or bulk relation change.</li>
+<li><strong>Never block HTTP</strong> on full 50k-activity forward pass.</li>
+</ul>
+
+<h3>UI</h3>
+<ul>
+<li>Virtual scrolling for Gantt and activity lists.</li>
+<li>Time-windowed Gantt (load visible months, fetch more on pan).</li>
+<li>Component-level aggregation with expand-for-detail.</li>
+<li>Debounced plan triggers (one background job per burst of edits).</li>
+</ul>
+
+<h3>Imports</h3>
+<ul>
+<li>Batched upsert (e.g. 500 rows per transaction) through import actor pipeline.</li>
+<li>Progress events (<code>ImportProgressUpdated</code>) for UI feedback.</li>
+<li>Idempotent external IDs for safe retry.</li>
+</ul>
+
+<h3>Multi-tenant isolation</h3>
+<ul>
+<li><strong>Performance tiers</strong> in tenant profile: <code>standard</code> vs <code>large</code>.</li>
+<li>Rate limits and fair queuing for heavy jobs (import, replan).</li>
+<li>Large tenants: dedicated DB + worker capacity.</li>
+</ul>
+
+<h3>SLOs (proposal targets)</h3>
+<ul>
+<li>Up to <strong>500 activities:</strong> interactive edits &lt; 1 second.</li>
+<li>Up to <strong>50,000 activities:</strong> browse and edit remain interactive; full replan in background with progress within minutes.</li>
+<li>Load-test gates at <strong>40, 500, 5,000, and 50,000</strong> activities before major client migrations.</li>
+</ul>
+
+<h2>17. Decision requested</h2>
 <ol>
 <li>Approve <strong>Platform 2.0</strong> program charter and dedicated team.</li>
 <li>Fund <strong>discovery + foundation + one pilot domain</strong>.</li>
 <li>Enforce <strong>no new submodules / handler workflows</strong>.</li>
+<li>Standardize on <strong>SQL Server</strong> for cloud and on-prem data stores.</li>
+<li>Adopt <strong>performance SLOs</strong> for large projects (Section 16).</li>
 <li>Name <strong>executive sponsor</strong> (engineering + product + commercial).</li>
 <li>Select <strong>pilot customer</strong> or internal flagship project for first cutover.</li>
 </ol>

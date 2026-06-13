@@ -13,16 +13,7 @@ public static class ImportDatabaseInitializer
         var dbContextFactory = scope.ServiceProvider.GetRequiredService<IDbContextFactory<ImportDbContext>>();
 
         await using var db = await dbContextFactory.CreateDbContextAsync();
-        var provider = db.Database.ProviderName ?? string.Empty;
-
-        if (provider.Contains("Sqlite", StringComparison.OrdinalIgnoreCase))
-        {
-            await db.Database.EnsureCreatedAsync();
-            logger.LogInformation("SQLite import database ensured.");
-            return;
-        }
-
         await db.Database.MigrateAsync();
-        logger.LogInformation("Import database migrations applied.");
+        logger.LogInformation("SQL Server import database migrations applied.");
     }
 }

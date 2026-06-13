@@ -1,43 +1,30 @@
+using ApiImportActorPoc.Api.Tests.Infrastructure;
 using ApiImportActorPoc.Contracts.Models;
 using ApiImportActorPoc.Contracts.Models.Import;
 using ApiImportActorPoc.Contracts.Values;
 using ApiImportActorPoc.Core.Import;
 using ApiImportActorPoc.Core.Templates;
-using ApiImportActorPoc.Data;
-using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 
 namespace ApiImportActorPoc.Api.Tests.Templates;
 
 public sealed class ComponentTemplateServiceTests : IAsyncLifetime
 {
-    private SqliteConnection _connection = null!;
-    private IDbContextFactory<ImportDbContext> _dbContextFactory = null!;
+    private SqlServerTestDatabase _database = null!;
     private ProjectImportUpsertService _upsertService = null!;
     private ComponentTemplateService _templateService = null!;
 
     public async ValueTask InitializeAsync()
     {
-        _connection = new SqliteConnection("Data Source=:memory:");
-        await _connection.OpenAsync();
-
-        var options = new DbContextOptionsBuilder<ImportDbContext>()
-            .UseSqlite(_connection)
-            .Options;
-
-        await using (var db = new ImportDbContext(options))
-        {
-            await db.Database.EnsureCreatedAsync();
-        }
-
-        _dbContextFactory = new TestDbContextFactory(options);
-        _upsertService = new ProjectImportUpsertService(_dbContextFactory);
-        _templateService = new ComponentTemplateService(_dbContextFactory);
+        _database = new SqlServerTestDatabase();
+        await _database.InitializeAsync();
+        _upsertService = new ProjectImportUpsertService(_database.Factory);
+        _templateService = new ComponentTemplateService(_database.Factory);
     }
 
     public async ValueTask DisposeAsync()
     {
-        await _connection.DisposeAsync();
+        await _database.DisposeAsync();
     }
 
     [Fact]
@@ -68,7 +55,7 @@ public sealed class ComponentTemplateServiceTests : IAsyncLifetime
         var model = ProjectModelBuilder.Build(payload).Model;
         await _upsertService.UpsertAsync(model);
 
-        await using var db = await _dbContextFactory.CreateDbContextAsync();
+        await using var db = await _database.Factory.CreateDbContextAsync();
         var templateId = await db.Components
             .Where(component => component.IsTemplate)
             .Select(component => component.Id)
@@ -109,7 +96,7 @@ public sealed class ComponentTemplateServiceTests : IAsyncLifetime
         var model = ProjectModelBuilder.Build(payload).Model;
         await _upsertService.UpsertAsync(model);
 
-        await using var db = await _dbContextFactory.CreateDbContextAsync();
+        await using var db = await _database.Factory.CreateDbContextAsync();
         var componentId = await db.Components.Select(component => component.Id).SingleAsync();
 
         var updated = await _templateService.SetTemplateAsync(componentId, true);
@@ -134,7 +121,7 @@ public sealed class ComponentTemplateServiceTests : IAsyncLifetime
         var model = ProjectModelBuilder.Build(payload).Model;
         await _upsertService.UpsertAsync(model);
 
-        await using var db = await _dbContextFactory.CreateDbContextAsync();
+        await using var db = await _database.Factory.CreateDbContextAsync();
         var componentId = await db.Components.Select(component => component.Id).SingleAsync();
 
         var result = await _templateService.InstantiateAsync(
@@ -142,13 +129,5 @@ public sealed class ComponentTemplateServiceTests : IAsyncLifetime
             new InstantiateComponentFromTemplateRequest("Copy"));
 
         Assert.Null(result);
-    }
-
-    private sealed class TestDbContextFactory(DbContextOptions<ImportDbContext> options) : IDbContextFactory<ImportDbContext>
-    {
-        public ImportDbContext CreateDbContext() => new(options);
-
-        public Task<ImportDbContext> CreateDbContextAsync(CancellationToken cancellationToken = default) =>
-            Task.FromResult(CreateDbContext());
     }
 }

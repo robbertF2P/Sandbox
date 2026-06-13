@@ -9,27 +9,20 @@ public static class ImportDataServiceCollectionExtensions
     public const string ImportConnectionStringName = "Import";
     public const string MigrationsAssemblyName = "ApiImportActorPoc.Data.Migrations";
 
+    public const string DefaultConnectionString =
+        "Server=localhost,1401;Database=ApiImportPoc;User Id=sa;Password=Your_strong_password123;TrustServerCertificate=True";
+
     public static IServiceCollection AddImportData(
         this IServiceCollection services,
         IConfiguration configuration)
     {
-        var provider = configuration.GetValue<ImportDatabaseProvider?>("Database:Provider")
-            ?? ImportDatabaseProvider.Sqlite;
         var connectionString = configuration.GetConnectionString(ImportConnectionStringName)
-            ?? "Data Source=import.db";
+            ?? DefaultConnectionString;
 
         services.AddDbContextFactory<ImportDbContext>(options =>
         {
-            if (provider == ImportDatabaseProvider.Sqlite)
-            {
-                options.UseSqlite(connectionString, sqlite =>
-                    sqlite.MigrationsAssembly(MigrationsAssemblyName));
-            }
-            else
-            {
-                options.UseSqlServer(connectionString, sql =>
-                    sql.MigrationsAssembly(MigrationsAssemblyName));
-            }
+            options.UseSqlServer(connectionString, sql =>
+                sql.MigrationsAssembly(MigrationsAssemblyName));
         });
 
         return services;
