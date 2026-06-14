@@ -38,6 +38,22 @@
       background: #f8fafc;
       font-style: italic;
     }
+    .diagram {
+      margin: 16px 0;
+      text-align: center;
+      page-break-inside: avoid;
+    }
+    .diagram img {
+      max-width: 100%;
+      height: auto;
+      border: 1px solid #e2e8f0;
+      border-radius: 4px;
+    }
+    .diagram figcaption {
+      font-size: 9pt;
+      color: #64748b;
+      margin-top: 8px;
+    }
   </style>
 </head>
 <body>
@@ -48,7 +64,7 @@
 
 <h2>1. Core recommendation</h2>
 <p>Rebuild the platform <strong>incrementally</strong> using a <strong>strangler-fig</strong> approach (Section 2): a single canonical core with <strong>versioned extension and integration packs</strong> — not a big-bang rewrite and not continued forking per client.</p>
-<p><strong>Critical constraint:</strong> the current application embeds years of domain knowledge that is <strong>poorly documented</strong> except through extensive unit and integration tests. The rebuild must <strong>preserve as much of that knowledge as possible</strong> by targeting a <strong>new core API</strong> with an <strong>adapter layer</strong> that delegates to legacy behaviour until parity is proven — not by discarding working code and rediscovering edge cases from scratch (Section 8).</p>
+<p><strong>Critical constraint:</strong> the current application embeds years of domain knowledge that is <strong>poorly documented</strong> except through extensive unit and integration tests. The rebuild must <strong>preserve as much of that knowledge as possible</strong> by targeting a <strong>new core API</strong> with an <strong>adapter layer</strong> that delegates to legacy behaviour until parity is proven — not by discarding working code and rediscovering edge cases from scratch (Section 9).</p>
 <p><strong>Ask:</strong></p>
 <ul>
 <li>Charter a <strong>Platform 2.0</strong> program with dedicated capacity (not 20% time).</li>
@@ -78,12 +94,12 @@ End:       Users ──► New platform
 </table>
 <table>
 <tr><th>Layer</th><th>Strangler mechanism</th></tr>
-<tr><td><strong>API &amp; domain logic</strong></td><td>New core API + adapter layer (Section 8)</td></tr>
+<tr><td><strong>API &amp; domain logic</strong></td><td>New core API + adapter layer (Section 9)</td></tr>
 <tr><td><strong>Workflows</strong></td><td>Retire handlers and Hangfire jobs one family at a time</td></tr>
-<tr><td><strong>Frontend</strong></td><td>New SPA + versioned API; replace Razor islands (Section 9)</td></tr>
+<tr><td><strong>Frontend</strong></td><td>New SPA + versioned API; replace Razor islands (Section 10)</td></tr>
 <tr><td><strong>Customizations</strong></td><td>Tenant packs on new core — not new submodules</td></tr>
 </table>
-<p><strong>Main risk:</strong> “two systems forever” — mitigated by domain sunset dates and adapter exit criteria (Section 16).</p>
+<p><strong>Main risk:</strong> “two systems forever” — mitigated by domain sunset dates and adapter exit criteria (Section 17).</p>
 <p><strong>One line:</strong> <em>Build the new platform around the old one, move one piece at a time, and remove each legacy piece only when the replacement is proven equivalent.</em></p>
 
 <h2>3. The problem (in business terms)</h2>
@@ -111,10 +127,10 @@ End:       Users ──► New platform
 <li><strong>Pick one SPA philosophy</strong> — <strong>Angular or Vue</strong>, not both, and not Razor for core product screens.</li>
 <li><strong>Define the API first</strong> — documented, versioned OpenAPI as the only boundary — so Cypress, Playwright, or Selenium can test critical flows without depending on server-rendered markup.</li>
 </ol>
-<p>We cannot rewind. We <em>can</em> stop extending the hybrid and migrate toward what we would have built if we had known where the product was going. That counterfactual is the frontend strand of Platform 2.0 (Section 9).</p>
+<p>We cannot rewind. We <em>can</em> stop extending the hybrid and migrate toward what we would have built if we had known where the product was going. That counterfactual is the frontend strand of Platform 2.0 (Section 10).</p>
 
 <h3>Architecture exceeded its intended envelope</h3>
-<p>The original <strong>layered architecture</strong> was a reasonable choice for a smaller product with narrower client differences. It has since <strong>expanded beyond what it was designed to carry</strong>. Client-specific behavior now lives in <strong>git submodules</strong>, service inheritance, and schema forks — so “the product” is effectively many variants sharing a name. Features such as <strong>workflows</strong> and <strong>Hangfire</strong> added a second, implicit orchestration layer on top of EF change handlers. We are not struggling because the domain is inherently impossible; we are carrying <strong>two kinds of diversity at once</strong> — a rich project-management domain <em>and</em> per-client implementation diversity — without a clear boundary between platform and customization.</p>
+<p>The original <strong>layered architecture</strong> was a reasonable choice for a smaller product with narrower client differences. It has since <strong>expanded beyond what it was designed to carry</strong> (see Section 4 for the typical request and save path). Client-specific behavior now lives in <strong>git submodules</strong>, service inheritance, and schema forks — so “the product” is effectively many variants sharing a name. Features such as <strong>workflows</strong> and <strong>Hangfire</strong> added a second, implicit orchestration layer on top of EF change handlers. We are not struggling because the domain is inherently impossible; we are carrying <strong>two kinds of diversity at once</strong> — a rich project-management domain <em>and</em> per-client implementation diversity — without a clear boundary between platform and customization.</p>
 <p>Those choices were rational under past delivery pressure. The toll is visible now: every change requires reconstructing hidden context before it can be implemented or reviewed safely.</p>
 
 <h3>Developer productivity and cognitive load</h3>
@@ -124,9 +140,28 @@ End:       Users ──► New platform
 <h3>Embedded knowledge vs. architectural baggage</h3>
 <p>A rebuild carries a real risk: <strong>losing knowledge</strong> baked into the current application — edge cases, client rules, integration behaviour, and planning semantics that accumulated over years of production use. That knowledge is <strong>rarely written down</strong>; it lives in code paths, in engineers’ heads, and most reliably in our <strong>numerous unit and integration tests</strong>.</p>
 <p>At the same time, the <strong>structures that hold that knowledge</strong> — submodules, handler chains, service inheritance, hybrid UI — are the baggage dragging delivery down. We cannot keep everything as-is, and we must not big-bang rewrite and hope we remember what mattered.</p>
-<p><strong>Goal:</strong> preserve behaviour, shed structure. Target a <strong>new core API</strong> and route traffic through an <strong>adapter layer</strong> that delegates to legacy until each domain is understood, tested, and ported (Section 8).</p>
+<p><strong>Goal:</strong> preserve behaviour, shed structure. Target a <strong>new core API</strong> and route traffic through an <strong>adapter layer</strong> that delegates to legacy until each domain is understood, tested, and ported (Section 9).</p>
 
-<h2>4. Root technical causes</h2>
+<h2>4. Legacy application layers: a typical save path</h2>
+<p>The current product follows a <strong>classic layered stack</strong> on paper — but a single user action can traverse every layer and still trigger <strong>hidden work</strong> after the HTTP response returns.</p>
+
+<h3>Request path (synchronous)</h3>
+<p>A typical use case begins in a <strong>frontend component</strong> (Vue, legacy AngularJS, or Razor-hosted script). The component calls a <strong>JavaScript service</strong>, which issues HTTP to a <strong>controller action</strong>. The controller delegates to an <strong>application service</strong>, which calls one or more <strong>domain services</strong> (often with client-specific subclass overrides). Domain services use <strong>repositories</strong> to read and update <strong>entities</strong> via Entity Framework. <strong>SaveChanges</strong> persists to SQL Server — but that is not where the work ends.</p>
+
+<h3>Side effects on save</h3>
+<p><strong>EF change handlers</strong> fire on <code>SaveChanges</code> — implementing rollups, integration side effects, validation, and denormalization (legacy of Access / stored procedures). Handlers cause <strong>additional reads and writes</strong> (sometimes nested <code>SaveChanges</code>) and can <strong>enqueue Hangfire jobs</strong> or workflow steps that run after the HTTP response.</p>
+
+<h3>Background processors</h3>
+<p>Background jobs often run <strong>custom SQL</strong> outside the repository/entity path — a third read/write surface alongside handlers. Together, handlers and background jobs form a <strong>parallel workflow system</strong> on top of the layered stack (Section 5).</p>
+
+<figure class="diagram">
+  <img src="diagrams/legacy-save-path.svg" alt="Legacy application layers: component through SaveChanges, change handlers, and background SQL" />
+  <figcaption>Figure 1 — Typical save path: layered call stack plus implicit handler chain and background SQL</figcaption>
+</figure>
+
+<p><strong>One line:</strong> <em>A save in the old application is a layered call stack plus an unpredictable handler chain and optional background SQL — not a single transaction boundary.</em></p>
+
+<h2>5. Root technical causes</h2>
 <p>The stack reflects <strong>scope creep on the architecture</strong>: patterns that worked at one scale now compound each other.</p>
 <ol>
 <li><strong>Git submodules and client-specific code branches</strong> — the decision to customize per client via submodules made sense early on; it now multiplies release combinations and merge cost.</li>
@@ -139,7 +174,7 @@ End:       Users ──► New platform
 </ol>
 <p>This is normal debt from years of shipping under pressure. It is not a people problem — and it is <strong>not an argument for a big-bang rewrite</strong>. It is an argument for a controlled boundary between core and customization going forward.</p>
 
-<h2>5. Strategic goal: one platform, many configurations</h2>
+<h2>6. Strategic goal: one platform, many configurations</h2>
 <table>
 <tr><th>Dimension</th><th>Target</th></tr>
 <tr><td><strong>Deployment</strong></td><td>Same product artifact for cloud SaaS and on-prem (profile-driven config).</td></tr>
@@ -200,9 +235,9 @@ End:       Users ──► New platform
 <tr><td><strong>5 — Operations plane</strong></td><td>Admin backoffice MVP: provision tenant without code</td></tr>
 <tr><td><strong>6 — End state</strong></td><td>Single platform; new client via backoffice + billing; legacy gone</td></tr>
 </table>
-<p>Stages 1–4: technical strangler. Stages 5–6: operational maturity — <strong>operate and sell</strong>, not <strong>build per client</strong>. Section 14 maps phases to these stages.</p>
+<p>Stages 1–4: technical strangler. Stages 5–6: operational maturity — <strong>operate and sell</strong>, not <strong>build per client</strong>. Section 15 maps phases to these stages.</p>
 
-<h2>6. Why the current customization model fails</h2>
+<h2>7. Why the current customization model fails</h2>
 <table>
 <tr><th>Approach</th><th>Long-term result</th></tr>
 <tr><td>Git submodules per client/integration</td><td>Version matrix explosion, merge hell</td></tr>
@@ -212,7 +247,7 @@ End:       Users ──► New platform
 </table>
 <p><strong>Replacement principle:</strong> <em>Professional services may customize behavior, not the core release artifact.</em></p>
 
-<h2>7. Target architecture: platform core + packs</h2>
+<h2>8. Target architecture: platform core + packs</h2>
 <pre>
                  API / UI
                     │
@@ -235,7 +270,7 @@ Integration   Customization   Deployment
 <p><strong>Core owns:</strong> canonical domain, invariants, APIs, persistence boundaries, external ID registry.</p>
 <p><strong>Packs own:</strong> client- or system-specific mapping, validation, enrichment, connectors, and policy steps.</p>
 
-<h2>8. Preserve embedded knowledge: new core API + adapter layer</h2>
+<h2>9. Preserve embedded knowledge: new core API + adapter layer</h2>
 <p>Rebuild is not permission to forget what the product already knows — but staying on the current stack is not neutral either.</p>
 <table>
 <tr><th>Preserve (asset)</th><th>Shed (baggage)</th></tr>
@@ -262,7 +297,7 @@ Integration   Customization   Deployment
 </pre>
 <p><strong>How adapters preserve knowledge:</strong> delegate first; use existing tests as <strong>parity gates</strong>; extract logic into the new core only after equivalence is proven; document at the API boundary; sunset every adapter with explicit exit criteria.</p>
 
-<h2>9. Frontend: applying the “do it over” decisions</h2>
+<h2>10. Frontend: applying the “do it over” decisions</h2>
 <p>The backend rebuild only delivers half the value if we keep adding to the hybrid. This section turns the Section 3 counterfactual into concrete architecture and migration.</p>
 
 <h3>What we started with (and why it worked)</h3>
@@ -298,7 +333,7 @@ Integration   Customization   Deployment
 </table>
 <p><strong>How we get there from here:</strong> freeze new Razor features and second SPA framework; expose API first; replace Razor islands with SPA routes behind feature flags; retire co-located client bundles as each domain moves.</p>
 
-<h2>10. Akka.NET: why it fits (orchestration, not fashion)</h2>
+<h2>11. Akka.NET: why it fits (orchestration, not fashion)</h2>
 <p>Akka.NET is proposed because our hardest problems are <strong>workflows</strong>, not CRUD: import/export pipelines, integration retries, long-running recalculations, and tenant-specific processing steps.</p>
 
 <h3>Actors vs. inheritance / submodules</h3>
@@ -326,7 +361,7 @@ Command (ImportProject, BookHours, RecalculatePlan)
 </pre>
 <p><strong>What Akka is NOT for:</strong> simple CRUD, DbContext in every actor, or replacing a disciplined domain model. Use actors at <strong>boundaries</strong>.</p>
 
-<h2>11. Data model strategy (avoid per-client schema forks)</h2>
+<h2>12. Data model strategy (avoid per-client schema forks)</h2>
 <ol>
 <li><strong>One canonical schema</strong> for all customers on <strong>SQL Server</strong> (production and on-prem standard).</li>
 <li><strong>Governed extension data</strong> for rare attributes (registry + validation).</li>
@@ -336,15 +371,15 @@ Command (ImportProject, BookHours, RecalculatePlan)
 <p>Customize <strong>behavior and mappings</strong>, not the physics of the database except through extension points.</p>
 <p><strong>Datastore:</strong> SQL Server only — no SQLite or per-client schema forks. Shared-database tenants use <code>TenantId</code> + indexes; enterprise tenants may use dedicated SQL Server instances (same schema, different connection).</p>
 
-<h2>12. Cloud and on-prem</h2>
+<h2>13. Cloud and on-prem</h2>
 <p>Same binary; differences are <strong>configuration and enabled packs</strong> (identity, messaging, storage, updates, offline file import/export).</p>
 
-<h2>13. Proof of concept</h2>
-<p>An internal POC demonstrates: external IDs, actor-orchestrated persistence, template-first ordering, planning with FS/SS/FF/SF + lag, domain value types, and automated tests — including the <strong>platform import</strong> side of the export → intermediate format → import bridge (Section 5).</p>
+<h2>14. Proof of concept</h2>
+<p>An internal POC demonstrates: external IDs, actor-orchestrated persistence, template-first ordering, planning with FS/SS/FF/SF + lag, domain value types, and automated tests — including the <strong>platform import</strong> side of the export → intermediate format → import bridge (Section 6).</p>
 <p><strong>Message:</strong> We are asking to scale an approach that already produced working vertical slices.</p>
 
-<h2>14. Phased migration</h2>
-<p>Phases align with <strong>journey stages</strong> in Section 5 (Today → End state).</p>
+<h2>15. Phased migration</h2>
+<p>Phases align with <strong>journey stages</strong> in Section 6 (Today → End state).</p>
 <ul>
 <li><strong>Phase 0</strong> (Stage 1 prep): Inventory, adapter map, backoffice scope, <strong>intermediate format</strong> schema; SAP/Kronos converter scope.</li>
 <li><strong>Phase 1</strong> (Stage 1): API, adapters, tenant profile; <strong>platform import</strong> from intermediate format (dry-run).</li>
@@ -355,10 +390,10 @@ Command (ImportProject, BookHours, RecalculatePlan)
 </ul>
 <p>Hangfire may remain temporarily as a <strong>scheduler trigger</strong> only during migration.</p>
 
-<h2>15. Metrics</h2>
+<h2>16. Metrics</h2>
 <p>Track: active forks, lead time, change failure rate, time to add integration, “unknown version” tickets, on-prem upgrade rate, % work delivered as packs vs forks, <strong>median PR review time</strong>, <strong>context switches per feature</strong>, <strong>% core screens on versioned API + single SPA</strong>, <strong>critical-path UI scenarios in E2E suite</strong>, <strong>% API traffic through adapters vs native new core</strong>, <strong>parity test pass rate</strong>, <strong>time to provision tenant via backoffice</strong>, <strong>active client-specific core branches (target: 0)</strong>, and <strong>projects migrated via export/import bridge</strong>.</p>
 
-<h2>16. Risks</h2>
+<h2>17. Risks</h2>
 <table>
 <tr><th>Risk</th><th>Mitigation</th></tr>
 <tr><td>Loss of tacit domain knowledge</td><td>Adapter layer delegates to legacy; existing tests as parity gates</td></tr>
@@ -369,7 +404,7 @@ Command (ImportProject, BookHours, RecalculatePlan)
 <tr><td>Big-bang temptation</td><td>Explicit anti-big-bang charter; pilot-first</td></tr>
 </table>
 
-<h2>17. Options</h2>
+<h2>18. Options</h2>
 <table>
 <tr><th>Option</th><th>Verdict</th></tr>
 <tr><td>A. Status quo</td><td>Cheapest now; cost accelerates</td></tr>
@@ -377,14 +412,14 @@ Command (ImportProject, BookHours, RecalculatePlan)
 <tr><td>C. Big-bang rewrite</td><td>Highest revenue and execution risk</td></tr>
 </table>
 
-<h2>18. Executive summary</h2>
+<h2>19. Executive summary</h2>
 <blockquote>
 Our product’s complexity is driven less by feature count than by years of client-specific customizations and integrations, delivered through git submodules, service inheritance, customized data models, EF change handlers, and Hangfire jobs — patterns inherited from an earlier Access/stored-procedure architecture. The <strong>layered design and submodule-based customization</strong> were fit for an earlier scope; the product has outgrown that envelope. Workflows and background jobs added implicit orchestration on top of an already diverse domain and diverse clients. On the <strong>frontend</strong>, we would now treat UI the same way: <strong>if we could do it over</strong>, we would never have let Razor, Web API, Vue, and legacy AngularJS share product screens without a versioned API — the lesson we apply in Platform 2.0. Combined with cloud and on-prem delivery, this created too many de facto product versions to test, upgrade, and support — and a <strong>high cognitive load</strong> that slows delivery and lengthens code review even for experienced engineers.<br><br>
 The proposed rebuild shifts to a <strong>platform-and-packs architecture</strong> whose <strong>end state</strong> is a <strong>single multi-tenant platform</strong>: new clients provisioned through an <strong>admin backoffice</strong> (packs, profile, users, billing over time) — not forks or bespoke builds. We <strong>preserve embedded domain knowledge</strong> via a <strong>versioned core API</strong> and <strong>adapter layer</strong>, following the <strong>strangler pattern</strong> through defined journey stages. On the UI: <strong>separate SPA</strong>, <strong>versioned API</strong>, <strong>automated UI tests</strong>. Long-running work moves into <strong>explicit Akka.NET workflows</strong>.<br><br>
 This restores predictable delivery, reduces support matrix size, protects professional services margin, and gives customers a credible upgrade path without forking the product for each engagement — <strong>without</strong> a big-bang rewrite.
 </blockquote>
 
-<h2>19. Performance and large projects (40–50,000 activities)</h2>
+<h2>20. Performance and large projects (40–50,000 activities)</h2>
 <p>Customers range from small projects (~40 activities) to large programmes (~50,000 activities). Responsiveness is a <strong>product architecture</strong> requirement, not only a hardware decision.</p>
 
 <h3>Design principle</h3>
@@ -453,17 +488,17 @@ This restores predictable delivery, reduces support matrix size, protects profes
 <li>Load-test gates at <strong>40, 500, 5,000, and 50,000</strong> activities before major client migrations.</li>
 </ul>
 
-<h2>20. Decision requested</h2>
+<h2>21. Decision requested</h2>
 <ol>
 <li>Approve <strong>Platform 2.0</strong> program charter and dedicated team.</li>
 <li>Fund <strong>discovery + foundation + one pilot domain</strong>.</li>
 <li>Enforce <strong>no new submodules / handler workflows</strong>.</li>
 <li>Standardize on <strong>SQL Server</strong> for cloud and on-prem data stores.</li>
-<li>Adopt <strong>performance SLOs</strong> for large projects (Section 19).</li>
-<li>Standardize the <strong>frontend</strong> using the “do it over” model: one SPA framework and a <strong>versioned public API</strong> (Section 9).</li>
-<li>Mandate <strong>adapter-first migration</strong> to the new core API so existing tests preserve domain knowledge (Section 8).</li>
+<li>Adopt <strong>performance SLOs</strong> for large projects (Section 20).</li>
+<li>Standardize the <strong>frontend</strong> using the “do it over” model: one SPA framework and a <strong>versioned public API</strong> (Section 10).</li>
+<li>Mandate <strong>adapter-first migration</strong> to the new core API so existing tests preserve domain knowledge (Section 9).</li>
 <li>Approve <strong>admin backoffice</strong> roadmap (Phase 4) as the path to onboard tenants without forks.</li>
-<li>Adopt <strong>intermediate exchange format</strong> as the contract for <strong>all project onboarding</strong> — legacy, SAP, Kronos, and future integrations (Section 5).</li>
+<li>Adopt <strong>intermediate exchange format</strong> as the contract for <strong>all project onboarding</strong> — legacy, SAP, Kronos, and future integrations (Section 6).</li>
 <li>Name <strong>executive sponsor</strong> (engineering + product + commercial).</li>
 <li>Select <strong>pilot customer</strong> or flagship project for first cutover <strong>and first export/import migration</strong>.</li>
 </ol>
