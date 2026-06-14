@@ -1,25 +1,36 @@
-using ApiImportActorPoc.Api.Tests.Infrastructure;
+using Akka.Actor;
 using ApiImportActorPoc.Api.Services;
+using ApiImportActorPoc.Api.Tests.Actors;
+using ApiImportActorPoc.Api.Tests.Infrastructure;
 using ApiImportActorPoc.Contracts.Models;
 using ApiImportActorPoc.Contracts.Models.Import;
 using ApiImportActorPoc.Contracts.Values;
+using ApiImportActorPoc.Core.Actors;
 using ApiImportActorPoc.Core.Import;
 using Microsoft.EntityFrameworkCore;
 
 namespace ApiImportActorPoc.Api.Tests.Progress;
 
-public sealed class HourBookingServiceTests : IAsyncLifetime
+public sealed class HourBookingServiceTests : ActorTestBase<HourBookingServiceTests>, IAsyncLifetime
 {
     private SqlServerTestDatabase _database = null!;
     private ProjectImportUpsertService _upsertService = null!;
     private HourBookingService _hourBookingService = null!;
+
+    public HourBookingServiceTests(ITestOutputHelper output)
+        : base(output)
+    {
+    }
 
     public async ValueTask InitializeAsync()
     {
         _database = new SqlServerTestDatabase();
         await _database.InitializeAsync();
         _upsertService = new ProjectImportUpsertService(_database.Factory);
-        _hourBookingService = new HourBookingService(_database.Factory);
+
+        var rootActor = Sys.ActorOf(RootActor.Props(_database.Factory), "import-root");
+        var actorFacade = new ActorSystemCommandFacade(rootActor);
+        _hourBookingService = new HourBookingService(_database.Factory, actorFacade);
     }
 
     public async ValueTask DisposeAsync()

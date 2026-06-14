@@ -1,3 +1,4 @@
+using ApiImportActorPoc.Contracts.Interfaces;
 using ApiImportActorPoc.Contracts.Models;
 using ApiImportActorPoc.Contracts.Values;
 using ApiImportActorPoc.Data;
@@ -6,7 +7,9 @@ using Microsoft.EntityFrameworkCore;
 
 namespace ApiImportActorPoc.Api.Services;
 
-public sealed class HourBookingService(IDbContextFactory<ImportDbContext> dbContextFactory)
+public sealed class HourBookingService(
+    IDbContextFactory<ImportDbContext> dbContextFactory,
+    IActorSystemCommandFacade actorFacade)
 {
     public async Task<IReadOnlyList<AssignmentListItem>> ListAssignmentsAsync(
         CancellationToken cancellationToken = default)
@@ -74,33 +77,23 @@ public sealed class HourBookingService(IDbContextFactory<ImportDbContext> dbCont
             throw new ArgumentOutOfRangeException(nameof(request), "Hours must be greater than zero.");
         }
 
-        await using var db = await dbContextFactory.CreateDbContextAsync(cancellationToken);
+        var result = await actorFacade.BookHoursAsync(
+            assignmentId,
+            request.Hours,
+            request.Notes,
+            cancellationToken);
 
-        var assignment = await db.Assignments
-            .FirstOrDefaultAsync(entity => entity.Id == assignmentId, cancellationToken);
-
-        if (assignment is null)
+        if (!result.Success)
         {
-            return null;
+            if (result.ErrorMessage == "Assignment not found.")
+            {
+                return null;
+            }
+
+            throw new InvalidOperationException(result.ErrorMessage ?? "Hour booking failed.");
         }
 
-        var booking = new HourBookingEntity
-        {
-            AssignmentId = assignmentId,
-            Hours = request.Hours,
-            BookedAt = DateTimeOffset.UtcNow,
-            Notes = string.IsNullOrWhiteSpace(request.Notes) ? null : request.Notes.Trim()
-        };
-
-        db.HourBookings.Add(booking);
-        await db.SaveChangesAsync(cancellationToken);
-
-        return new HourBookingDto(
-            booking.Id,
-            booking.AssignmentId,
-            booking.Hours,
-            booking.BookedAt,
-            booking.Notes);
+        return result.Booking;
     }
 
     private static string BuildComponentPath(

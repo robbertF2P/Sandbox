@@ -1,6 +1,8 @@
 using ApiImportActorPoc.Contracts.Messages.Import;
+using ApiImportActorPoc.Contracts.Messages.Progress;
 using ApiImportActorPoc.Contracts.Models;
 using ApiImportActorPoc.Contracts.Models.Import;
+using ApiImportActorPoc.Contracts.Values;
 
 namespace ApiImportActorPoc.Contracts.Interfaces;
 
@@ -16,5 +18,11 @@ public interface IActorSystemCommandFacade
 
     Task<PersistImportResult> PersistImportAsync(
         Guid sessionId,
+        CancellationToken cancellationToken = default);
+
+    Task<BookHoursResult> BookHoursAsync(
+        int assignmentId,
+        Hours hours,
+        string? notes,
         CancellationToken cancellationToken = default);
 }
