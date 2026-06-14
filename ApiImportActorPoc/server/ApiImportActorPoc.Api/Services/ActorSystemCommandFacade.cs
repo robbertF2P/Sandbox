@@ -1,7 +1,9 @@
 using Akka.Actor;
 using ApiImportActorPoc.Contracts.Interfaces;
 using ApiImportActorPoc.Contracts.Messages.Import;
+using ApiImportActorPoc.Contracts.Messages.Progress;
 using ApiImportActorPoc.Contracts.Models.Import;
+using ApiImportActorPoc.Contracts.Values;
 
 namespace ApiImportActorPoc.Api.Services;
 
@@ -29,4 +31,14 @@ public sealed class ActorSystemCommandFacade : IActorSystemCommandFacade
         Guid sessionId,
         CancellationToken cancellationToken = default) =>
         _rootActor.Ask<PersistImportResult>(new PersistImportCommand(sessionId), _askTimeout, cancellationToken);
+
+    public Task<BookHoursResult> BookHoursAsync(
+        int assignmentId,
+        Hours hours,
+        string? notes,
+        CancellationToken cancellationToken = default) =>
+        _rootActor.Ask<BookHoursResult>(
+            new BookHoursCommand(assignmentId, hours, notes),
+            _askTimeout,
+            cancellationToken);
 }

@@ -25,6 +25,18 @@ Proof of concept modeled on `AkkaSignalRVuePoc`: Akka.NET actors import a **ship
 
 Import build stays in memory (`ImportSessionActor` → `ImportManagerActor`). When the model is ready to save, `RootActor` forwards to `DataManagerActor`, which delegates database work to `ProjectImportDataActor` — the only actor that opens `ImportDbContext` for import persistence. Components are ordered **templates first** among siblings at every tree level before upsert. `DataManagerActor` publishes `ImportPersisted` when the save completes.
 
+## Actor progress (hour booking)
+
+Booking hours is orchestrated by `ProgressManagerActor`. `POST /api/assignments/{id}/hours` routes through `IActorSystemCommandFacade` → `RootActor` → `ProgressManagerActor`, which:
+
+1. Publishes `HoursBookedProcessingStarted`
+2. Delegates persistence to `HourBookingDataActor` (sole EF writer for hour bookings)
+3. Publishes `HoursBooked` after the booking is saved
+4. Recalculates project progress via `ProjectProgressLoader` / `ProgressCalculator`
+5. Publishes `ProgressRecalculated` with the updated rollup
+
+On failure, `HoursBookingFailed` is published. All progress events flow through `EventStream` → `SignalRHubActor` → `importEvent` on the hub.
+
 ## Stack
 
 - .NET 10, Akka.NET, ASP.NET Core minimal API, SignalR
@@ -106,7 +118,7 @@ Open `http://localhost:5174`. Copy `.env.example` to `.env.local` to override AP
 | GET | `/api/import/{sessionId}/model` | Get built in-memory model as JSON |
 | POST | `/api/import/{sessionId}/persist` | Save model via `DataManagerActor` (templates first, then tree) |
 
-SignalR event: `importEvent` — `ImportStarted`, `ImportProgressUpdated`, `ImportCompleted`, `ImportFailed`, `ImportPersisted`.
+SignalR event: `importEvent` — `ImportStarted`, `ImportProgressUpdated`, `ImportCompleted`, `ImportFailed`, `ImportPersisted`, `HoursBookedProcessingStarted`, `HoursBooked`, `ProgressRecalculated`, `HoursBookingFailed`.
 
 ## Vue client pages
 

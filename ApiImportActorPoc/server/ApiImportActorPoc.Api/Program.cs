@@ -2,6 +2,7 @@ using ApiImportActorPoc.Api.Endpoints;
 using ApiImportActorPoc.Api.Hubs;
 using ApiImportActorPoc.Api.Services;
 using ApiImportActorPoc.Core.Planning;
+using ApiImportActorPoc.Core.Progress;
 using ApiImportActorPoc.Core.Templates;
 using ApiImportActorPoc.Data;
 using Serilog;
@@ -38,6 +39,7 @@ try
     });
     builder.Services.AddImportData(builder.Configuration);
     builder.Services.AddSingleton<ProjectQueryService>();
+    builder.Services.AddSingleton<ProjectProgressLoader>();
     builder.Services.AddSingleton<ProgressQueryService>();
     builder.Services.AddSingleton<HourBookingService>();
     builder.Services.AddSingleton<ComponentTemplateService>();

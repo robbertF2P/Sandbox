@@ -57,6 +57,38 @@ public sealed class SignalRHubActor : ReceiveActor
                 persisted.SessionId,
                 new { persisted.ProjectId },
                 persisted.OccurredAt),
+            HoursBookedProcessingStarted started => new ImportEventNotification(
+                nameof(HoursBookedProcessingStarted),
+                started.ProcessingId,
+                new { started.AssignmentId, Hours = started.Hours.Value },
+                started.OccurredAt),
+            HoursBooked booked => new ImportEventNotification(
+                nameof(HoursBooked),
+                booked.ProcessingId,
+                new
+                {
+                    booked.Booking.Id,
+                    booked.Booking.AssignmentId,
+                    Hours = booked.Booking.Hours.Value,
+                    booked.ProjectId
+                },
+                booked.OccurredAt),
+            ProgressRecalculated recalculated => new ImportEventNotification(
+                nameof(ProgressRecalculated),
+                recalculated.ProcessingId,
+                new
+                {
+                    recalculated.ProjectId,
+                    BudgetedHours = recalculated.Progress.BudgetedHours.Value,
+                    HoursWorked = recalculated.Progress.HoursWorked.Value,
+                    recalculated.Progress.PercentComplete
+                },
+                recalculated.OccurredAt),
+            HoursBookingFailed failed => new ImportEventNotification(
+                nameof(HoursBookingFailed),
+                failed.ProcessingId,
+                new { failed.AssignmentId, failed.ErrorMessage },
+                failed.OccurredAt),
             _ => null
         };
 

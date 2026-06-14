@@ -1,7 +1,9 @@
 using Akka.Actor;
 using ApiImportActorPoc.Contracts.Events;
 using ApiImportActorPoc.Contracts.Messages.Import;
+using ApiImportActorPoc.Contracts.Messages.Progress;
 using ApiImportActorPoc.Core.Actors.Data;
+using ApiImportActorPoc.Core.Actors.Progress;
 using ApiImportActorPoc.Data;
 using Microsoft.EntityFrameworkCore;
 
@@ -12,6 +14,7 @@ public sealed class RootActor : ReceiveActor
     private readonly IDbContextFactory<ImportDbContext> _dbContextFactory;
     private IActorRef _importManager = ActorRefs.Nobody;
     private IActorRef _dataManager = ActorRefs.Nobody;
+    private IActorRef _progressManager = ActorRefs.Nobody;
 
     public RootActor(IDbContextFactory<ImportDbContext> dbContextFactory)
     {
@@ -31,12 +34,14 @@ public sealed class RootActor : ReceiveActor
     {
         _importManager = Context.ActorOf(Import.ImportManagerActor.Props(), "import-manager");
         _dataManager = Context.ActorOf(DataManagerActor.Props(_dbContextFactory), "data-manager");
+        _progressManager = Context.ActorOf(ProgressManagerActor.Props(_dbContextFactory), "progress-manager");
     }
 
     private void Ready()
     {
         Receive<StartImportCommand>(_importManager.Forward);
         Receive<GetImportModelQuery>(_importManager.Forward);
+        Receive<BookHoursCommand>(_progressManager.Forward);
         Receive<PersistImportCommand>(cmd =>
         {
             _importManager.Tell(new GetImportModelQuery(cmd.SessionId));
