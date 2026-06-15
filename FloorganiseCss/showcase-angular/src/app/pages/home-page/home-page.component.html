@@ -1,0 +1,27 @@
+<div class="f2p-app-light min-h-screen">
+  <header class="border-b border-f2p-border bg-f2p-surface px-6 py-4">
+    <div class="mx-auto flex max-w-6xl items-center justify-between gap-4">
+      <div class="flex items-center gap-4">
+        <button
+          id="module-dropdown-button"
+          type="button"
+          class="f2ps-btn-secondary f2ps-btn-sm"
+          aria-label="Open module menu"
+        >
+          Modules
+        </button>
+        <span class="text-lg font-bold text-f2p-ink">Floor2Plan</span>
+      </div>
+      <p class="text-sm text-f2p-ink-muted">Platform 2.0 · Angular mock</p>
+    </div>
+  </header>
+
+  <main class="mx-auto max-w-6xl px-6 py-8">
+    <section class="mb-8">
+      <h1 class="text-2xl font-bold text-f2p-ink">Home</h1>
+      <p class="mt-1 text-sm text-f2p-ink-muted">Select a module to continue.</p>
+    </section>
+
+    <app-f2p-home-tiles [tiles]="tiles" (tileSelect)="onTileSelect($event)" />
+  </main>
+</div>

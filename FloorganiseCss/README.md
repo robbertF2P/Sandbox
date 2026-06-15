@@ -84,7 +84,9 @@ Dark POC tokens: `f2p-dark-*` prefix (e.g. `bg-f2p-dark-surface`, `text-f2p-dark
 
 ## Showcase
 
-Sample Vue components demonstrating the styling strategy:
+Sample components demonstrating the styling strategy.
+
+### Vue (full design system)
 
 ```bash
 cd FloorganiseCss/showcase
@@ -92,9 +94,19 @@ npm install
 npm run dev   # http://localhost:5175
 ```
 
+### Angular (Platform 2.0 home page mock)
+
+```bash
+cd FloorganiseCss/showcase-angular
+npm install
+npm start     # http://localhost:5176
+```
+
+Production home page with `f2p-app-light` shell, module header, and clickable `f2ps-tile` grid — same DOM contract as the Vue `F2pHomeTiles` component and `Floor2PlanSmokeTests`.
+
 | Component | Pattern |
 |-----------|---------|
-| `F2pHomeTiles` | Production home grid — `f2ps-tile`, `f2p-tile-grid` |
+| `F2pHomeTiles` / `F2pHomeTilesComponent` | Production home grid — `f2ps-tile`, `f2p-tile-grid` |
 | `F2pLoginPanel` | Login form — `form.login`, `f2ps-btn-primary`, notifications |
 | `F2pButtonShowcase` | All `f2ps-btn-*` variants and sizes |
 | `F2pCatalogPanel` | Dark catalog — `catalog-list`, `btn--*` |

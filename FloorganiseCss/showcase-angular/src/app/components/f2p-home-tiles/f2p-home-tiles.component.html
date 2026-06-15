@@ -1,0 +1,17 @@
+<!-- Semantic aliases only: f2ps-tile + f2p-tile-grid -->
+<div class="f2p-tile-grid">
+  @for (tile of tiles(); track tile.label) {
+    <article
+      class="f2ps-tile f2ps-clickable flex flex-col justify-end p-4"
+      [ngClass]="accentClass(tile)"
+      [attr.data-testid]="'home-tile-' + tile.label.toLowerCase()"
+      (click)="onTileClick(tile)"
+      (keyup.enter)="onTileClick(tile)"
+      tabindex="0"
+      role="button"
+    >
+      <p class="f2ps-tile__label">{{ tile.label }}</p>
+      <p class="f2ps-tile__meta">{{ tile.meta }}</p>
+    </article>
+  }
+</div>
