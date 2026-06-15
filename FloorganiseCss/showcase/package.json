@@ -1,7 +1,7 @@
 {
-  "name": "api-import-actor-poc-client",
+  "name": "@floorganise/css-showcase",
   "private": true,
-  "version": "0.0.0",
+  "version": "0.1.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -9,14 +9,11 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@floorganise/css": "file:../../FloorganiseCss",
-    "@microsoft/signalr": "^10.0.0",
-    "vue": "^3.5.34",
-    "vue-router": "^4.6.4"
+    "@floorganise/css": "file:..",
+    "vue": "^3.5.34"
   },
   "devDependencies": {
     "@tailwindcss/vite": "^4.3.1",
-    "@types/node": "^24.12.3",
     "@vitejs/plugin-vue": "^6.0.6",
     "@vue/tsconfig": "^0.9.1",
     "tailwindcss": "^4.3.1",

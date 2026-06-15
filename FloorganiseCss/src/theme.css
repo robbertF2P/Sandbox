@@ -1,0 +1,82 @@
+/*
+ * Floorganise design tokens
+ * Derived from Floor2Plan production CSS (f2p-style.bundle.css) and Vue POC themes.
+ * Use Tailwind utilities: bg-f2p-brand, text-f2p-ink, border-f2p-border, etc.
+ */
+@theme {
+  /* Brand — production primary #00aeef */
+  --color-f2p-brand: #00aeef;
+  --color-f2p-brand-hover: #0084c1;
+  --color-f2p-brand-light: #d9f3fd;
+  --color-f2p-brand-muted: #e1f1f7;
+
+  /* Ink & surfaces — production light theme */
+  --color-f2p-ink: #101821;
+  --color-f2p-ink-muted: #5d626f;
+  --color-f2p-ink-subtle: #6c757d;
+  --color-f2p-surface: #ffffff;
+  --color-f2p-surface-muted: #f3f7fa;
+  --color-f2p-surface-subtle: #eeeff1;
+  --color-f2p-surface-hover: #fafafb;
+  --color-f2p-border: #d9d9d9;
+  --color-f2p-border-subtle: #dee2e6;
+  --color-f2p-navy: #001b2e;
+
+  /* Semantic */
+  --color-f2p-success: #7ac74f;
+  --color-f2p-success-strong: #7dc65d;
+  --color-f2p-warning: #ffa630;
+  --color-f2p-danger: #d7263d;
+  --color-f2p-danger-strong: #d32e40;
+  --color-f2p-danger-dark: #b41920;
+
+  /* Dark POC theme (Vue clients) */
+  --color-f2p-dark-bg: #0f172a;
+  --color-f2p-dark-bg-accent: #1d4ed8;
+  --color-f2p-dark-ink: #e5eefb;
+  --color-f2p-dark-ink-muted: #cbd5e1;
+  --color-f2p-dark-ink-subtle: #94a3b8;
+  --color-f2p-dark-link: #93c5fd;
+  --color-f2p-dark-link-soft: #bfdbfe;
+  --color-f2p-dark-surface: rgb(15 23 42 / 0.72);
+  --color-f2p-dark-surface-raised: rgb(30 41 59 / 0.85);
+  --color-f2p-dark-surface-inset: rgb(2 6 23 / 0.65);
+  --color-f2p-dark-border: rgb(148 163 184 / 0.24);
+  --color-f2p-dark-success: #86efac;
+  --color-f2p-dark-warning: #fde68a;
+  --color-f2p-dark-danger: #fca5a5;
+  --color-f2p-dark-cyan: #38bdf8;
+  --color-f2p-dark-indigo: rgb(129 140 248 / 0.8);
+  --color-f2p-dark-milestone: #fbbf24;
+
+  /* Typography */
+  --font-sans: "Inter Variable", Inter, ui-sans-serif, system-ui, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, monospace;
+
+  /* Radii */
+  --radius-f2p-sm: 0.2rem;
+  --radius-f2p-md: 0.6rem;
+  --radius-f2p-lg: 0.75rem;
+  --radius-f2p-xl: 1rem;
+  --radius-f2p-2xl: 1.5rem;
+  --radius-f2p-card: 1.5rem;
+  --radius-f2p-pill: 999px;
+
+  /* Shadows */
+  --shadow-f2p-tile: 0 2px 4px rgb(0 0 0 / 0.1);
+  --shadow-f2p-btn: 0 0 4px rgb(0 0 0 / 0.1);
+  --shadow-f2p-panel: 0 24px 80px rgb(15 23 42 / 0.32);
+
+  /* Layout widths */
+  --width-f2p-shell: 60rem;
+  --width-f2p-shell-wide: 68.75rem;
+  --width-f2p-editor: 75rem;
+  --max-width-f2p-shell: 60rem;
+  --max-width-f2p-shell-wide: 68.75rem;
+  --max-width-f2p-editor: 75rem;
+  --max-width-f2p-form: 40rem;
+
+  /* Component sizing */
+  --spacing-f2p-textarea-min: 17.5rem;
+  --spacing-f2p-output-max: 30rem;
+}

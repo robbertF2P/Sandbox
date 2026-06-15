@@ -4,7 +4,7 @@ import ToastContainer from './components/ToastContainer.vue'
 </script>
 
 <template>
-  <div class="app">
+  <div class="f2p-app-dark app">
     <ToastContainer />
     <header class="app-nav">
       <RouterLink to="/" class="app-nav__brand">Akka + SignalR POC</RouterLink>

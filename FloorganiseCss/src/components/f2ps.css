@@ -1,0 +1,128 @@
+/*
+ * Floor2Plan production component aliases (f2ps-*)
+ * Matches selectors used by Floor2PlanSmokeTests and live Floor2Plan UI.
+ */
+@utility f2ps-btn-base {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-width: 0;
+  font-weight: 600;
+  transition-property: color, background-color, box-shadow;
+  transition-duration: 100ms;
+  box-shadow: var(--shadow-f2p-btn);
+}
+
+@layer components {
+  .f2ps-btn {
+    @apply f2ps-btn-base;
+  }
+
+  .f2ps-btn-sm {
+    @apply f2ps-btn-base px-3 py-1.5 text-sm;
+  }
+
+  .f2ps-btn-md {
+    @apply f2ps-btn-base px-4 py-2 text-base;
+  }
+
+  .f2ps-btn-lg {
+    @apply f2ps-btn-base px-5 py-2.5 text-lg;
+  }
+
+  .f2ps-btn-xl {
+    @apply f2ps-btn-base px-6 py-3 text-xl;
+  }
+
+  .f2ps-btn-primary {
+    @apply f2ps-btn-base bg-f2p-brand text-white hover:bg-f2p-brand-hover;
+  }
+
+  .f2ps-btn-secondary {
+    @apply f2ps-btn-base bg-f2p-brand-light text-f2p-ink hover:bg-f2p-brand-muted;
+  }
+
+  .f2ps-btn-tertiary {
+    @apply f2ps-btn-base bg-transparent text-f2p-ink hover:bg-f2p-surface-subtle;
+  }
+
+  .f2ps-btn-decline {
+    @apply f2ps-btn-base bg-f2p-danger-strong text-white hover:bg-f2p-danger;
+  }
+
+  .f2ps-btn-approve {
+    @apply f2ps-btn-base bg-f2p-success-strong text-white hover:bg-f2p-success;
+  }
+
+  .f2ps-tile {
+    @apply relative overflow-hidden rounded-f2p-sm border border-f2p-border bg-f2p-surface;
+    height: 11.25rem;
+    box-shadow: var(--shadow-f2p-tile);
+  }
+
+  .f2ps-tile-fluid {
+    @apply h-auto;
+  }
+
+  .f2p-tile-grid {
+    @apply grid gap-4;
+    grid-template-columns: repeat(auto-fill, minmax(11rem, 1fr));
+  }
+
+  .f2ps-tile__label {
+    @apply text-sm font-semibold text-f2p-ink;
+  }
+
+  .f2ps-tile__meta {
+    @apply text-xs text-f2p-ink-muted;
+  }
+
+  .f2ps-clickable {
+    @apply cursor-pointer transition-shadow duration-100 hover:shadow-md;
+  }
+
+  .f2ps-icon {
+    @apply inline-block bg-current;
+    mask-size: contain;
+    mask-repeat: no-repeat;
+    mask-position: center;
+  }
+
+  .f2ps-error-text {
+    @apply text-f2p-danger;
+  }
+
+  .f2ps-group-box {
+    @apply rounded-f2p-md border border-f2p-border bg-f2p-surface p-4;
+  }
+
+  .f2ps-horizontal-separator,
+  .f2ps-horizontal-seperator {
+    @apply h-px w-full bg-f2p-surface-subtle;
+  }
+
+  .login-notification {
+    @apply flex items-center justify-center rounded-sm p-3 text-base font-bold;
+    background-color: hsl(270 2% 88%);
+  }
+
+  .login-notification-danger {
+    @apply bg-f2p-danger text-white;
+  }
+
+  .login-notification-warning {
+    @apply bg-f2p-warning text-white;
+  }
+
+  .login-notification-success {
+    @apply bg-f2p-success text-white;
+  }
+
+  .client-background {
+    @apply bg-cover bg-center bg-no-repeat;
+  }
+
+  form.login {
+    @apply grid gap-3;
+  }
+}

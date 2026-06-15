@@ -1,0 +1,549 @@
+/*
+ * Vue POC dark-theme component aliases
+ * Keeps existing BEM class names; each maps to Tailwind utilities via @apply.
+ */
+@layer components {
+  .app {
+    @apply min-h-screen;
+  }
+
+  .app-nav {
+    @apply mx-auto flex w-full flex-wrap items-center justify-between gap-4 px-0 pt-5;
+    width: min(var(--width-f2p-shell), calc(100vw - 2rem));
+  }
+
+  .app-nav--wide {
+    width: min(var(--width-f2p-shell-wide), calc(100vw - 2rem));
+  }
+
+  .app-nav__brand {
+    @apply font-extrabold tracking-tight text-white no-underline;
+  }
+
+  .app-nav__links {
+    @apply flex gap-2;
+  }
+
+  .app-nav__links a {
+    @apply rounded-f2p-pill border border-f2p-dark-border bg-f2p-dark-surface px-3.5 py-2 text-f2p-dark-link-soft no-underline;
+  }
+
+  .app-nav__links a.router-link-active {
+    @apply border-f2p-dark-link/55 bg-f2p-brand/35 text-white;
+  }
+
+  .shell {
+    @apply mx-auto px-0 pb-16 pt-8;
+    width: min(var(--width-f2p-shell), calc(100vw - 2rem));
+  }
+
+  .shell--wide {
+    @apply pb-12 pt-6;
+    width: min(var(--width-f2p-shell-wide), calc(100vw - 2rem));
+  }
+
+  .editor {
+    width: min(var(--width-f2p-editor), calc(100vw - 2rem));
+  }
+
+  .page-header {
+    @apply mb-4 flex flex-wrap items-start justify-between gap-4;
+  }
+
+  .button-row {
+    @apply flex flex-wrap gap-2;
+  }
+
+  .button-row button {
+    @apply mt-0;
+  }
+
+  .panel {
+    @apply rounded-f2p-xl border border-f2p-dark-border bg-f2p-dark-surface p-5;
+  }
+
+  .panel h1,
+  .panel h2 {
+    @apply mt-0;
+  }
+
+  .panel-inset {
+    @apply bg-f2p-dark-surface-inset/25;
+  }
+
+  .grid {
+    @apply grid grid-cols-2 gap-4;
+  }
+
+  @media (max-width: 900px) {
+    .grid {
+      @apply grid-cols-1;
+    }
+  }
+
+  .field {
+    @apply mb-4 grid gap-1.5;
+  }
+
+  .field span {
+    @apply text-sm text-f2p-dark-ink-muted;
+  }
+
+  input,
+  select {
+    @apply w-full rounded-f2p-md border border-f2p-dark-border/25 bg-f2p-dark-surface-inset px-3 py-2.5 text-f2p-dark-ink;
+  }
+
+  textarea {
+    @apply w-full rounded-f2p-lg border border-f2p-dark-border/25 bg-f2p-dark-surface-inset p-3 text-f2p-dark-ink;
+    min-height: var(--spacing-f2p-textarea-min);
+  }
+
+  button:not(.btn):not(.toast__dismiss) {
+    @apply mt-3 cursor-pointer rounded-f2p-lg border-0 bg-f2p-brand px-4 py-2.5 text-white;
+  }
+
+  button:disabled {
+    @apply cursor-not-allowed opacity-60;
+  }
+
+  .btn-secondary {
+    @apply bg-slate-700/90;
+  }
+
+  .btn-danger {
+    @apply mt-0 w-auto bg-f2p-danger-dark px-3 py-2;
+  }
+
+  .btn-link {
+    @apply inline-block rounded-f2p-lg bg-f2p-brand px-4 py-2.5 text-white no-underline;
+  }
+
+  .btn-link--small {
+    @apply px-3 py-1.5 text-sm;
+  }
+
+  .entity-list {
+    @apply m-0 list-none p-0;
+  }
+
+  .entity-list li {
+    @apply flex items-center justify-between gap-4 border-b border-f2p-dark-border/12 py-3;
+  }
+
+  .sub-list {
+    @apply mt-3;
+  }
+
+  .sub-list__header {
+    @apply mb-2 flex items-center justify-between gap-3;
+  }
+
+  .sub-list__header h3,
+  .sub-list__header h4 {
+    @apply m-0;
+  }
+
+  .nested-card {
+    @apply mt-3 rounded-f2p-lg border border-f2p-dark-border/16 bg-f2p-dark-surface-inset/35 p-3.5;
+  }
+
+  .nested-card--template {
+    @apply border-f2p-dark-cyan/45;
+  }
+
+  .list-row {
+    @apply mb-2 grid grid-cols-[1fr_auto_auto] items-center gap-2;
+  }
+
+  .list-row:has(select) {
+    grid-template-columns: 1fr 11rem 4rem auto;
+  }
+
+  .template-toggle {
+    @apply inline-flex items-center gap-1.5 whitespace-nowrap text-sm text-f2p-dark-ink-subtle;
+  }
+
+  .template-create {
+    @apply my-3 rounded-f2p-lg border border-dashed border-f2p-dark-cyan/35 p-3.5;
+  }
+
+  .template-name-input {
+    @apply min-w-40;
+  }
+
+  .id-chip {
+    @apply font-mono text-xs text-f2p-dark-ink-subtle;
+  }
+
+  .muted {
+    @apply text-f2p-dark-ink-subtle;
+  }
+
+  .error {
+    @apply rounded-[1.125rem] border border-red-400/35 bg-red-950/30 p-4 text-f2p-dark-danger;
+  }
+
+  .success {
+    @apply text-f2p-dark-success;
+  }
+
+  .progress-list {
+    @apply m-0 max-h-80 list-none overflow-auto p-0;
+  }
+
+  .progress-list li {
+    @apply border-b border-f2p-dark-border/12 py-1.5 text-[0.95rem];
+  }
+
+  .model-output {
+    @apply overflow-auto whitespace-pre-wrap break-words font-mono text-sm;
+    max-height: var(--spacing-f2p-output-max);
+  }
+
+  .book-hours-form {
+    @apply grid max-w-f2p-form gap-4;
+  }
+
+  .book-hours-form label {
+    @apply grid gap-1.5;
+  }
+
+  .progress-block {
+    @apply my-3;
+  }
+
+  .progress-block__label {
+    @apply mb-1.5 text-sm text-f2p-dark-ink-muted;
+  }
+
+  .progress-block__meta {
+    @apply mt-1.5 flex justify-between text-sm text-f2p-dark-ink-subtle;
+  }
+
+  .progress-bar {
+    @apply h-2.5 overflow-hidden rounded-f2p-pill bg-f2p-dark-border/20;
+  }
+
+  .progress-bar__fill {
+    @apply h-full rounded-[inherit] bg-gradient-to-r from-f2p-brand to-f2p-dark-cyan;
+  }
+
+  .progress-tree {
+    @apply m-0 mt-2 list-none pl-0;
+  }
+
+  .progress-tree--root {
+    @apply mt-4;
+  }
+
+  .progress-tree details {
+    @apply mb-3 rounded-f2p-lg border border-f2p-dark-border/14 bg-f2p-dark-surface-inset/25 p-3;
+  }
+
+  .progress-tree summary {
+    @apply mb-1.5 cursor-pointer;
+  }
+
+  .progress-tree__name {
+    @apply font-semibold;
+  }
+
+  .progress-tree--assignments {
+    @apply pl-3;
+  }
+
+  .progress-tree__assignment {
+    @apply mb-1 flex flex-wrap gap-2;
+  }
+
+  .plan-controls {
+    @apply mb-4 grid gap-4;
+  }
+
+  .plan-controls__milestones h3,
+  .plan-durations h3,
+  .plan-durations h4 {
+    @apply mb-2 mt-0;
+  }
+
+  .plan-durations {
+    @apply mt-6;
+  }
+
+  .gantt {
+    @apply mt-4 overflow-hidden rounded-f2p-lg border border-f2p-dark-border/20;
+  }
+
+  .gantt__header,
+  .gantt__row,
+  .gantt__milestone-row {
+    @apply grid border-b border-f2p-dark-border/12;
+    grid-template-columns: minmax(14rem, 22rem) 1fr;
+  }
+
+  .gantt__label-col {
+    @apply border-r border-f2p-dark-border/12 px-3.5 py-2.5 text-sm;
+  }
+
+  .gantt__label-col--milestone {
+    @apply text-f2p-dark-milestone;
+  }
+
+  .gantt__timeline-col {
+    @apply relative min-h-10;
+    background: linear-gradient(90deg, rgb(148 163 184 / 0.08) 1px, transparent 1px);
+    background-size: calc(100% / 8) 100%;
+  }
+
+  .gantt__ticks {
+    @apply flex justify-between px-3 py-2 text-xs text-f2p-dark-ink-subtle;
+  }
+
+  .gantt__bar {
+    @apply absolute top-2 flex h-6 items-center overflow-hidden whitespace-nowrap rounded px-2;
+  }
+
+  .gantt__bar--activity {
+    @apply bg-f2p-dark-cyan/75;
+  }
+
+  .gantt__bar--assignment {
+    @apply top-2.5 h-3 bg-f2p-dark-indigo;
+  }
+
+  .gantt__bar-label {
+    @apply text-[0.7rem];
+  }
+
+  .gantt__milestone-marker {
+    @apply absolute top-1.5 h-0 w-0 -translate-x-[0.45rem] border-x-[0.45rem] border-b-[0.8rem] border-solid border-x-transparent border-b-f2p-dark-milestone;
+  }
+
+  /* SignalR POC (Akka) */
+  .hero,
+  .status-card,
+  .latest,
+  .messages,
+  .catalog-list {
+    @apply rounded-f2p-card border border-f2p-dark-border bg-f2p-dark-surface;
+    box-shadow: var(--shadow-f2p-panel);
+    backdrop-filter: blur(18px);
+  }
+
+  .hero {
+    @apply p-8;
+  }
+
+  .hero h1,
+  h1 {
+    @apply m-0 max-w-[47.5rem] text-[clamp(2.5rem,8vw,5rem)] leading-[0.95] tracking-tighter;
+  }
+
+  h2 {
+    @apply m-0;
+  }
+
+  .description {
+    @apply max-w-[42.5rem] text-lg leading-relaxed text-f2p-dark-link-soft;
+  }
+
+  .eyebrow,
+  .label {
+    @apply text-xs font-bold uppercase tracking-[0.14em] text-f2p-dark-link;
+  }
+
+  .status-card {
+    @apply mt-4 grid gap-4 p-5;
+    grid-template-columns: repeat(auto-fit, minmax(16.25rem, 1fr));
+  }
+
+  .status-card div {
+    @apply grid min-w-0 gap-1.5;
+  }
+
+  .status-card strong {
+    @apply [overflow-wrap:anywhere];
+  }
+
+  .state.connected {
+    @apply text-f2p-dark-success;
+  }
+
+  .state.reconnecting,
+  .state.connecting {
+    @apply text-f2p-dark-warning;
+  }
+
+  .state.disconnected {
+    @apply text-f2p-dark-danger;
+  }
+
+  .latest,
+  .messages,
+  .catalog-list {
+    @apply mt-4 p-6;
+  }
+
+  .catalog-list ul {
+    @apply m-0 mt-4 grid list-none gap-3 p-0;
+  }
+
+  .catalog-toolbar {
+    @apply mt-4 flex flex-wrap items-center justify-between gap-4;
+  }
+
+  .catalog-toolbar h2 {
+    @apply m-0;
+  }
+
+  .catalog-list li {
+    @apply grid grid-cols-[1fr_auto] items-start gap-4 rounded-2xl bg-f2p-dark-surface-raised/70 px-4 py-3.5;
+  }
+
+  .catalog-list__aside {
+    @apply grid justify-items-end gap-2.5;
+  }
+
+  .catalog-list__actions {
+    @apply flex flex-wrap gap-2;
+  }
+
+  .catalog-list__primary {
+    @apply grid min-w-0 gap-1.5;
+  }
+
+  .catalog-list__description {
+    @apply text-f2p-dark-ink-muted;
+  }
+
+  .catalog-list__meta {
+    @apply text-sm text-f2p-dark-ink-subtle [overflow-wrap:anywhere];
+  }
+
+  code {
+    @apply rounded-sm bg-f2p-dark-surface-raised/90 px-1.5 py-0.5 text-[0.92em] text-f2p-dark-link-soft;
+  }
+
+  .btn {
+    @apply mt-0 cursor-pointer rounded-[0.625rem] border border-f2p-dark-border/35 bg-f2p-dark-surface-raised/85 px-3.5 py-2 text-slate-200;
+  }
+
+  .btn:disabled {
+    @apply cursor-not-allowed opacity-55;
+  }
+
+  .btn--primary {
+    @apply border-f2p-dark-link/55 bg-f2p-brand/55 text-white;
+  }
+
+  .btn--ghost:hover:not(:disabled) {
+    @apply border-f2p-dark-link/45 text-white;
+  }
+
+  .btn--danger {
+    @apply border-red-400/45 bg-red-950/35 text-red-200;
+  }
+
+  .project-form {
+    @apply mt-4 rounded-f2p-card border border-f2p-dark-border bg-f2p-dark-surface p-6;
+    box-shadow: var(--shadow-f2p-panel);
+  }
+
+  .project-form__header {
+    @apply mb-4 flex items-center justify-between gap-4;
+  }
+
+  .project-form__header h2 {
+    @apply m-0;
+  }
+
+  .project-form__body {
+    @apply grid gap-4;
+  }
+
+  .project-form .field {
+    @apply mb-0 gap-1.5;
+  }
+
+  .project-form .field input,
+  .project-form .field select,
+  .project-form .field textarea {
+    @apply rounded-xl border border-f2p-dark-border/35 bg-f2p-dark-surface-raised/85 px-3 py-2.5 text-slate-200;
+  }
+
+  .project-form .field textarea {
+    @apply min-h-20 resize-y;
+  }
+
+  .project-form__actions {
+    @apply flex justify-end;
+  }
+
+  .toast-stack {
+    @apply fixed top-4 right-4 z-[1000] grid gap-2.5;
+    width: min(22.5rem, calc(100vw - 2rem));
+  }
+
+  .toast {
+    @apply grid grid-cols-[1fr_auto] items-start gap-3 rounded-2xl border border-f2p-dark-border/35 bg-f2p-dark-surface/95 p-4;
+    box-shadow: 0 16px 48px rgb(15 23 42 / 0.45);
+  }
+
+  .toast p {
+    @apply m-0 leading-snug text-slate-200;
+  }
+
+  .toast.success {
+    @apply border-f2p-dark-success/45;
+  }
+
+  .toast__dismiss {
+    @apply mt-0 cursor-pointer rounded-lg border-0 bg-f2p-dark-surface-raised/80 px-2 py-1 text-f2p-dark-link;
+  }
+
+  .toast__dismiss:hover {
+    @apply text-white;
+  }
+
+  .latest h2 {
+    @apply mt-2 text-[clamp(1.8rem,4vw,3rem)] text-white;
+  }
+
+  .latest p {
+    @apply text-f2p-dark-ink-muted;
+  }
+
+  .messages ul {
+    @apply m-0 mt-4 grid list-none gap-3 p-0;
+  }
+
+  .messages li {
+    @apply grid grid-cols-[auto_1fr_auto] items-center gap-4 rounded-2xl bg-f2p-dark-surface-raised/70 px-4 py-3.5;
+  }
+
+  .sequence {
+    @apply font-extrabold text-f2p-dark-link;
+  }
+
+  time,
+  .empty {
+    @apply text-f2p-dark-ink-subtle;
+  }
+
+  @media (max-width: 640px) {
+    .shell,
+    .shell--wide {
+      @apply pb-8 pt-6;
+    }
+
+    .messages li,
+    .catalog-list li {
+      @apply grid-cols-1 gap-1.5;
+    }
+
+    .catalog-list__aside {
+      @apply justify-items-start;
+    }
+  }
+}
