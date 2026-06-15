@@ -23,6 +23,10 @@ const emit = defineEmits<{
 const templateMessage = ref('')
 const templateError = ref('')
 
+function templateNameValue(templateId: number, fallback: string) {
+  return (document.getElementById(`template-name-${templateId}`) as HTMLInputElement | null)?.value || fallback
+}
+
 function addComponent(current: EditableComponent[]) {
   emit('update', [...current, createEmptyComponent('New module')])
 }
@@ -62,7 +66,7 @@ async function toggleTemplate(index: number, component: EditableComponent, isTem
 }
 
 async function createFromTemplate(
-  current: EditableComponent[],
+  _current: EditableComponent[],
   templateId: number,
   name: string,
   parentComponentId?: number,
@@ -113,7 +117,7 @@ async function createFromTemplate(
           @click="createFromTemplate(
             components,
             template.id,
-            (document.getElementById(`template-name-${template.id}`) as HTMLInputElement)?.value || `${template.name} copy`,
+            templateNameValue(template.id, `${template.name} copy`),
           )"
         >
           Create

@@ -1,0 +1,111 @@
+/*
+ * Floor2Plan production component aliases (f2ps-*)
+ * Matches selectors used by Floor2PlanSmokeTests and live Floor2Plan UI.
+ */
+@utility f2ps-btn-base {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-width: 0;
+  font-weight: 600;
+  transition-property: color, background-color, box-shadow;
+  transition-duration: 100ms;
+  box-shadow: var(--shadow-flo-btn);
+}
+
+@layer components {
+  .f2ps-btn {
+    @apply f2ps-btn-base;
+  }
+
+  .f2ps-btn-sm {
+    @apply f2ps-btn-base px-3 py-1.5 text-sm;
+  }
+
+  .f2ps-btn-md {
+    @apply f2ps-btn-base px-4 py-2 text-base;
+  }
+
+  .f2ps-btn-lg {
+    @apply f2ps-btn-base px-5 py-2.5 text-lg;
+  }
+
+  .f2ps-btn-xl {
+    @apply f2ps-btn-base px-6 py-3 text-xl;
+  }
+
+  .f2ps-btn-primary {
+    @apply f2ps-btn-base bg-flo-brand text-white hover:bg-flo-brand-hover;
+  }
+
+  .f2ps-btn-secondary {
+    @apply f2ps-btn-base bg-flo-brand-light text-flo-ink hover:bg-flo-brand-muted;
+  }
+
+  .f2ps-btn-tertiary {
+    @apply f2ps-btn-base bg-transparent text-flo-ink hover:bg-flo-surface-subtle;
+  }
+
+  .f2ps-btn-decline {
+    @apply f2ps-btn-base bg-flo-danger-strong text-white hover:bg-flo-danger;
+  }
+
+  .f2ps-btn-approve {
+    @apply f2ps-btn-base bg-flo-success-strong text-white hover:bg-flo-success;
+  }
+
+  .f2ps-tile {
+    @apply relative overflow-hidden rounded-flo-sm border border-flo-border bg-flo-surface;
+    height: 11.25rem;
+    box-shadow: var(--shadow-flo-tile);
+  }
+
+  .f2ps-tile-fluid {
+    @apply h-auto;
+  }
+
+  .f2ps-icon {
+    @apply inline-block bg-current;
+    mask-size: contain;
+    mask-repeat: no-repeat;
+    mask-position: center;
+  }
+
+  .f2ps-error-text {
+    @apply text-flo-danger;
+  }
+
+  .f2ps-group-box {
+    @apply rounded-flo-md border border-flo-border bg-flo-surface p-4;
+  }
+
+  .f2ps-horizontal-separator,
+  .f2ps-horizontal-seperator {
+    @apply h-px w-full bg-flo-surface-subtle;
+  }
+
+  .login-notification {
+    @apply flex items-center justify-center rounded-sm p-3 text-base font-bold;
+    background-color: hsl(270 2% 88%);
+  }
+
+  .login-notification-danger {
+    @apply bg-flo-danger text-white;
+  }
+
+  .login-notification-warning {
+    @apply bg-flo-warning text-white;
+  }
+
+  .login-notification-success {
+    @apply bg-flo-success text-white;
+  }
+
+  .client-background {
+    @apply bg-cover bg-center bg-no-repeat;
+  }
+
+  form.login {
+    @apply grid gap-3;
+  }
+}

@@ -1,0 +1,40 @@
+@layer base {
+  *,
+  *::before,
+  *::after {
+    @apply box-border;
+  }
+
+  html {
+    @apply text-base;
+  }
+
+  body {
+    @apply m-0 min-h-screen font-sans antialiased;
+  }
+
+  button,
+  textarea,
+  input,
+  select {
+    font: inherit;
+  }
+
+  a {
+    @apply text-flo-brand transition-colors duration-100;
+  }
+}
+
+/* Dark POC app shell — opt in via .flo-app-dark on a root element */
+@layer base {
+  .flo-app-dark {
+    @apply min-h-screen text-flo-dark-ink;
+    background:
+      radial-gradient(circle at top left, var(--color-flo-dark-bg-accent) 0, transparent 32rem),
+      var(--color-flo-dark-bg);
+  }
+
+  .flo-app-dark a {
+    @apply text-flo-dark-link no-underline;
+  }
+}
