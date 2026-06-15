@@ -50,8 +50,8 @@ services:
 
   client:
     build:
-      context: .
-      dockerfile: client/Dockerfile
+      context: ..
+      dockerfile: AkkaSignalRVuePoc/client/Dockerfile
       args:
         VITE_API_BASE_URL: http://localhost:5000
         VITE_SIGNALR_HUB_URL: http://localhost:5000/hubs/live-messages
