@@ -180,4 +180,41 @@ Host Edge profile reuse in Docker can be limited by OS keychain encryption and p
 
 Console warnings and errors are written to `artifacts/console/*.json`. Opened and missing tile/menu targets are written to `artifacts/navigation/*.json`.
 
+## API documentation
+
+The smoke harness can discover Floor2Plan JSON API endpoints and generate an OpenAPI 3 document. HTML template routes, static assets, telemetry, and image endpoints are excluded.
+
+Capture live API traffic while navigating the app:
+
+```sh
+SMOKE_SERVICE_USERNAME=your-service-user \
+SMOKE_SERVICE_PASSWORD=your-service-password \
+npm run capture:api
+```
+
+Build the Swagger/OpenAPI document from captured traffic:
+
+```sh
+npm run build:openapi
+```
+
+Run both steps:
+
+```sh
+npm run document:api
+```
+
+Optional static bundle scan for additional candidate endpoints:
+
+```sh
+npm run discover:api
+npm run build:openapi
+```
+
+Output:
+
+- `swagger/openapi.json` — OpenAPI 3.0 document
+- `artifacts/api-discovery/*-captured-requests.json` — raw captured JSON requests
+- `artifacts/api-discovery/discovered-endpoints.json` — static probe results
+
 The logo login path uses Azure AD. When `SMOKE_LOGIN_MODE=logo`, the runner must have a valid Microsoft SSO session for the target application; otherwise the smoke test will stop before the home tiles can render.
