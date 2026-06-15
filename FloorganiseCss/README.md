@@ -82,6 +82,26 @@ Dark POC tokens: `f2p-dark-*` prefix (e.g. `bg-f2p-dark-surface`, `text-f2p-dark
 - Data viz: `.gantt*`, `.progress-bar*`, `.progress-tree*`
 - Feedback: `.error`, `.success`, `.muted`
 
+## Showcase
+
+Sample Vue components demonstrating the styling strategy:
+
+```bash
+cd FloorganiseCss/showcase
+npm install
+npm run dev   # http://localhost:5175
+```
+
+| Component | Pattern |
+|-----------|---------|
+| `F2pHomeTiles` | Production home grid — `f2ps-tile`, `f2p-tile-grid` |
+| `F2pLoginPanel` | Login form — `form.login`, `f2ps-btn-primary`, notifications |
+| `F2pButtonShowcase` | All `f2ps-btn-*` variants and sizes |
+| `F2pCatalogPanel` | Dark catalog — `catalog-list`, `btn--*` |
+| `F2pStatusPanel` | Live hub — `hero`, `status-card`, `state.*` |
+| `F2pHybridPanel` | Semantic + Tailwind utilities together |
+| `F2pToastSample` | Toast feedback — `toast.success` |
+
 ## Extending
 
 Add tokens in `src/theme.css` (`@theme` block). Add aliases in `src/components/`. Use Tailwind utilities directly in Vue templates for one-off layout.

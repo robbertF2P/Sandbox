@@ -37,4 +37,23 @@
   .f2p-app-dark a {
     @apply text-f2p-dark-link no-underline;
   }
+
+  /* Production light shell — opt in via .f2p-app-light */
+  .f2p-app-light {
+    @apply min-h-screen bg-f2p-surface-muted text-f2p-ink;
+  }
+
+  .f2p-app-light a {
+    @apply text-f2p-brand no-underline;
+  }
+
+  .f2p-app-light input,
+  .f2p-app-light select,
+  .f2p-app-light textarea {
+    @apply border-f2p-border bg-f2p-surface text-f2p-ink;
+  }
+
+  .f2p-app-light .field {
+    @apply mb-0 text-f2p-ink-muted;
+  }
 }

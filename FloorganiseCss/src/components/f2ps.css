@@ -64,6 +64,23 @@
     @apply h-auto;
   }
 
+  .f2p-tile-grid {
+    @apply grid gap-4;
+    grid-template-columns: repeat(auto-fill, minmax(11rem, 1fr));
+  }
+
+  .f2ps-tile__label {
+    @apply text-sm font-semibold text-f2p-ink;
+  }
+
+  .f2ps-tile__meta {
+    @apply text-xs text-f2p-ink-muted;
+  }
+
+  .f2ps-clickable {
+    @apply cursor-pointer transition-shadow duration-100 hover:shadow-md;
+  }
+
   .f2ps-icon {
     @apply inline-block bg-current;
     mask-size: contain;
