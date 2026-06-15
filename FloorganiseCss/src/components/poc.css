@@ -8,8 +8,8 @@
   }
 
   .app-nav {
-    @apply mx-auto flex w-full max-w-flo-shell-wide items-center justify-between px-0 pt-5;
-    width: min(var(--width-flo-shell-wide), calc(100vw - 2rem));
+    @apply mx-auto flex w-full max-w-f2p-shell-wide items-center justify-between px-0 pt-5;
+    width: min(var(--width-f2p-shell-wide), calc(100vw - 2rem));
   }
 
   .app-nav__brand {
@@ -21,20 +21,20 @@
   }
 
   .app-nav__links a {
-    @apply rounded-flo-pill border border-flo-dark-border bg-flo-dark-surface px-3.5 py-2 text-flo-dark-link-soft no-underline;
+    @apply rounded-f2p-pill border border-f2p-dark-border bg-f2p-dark-surface px-3.5 py-2 text-f2p-dark-link-soft no-underline;
   }
 
   .app-nav__links a.router-link-active {
-    @apply border-flo-dark-link/55 bg-flo-brand/35 text-white;
+    @apply border-f2p-dark-link/55 bg-f2p-brand/35 text-white;
   }
 
   .shell {
     @apply mx-auto px-0 pb-12 pt-6;
-    width: min(var(--width-flo-shell-wide), calc(100vw - 2rem));
+    width: min(var(--width-f2p-shell-wide), calc(100vw - 2rem));
   }
 
   .editor {
-    width: min(var(--width-flo-editor), calc(100vw - 2rem));
+    width: min(var(--width-f2p-editor), calc(100vw - 2rem));
   }
 
   .page-header {
@@ -50,7 +50,7 @@
   }
 
   .panel {
-    @apply rounded-flo-xl border border-flo-dark-border bg-flo-dark-surface p-5;
+    @apply rounded-f2p-xl border border-f2p-dark-border bg-f2p-dark-surface p-5;
   }
 
   .panel h1,
@@ -59,7 +59,7 @@
   }
 
   .panel-inset {
-    @apply bg-flo-dark-surface-inset/25;
+    @apply bg-f2p-dark-surface-inset/25;
   }
 
   .grid {
@@ -77,21 +77,21 @@
   }
 
   .field span {
-    @apply text-sm text-flo-dark-ink-muted;
+    @apply text-sm text-f2p-dark-ink-muted;
   }
 
   input,
   select {
-    @apply w-full rounded-flo-md border border-flo-dark-border/25 bg-flo-dark-surface-inset px-3 py-2.5 text-flo-dark-ink;
+    @apply w-full rounded-f2p-md border border-f2p-dark-border/25 bg-f2p-dark-surface-inset px-3 py-2.5 text-f2p-dark-ink;
   }
 
   textarea {
-    @apply w-full rounded-flo-lg border border-flo-dark-border/25 bg-flo-dark-surface-inset p-3 text-flo-dark-ink;
-    min-height: var(--spacing-flo-textarea-min);
+    @apply w-full rounded-f2p-lg border border-f2p-dark-border/25 bg-f2p-dark-surface-inset p-3 text-f2p-dark-ink;
+    min-height: var(--spacing-f2p-textarea-min);
   }
 
   button {
-    @apply mt-3 cursor-pointer rounded-flo-lg border-0 bg-flo-brand px-4 py-2.5 text-white;
+    @apply mt-3 cursor-pointer rounded-f2p-lg border-0 bg-f2p-brand px-4 py-2.5 text-white;
   }
 
   button:disabled {
@@ -103,11 +103,11 @@
   }
 
   .btn-danger {
-    @apply mt-0 w-auto bg-flo-danger-dark px-3 py-2;
+    @apply mt-0 w-auto bg-f2p-danger-dark px-3 py-2;
   }
 
   .btn-link {
-    @apply inline-block rounded-flo-lg bg-flo-brand px-4 py-2.5 text-white no-underline;
+    @apply inline-block rounded-f2p-lg bg-f2p-brand px-4 py-2.5 text-white no-underline;
   }
 
   .btn-link--small {
@@ -119,7 +119,7 @@
   }
 
   .entity-list li {
-    @apply flex items-center justify-between gap-4 border-b border-flo-dark-border/12 py-3;
+    @apply flex items-center justify-between gap-4 border-b border-f2p-dark-border/12 py-3;
   }
 
   .sub-list {
@@ -136,11 +136,11 @@
   }
 
   .nested-card {
-    @apply mt-3 rounded-flo-lg border border-flo-dark-border/16 bg-flo-dark-surface-inset/35 p-3.5;
+    @apply mt-3 rounded-f2p-lg border border-f2p-dark-border/16 bg-f2p-dark-surface-inset/35 p-3.5;
   }
 
   .nested-card--template {
-    @apply border-flo-dark-cyan/45;
+    @apply border-f2p-dark-cyan/45;
   }
 
   .list-row {
@@ -152,11 +152,11 @@
   }
 
   .template-toggle {
-    @apply inline-flex items-center gap-1.5 whitespace-nowrap text-sm text-flo-dark-ink-subtle;
+    @apply inline-flex items-center gap-1.5 whitespace-nowrap text-sm text-f2p-dark-ink-subtle;
   }
 
   .template-create {
-    @apply my-3 rounded-flo-lg border border-dashed border-flo-dark-cyan/35 p-3.5;
+    @apply my-3 rounded-f2p-lg border border-dashed border-f2p-dark-cyan/35 p-3.5;
   }
 
   .template-name-input {
@@ -164,19 +164,19 @@
   }
 
   .id-chip {
-    @apply font-mono text-xs text-flo-dark-ink-subtle;
+    @apply font-mono text-xs text-f2p-dark-ink-subtle;
   }
 
   .muted {
-    @apply text-flo-dark-ink-subtle;
+    @apply text-f2p-dark-ink-subtle;
   }
 
   .error {
-    @apply text-flo-dark-danger;
+    @apply text-f2p-dark-danger;
   }
 
   .success {
-    @apply text-flo-dark-success;
+    @apply text-f2p-dark-success;
   }
 
   .progress-list {
@@ -184,16 +184,16 @@
   }
 
   .progress-list li {
-    @apply border-b border-flo-dark-border/12 py-1.5 text-[0.95rem];
+    @apply border-b border-f2p-dark-border/12 py-1.5 text-[0.95rem];
   }
 
   .model-output {
     @apply overflow-auto whitespace-pre-wrap break-words font-mono text-sm;
-    max-height: var(--spacing-flo-output-max);
+    max-height: var(--spacing-f2p-output-max);
   }
 
   .book-hours-form {
-    @apply grid max-w-flo-form gap-4;
+    @apply grid max-w-f2p-form gap-4;
   }
 
   .book-hours-form label {
@@ -205,19 +205,19 @@
   }
 
   .progress-block__label {
-    @apply mb-1.5 text-sm text-flo-dark-ink-muted;
+    @apply mb-1.5 text-sm text-f2p-dark-ink-muted;
   }
 
   .progress-block__meta {
-    @apply mt-1.5 flex justify-between text-sm text-flo-dark-ink-subtle;
+    @apply mt-1.5 flex justify-between text-sm text-f2p-dark-ink-subtle;
   }
 
   .progress-bar {
-    @apply h-2.5 overflow-hidden rounded-flo-pill bg-flo-dark-border/20;
+    @apply h-2.5 overflow-hidden rounded-f2p-pill bg-f2p-dark-border/20;
   }
 
   .progress-bar__fill {
-    @apply h-full rounded-[inherit] bg-gradient-to-r from-flo-brand to-flo-dark-cyan;
+    @apply h-full rounded-[inherit] bg-gradient-to-r from-f2p-brand to-f2p-dark-cyan;
   }
 
   .progress-tree {
@@ -229,7 +229,7 @@
   }
 
   .progress-tree details {
-    @apply mb-3 rounded-flo-lg border border-flo-dark-border/14 bg-flo-dark-surface-inset/25 p-3;
+    @apply mb-3 rounded-f2p-lg border border-f2p-dark-border/14 bg-f2p-dark-surface-inset/25 p-3;
   }
 
   .progress-tree summary {
@@ -263,22 +263,22 @@
   }
 
   .gantt {
-    @apply mt-4 overflow-hidden rounded-flo-lg border border-flo-dark-border/20;
+    @apply mt-4 overflow-hidden rounded-f2p-lg border border-f2p-dark-border/20;
   }
 
   .gantt__header,
   .gantt__row,
   .gantt__milestone-row {
-    @apply grid border-b border-flo-dark-border/12;
+    @apply grid border-b border-f2p-dark-border/12;
     grid-template-columns: minmax(14rem, 22rem) 1fr;
   }
 
   .gantt__label-col {
-    @apply border-r border-flo-dark-border/12 px-3.5 py-2.5 text-sm;
+    @apply border-r border-f2p-dark-border/12 px-3.5 py-2.5 text-sm;
   }
 
   .gantt__label-col--milestone {
-    @apply text-flo-dark-milestone;
+    @apply text-f2p-dark-milestone;
   }
 
   .gantt__timeline-col {
@@ -288,7 +288,7 @@
   }
 
   .gantt__ticks {
-    @apply flex justify-between px-3 py-2 text-xs text-flo-dark-ink-subtle;
+    @apply flex justify-between px-3 py-2 text-xs text-f2p-dark-ink-subtle;
   }
 
   .gantt__bar {
@@ -296,11 +296,11 @@
   }
 
   .gantt__bar--activity {
-    @apply bg-flo-dark-cyan/75;
+    @apply bg-f2p-dark-cyan/75;
   }
 
   .gantt__bar--assignment {
-    @apply top-2.5 h-3 bg-flo-dark-indigo;
+    @apply top-2.5 h-3 bg-f2p-dark-indigo;
   }
 
   .gantt__bar-label {
@@ -308,6 +308,6 @@
   }
 
   .gantt__milestone-marker {
-    @apply absolute top-1.5 h-0 w-0 -translate-x-[0.45rem] border-x-[0.45rem] border-b-[0.8rem] border-solid border-x-transparent border-b-flo-dark-milestone;
+    @apply absolute top-1.5 h-0 w-0 -translate-x-[0.45rem] border-x-[0.45rem] border-b-[0.8rem] border-solid border-x-transparent border-b-f2p-dark-milestone;
   }
 }

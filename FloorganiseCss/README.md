@@ -8,7 +8,7 @@ Tailwind utility classes are powerful but verbose in templates. This package map
 
 - **Fewer classes in markup** — use `.panel`, `.f2ps-btn-primary`, `.app-nav` instead of long utility strings
 - **Full Tailwind power** — add utilities alongside semantic classes: `class="panel flex gap-4"`
-- **Design tokens** — `bg-flo-brand`, `text-flo-ink`, `border-flo-border` from production Floor2Plan CSS
+- **Design tokens** — `bg-f2p-brand`, `text-f2p-ink`, `border-f2p-border` from production Floor2Plan CSS
 
 ## Design sources
 
@@ -44,23 +44,23 @@ import '@floorganise/css'
 **App root (dark POC theme)**
 
 ```html
-<div class="flo-app-dark app">…</div>
+<div class="f2p-app-dark app">…</div>
 ```
 
 ## Token reference
 
 | Token | Value | Tailwind utility |
 |-------|-------|------------------|
-| Brand | `#00aeef` | `bg-flo-brand`, `text-flo-brand` |
-| Brand hover | `#0084c1` | `hover:bg-flo-brand-hover` |
-| Ink | `#101821` | `text-flo-ink` |
-| Surface | `#ffffff` | `bg-flo-surface` |
-| Border | `#d9d9d9` | `border-flo-border` |
-| Danger | `#d7263d` | `text-flo-danger`, `bg-flo-danger` |
-| Success | `#7ac74f` | `bg-flo-success` |
-| Warning | `#ffa630` | `bg-flo-warning` |
+| Brand | `#00aeef` | `bg-f2p-brand`, `text-f2p-brand` |
+| Brand hover | `#0084c1` | `hover:bg-f2p-brand-hover` |
+| Ink | `#101821` | `text-f2p-ink` |
+| Surface | `#ffffff` | `bg-f2p-surface` |
+| Border | `#d9d9d9` | `border-f2p-border` |
+| Danger | `#d7263d` | `text-f2p-danger`, `bg-f2p-danger` |
+| Success | `#7ac74f` | `bg-f2p-success` |
+| Warning | `#ffa630` | `bg-f2p-warning` |
 
-Dark POC tokens: `flo-dark-*` prefix (e.g. `bg-flo-dark-surface`, `text-flo-dark-ink`).
+Dark POC tokens: `f2p-dark-*` prefix (e.g. `bg-f2p-dark-surface`, `text-f2p-dark-ink`).
 
 ## Component aliases
 

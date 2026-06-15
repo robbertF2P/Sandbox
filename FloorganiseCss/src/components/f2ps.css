@@ -10,7 +10,7 @@
   font-weight: 600;
   transition-property: color, background-color, box-shadow;
   transition-duration: 100ms;
-  box-shadow: var(--shadow-flo-btn);
+  box-shadow: var(--shadow-f2p-btn);
 }
 
 @layer components {
@@ -35,29 +35,29 @@
   }
 
   .f2ps-btn-primary {
-    @apply f2ps-btn-base bg-flo-brand text-white hover:bg-flo-brand-hover;
+    @apply f2ps-btn-base bg-f2p-brand text-white hover:bg-f2p-brand-hover;
   }
 
   .f2ps-btn-secondary {
-    @apply f2ps-btn-base bg-flo-brand-light text-flo-ink hover:bg-flo-brand-muted;
+    @apply f2ps-btn-base bg-f2p-brand-light text-f2p-ink hover:bg-f2p-brand-muted;
   }
 
   .f2ps-btn-tertiary {
-    @apply f2ps-btn-base bg-transparent text-flo-ink hover:bg-flo-surface-subtle;
+    @apply f2ps-btn-base bg-transparent text-f2p-ink hover:bg-f2p-surface-subtle;
   }
 
   .f2ps-btn-decline {
-    @apply f2ps-btn-base bg-flo-danger-strong text-white hover:bg-flo-danger;
+    @apply f2ps-btn-base bg-f2p-danger-strong text-white hover:bg-f2p-danger;
   }
 
   .f2ps-btn-approve {
-    @apply f2ps-btn-base bg-flo-success-strong text-white hover:bg-flo-success;
+    @apply f2ps-btn-base bg-f2p-success-strong text-white hover:bg-f2p-success;
   }
 
   .f2ps-tile {
-    @apply relative overflow-hidden rounded-flo-sm border border-flo-border bg-flo-surface;
+    @apply relative overflow-hidden rounded-f2p-sm border border-f2p-border bg-f2p-surface;
     height: 11.25rem;
-    box-shadow: var(--shadow-flo-tile);
+    box-shadow: var(--shadow-f2p-tile);
   }
 
   .f2ps-tile-fluid {
@@ -72,16 +72,16 @@
   }
 
   .f2ps-error-text {
-    @apply text-flo-danger;
+    @apply text-f2p-danger;
   }
 
   .f2ps-group-box {
-    @apply rounded-flo-md border border-flo-border bg-flo-surface p-4;
+    @apply rounded-f2p-md border border-f2p-border bg-f2p-surface p-4;
   }
 
   .f2ps-horizontal-separator,
   .f2ps-horizontal-seperator {
-    @apply h-px w-full bg-flo-surface-subtle;
+    @apply h-px w-full bg-f2p-surface-subtle;
   }
 
   .login-notification {
@@ -90,15 +90,15 @@
   }
 
   .login-notification-danger {
-    @apply bg-flo-danger text-white;
+    @apply bg-f2p-danger text-white;
   }
 
   .login-notification-warning {
-    @apply bg-flo-warning text-white;
+    @apply bg-f2p-warning text-white;
   }
 
   .login-notification-success {
-    @apply bg-flo-success text-white;
+    @apply bg-f2p-success text-white;
   }
 
   .client-background {
