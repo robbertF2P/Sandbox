@@ -47,6 +47,8 @@ import '@floorganise/css'
 <div class="f2p-app-dark app">…</div>
 ```
 
+Use `shell--wide` / `app-nav--wide` for the wider Import POC layout (1100px). SignalR POC uses default `shell` (960px).
+
 ## Token reference
 
 | Token | Value | Tailwind utility |
@@ -74,7 +76,8 @@ Dark POC tokens: `f2p-dark-*` prefix (e.g. `bg-f2p-dark-surface`, `text-f2p-dark
 
 ### Vue POC (dark)
 
-- Layout: `.app`, `.app-nav`, `.shell`, `.grid`, `.panel`
+- Layout: `.app`, `.app-nav`, `.shell`, `.shell--wide`, `.grid`, `.panel`
+- SignalR: `.hero`, `.status-card`, `.catalog-list`, `.btn`, `.toast`, `.messages`
 - Forms: `.field`, `input`, `textarea`, `button`, `.btn-secondary`, `.btn-danger`
 - Data viz: `.gantt*`, `.progress-bar*`, `.progress-tree*`
 - Feedback: `.error`, `.success`, `.muted`

@@ -68,11 +68,11 @@
   --shadow-f2p-panel: 0 24px 80px rgb(15 23 42 / 0.32);
 
   /* Layout widths */
-  --width-f2p-shell: 68.75rem;
-  --width-f2p-shell-wide: 75rem;
+  --width-f2p-shell: 60rem;
+  --width-f2p-shell-wide: 68.75rem;
   --width-f2p-editor: 75rem;
-  --max-width-f2p-shell: 68.75rem;
-  --max-width-f2p-shell-wide: 75rem;
+  --max-width-f2p-shell: 60rem;
+  --max-width-f2p-shell-wide: 68.75rem;
   --max-width-f2p-editor: 75rem;
   --max-width-f2p-form: 40rem;
 

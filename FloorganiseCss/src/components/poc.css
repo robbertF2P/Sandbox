@@ -8,12 +8,16 @@
   }
 
   .app-nav {
-    @apply mx-auto flex w-full max-w-f2p-shell-wide items-center justify-between px-0 pt-5;
+    @apply mx-auto flex w-full flex-wrap items-center justify-between gap-4 px-0 pt-5;
+    width: min(var(--width-f2p-shell), calc(100vw - 2rem));
+  }
+
+  .app-nav--wide {
     width: min(var(--width-f2p-shell-wide), calc(100vw - 2rem));
   }
 
   .app-nav__brand {
-    @apply font-extrabold text-white no-underline;
+    @apply font-extrabold tracking-tight text-white no-underline;
   }
 
   .app-nav__links {
@@ -29,7 +33,12 @@
   }
 
   .shell {
-    @apply mx-auto px-0 pb-12 pt-6;
+    @apply mx-auto px-0 pb-16 pt-8;
+    width: min(var(--width-f2p-shell), calc(100vw - 2rem));
+  }
+
+  .shell--wide {
+    @apply pb-12 pt-6;
     width: min(var(--width-f2p-shell-wide), calc(100vw - 2rem));
   }
 
@@ -90,7 +99,7 @@
     min-height: var(--spacing-f2p-textarea-min);
   }
 
-  button {
+  button:not(.btn):not(.toast__dismiss) {
     @apply mt-3 cursor-pointer rounded-f2p-lg border-0 bg-f2p-brand px-4 py-2.5 text-white;
   }
 
@@ -172,7 +181,7 @@
   }
 
   .error {
-    @apply text-f2p-dark-danger;
+    @apply rounded-[1.125rem] border border-red-400/35 bg-red-950/30 p-4 text-f2p-dark-danger;
   }
 
   .success {
@@ -309,5 +318,232 @@
 
   .gantt__milestone-marker {
     @apply absolute top-1.5 h-0 w-0 -translate-x-[0.45rem] border-x-[0.45rem] border-b-[0.8rem] border-solid border-x-transparent border-b-f2p-dark-milestone;
+  }
+
+  /* SignalR POC (Akka) */
+  .hero,
+  .status-card,
+  .latest,
+  .messages,
+  .catalog-list {
+    @apply rounded-f2p-card border border-f2p-dark-border bg-f2p-dark-surface;
+    box-shadow: var(--shadow-f2p-panel);
+    backdrop-filter: blur(18px);
+  }
+
+  .hero {
+    @apply p-8;
+  }
+
+  .hero h1,
+  h1 {
+    @apply m-0 max-w-[47.5rem] text-[clamp(2.5rem,8vw,5rem)] leading-[0.95] tracking-tighter;
+  }
+
+  h2 {
+    @apply m-0;
+  }
+
+  .description {
+    @apply max-w-[42.5rem] text-lg leading-relaxed text-f2p-dark-link-soft;
+  }
+
+  .eyebrow,
+  .label {
+    @apply text-xs font-bold uppercase tracking-[0.14em] text-f2p-dark-link;
+  }
+
+  .status-card {
+    @apply mt-4 grid gap-4 p-5;
+    grid-template-columns: repeat(auto-fit, minmax(16.25rem, 1fr));
+  }
+
+  .status-card div {
+    @apply grid min-w-0 gap-1.5;
+  }
+
+  .status-card strong {
+    @apply [overflow-wrap:anywhere];
+  }
+
+  .state.connected {
+    @apply text-f2p-dark-success;
+  }
+
+  .state.reconnecting,
+  .state.connecting {
+    @apply text-f2p-dark-warning;
+  }
+
+  .state.disconnected {
+    @apply text-f2p-dark-danger;
+  }
+
+  .latest,
+  .messages,
+  .catalog-list {
+    @apply mt-4 p-6;
+  }
+
+  .catalog-list ul {
+    @apply m-0 mt-4 grid list-none gap-3 p-0;
+  }
+
+  .catalog-toolbar {
+    @apply mt-4 flex flex-wrap items-center justify-between gap-4;
+  }
+
+  .catalog-toolbar h2 {
+    @apply m-0;
+  }
+
+  .catalog-list li {
+    @apply grid grid-cols-[1fr_auto] items-start gap-4 rounded-2xl bg-f2p-dark-surface-raised/70 px-4 py-3.5;
+  }
+
+  .catalog-list__aside {
+    @apply grid justify-items-end gap-2.5;
+  }
+
+  .catalog-list__actions {
+    @apply flex flex-wrap gap-2;
+  }
+
+  .catalog-list__primary {
+    @apply grid min-w-0 gap-1.5;
+  }
+
+  .catalog-list__description {
+    @apply text-f2p-dark-ink-muted;
+  }
+
+  .catalog-list__meta {
+    @apply text-sm text-f2p-dark-ink-subtle [overflow-wrap:anywhere];
+  }
+
+  code {
+    @apply rounded-sm bg-f2p-dark-surface-raised/90 px-1.5 py-0.5 text-[0.92em] text-f2p-dark-link-soft;
+  }
+
+  .btn {
+    @apply mt-0 cursor-pointer rounded-[0.625rem] border border-f2p-dark-border/35 bg-f2p-dark-surface-raised/85 px-3.5 py-2 text-slate-200;
+  }
+
+  .btn:disabled {
+    @apply cursor-not-allowed opacity-55;
+  }
+
+  .btn--primary {
+    @apply border-f2p-dark-link/55 bg-f2p-brand/55 text-white;
+  }
+
+  .btn--ghost:hover:not(:disabled) {
+    @apply border-f2p-dark-link/45 text-white;
+  }
+
+  .btn--danger {
+    @apply border-red-400/45 bg-red-950/35 text-red-200;
+  }
+
+  .project-form {
+    @apply mt-4 rounded-f2p-card border border-f2p-dark-border bg-f2p-dark-surface p-6;
+    box-shadow: var(--shadow-f2p-panel);
+  }
+
+  .project-form__header {
+    @apply mb-4 flex items-center justify-between gap-4;
+  }
+
+  .project-form__header h2 {
+    @apply m-0;
+  }
+
+  .project-form__body {
+    @apply grid gap-4;
+  }
+
+  .project-form .field {
+    @apply mb-0 gap-1.5;
+  }
+
+  .project-form .field input,
+  .project-form .field select,
+  .project-form .field textarea {
+    @apply rounded-xl border border-f2p-dark-border/35 bg-f2p-dark-surface-raised/85 px-3 py-2.5 text-slate-200;
+  }
+
+  .project-form .field textarea {
+    @apply min-h-20 resize-y;
+  }
+
+  .project-form__actions {
+    @apply flex justify-end;
+  }
+
+  .toast-stack {
+    @apply fixed top-4 right-4 z-[1000] grid gap-2.5;
+    width: min(22.5rem, calc(100vw - 2rem));
+  }
+
+  .toast {
+    @apply grid grid-cols-[1fr_auto] items-start gap-3 rounded-2xl border border-f2p-dark-border/35 bg-f2p-dark-surface/95 p-4;
+    box-shadow: 0 16px 48px rgb(15 23 42 / 0.45);
+  }
+
+  .toast p {
+    @apply m-0 leading-snug text-slate-200;
+  }
+
+  .toast.success {
+    @apply border-f2p-dark-success/45;
+  }
+
+  .toast__dismiss {
+    @apply mt-0 cursor-pointer rounded-lg border-0 bg-f2p-dark-surface-raised/80 px-2 py-1 text-f2p-dark-link;
+  }
+
+  .toast__dismiss:hover {
+    @apply text-white;
+  }
+
+  .latest h2 {
+    @apply mt-2 text-[clamp(1.8rem,4vw,3rem)] text-white;
+  }
+
+  .latest p {
+    @apply text-f2p-dark-ink-muted;
+  }
+
+  .messages ul {
+    @apply m-0 mt-4 grid list-none gap-3 p-0;
+  }
+
+  .messages li {
+    @apply grid grid-cols-[auto_1fr_auto] items-center gap-4 rounded-2xl bg-f2p-dark-surface-raised/70 px-4 py-3.5;
+  }
+
+  .sequence {
+    @apply font-extrabold text-f2p-dark-link;
+  }
+
+  time,
+  .empty {
+    @apply text-f2p-dark-ink-subtle;
+  }
+
+  @media (max-width: 640px) {
+    .shell,
+    .shell--wide {
+      @apply pb-8 pt-6;
+    }
+
+    .messages li,
+    .catalog-list li {
+      @apply grid-cols-1 gap-1.5;
+    }
+
+    .catalog-list__aside {
+      @apply justify-items-start;
+    }
   }
 }
