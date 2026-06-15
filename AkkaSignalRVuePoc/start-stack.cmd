@@ -9,7 +9,7 @@ echo ===================================
 echo.
 
 echo Checking Docker Desktop...
-docker info >nul 2>&1
+podman info >nul 2>&1
 if errorlevel 1 (
     echo [ERROR] Docker Desktop is not running or not available in PATH.
     echo Start Docker Desktop, wait until it is ready, then run this script again.
@@ -17,7 +17,7 @@ if errorlevel 1 (
 )
 
 echo Building and starting containers...
-docker compose up --build -d
+podman compose up --build -d
 if errorlevel 1 (
     echo [ERROR] Failed to start the stack.
     exit /b 1

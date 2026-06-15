@@ -95,8 +95,8 @@ export SMOKE_SERVICE_PASSWORD="your-service-password"
 Windows PowerShell:
 
 ```powershell
-$env:SMOKE_SERVICE_USERNAME="your-service-user"
-$env:SMOKE_SERVICE_PASSWORD="your-service-password"
+$env:SMOKE_SERVICE_USERNAME="testrd"
+$env:SMOKE_SERVICE_PASSWORD="test"
 .\run-smoke-podman.ps1
 .\run-smoke-podman.ps1 -TargetUrl https://example.com/Account/Login
 ```
