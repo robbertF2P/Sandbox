@@ -1,0 +1,113 @@
+# Use case record schema — one item per use case in use-cases.yaml
+# Copilot: emit a YAML array under key `use_cases`
+
+use_cases:
+  - id: UC-ORDERS-001                    # required, stable
+    name: Place order                    # imperative, domain language
+    tier: P0                             # P0 | P1 | P2 | P3
+    type: command                        # command | query | event_handler | job
+
+    bounded_context: Orders
+    actors:
+      - Customer                         # human or system actor
+      - SalesRep
+
+    trigger:
+      kind: HTTP                         # HTTP | Message | Job | UI | CLI | Interceptor
+      entry_point_id: EP-042             # from 01-entry-points.md
+      location: OrdersController.PlaceOrder
+      route_or_message: POST /api/orders
+
+    description: |
+      Customer submits a cart as an order in Submitted state.
+
+    preconditions:
+      - Cart exists and is not empty
+      - Customer account is active
+      - All line items have positive quantity
+
+    main_flow:
+      - Validate cart and pricing
+      - Reserve inventory (calls Inventory context)
+      - Persist order in Submitted state
+      - Publish OrderPlaced integration event
+
+    postconditions:
+      state:
+        - Order.Status == Submitted
+        - OrderLine records match cart
+      side_effects:
+        - Message OrderPlaced emitted
+        - Inventory reservation created (external context)
+
+    alternative_flows:
+      - name: Insufficient stock
+        when: Inventory reservation fails
+        outcome: 409 response; no order persisted
+      - name: Invalid pricing
+        when: Price changed since cart built
+        outcome: 422 with price refresh required
+
+    business_rules:
+      - id: BR-ORDERS-001
+        rule: Order total must equal sum of line totals plus tax
+        source: OrderService.CalculateTotal.cs:45
+      - id: BR-ORDERS-002
+        rule: Cannot place order with expired quote
+        source: OrderValidator.cs:12
+
+    owned_data:
+      tables:
+        - Orders
+        - OrderLines
+      aggregates:
+        - Order
+
+    cross_context_interactions:
+      - target_context: Inventory
+        kind: sync_call           # sync_call | async_event | shared_table [anti-pattern]
+        description: Reserve stock for each line
+        contract: IInventoryReservationService
+      - target_context: Billing
+        kind: async_event
+        description: Billing reacts to OrderPlaced (not part of this UC commit)
+
+    code_trace:
+      - layer: API
+        path: src/Web/Controllers/OrdersController.cs
+      - layer: Application
+        path: src/Domain/Orders/OrderService.cs
+      - layer: Data
+        path: src/Data/OrdersRepository.cs
+
+    existing_tests:
+      - project: Legacy.UnitTests
+        class: OrderServiceTests
+        method: PlaceOrder_ValidCart_Succeeds
+        coverage: partial           # full | partial | none
+
+  test_mapping:
+    characterization_candidate: true
+    gap: true                       # true if no adequate test exists
+    suggested_tests:
+      - name: Orders_PlaceOrder_ValidCart_CreatesSubmittedOrder
+        type: characterization
+        priority: 1
+      - name: Orders_PlaceOrder_InsufficientStock_Returns409
+        type: integration
+        priority: 2
+
+    known_quirks:
+      - description: Tax rounding uses banker's rounding; do not "fix" without approval
+        source: OrderService.cs:88
+        ticket: null
+
+    refactor_notes: |
+      Extract OrderService and OrdersRepository first.
+      Replace Inventory sync call with command + event in target state.
+
+  metadata:
+    status: draft                    # draft | reviewed | approved
+    author: copilot
+    reviewed_by: null
+    last_updated: 2026-06-17

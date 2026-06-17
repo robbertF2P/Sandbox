@@ -1,0 +1,58 @@
+# Test case schema — items for test-cases.yaml (Phase 4 output)
+
+test_cases:
+  - id: TC-ORDERS-001
+    use_case_id: UC-ORDERS-001
+    name: Orders_PlaceOrder_ValidCart_CreatesSubmittedOrder
+    type: characterization        # characterization | integration | unit | contract
+    priority: 1                   # 1 = implement first
+    bounded_context: Orders
+
+    entry_point:
+      kind: HTTP
+      method: POST
+      path: /api/orders
+      # alternative for non-HTTP:
+      # kind: Message
+      # message_type: PlaceOrderCommand
+
+    arrange:
+      fixtures:
+        - LegacyTestDatabaseSeed.Orders.ValidCart
+      test_data:
+        customer_id: CUST-1001
+        cart_id: CART-9001
+      mocks:
+        - boundary: Inventory
+          note: Use real DB if shared test DB; otherwise fake IInventoryReservationService
+
+    act:
+      description: POST valid place-order payload
+      payload_ref: fixtures/place-order-valid.json
+
+    assert:
+      response:
+        status: 201
+        body_contains:
+          status: Submitted
+      database:
+        - table: Orders
+          condition: Id = @orderId AND Status = 'Submitted'
+        - table: OrderLines
+          condition: OrderId = @orderId AND COUNT = 3
+      messages:
+        - type: OrderPlaced
+          payload_contains:
+            order_id: "@orderId"
+      side_effects_negative:
+        - no row in Orders when validation fails
+
+    parallel_safe: false
+    known_quirk: false
+    flaky_risk: medium              # low | medium | high
+    blocker: null                   # e.g. "static DateTime.Now in OrderService"
+
+    implementation:
+      project: Orders.Characterization.Tests
+      file: PlaceOrderTests.cs
+      status: gap                   # gap | implemented | failing
