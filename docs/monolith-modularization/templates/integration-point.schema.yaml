@@ -1,0 +1,93 @@
+# Integration point record schema — one item per integration in integrations.yaml
+# Claude: emit a YAML array under key `integration_points`
+
+integration_points:
+  - id: INT-IMPORT-001                    # required, stable: INT-<CONTEXT>-###
+    name: Import project structure from PLM
+    bounded_context: Import               # primary owner context
+    tier: P0                              # P0 | P1 | P2 | P3 (business criticality)
+
+  external_system:
+    name: PLM                             # SAP | Kronos | PLM | HR | File | Custom
+    vendor_or_product: "<product name if known>"
+    category: master_data                 # master_data | transactional | time | finance | identity | file | notification
+
+  integration_role:
+    pattern: f2p_follows                  # f2p_leads | f2p_follows | bidirectional | read_only_mirror
+    system_of_record: external            # f2p | external | shared | context_dependent
+    description: |
+      PLM owns WBS/component structure; F2P imports and enriches for planning.
+      F2P never writes structure back to PLM in current deployments.
+
+  direction:
+    inbound: true                         # external → F2P
+    outbound: false                       # F2P → external
+    trigger:
+      kind: Job                           # HTTP | Message | Job | File | Webhook | Manual | Scheduled
+      entry_point_id: EP-123              # from 01-entry-points.md if known
+      location: ImportJobHandler.Run
+      schedule_or_route: "0 2 * * *"
+
+  data_contract:
+    format: intermediate_json             # intermediate_json | idoc | rest_json | csv | xml | custom_api | db_view
+    schema_version: v1
+    entities:
+      - Project
+      - Component
+      - Activity
+    external_id_namespace: PLM            # key in EntityExternalIds / payload ExternalIds
+    idempotency: external_id_upsert       # external_id_upsert | natural_key | none | unknown
+    validation:
+      - External ID uniqueness per entity type
+      - Dry-run before persist
+
+  bounded_context_ownership:
+    owns_integration_logic: Import        # which context owns connector/converter code
+    consumes_contexts:                    # contexts that react to imported data
+      - WBS
+      - Planning
+    publishes_events:
+      - ProjectImported
+      - StructureChanged
+    depends_on_events: []
+
+  current_implementation:
+    locations:
+      - path: src/Integration/PlmImport/
+        kind: submodule                   # submodule | handler | hangfire | service_override | inline
+    tenant_variance: per_client           # none | per_client | per_pack | unknown
+    tests:
+      - project: Legacy.IntegrationTests
+        class: PlmImportTests
+        coverage: partial
+
+  target_design:
+    placement: integration_pack           # core | integration_pack | bounded_context_module | gateway
+    pack_name: plm-v1
+    connector_type: converter_to_intermediate  # converter_to_intermediate | direct_api_adapter | event_bridge | file_drop
+    anti_patterns_to_remove:
+      - Git submodule per client
+      - Cross-context direct DB write during import
+    open_questions:
+      - "[NEEDS REVIEW] Does any tenant require outbound sync to PLM?"
+
+  failure_and_ops:
+    retry_policy: exponential_3           # none | fixed | exponential_3 | manual_replay
+    partial_failure_handling: per_entity   # all_or_nothing | per_entity | unknown
+    observability: logs_only               # logs_only | metrics | dedicated_dashboard | none
+    manual_intervention: PS_replay_file
+
+  test_mapping:
+    characterization_candidate: true
+    golden_files: []
+    suggested_tests:
+      - name: Import_PlmGoldenFile_CreatesProjectWithExternalIds
+        type: characterization
+        priority: 1
+    gap: true
+
+  metadata:
+    status: draft
+    author: claude
+    reviewed_by: null
+    last_updated: 2026-06-18
