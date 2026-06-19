@@ -27,14 +27,6 @@ public static class ExcelReaderMoqExtensions
         return mock;
     }
 
-    public static ExcelRowData CreateRow(int rowIndex, params (string Header, string? Value)[] cells)
-    {
-        var cellsByHeader = cells.ToDictionary(
-            cell => cell.Header,
-            cell => cell.Value,
-            StringComparer.OrdinalIgnoreCase);
-
-        IReadOnlyList<string?> cellsByIndex = cells.Select(cell => cell.Value).ToArray();
-        return new ExcelRowData(rowIndex, cellsByHeader, cellsByIndex);
-    }
+    public static ExcelRowData CreateRow(int rowIndex, params (string Header, string? Value)[] cells) =>
+        ExcelRowFactory.FromCells(rowIndex, cells);
 }

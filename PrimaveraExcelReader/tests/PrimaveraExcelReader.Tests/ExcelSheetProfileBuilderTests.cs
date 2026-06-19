@@ -24,20 +24,16 @@ public sealed class ExcelSheetProfileBuilderTests
             .MapOptional(row => row.Note).From("Note")
             .Build();
 
-        var row = new ExcelRowData(
+        ExcelRowData row = ExcelRowFactory.FromCells(
             1,
-            new Dictionary<string, string?>(StringComparer.OrdinalIgnoreCase)
-            {
-                ["Code"] = "A-1",
-                ["Note"] = "Inspection"
-            },
-            ["A-1", "Inspection"]);
+            ("Code", "A-1"),
+            ("Note", "Inspection"));
 
         ExcelRowMapResult<SampleRow> result = profile.TryMapRow(row);
 
-        Assert.True(result.IsSuccess);
-        Assert.Equal("A-1", result.Row!.Code);
-        Assert.Equal("Inspection", result.Row.Note);
+        SampleRow mapped = ExcelReadResultAssert.Success(result);
+        Assert.Equal("A-1", mapped.Code);
+        Assert.Equal("Inspection", mapped.Note);
     }
 
     [Fact]
@@ -48,15 +44,11 @@ public sealed class ExcelSheetProfileBuilderTests
             .Bind("Code", (row, value) => row.Code = value?.ToUpperInvariant() ?? string.Empty, required: true)
             .Build();
 
-        var row = new ExcelRowData(
-            1,
-            new Dictionary<string, string?>(StringComparer.OrdinalIgnoreCase) { ["Code"] = "a-1" },
-            ["a-1"]);
+        ExcelRowData row = ExcelRowFactory.FromCells(1, ("Code", "a-1"));
 
         ExcelRowMapResult<SampleRow> result = profile.TryMapRow(row);
 
-        Assert.True(result.IsSuccess);
-        Assert.Equal("A-1", result.Row!.Code);
+        Assert.Equal("A-1", ExcelReadResultAssert.Success(result).Code);
     }
 
     private sealed class SampleRow

@@ -1,7 +1,6 @@
 using Moq;
 using PrimaveraExcelReader.Abstractions;
 using PrimaveraExcelReader.Mapping;
-using PrimaveraExcelReader.Npoi;
 using PrimaveraExcelReader.Primavera.Models;
 using PrimaveraExcelReader.Primavera.Profiles;
 
@@ -12,34 +11,24 @@ public sealed class ExcelReaderServiceTests
     [Fact]
     public async Task ReadAsync_MapsStandardPrimaveraActivitySheet()
     {
-        await using MemoryStream stream = new ExcelWorkbookTestBuilder()
-            .AddSheet(
-                "Activities",
-                [
-                    ["Activity ID", "Activity Name", "WBS Code", "Status", "Planned Start", "Planned Finish", "Original Duration (h)"],
-                    ["A-100", "Hull Block Erection", "WBS-204", "In Progress", "2026-03-01", "2026-03-15", "120"],
-                    ["A-200", "Engine Room Outfitting", "WBS-205", "Not Started", "2026-03-16", "2026-04-01", "80"]
-                ])
-            .BuildStream();
-
-        var service = new ExcelReaderService(new NpoiExcelWorkbookAccessor());
-
-        ExcelReadResult<PrimaveraActivityRow> result = await service.ReadAsync(
-            stream,
+        ExcelReadResult<PrimaveraActivityRow> result = await ExcelReaderTestRunner.ReadSheetAsync(
+            PrimaveraSheetScenarios.StandardActivitiesSheet,
             PrimaveraSheetProfiles.StandardActivityExport);
 
-        Assert.Equal(2, result.Rows.Count);
-        Assert.Equal("A-100", result.Rows[0].ActivityId);
-        Assert.Equal("Hull Block Erection", result.Rows[0].ActivityName);
-        Assert.Equal("WBS-204", result.Rows[0].WbsCode);
-        Assert.Equal(120m, result.Rows[0].DurationHours);
-        Assert.Equal(new DateOnly(2026, 3, 1), result.Rows[0].PlannedStart);
+        ExcelReadResultAssert.HasRows(result, 2);
+
+        PrimaveraActivityRow first = result.Rows[0];
+        Assert.Equal("A-100", first.ActivityId);
+        Assert.Equal("Hull Block Erection", first.ActivityName);
+        Assert.Equal("WBS-204", first.WbsCode);
+        Assert.Equal(120m, first.DurationHours);
+        Assert.Equal(new DateOnly(2026, 3, 1), first.PlannedStart);
     }
 
     [Fact]
     public async Task ReadAsync_UsesMockedWorkbookAccessorForIsolatedMappingTests()
     {
-        ExcelRowData row = ExcelReaderMoqExtensions.CreateRow(
+        ExcelRowData row = ExcelRowFactory.FromCells(
             1,
             ("Activity ID", "A-300"),
             ("Activity Name", "Propulsion Alignment"),
@@ -49,21 +38,9 @@ public sealed class ExcelReaderServiceTests
             ("Planned Finish", "2026-02-10"),
             ("Original Duration (h)", "40"));
 
-        Mock<IExcelWorkbookAccessor> accessorMock = ExcelReaderMoqExtensions.CreateWorkbookAccessorMock("Activities", row);
-        var service = new ExcelReaderService(accessorMock.Object);
-
-        ExcelReadResult<PrimaveraActivityRow> result = await service.ReadAsync(
-            Stream.Null,
-            PrimaveraSheetProfiles.StandardActivityExport);
-
-        accessorMock.Verify(
-            accessor => accessor.ReadSheetAsync(
-                It.IsAny<Stream>(),
-                "Activities",
-                0,
-                1,
-                It.IsAny<CancellationToken>()),
-            Times.Once);
+        ExcelReadResult<PrimaveraActivityRow> result = await ExcelReaderTestRunner.ReadRowsAsync(
+            PrimaveraSheetProfiles.StandardActivityExport,
+            row);
 
         PrimaveraActivityRow activity = Assert.Single(result.Rows);
         Assert.Equal("A-300", activity.ActivityId);
@@ -73,7 +50,7 @@ public sealed class ExcelReaderServiceTests
     [Fact]
     public async Task ReadAsync_SkipsEmptyRowsAndRecordsReason()
     {
-        ExcelRowData validRow = ExcelReaderMoqExtensions.CreateRow(
+        ExcelRowData validRow = ExcelRowFactory.FromCells(
             1,
             ("Activity ID", "A-400"),
             ("Activity Name", "Tank Testing"),
@@ -83,7 +60,7 @@ public sealed class ExcelReaderServiceTests
             ("Planned Finish", null),
             ("Original Duration (h)", null));
 
-        ExcelRowData emptyRow = ExcelReaderMoqExtensions.CreateRow(
+        ExcelRowData emptyRow = ExcelRowFactory.FromCells(
             2,
             ("Activity ID", null),
             ("Activity Name", null),
@@ -93,38 +70,20 @@ public sealed class ExcelReaderServiceTests
             ("Planned Finish", null),
             ("Original Duration (h)", null));
 
-        Mock<IExcelWorkbookAccessor> accessorMock = ExcelReaderMoqExtensions.CreateWorkbookAccessorMock(
-            "Activities",
+        ExcelReadResult<PrimaveraActivityRow> result = await ExcelReaderTestRunner.ReadRowsAsync(
+            PrimaveraSheetProfiles.StandardActivityExport,
             validRow,
             emptyRow);
 
-        var service = new ExcelReaderService(accessorMock.Object);
-
-        ExcelReadResult<PrimaveraActivityRow> result = await service.ReadAsync(
-            Stream.Null,
-            PrimaveraSheetProfiles.StandardActivityExport);
-
         Assert.Single(result.Rows);
-        Assert.Contains(result.Issues, issue => issue.Kind == ExcelReadIssueKind.EmptyRow);
+        ExcelReadResultAssert.HasIssue(result.Issues, ExcelReadIssueKind.EmptyRow, 3);
     }
 
     [Fact]
     public async Task ReadAsync_MapsLegacyPrimaveraTaskSheetLayout()
     {
-        await using MemoryStream stream = new ExcelWorkbookTestBuilder()
-            .AddSheet(
-                "TASK",
-                [
-                    ["task_code", "task_name", "wbs_id", "task_type", "status_code", "early_start_date", "early_end_date", "target_drtn_hr_cnt"],
-                    ["A-500", "Steel Cutting", "WBS-500", "TT_Task", "Active", "2026-01-01", "2026-01-05", "32"],
-                    ["M-001", "Keel Laying Milestone", "WBS-500", "TT_Mile", "Complete", "2026-01-06", "2026-01-06", "0"]
-                ])
-            .BuildStream();
-
-        var service = new ExcelReaderService(new NpoiExcelWorkbookAccessor());
-
-        ExcelReadResult<PrimaveraActivityRow> result = await service.ReadAsync(
-            stream,
+        ExcelReadResult<PrimaveraActivityRow> result = await ExcelReaderTestRunner.ReadSheetAsync(
+            PrimaveraSheetScenarios.LegacyTaskSheet,
             PrimaveraSheetProfiles.LegacyActivityExport);
 
         PrimaveraActivityRow activity = Assert.Single(result.Rows);
@@ -136,19 +95,8 @@ public sealed class ExcelReaderServiceTests
     [Fact]
     public async Task ReadAsync_MapsResourceAssignmentSheetByColumnIndex()
     {
-        await using MemoryStream stream = new ExcelWorkbookTestBuilder()
-            .AddSheet(
-                "Resource Assignments",
-                [
-                    ["Assignment ID", "Activity ID", "Resource Description", "Resource ID", "Role ID", "Budgeted Units", "Remaining Units"],
-                    ["T-100", "A-100", "Welding crew lead", "RES-WELD-01", "WELD", "160", "120"]
-                ])
-            .BuildStream();
-
-        var service = new ExcelReaderService(new NpoiExcelWorkbookAccessor());
-
-        ExcelReadResult<PrimaveraTaskRow> result = await service.ReadAsync(
-            stream,
+        ExcelReadResult<PrimaveraTaskRow> result = await ExcelReaderTestRunner.ReadSheetAsync(
+            PrimaveraSheetScenarios.ResourceAssignmentSheet,
             PrimaveraSheetProfiles.ResourceAssignmentExport);
 
         PrimaveraTaskRow task = Assert.Single(result.Rows);

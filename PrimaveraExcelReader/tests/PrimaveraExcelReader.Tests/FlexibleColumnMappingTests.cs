@@ -1,3 +1,4 @@
+using PrimaveraExcelReader.Abstractions;
 using PrimaveraExcelReader.Mapping;
 using PrimaveraExcelReader.Npoi;
 
@@ -6,37 +7,30 @@ namespace PrimaveraExcelReader.Tests;
 public sealed class FlexibleColumnMappingTests
 {
     [Fact]
-    public async Task CustomProfile_MapsAlternateHeadersToSameModel()
+    public void TryMapRow_MapsAlternateHeadersToSameModel()
     {
-        ExcelSheetProfile<ShipyardActivityRow> alternateProfile = ExcelSheetProfile<ShipyardActivityRow>.Configure()
+        ExcelSheetProfile<ShipyardActivityRow> profile = ExcelSheetProfile<ShipyardActivityRow>.Configure()
             .Sheet("Schedule")
-            .HeaderRow(0)
-            .DataStartsAt(1)
             .Map(row => row.Code).From("Code", required: true)
             .Map(row => row.Description).From("Description", required: true)
             .Map(row => row.Area).From("Area")
             .Build();
 
-        await using MemoryStream stream = new ExcelWorkbookTestBuilder()
-            .AddSheet(
-                "Schedule",
-                [
-                    ["Code", "Description", "Area"],
-                    ["ACT-01", "Install propeller shaft", "AFT"]
-                ])
-            .BuildStream();
+        ExcelRowData row = ExcelRowFactory.FromCells(
+            1,
+            ("Code", "ACT-01"),
+            ("Description", "Install propeller shaft"),
+            ("Area", "AFT"));
 
-        var service = new ExcelReaderService(new NpoiExcelWorkbookAccessor());
-        ExcelReadResult<ShipyardActivityRow> result = await service.ReadAsync(stream, alternateProfile);
+        ShipyardActivityRow mapped = ExcelReadResultAssert.Success(profile.TryMapRow(row));
 
-        ShipyardActivityRow row = Assert.Single(result.Rows);
-        Assert.Equal("ACT-01", row.Code);
-        Assert.Equal("Install propeller shaft", row.Description);
-        Assert.Equal("AFT", row.Area);
+        Assert.Equal("ACT-01", mapped.Code);
+        Assert.Equal("Install propeller shaft", mapped.Description);
+        Assert.Equal("AFT", mapped.Area);
     }
 
     [Fact]
-    public async Task CustomProfile_UsesAfterMapForDerivedFields()
+    public void TryMapRow_UsesAfterMapForDerivedFields()
     {
         ExcelSheetProfile<ShipyardTaskRow> profile = ExcelSheetProfile<ShipyardTaskRow>.Configure()
             .Sheet("Labor")
@@ -49,20 +43,15 @@ public sealed class FlexibleColumnMappingTests
             })
             .Build();
 
-        await using MemoryStream stream = new ExcelWorkbookTestBuilder()
-            .AddSheet(
-                "Labor",
-                [
-                    ["Task Code", "Hours", "Trade"],
-                    ["TSK-01", "12", "PIPE"]
-                ])
-            .BuildStream();
+        ExcelRowData row = ExcelRowFactory.FromCells(
+            1,
+            ("Task Code", "TSK-01"),
+            ("Hours", "12"),
+            ("Trade", "PIPE"));
 
-        var service = new ExcelReaderService(new NpoiExcelWorkbookAccessor());
-        ExcelReadResult<ShipyardTaskRow> result = await service.ReadAsync(stream, profile);
+        ShipyardTaskRow mapped = ExcelReadResultAssert.Success(profile.TryMapRow(row));
 
-        ShipyardTaskRow row = Assert.Single(result.Rows);
-        Assert.Equal("TSK-01 (PIPE)", row.DisplayName);
+        Assert.Equal("TSK-01 (PIPE)", mapped.DisplayName);
     }
 
     [Fact]
@@ -70,17 +59,19 @@ public sealed class FlexibleColumnMappingTests
     {
         await using MemoryStream stream = new ExcelWorkbookTestBuilder()
             .AddSheet(
-                "Activities",
-                [
-                    ["Activity ID", "Activity Name", "WBS Code", "Status", "Planned Start", "Planned Finish", "Original Duration (h)"],
-                    ["A-700", "Launch Preparation", "WBS-700", "Active", "2026-05-01", "2026-05-10", "64"]
-                ])
+                new TestSheetDefinition(
+                    "Activities",
+                    [
+                        PrimaveraSheetScenarios.StandardActivityHeaders,
+                        ["A-700", "Launch Preparation", "WBS-700", "Active", "2026-05-01", "2026-05-10", "64"]
+                    ]))
             .AddSheet(
-                "Tasks",
-                [
-                    ["Task ID", "Activity ID", "Task Name", "Resource Name", "Budgeted Units", "Remaining Units", "Trade Code"],
-                    ["T-700", "A-700", "Dock checks", "Marco van Berg", "24", "24", "QA"]
-                ])
+                new TestSheetDefinition(
+                    "Tasks",
+                    [
+                        ["Task ID", "Activity ID", "Task Name", "Resource Name", "Budgeted Units", "Remaining Units", "Trade Code"],
+                        ["T-700", "A-700", "Dock checks", "Marco van Berg", "24", "24", "QA"]
+                    ]))
             .BuildStream();
 
         var service = new ExcelReaderService(new NpoiExcelWorkbookAccessor());

@@ -8,16 +8,19 @@ public sealed class ExcelWorkbookTestBuilder : IDisposable
     private readonly XSSFWorkbook _workbook = new();
     private bool _disposed;
 
-    public ExcelWorkbookTestBuilder AddSheet(string sheetName, params string[][] rows)
+    public ExcelWorkbookTestBuilder AddSheet(string sheetName, params string[][] rows) =>
+        AddSheet(new TestSheetDefinition(sheetName, rows));
+
+    public ExcelWorkbookTestBuilder AddSheet(TestSheetDefinition sheet)
     {
-        ISheet sheet = _workbook.CreateSheet(sheetName);
+        ISheet worksheet = _workbook.CreateSheet(sheet.Name);
 
-        for (int rowIndex = 0; rowIndex < rows.Length; rowIndex++)
+        for (int rowIndex = 0; rowIndex < sheet.Rows.Count; rowIndex++)
         {
-            IRow row = sheet.CreateRow(rowIndex);
-            string[] values = rows[rowIndex];
+            IRow row = worksheet.CreateRow(rowIndex);
+            IReadOnlyList<string> values = sheet.Rows[rowIndex];
 
-            for (int columnIndex = 0; columnIndex < values.Length; columnIndex++)
+            for (int columnIndex = 0; columnIndex < values.Count; columnIndex++)
             {
                 row.CreateCell(columnIndex).SetCellValue(values[columnIndex]);
             }
