@@ -9,6 +9,12 @@ This repo uses **Agent Skills** for domain-specific guidance. Copilot loads them
 
 Use both for modeling and implementation work on C# domain code.
 
+## Domain-specific languages
+
+- **`domain-specific-languages`** — Martin Fowler: Semantic Model, internal vs external DSL, fluent APIs, parsing, code generation.
+
+Use when designing configuration languages, rule engines, fluent builders, or parsers.
+
 ## .NET / C#
 
 - **`dotnet-core-csharp-development`** — SDK-style projects, ASP.NET Core, DI, testing, C# style.
