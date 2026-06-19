@@ -9,6 +9,8 @@ description: |
   - Refactoring toward deeper insight or reviewing model/implementation alignment
   - Splitting or integrating subsystems, legacy adapters, or shared kernels
   - Reviewing whether code reflects the domain or has drifted procedural/anemic
+  For implementation tactics (CQRS, domain events, aggregate rules in code), also use
+  the implementing-domain-driven-design skill (Vaughn Vernon).
 paths:
   - "**/*.cs"
   - "**/*.csproj"
@@ -267,6 +269,7 @@ Still apply **Ubiquitous Language** and **Entity vs Value** distinction when any
 ## Further reading
 
 - Eric Evans — *Domain-Driven Design* (this skill's source)
+- **`implementing-domain-driven-design` skill** — Vaughn Vernon's practical guide: aggregate rules, CQRS, domain events, application services, integration (companion to this skill)
 - [domaindrivendesign.org](http://domaindrivendesign.org) — supplemental examples and community
 - Vaughn Vernon — *Implementing Domain-Driven Design* (tactical + strategic detail, CQRS, event sourcing)
 - For functional expression of domain logic in C#, combine with `functional-programming-csharp` skill
