@@ -1,0 +1,89 @@
+# Integration story map schema — reverse-engineered from integration tests
+# Claude: emit under key `story_map` in integrations/contexts/<slug>/story-map.yaml
+# Bundle epics by bounded_context; one file per context plus optional rollup.
+
+story_map:
+  bounded_context: Import
+  map_version: 1
+  source_repo: "<external monolith path or url>"
+  reverse_engineered_from: integration_tests   # primary evidence source
+
+  epics:
+    - id: EPIC-IMPORT-001
+      name: Onboard project structure from external systems
+      bounded_context: Import
+      narrative: |
+        As a professional services operator, I need to load project structure from
+        customer ERP/PLM systems into F2P so planning can start without manual re-entry.
+      priority: P0                             # P0 | P1 | P2
+      external_systems: [PLM, SAP]
+      integration_points: [INT-IMPORT-001, INT-IMPORT-002]
+      story_map_backbone:                      # optional left-to-right flow
+        - Load source file or trigger sync
+        - Validate and dry-run
+        - Persist with external IDs
+        - Notify downstream contexts
+
+      user_stories:
+        - id: US-IMPORT-001
+          title: Import WBS from PLM with external IDs
+          format: |
+            As a PS operator
+            I want to import a project structure from PLM
+            So that components and activities exist in F2P with stable PLM references
+          actor: PS operator
+          tier: P0
+
+          acceptance_criteria:
+            - id: AC-IMPORT-001-01
+              given: A valid PLM export file for an existing tenant
+              when: The import job runs in dry-run mode
+              then: A validation report lists all components and activities without persisting
+              test_evidence:
+                project: Legacy.DataIntegrationTests
+                class: PlmImportTests
+                method: Import_ValidPlmFile_DryRunReturnsValidationReport
+                path: tests/Legacy.DataIntegrationTests/PlmImportTests.cs
+              expert_validation:
+                status: draft                  # draft | confirmed | disputed | deferred
+                notes: null
+            - id: AC-IMPORT-001-02
+              given: A valid PLM export file
+              when: The import job runs in commit mode
+              then: Each entity has a unique PLM external ID and idempotent re-import updates in place
+              test_evidence:
+                project: Legacy.DataIntegrationTests
+                class: PlmImportTests
+                method: Import_SamePlmFileTwice_UpdatesByExternalId
+              expert_validation:
+                status: draft
+                notes: null
+
+          lead_follow_questions:                 # for domain expert workshop
+            - Who owns component identity — PLM or F2P?
+            - May PS edit imported activity names in F2P?
+          linked_integration_points: [INT-IMPORT-001]
+          linked_use_cases: [UC-IMPORT-001]
+          gaps:
+            - No test covers partial import failure per component
+
+      expert_workshop:
+        scheduled: null
+        attendees: []
+        outcomes: []
+        open_questions: []
+
+  cross_context_epics: []                      # optional; epics spanning contexts
+
+  rollup:
+    total_stories: 0
+    total_acceptance_criteria: 0
+    confirmed_ac_count: 0
+    disputed_ac_count: 0
+    untested_behaviour_count: 0                # stories with no test evidence
+
+  metadata:
+    status: draft                              # draft | ready_for_workshop | validated
+    author: claude
+    reviewed_by: null
+    last_updated: 2026-06-18
