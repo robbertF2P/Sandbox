@@ -1,4 +1,3 @@
-using PrimaveraExcelReader.Abstractions;
 using PrimaveraExcelReader.Mapping;
 using PrimaveraExcelReader.Npoi;
 
@@ -9,18 +8,14 @@ public sealed class FlexibleColumnMappingTests
     [Fact]
     public async Task CustomProfile_MapsAlternateHeadersToSameModel()
     {
-        var alternateProfile = new ExcelSheetProfile<ShipyardActivityRow>
-        {
-            SheetName = "Schedule",
-            HeaderRowIndex = 0,
-            DataStartRowIndex = 1,
-            ColumnBindings =
-            [
-                new ExcelColumnBinding<ShipyardActivityRow>("Code", (row, value) => row.Code = value ?? string.Empty, required: true),
-                new ExcelColumnBinding<ShipyardActivityRow>("Description", (row, value) => row.Description = value ?? string.Empty, required: true),
-                new ExcelColumnBinding<ShipyardActivityRow>("Area", (row, value) => row.Area = value ?? string.Empty)
-            ]
-        };
+        ExcelSheetProfile<ShipyardActivityRow> alternateProfile = ExcelSheetProfile<ShipyardActivityRow>.Configure()
+            .Sheet("Schedule")
+            .HeaderRow(0)
+            .DataStartsAt(1)
+            .Map(row => row.Code).From("Code", required: true)
+            .Map(row => row.Description).From("Description", required: true)
+            .Map(row => row.Area).From("Area")
+            .Build();
 
         await using MemoryStream stream = new ExcelWorkbookTestBuilder()
             .AddSheet(
@@ -43,20 +38,16 @@ public sealed class FlexibleColumnMappingTests
     [Fact]
     public async Task CustomProfile_UsesAfterMapForDerivedFields()
     {
-        var profile = new ExcelSheetProfile<ShipyardTaskRow>
-        {
-            SheetName = "Labor",
-            ColumnBindings =
-            [
-                new ExcelColumnBinding<ShipyardTaskRow>("Task Code", (row, value) => row.TaskCode = value ?? string.Empty, required: true),
-                new ExcelColumnBinding<ShipyardTaskRow>("Hours", (row, value) => row.HoursText = value)
-            ],
-            AfterMap = (model, row) =>
+        ExcelSheetProfile<ShipyardTaskRow> profile = ExcelSheetProfile<ShipyardTaskRow>.Configure()
+            .Sheet("Labor")
+            .Map(row => row.TaskCode).From("Task Code", required: true)
+            .MapOptional(row => row.HoursText).From("Hours")
+            .AfterMap((model, row) =>
             {
                 model.DisplayName = $"{model.TaskCode} ({row.GetByHeader("Trade")})";
                 return model;
-            }
-        };
+            })
+            .Build();
 
         await using MemoryStream stream = new ExcelWorkbookTestBuilder()
             .AddSheet(
@@ -98,15 +89,11 @@ public sealed class FlexibleColumnMappingTests
             await service.ReadManyAsync(
                 stream,
                 [
-                    new ExcelSheetProfile<ShipyardCombinedRow>
-                    {
-                        SheetName = "Activities",
-                        ColumnBindings =
-                        [
-                            new ExcelColumnBinding<ShipyardCombinedRow>("Activity ID", (row, value) => row.Key = value ?? string.Empty),
-                            new ExcelColumnBinding<ShipyardCombinedRow>("Activity Name", (row, value) => row.Label = value ?? string.Empty)
-                        ]
-                    }
+                    ExcelSheetProfile<ShipyardCombinedRow>.Configure()
+                        .Sheet("Activities")
+                        .Map(row => row.Key).From("Activity ID")
+                        .Map(row => row.Label).From("Activity Name")
+                        .Build()
                 ]);
 
         Assert.True(activityResults.ContainsKey("Activities"));

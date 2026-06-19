@@ -4,6 +4,8 @@ namespace PrimaveraExcelReader.Mapping;
 
 public sealed class ExcelSheetProfile<T> where T : new()
 {
+    public static ExcelSheetProfileBuilder<T> Configure() => ExcelSheetProfileBuilder<T>.Create();
+
     public required string SheetName { get; init; }
 
     public int HeaderRowIndex { get; init; }

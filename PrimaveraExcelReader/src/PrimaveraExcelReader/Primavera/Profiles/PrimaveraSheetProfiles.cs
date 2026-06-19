@@ -5,90 +5,75 @@ namespace PrimaveraExcelReader.Primavera.Profiles;
 
 public static class PrimaveraSheetProfiles
 {
-    public static ExcelSheetProfile<PrimaveraActivityRow> StandardActivityExport { get; } = new()
-    {
-        SheetName = "Activities",
-        HeaderRowIndex = 0,
-        DataStartRowIndex = 1,
-        ColumnBindings =
-        [
-            new ExcelColumnBinding<PrimaveraActivityRow>("Activity ID", (row, value) => row.ActivityId = value ?? string.Empty, required: true),
-            new ExcelColumnBinding<PrimaveraActivityRow>("Activity Name", (row, value) => row.ActivityName = value ?? string.Empty, required: true),
-            new ExcelColumnBinding<PrimaveraActivityRow>("WBS Code", (row, value) => row.WbsCode = value ?? string.Empty, required: true),
-            new ExcelColumnBinding<PrimaveraActivityRow>("Status", (row, value) => row.Status = value),
-            new ExcelColumnBinding<PrimaveraActivityRow>("Planned Start", (row, value) => row.PlannedStart = value),
-            new ExcelColumnBinding<PrimaveraActivityRow>("Planned Finish", (row, value) => row.PlannedFinish = value),
-            new ExcelColumnBinding<PrimaveraActivityRow>("Original Duration (h)", (row, value) => row.DurationHours = value)
-        ]
-    };
+    public static ExcelSheetProfile<PrimaveraActivityRow> StandardActivityExport { get; } =
+        ExcelSheetProfile<PrimaveraActivityRow>.Configure()
+            .Sheet("Activities")
+            .HeaderRow(0)
+            .DataStartsAt(1)
+            .Map(row => row.ActivityId).From("Activity ID", required: true)
+            .Map(row => row.ActivityName).From("Activity Name", required: true)
+            .Map(row => row.WbsCode).From("WBS Code", required: true)
+            .MapOptional(row => row.Status).From("Status")
+            .MapOptional(row => row.PlannedStart).From("Planned Start")
+            .MapOptional(row => row.PlannedFinish).From("Planned Finish")
+            .MapOptional(row => row.DurationHours).From("Original Duration (h)")
+            .Build();
 
-    public static ExcelSheetProfile<PrimaveraActivityRow> LegacyActivityExport { get; } = new()
-    {
-        SheetName = "TASK",
-        HeaderRowIndex = 0,
-        DataStartRowIndex = 1,
-        ColumnBindings =
-        [
-            new ExcelColumnBinding<PrimaveraActivityRow>("task_code", (row, value) => row.ActivityId = value ?? string.Empty, required: true),
-            new ExcelColumnBinding<PrimaveraActivityRow>("task_name", (row, value) => row.ActivityName = value ?? string.Empty, required: true),
-            new ExcelColumnBinding<PrimaveraActivityRow>("wbs_id", (row, value) => row.WbsCode = value ?? string.Empty, required: true),
-            new ExcelColumnBinding<PrimaveraActivityRow>("status_code", (row, value) => row.Status = value),
-            new ExcelColumnBinding<PrimaveraActivityRow>("early_start_date", (row, value) => row.PlannedStart = value),
-            new ExcelColumnBinding<PrimaveraActivityRow>("early_end_date", (row, value) => row.PlannedFinish = value),
-            new ExcelColumnBinding<PrimaveraActivityRow>("target_drtn_hr_cnt", (row, value) => row.DurationHours = value)
-        ],
-        RowFilter = row => !string.Equals(row.GetByHeader("task_type"), "TT_Mile", StringComparison.OrdinalIgnoreCase)
-    };
+    public static ExcelSheetProfile<PrimaveraActivityRow> LegacyActivityExport { get; } =
+        ExcelSheetProfile<PrimaveraActivityRow>.Configure()
+            .Sheet("TASK")
+            .HeaderRow(0)
+            .DataStartsAt(1)
+            .Map(row => row.ActivityId).From("task_code", required: true)
+            .Map(row => row.ActivityName).From("task_name", required: true)
+            .Map(row => row.WbsCode).From("wbs_id", required: true)
+            .MapOptional(row => row.Status).From("status_code")
+            .MapOptional(row => row.PlannedStart).From("early_start_date")
+            .MapOptional(row => row.PlannedFinish).From("early_end_date")
+            .MapOptional(row => row.DurationHours).From("target_drtn_hr_cnt")
+            .Where(row => !string.Equals(row.GetByHeader("task_type"), "TT_Mile", StringComparison.OrdinalIgnoreCase))
+            .Build();
 
-    public static ExcelSheetProfile<PrimaveraTaskRow> StandardTaskExport { get; } = new()
-    {
-        SheetName = "Tasks",
-        HeaderRowIndex = 0,
-        DataStartRowIndex = 1,
-        ColumnBindings =
-        [
-            new ExcelColumnBinding<PrimaveraTaskRow>("Task ID", (row, value) => row.TaskId = value ?? string.Empty, required: true),
-            new ExcelColumnBinding<PrimaveraTaskRow>("Activity ID", (row, value) => row.ActivityId = value ?? string.Empty, required: true),
-            new ExcelColumnBinding<PrimaveraTaskRow>("Task Name", (row, value) => row.TaskName = value ?? string.Empty, required: true),
-            new ExcelColumnBinding<PrimaveraTaskRow>("Resource Name", (row, value) => row.ResourceName = value),
-            new ExcelColumnBinding<PrimaveraTaskRow>("Budgeted Units", (row, value) => row.BudgetedUnits = value),
-            new ExcelColumnBinding<PrimaveraTaskRow>("Remaining Units", (row, value) => row.RemainingUnits = value),
-            new ExcelColumnBinding<PrimaveraTaskRow>("Trade Code", (row, value) => row.TradeCode = value)
-        ]
-    };
+    public static ExcelSheetProfile<PrimaveraTaskRow> StandardTaskExport { get; } =
+        ExcelSheetProfile<PrimaveraTaskRow>.Configure()
+            .Sheet("Tasks")
+            .HeaderRow(0)
+            .DataStartsAt(1)
+            .Map(row => row.TaskId).From("Task ID", required: true)
+            .Map(row => row.ActivityId).From("Activity ID", required: true)
+            .Map(row => row.TaskName).From("Task Name", required: true)
+            .MapOptional(row => row.ResourceName).From("Resource Name")
+            .MapOptional(row => row.BudgetedUnits).From("Budgeted Units")
+            .MapOptional(row => row.RemainingUnits).From("Remaining Units")
+            .MapOptional(row => row.TradeCode).From("Trade Code")
+            .Build();
 
-    public static ExcelSheetProfile<PrimaveraTaskRow> ResourceAssignmentExport { get; } = new()
-    {
-        SheetName = "Resource Assignments",
-        HeaderRowIndex = 0,
-        DataStartRowIndex = 1,
-        ColumnBindings =
-        [
-            new ExcelColumnBinding<PrimaveraTaskRow>("Assignment ID", (row, value) => row.TaskId = value ?? string.Empty, required: true, columnIndex: 0),
-            new ExcelColumnBinding<PrimaveraTaskRow>("Activity ID", (row, value) => row.ActivityId = value ?? string.Empty, required: true, columnIndex: 1),
-            new ExcelColumnBinding<PrimaveraTaskRow>("Resource ID", (row, value) => row.ResourceName = value, columnIndex: 3),
-            new ExcelColumnBinding<PrimaveraTaskRow>("Budgeted Units", (row, value) => row.BudgetedUnits = value, columnIndex: 5),
-            new ExcelColumnBinding<PrimaveraTaskRow>("Remaining Units", (row, value) => row.RemainingUnits = value, columnIndex: 6),
-            new ExcelColumnBinding<PrimaveraTaskRow>("Role ID", (row, value) => row.TradeCode = value, columnIndex: 4)
-        ],
-        AfterMap = (model, row) =>
-        {
-            model.TaskName = row.GetByIndex(2) ?? model.TaskId;
-            return model;
-        }
-    };
+    public static ExcelSheetProfile<PrimaveraTaskRow> ResourceAssignmentExport { get; } =
+        ExcelSheetProfile<PrimaveraTaskRow>.Configure()
+            .Sheet("Resource Assignments")
+            .HeaderRow(0)
+            .DataStartsAt(1)
+            .Map(row => row.TaskId).AtColumn(0, "Assignment ID", required: true)
+            .Map(row => row.ActivityId).AtColumn(1, "Activity ID", required: true)
+            .MapOptional(row => row.ResourceName).AtColumn(3, "Resource ID")
+            .MapOptional(row => row.TradeCode).AtColumn(4, "Role ID")
+            .MapOptional(row => row.BudgetedUnits).AtColumn(5, "Budgeted Units")
+            .MapOptional(row => row.RemainingUnits).AtColumn(6, "Remaining Units")
+            .AfterMap((model, row) =>
+            {
+                model.TaskName = row.GetByIndex(2) ?? model.TaskId;
+                return model;
+            })
+            .Build();
 
-    public static ExcelSheetProfile<PrimaveraWbsRow> StandardWbsExport { get; } = new()
-    {
-        SheetName = "WBS",
-        HeaderRowIndex = 0,
-        DataStartRowIndex = 1,
-        ColumnBindings =
-        [
-            new ExcelColumnBinding<PrimaveraWbsRow>("WBS Code", (row, value) => row.WbsCode = value ?? string.Empty, required: true),
-            new ExcelColumnBinding<PrimaveraWbsRow>("WBS Name", (row, value) => row.WbsName = value ?? string.Empty, required: true),
-            new ExcelColumnBinding<PrimaveraWbsRow>("Parent WBS Code", (row, value) => row.ParentWbsCode = value),
-            new ExcelColumnBinding<PrimaveraWbsRow>("Project ID", (row, value) => row.ProjectId = value)
-        ]
-    };
+    public static ExcelSheetProfile<PrimaveraWbsRow> StandardWbsExport { get; } =
+        ExcelSheetProfile<PrimaveraWbsRow>.Configure()
+            .Sheet("WBS")
+            .HeaderRow(0)
+            .DataStartsAt(1)
+            .Map(row => row.WbsCode).From("WBS Code", required: true)
+            .Map(row => row.WbsName).From("WBS Name", required: true)
+            .MapOptional(row => row.ParentWbsCode).From("Parent WBS Code")
+            .MapOptional(row => row.ProjectId).From("Project ID")
+            .Build();
 }
