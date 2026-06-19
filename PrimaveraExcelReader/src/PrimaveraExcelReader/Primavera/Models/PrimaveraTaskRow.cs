@@ -10,9 +10,9 @@ public sealed class PrimaveraTaskRow
 
     public string? ResourceName { get; set; }
 
-    public string? BudgetedUnits { get; set; }
+    public decimal? BudgetedUnits { get; set; }
 
-    public string? RemainingUnits { get; set; }
+    public decimal? RemainingUnits { get; set; }
 
     public string? TradeCode { get; set; }
 }

@@ -18,15 +18,11 @@ public static class PrimaveraImportMapper
 
     public static AssignmentImportDto ToAssignmentImportDto(PrimaveraTaskRow row)
     {
-        decimal? budgetedHours = decimal.TryParse(row.BudgetedUnits, out decimal parsedHours)
-            ? parsedHours
-            : null;
-
         return new AssignmentImportDto(
             row.TaskId,
             row.ResourceName ?? row.TradeCode ?? "Unassigned",
             row.TaskName,
-            budgetedHours,
+            row.BudgetedUnits,
             ExternalIds: new Dictionary<string, string>
             {
                 ["Primavera"] = row.TaskId,

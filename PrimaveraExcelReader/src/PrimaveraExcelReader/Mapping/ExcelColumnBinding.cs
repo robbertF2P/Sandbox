@@ -34,6 +34,13 @@ public sealed class ExcelColumnBinding<T>
                 $"Required column '{HeaderName}' is missing or empty on row {row.RowIndex + 1}.");
         }
 
-        Setter(target, value);
+        try
+        {
+            Setter(target, value);
+        }
+        catch (ExcelCellParseException ex)
+        {
+            throw new InvalidOperationException($"Row {row.RowIndex + 1}: {ex.Message}", ex);
+        }
     }
 }

@@ -35,7 +35,7 @@ public sealed class PrimaveraImportMapperTests
             ActivityId = "A-100",
             TaskName = "Structural Welding",
             ResourceName = "Elena Petrov",
-            BudgetedUnits = "48.5"
+            BudgetedUnits = 48.5m
         };
 
         AssignmentImportDto dto = PrimaveraImportMapper.ToAssignmentImportDto(row);

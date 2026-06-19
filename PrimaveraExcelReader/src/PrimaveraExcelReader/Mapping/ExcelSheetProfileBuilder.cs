@@ -32,21 +32,15 @@ public sealed class ExcelSheetProfileBuilder<T> where T : new()
         return this;
     }
 
-    public ExcelColumnBindingBuilder<T> Map(Expression<Func<T, string>> property)
+    public ExcelColumnBindingBuilder<T> Map<TProperty>(Expression<Func<T, TProperty>> property)
     {
         return new ExcelColumnBindingBuilder<T>(
             this,
-            ExpressionBindingHelper.CreateStringSetter(property),
+            ExpressionBindingHelper.CreateSetter(property),
             ExpressionBindingHelper.GetPropertyName(property));
     }
 
-    public ExcelColumnBindingBuilder<T> MapOptional(Expression<Func<T, string?>> property)
-    {
-        return new ExcelColumnBindingBuilder<T>(
-            this,
-            ExpressionBindingHelper.CreateNullableStringSetter(property),
-            ExpressionBindingHelper.GetPropertyName(property));
-    }
+    public ExcelColumnBindingBuilder<T> MapOptional(Expression<Func<T, string?>> property) => Map(property);
 
     public ExcelSheetProfileBuilder<T> Where(Func<ExcelRowData, bool> rowFilter)
     {

@@ -32,7 +32,8 @@ public sealed class ExcelReaderServiceTests
         Assert.Equal("A-100", result.Rows[0].ActivityId);
         Assert.Equal("Hull Block Erection", result.Rows[0].ActivityName);
         Assert.Equal("WBS-204", result.Rows[0].WbsCode);
-        Assert.Equal("120", result.Rows[0].DurationHours);
+        Assert.Equal(120m, result.Rows[0].DurationHours);
+        Assert.Equal(new DateOnly(2026, 3, 1), result.Rows[0].PlannedStart);
     }
 
     [Fact]
@@ -155,7 +156,8 @@ public sealed class ExcelReaderServiceTests
         Assert.Equal("A-100", task.ActivityId);
         Assert.Equal("Welding crew lead", task.TaskName);
         Assert.Equal("RES-WELD-01", task.ResourceName);
-        Assert.Equal("160", task.BudgetedUnits);
+        Assert.Equal(160m, task.BudgetedUnits);
+        Assert.Equal(120m, task.RemainingUnits);
         Assert.Equal("WELD", task.TradeCode);
     }
 }

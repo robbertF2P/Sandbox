@@ -10,9 +10,9 @@ public sealed class PrimaveraActivityRow
 
     public string? Status { get; set; }
 
-    public string? PlannedStart { get; set; }
+    public DateOnly? PlannedStart { get; set; }
 
-    public string? PlannedFinish { get; set; }
+    public DateOnly? PlannedFinish { get; set; }
 
-    public string? DurationHours { get; set; }
+    public decimal? DurationHours { get; set; }
 }

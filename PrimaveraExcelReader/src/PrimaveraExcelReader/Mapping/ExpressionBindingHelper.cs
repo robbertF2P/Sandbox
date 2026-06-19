@@ -5,15 +5,16 @@ namespace PrimaveraExcelReader.Mapping;
 
 internal static class ExpressionBindingHelper
 {
-    public static Action<T, string?> CreateStringSetter<T>(Expression<Func<T, string>> propertyExpression)
+    public static Action<T, string?> CreateSetter<T, TProperty>(Expression<Func<T, TProperty>> propertyExpression)
     {
-        Action<T, string> baseSetter = CompileSetter<T, string>(propertyExpression);
-        return (target, value) => baseSetter(target, value ?? string.Empty);
-    }
+        Action<T, TProperty> assign = CompileSetter(propertyExpression);
+        string propertyName = GetPropertyName(propertyExpression);
 
-    public static Action<T, string?> CreateNullableStringSetter<T>(Expression<Func<T, string?>> propertyExpression)
-    {
-        return CompileSetter<T, string?>(propertyExpression);
+        return (target, raw) =>
+        {
+            TProperty parsed = ExcelCellParser.Parse<TProperty>(raw, propertyName);
+            assign(target, parsed);
+        };
     }
 
     public static string GetPropertyName<T, TProperty>(Expression<Func<T, TProperty>> propertyExpression)
