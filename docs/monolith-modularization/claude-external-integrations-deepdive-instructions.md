@@ -34,6 +34,7 @@ If the external repo is unavailable, stop and list what is missing. Do not infer
 3. Store outputs under `docs/modularization/integrations/` in the **external repo** (create if missing).
 4. Human review is required after Phases B, **C**, and F before changing domain models or extracting integration code into packs.
 5. Cross-reference `docs/monolith-modularization/copilot-analysis-instructions.md` for entry-point IDs (EP-###) and bounded context names.
+6. Before any implementation PR, satisfy `docs/monolith-modularization/ai-assisted-delivery-quality-framework.md` (DoD + anti-slop checklist).
 
 ### Relationship to modularization phases
 

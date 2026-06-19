@@ -20,6 +20,8 @@ For **third-party external system integrations** (SAP, Kronos, PLM, lead vs foll
 4. **Phased work** — complete inventory and context map before use-case extraction.
 5. **Test-gated extraction** — no module move without linked UC-/TC- IDs and green tests.
 6. **No big-bang** — one strangler slice per change set.
+7. **Quality framework** — follow `docs/monolith-modularization/ai-assisted-delivery-quality-framework.md` for anti-slop rules, DoD, and CI gates.
+8. **Module dashboards** — each bounded context publishes ADO test results per `azure-devops-module-test-dashboards.md`.
 
 ## Target architecture
 
