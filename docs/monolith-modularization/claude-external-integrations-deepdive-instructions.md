@@ -6,16 +6,33 @@
 
 **Prerequisite:** Phase 0 inventory complete (`docs/modularization/00-inventory.md`). Bounded context map (`02-bounded-context-map.md`) strongly recommended.
 
-**Outcome:** Per-context integration catalogs, a cross-context integration map, lead/follow classification, and target-state best practices for integration packs and the intermediate exchange format.
+**Outcome:** Per-context integration catalogs, a **reverse-engineered story map** (user stories + acceptance criteria + epics) for domain expert validation, lead/follow classification, and target-state best practices for integration packs and the intermediate exchange format.
+
+---
+
+## Important: analyze the external application repository
+
+Claude must run Phases A–G against the **external Floor2Plan monolith repository** — the legacy production application — **not** this SandBox workspace.
+
+This SandBox repo holds instruction packs, POCs (`ApiImportActorPoc`), and modularization templates only. The integration tests, submodules, Hangfire jobs, and vendor connectors live in the external repo.
+
+```yaml
+analysis_target:
+  repo: "<path or url to external F2P monolith>"
+  workspace_note: "Open the external repo as the Cursor workspace root before running any @workspace phase."
+  sandbox_repo_role: "Copy finished artifacts back here under docs/modularization/integrations/ if desired."
+```
+
+If the external repo is unavailable, stop and list what is missing. Do not infer integration behaviour from SandBox POCs except as **target-state reference** (clearly label `reference_only: true`).
 
 ---
 
 ## How to use this document
 
-1. Open the **monolith repository** (or workspace containing legacy + target modules) in Cursor with Claude.
-2. Run **one phase at a time**. Do not skip Phase A (discovery sweep) or Phase C (lead/follow classification).
-3. Store outputs under `docs/modularization/integrations/` (create if missing).
-4. Human review is required after Phases B, C, and E before changing domain models or extracting integration code into packs.
+1. Open the **external monolith repository** in Cursor with Claude.
+2. Run **one phase at a time**. Do not skip Phase A (discovery sweep) or Phase C (story map from integration tests).
+3. Store outputs under `docs/modularization/integrations/` in the **external repo** (create if missing).
+4. Human review is required after Phases B, **C**, and F before changing domain models or extracting integration code into packs.
 5. Cross-reference `docs/monolith-modularization/copilot-analysis-instructions.md` for entry-point IDs (EP-###) and bounded context names.
 
 ### Relationship to modularization phases
@@ -24,8 +41,9 @@
 |---------------------|----------------------|-------|
 | Phase 0 — Inventory | Phase A | Reuse `00-inventory.md`; extend with integration-specific search |
 | Phase 2 — Context map | Phase B | Attach integrations to each context's `external_dependencies` |
-| Phase 3 — Use cases | Phase D | Integration flows become use cases or steps within use cases |
-| Phase 5 — Module cuts | Phase E | Integration code placement drives pack vs core decisions |
+| Phase 3 — Use cases | Phase C + E | Stories from tests (C); formal use-case linkage (E) |
+| Domain validation | **Phase C** | Reverse-engineered story map for expert workshop |
+| Phase 5 — Module cuts | Phase F | Integration code placement drives pack vs core decisions |
 
 ### Required inputs (fill before Phase A)
 
@@ -207,7 +225,150 @@ Stop after this context. Wait for human review before next context.
 
 ---
 
-## Phase C — Lead/follow classification workshop
+## Phase C — Domain expert validation: reverse-engineered story map
+
+### Goal
+
+Reverse-engineer a **user story mapping session** from existing **integration tests** in the external application. Produce epics, user stories, and acceptance criteria (ACs) rich enough for a domain expert workshop — without asking the expert to read code or test classes.
+
+This phase is the primary **domain expert validation** gate. Experts confirm, dispute, or defer each AC and answer embedded lead/follow questions. Confirmed stories become the behavioural contract for modularization.
+
+### Why integration tests first
+
+In the external F2P application, years of integration behaviour are encoded in tests — often more reliably than comments or docs. Test names, arrange/act/assert blocks, fixtures, golden files, and mocked HTTP responses are the **primary source of truth** for this phase. Production code from Phase B corroborates; it does not override test-proven behaviour unless tests are clearly obsolete.
+
+### Reverse-engineering heuristics (tell Claude to apply)
+
+1. **Find integration test projects** — `*IntegrationTest*`, `*DataIntegrationTest*`, `*Integration.Tests*`, client-specific test folders, submodule test suites.
+2. **Filter to integration-related tests** — names or bodies referencing SAP, Kronos, PLM, HR, Import, Export, Sync, ExternalId, converter, IDoc, file paths under `TestData/` or `Fixtures/`.
+3. **Parse test structure:**
+   - `MethodName_Scenario_ExpectedOutcome` → story + AC
+   - `[Given]` / `[When]` / `[Then]` attributes (Gherkin-style) → AC directly
+   - Arrange → preconditions; Act → trigger; Assert → postconditions
+4. **Infer actors** from test setup: `PS operator`, `Scheduler`, `External system (PLM)`, `Tenant admin`, `End user`.
+5. **Group stories into epics** by bounded context + external system + user goal (not by test class).
+6. **Build story map backbone** (left → right): trigger → validate → transform → persist → notify/downstream.
+7. **Flag gaps:** behaviour in Phase B catalog with no test; tests with no matching integration point.
+8. **Do not invent ACs** without test evidence — use `gaps` and `untested_behaviour` sections instead.
+
+### Claude instruction (run once per bounded context)
+
+```text
+@workspace EXTERNAL INTEGRATIONS — PHASE C: Reverse-engineered story map for "<CONTEXT_NAME>".
+
+Target: external F2P monolith repository (NOT SandBox). Cite paths from the open workspace.
+
+Inputs:
+- docs/modularization/integrations/contexts/<context-slug>/integrations.yaml (Phase B)
+- docs/modularization/02-bounded-context-map.md
+- docs/monolith-modularization/templates/integration-story-map.schema.yaml
+- Test project list from docs/modularization/00-inventory.md
+
+Tasks:
+1. Locate all integration tests owned by or exercising this bounded context.
+2. For each relevant test method, extract one or more acceptance criteria:
+   - Given / When / Then (or equivalent bullet form)
+   - Cite test_evidence: project, class, method, file path
+3. Cluster ACs into user stories (one user goal per story):
+   - Use "As a <actor> I want <goal> So that <benefit>"
+   - Imperative, domain language; vendor name only when actor is the external system
+4. Cluster stories into epics bundled under this bounded context:
+   - Epic = outcome a user cares about (e.g. "Onboard project from PLM", "Sync approved hours from Kronos")
+   - Each epic lists external_systems, integration_points (INT-###), story_map_backbone
+5. Attach lead_follow_questions per story (from Phase B + test assertions about who may edit/delete).
+6. Mark every AC expert_validation.status = draft.
+7. Produce a human-readable workshop pack (markdown) for domain experts — no code blocks required in the narrative section.
+8. Produce machine-readable YAML per schema.
+
+Outputs:
+- docs/modularization/integrations/contexts/<context-slug>/story-map.md
+- docs/modularization/integrations/contexts/<context-slug>/story-map.yaml
+
+Rules:
+- Every AC must cite at least one integration test OR be listed under gaps with reason.
+- Prefer multiple ACs per story over one giant story.
+- Max 8 epics, 40 stories, 120 ACs per context in first pass.
+- Mark inferred behaviour [INFERRED FROM TEST NAME ONLY] if body not read.
+- Mark [NEEDS REVIEW] if test is ignored, skipped, or commented out.
+
+Stop after this context. Do not run lead/follow matrix yet — that is Phase D.
+```
+
+### Workshop pack format (`story-map.md`)
+
+The markdown output must be **printable / shareable** for domain experts. Structure:
+
+```markdown
+# Story map — <Context name> integrations
+
+> DRAFT — reverse-engineered from integration tests. For domain expert validation workshop.
+
+## Epic: <Epic name> (EPIC-###)
+
+**Outcome:** <one sentence>
+**External systems:** PLM, SAP
+**Integration points:** INT-IMPORT-001
+
+### Story: <Title> (US-###)
+
+As a **<actor>**, I want **<goal>** so that **<benefit>**.
+
+| AC | Given | When | Then | Test evidence | Expert ✓ |
+|----|-------|------|------|---------------|----------|
+| AC-…-01 | … | … | … | PlmImportTests.Import_… | ☐ |
+
+**Questions for expert:**
+- …
+
+**Gaps (no test):**
+- …
+```
+
+### Rollup instruction (after all contexts)
+
+```text
+@workspace EXTERNAL INTEGRATIONS — PHASE C ROLLUP: Cross-context story map index.
+
+Inputs: docs/modularization/integrations/contexts/*/story-map.yaml
+
+Tasks:
+1. Merge into docs/modularization/integrations/02-story-map-index.md
+2. Summary table: context | epics | stories | ACs | gaps | disputed
+3. List cross-context epics (e.g. "End-to-end onboarding: SAP → Import → Planning")
+4. Mermaid story-map diagram: epics as swimlanes by bounded context
+
+Output: docs/modularization/integrations/02-story-map-index.md
+```
+
+### Domain expert workshop agenda (facilitator)
+
+| Step | Duration | Activity |
+|------|----------|----------|
+| 1 | 10 min | Walk through epic list per bounded context |
+| 2 | 30 min | Per epic: confirm stories still reflect how PS/clients work today |
+| 3 | 45 min | Per story: validate ACs — confirm / dispute / defer; capture notes in YAML |
+| 4 | 20 min | Answer lead/follow questions; flag bidirectional flows |
+| 5 | 15 min | Capture gaps: behaviour experts expect but no test exists |
+| 6 | 10 min | Prioritize disputed items for follow-up test or code trace |
+
+### Expert validation checklist
+
+- [ ] Every P0 epic has at least one **confirmed** story.
+- [ ] Disputed ACs have owner and follow-up action (fix test, fix code, or fix doc).
+- [ ] Lead/follow questions answered for all P0/P1 stories touching external systems.
+- [ ] Gaps logged for untested but business-critical flows.
+- [ ] `story-map.yaml` metadata.status = `validated` only after workshop.
+
+### Acceptance criteria (phase complete)
+
+- Each pilot context (Import, Hours, WBS) has `story-map.md` + `story-map.yaml`.
+- Every AC cites test evidence or appears in `gaps`.
+- Rollup index exists with epic counts per bounded context.
+- No lead/follow matrix in this phase (deferred to Phase D).
+
+---
+
+## Phase D — Lead/follow classification workshop
 
 ### Goal
 
@@ -226,10 +387,11 @@ Make **system of record** explicit per entity type — the requirement gap this 
 ### Claude instruction
 
 ```text
-@workspace EXTERNAL INTEGRATIONS — PHASE C ONLY: Lead/follow classification.
+@workspace EXTERNAL INTEGRATIONS — PHASE D ONLY: Lead/follow classification.
 
 Inputs:
 - docs/modularization/integrations/contexts/*/integrations.yaml
+- docs/modularization/integrations/contexts/*/story-map.yaml (Phase C — expert-validated where available)
 - docs/modularization/02-bounded-context-map.md
 
 Tasks:
@@ -246,24 +408,26 @@ Tasks:
 5. Produce Mermaid diagram: systems as nodes, directed edges labeled with entity types and lead/follow.
 
 Outputs:
-- docs/modularization/integrations/01-lead-follow-matrix.md
-- docs/modularization/integrations/01-lead-follow-matrix.yaml
-- docs/modularization/integrations/01-lead-follow.mermaid
+- docs/modularization/integrations/03-lead-follow-matrix.md
+- docs/modularization/integrations/03-lead-follow-matrix.yaml
+- docs/modularization/integrations/03-lead-follow.mermaid
 
-Mark file with "DRAFT — REQUIRES DOMAIN VALIDATION" at top.
+Mark file with "DRAFT — REQUIRES DOMAIN VALIDATION" at top unless Phase C workshop marked stories validated.
+Cross-reference disputed ACs from story-map.yaml.
 List top 10 [UNDOCUMENTED] cells as questions for domain experts.
 ```
 
 ### Human validation checklist
 
 - [ ] Domain expert confirms system of record per entity for pilot tenants.
+- [ ] Lead/follow aligns with **confirmed** user stories from Phase C (flag mismatches).
 - [ ] Bidirectional flows have documented conflict resolution.
 - [ ] No silent assumption that one vendor is globally "lead".
 - [ ] Matrix covers hours/time (Kronos) and structure (PLM/SAP) separately.
 
 ---
 
-## Phase D — Domain language and use-case linkage
+## Phase E — Domain language and use-case linkage
 
 ### Goal
 
@@ -272,11 +436,12 @@ Express integrations in **ubiquitous language** and link to modularization use c
 ### Claude instruction
 
 ```text
-@workspace EXTERNAL INTEGRATIONS — PHASE D: Domain language and use-case linkage.
+@workspace EXTERNAL INTEGRATIONS — PHASE E: Domain language and use-case linkage.
 
 Inputs:
 - docs/modularization/integrations/contexts/*/integrations.yaml
-- docs/modularization/integrations/01-lead-follow-matrix.md
+- docs/modularization/integrations/contexts/*/story-map.yaml
+- docs/modularization/integrations/03-lead-follow-matrix.md
 - docs/modularization/contexts/*/use-cases.yaml (if Phase 3 exists)
 - docs/monolith-modularization/templates/use-case.schema.yaml
 
@@ -287,6 +452,7 @@ Tasks:
 2. Define ubiquitous language terms introduced by integrations:
    - External ID, System of Record, Integration Pack, Intermediate Format, Converter, Replay
 3. Map integration points to use cases:
+   - Promote confirmed user stories (US-###) to UC-### where appropriate
    - Existing UC-### (update cross_context_interactions / add steps)
    - New UC-### for integration-only flows (tier P0/P1 if revenue/critical)
 4. Identify missing domain concepts currently buried in infrastructure:
@@ -295,15 +461,15 @@ Tasks:
    - IStructureImportSink, IHourSyncSource, IOutboundActualsPublisher, IExternalIdRegistry
 
 Output:
-- docs/modularization/integrations/02-domain-language.md
-- docs/modularization/integrations/02-use-case-linkage.yaml
+- docs/modularization/integrations/04-domain-language.md
+- docs/modularization/integrations/04-use-case-linkage.yaml
 
 Do not implement ports yet. Cite code for every proposed port boundary.
 ```
 
 ---
 
-## Phase E — Target architecture and best practices
+## Phase F — Target architecture and best practices
 
 ### Goal
 
@@ -361,7 +527,7 @@ Recommend where each integration lives in the **module + pack** target state.
 ### Claude instruction
 
 ```text
-@workspace EXTERNAL INTEGRATIONS — PHASE E: Target architecture and recommendations.
+@workspace EXTERNAL INTEGRATIONS — PHASE F: Target architecture and recommendations.
 
 Inputs:
 - All artifacts under docs/modularization/integrations/
@@ -384,35 +550,37 @@ Tasks:
 7. Flag blockers for module extraction: shared tables, handler chains, submodules.
 
 Outputs:
-- docs/modularization/integrations/03-target-architecture.md
-- docs/modularization/integrations/03-pack-roadmap.md
-- docs/modularization/integrations/03-integration-context-map.mermaid
+- docs/modularization/integrations/05-target-architecture.md
+- docs/modularization/integrations/05-pack-roadmap.md
+- docs/modularization/integrations/05-integration-context-map.mermaid
 
 Include "Best practices checklist" section engineers can adopt per new integration.
 ```
 
 ---
 
-## Phase F — Gap analysis and test plan
+## Phase G — Gap analysis and test plan
 
 ### Claude instruction
 
 ```text
-@workspace EXTERNAL INTEGRATIONS — PHASE F: Gaps and test plan.
+@workspace EXTERNAL INTEGRATIONS — PHASE G: Gaps and test plan.
 
 Inputs:
 - docs/modularization/integrations/contexts/*/integrations.yaml
+- docs/modularization/integrations/contexts/*/story-map.yaml
 - Existing test projects from 00-inventory.md
 
 Tasks:
 1. For each P0/P1 integration point, list test GAPs.
-2. Propose golden files per converter (anonymized samples if needed).
-3. Rank top 10 tests to implement before extracting Import/Hours integration code.
-4. Identify untestable areas (hardcoded paths, DateTime.Now, static HTTP, missing fixtures).
+2. Cross-reference story-map gaps — prioritize tests experts flagged as missing.
+3. Propose golden files per converter (anonymized samples if needed).
+4. Rank top 10 tests to implement before extracting Import/Hours integration code.
+5. Identify untestable areas (hardcoded paths, DateTime.Now, static HTTP, missing fixtures).
 
 Output:
-- docs/modularization/integrations/04-test-plan.md
-- docs/modularization/integrations/04-test-cases.yaml
+- docs/modularization/integrations/06-test-plan.md
+- docs/modularization/integrations/06-test-cases.yaml
 
 Align naming with docs/monolith-modularization/copilot-analysis-instructions.md Phase 4.
 ```
@@ -424,20 +592,23 @@ Align naming with docs/monolith-modularization/copilot-analysis-instructions.md 
 ```text
 docs/modularization/integrations/
 ├── 00-raw-integration-candidates.md
-├── 01-lead-follow-matrix.md
-├── 01-lead-follow-matrix.yaml
-├── 01-lead-follow.mermaid
-├── 02-domain-language.md
-├── 02-use-case-linkage.yaml
-├── 03-target-architecture.md
-├── 03-pack-roadmap.md
-├── 03-integration-context-map.mermaid
-├── 04-test-plan.md
-├── 04-test-cases.yaml
+├── 02-story-map-index.md              # Phase C rollup — epics by bounded context
+├── 03-lead-follow-matrix.md
+├── 03-lead-follow-matrix.yaml
+├── 03-lead-follow.mermaid
+├── 04-domain-language.md
+├── 04-use-case-linkage.yaml
+├── 05-target-architecture.md
+├── 05-pack-roadmap.md
+├── 05-integration-context-map.mermaid
+├── 06-test-plan.md
+├── 06-test-cases.yaml
 └── contexts/
     ├── import/
     │   ├── integrations.md
-    │   └── integrations.yaml
+    │   ├── integrations.yaml
+    │   ├── story-map.md             # Domain expert workshop pack
+    │   └── story-map.yaml
     ├── hours/
     ├── wbs/
     └── ...
@@ -451,14 +622,23 @@ docs/modularization/integrations/
 |------|-------------|-------------|
 | IG0 | A | Raw sweep reviewed; no major vendor missing |
 | IG1 | B | Per-context catalogs reviewed by context owner |
-| IG2 | C | Lead/follow matrix validated by domain expert |
-| IG3 | D | Ubiquitous language aligned with context map |
-| IG4 | E | Pack placement agreed before moving integration code |
-| IG5 | F | Golden-file strategy agreed for P0 integrations |
+| **IG2** | **C** | **Story map workshop complete; P0 ACs confirmed or disputed with owners** |
+| IG3 | D | Lead/follow matrix validated; aligned with confirmed stories |
+| IG4 | E | Ubiquitous language aligned with context map |
+| IG5 | F | Pack placement agreed before moving integration code |
+| IG6 | G | Golden-file strategy agreed for P0 integrations |
 
 ---
 
 ## Prompts for common follow-ups
+
+### Run domain expert workshop from story map
+
+```text
+@workspace Using docs/modularization/integrations/contexts/<context>/story-map.md,
+produce a facilitator script and a one-page summary per epic for a 2-hour workshop.
+Include: confirmed/disputed/deferred checkboxes, lead/follow questions, gap list.
+```
 
 ### Trace one vendor end-to-end
 
@@ -513,13 +693,14 @@ INTEGRATION IMPLEMENTATION GUARDRAILS:
 
 ## First iteration starter pack
 
-Minimum viable deep-dive (after Phase 0):
+Minimum viable deep-dive (after Phase 0), in the **external monolith repo**:
 
-1. **Phase A** — full repo sweep (half day + review)
-2. **Phase B** — pilot contexts: **Import**, **Hours**, **WBS** (highest integration density)
-3. **Phase C** — lead/follow workshop with domain expert
-4. **Phase E** — pack roadmap for SAP, Kronos, PLM only
-5. **Phase F** — 5 golden-file tests for Import pipeline
+1. **Phase A** — full repo sweep
+2. **Phase B** — pilot contexts: **Import**, **Hours**, **WBS**
+3. **Phase C** — reverse-engineer story maps from integration tests; **domain expert workshop**
+4. **Phase D** — lead/follow matrix informed by validated stories
+5. **Phase F** — pack roadmap for SAP, Kronos, PLM
+6. **Phase G** — golden-file tests for gaps experts flagged
 
 Expand to remaining contexts after pilot proves the artifact format.
 
@@ -530,3 +711,4 @@ Expand to remaining contexts after pilot proves the artifact format.
 | Version | Date | Notes |
 |---------|------|-------|
 | 1.0 | 2026-06-18 | Initial deep-dive instruction pack |
+| 1.1 | 2026-06-18 | Phase C story map from integration tests; external repo scope; phases renumbered D–G |

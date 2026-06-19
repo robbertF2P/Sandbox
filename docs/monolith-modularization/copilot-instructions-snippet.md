@@ -10,7 +10,7 @@ You are assisting with **monolith-to-modular migration** using a strangler-fig a
 
 Follow phases and output formats in `docs/monolith-modularization/copilot-analysis-instructions.md` (or the copy in this repo under `docs/modularization/`).
 
-For **third-party external system integrations** (SAP, Kronos, PLM, lead vs follow, integration packs), use `docs/monolith-modularization/claude-external-integrations-deepdive-instructions.md` after Phase 0.
+For **third-party external system integrations** (SAP, Kronos, PLM, lead vs follow, integration packs), use `docs/monolith-modularization/claude-external-integrations-deepdive-instructions.md` after Phase 0. Run against the **external F2P monolith repo**, not SandBox. Phase C produces epics, user stories, and ACs reverse-engineered from integration tests for domain expert validation.
 
 ## Non-negotiable rules
 
