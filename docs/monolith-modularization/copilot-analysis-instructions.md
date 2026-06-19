@@ -15,6 +15,7 @@
 3. Run **one phase at a time**. Do not skip Phase 0 (inventory) or Phase 2 (context map validation).
 4. Store outputs under `docs/modularization/` in the monolith repo (create if missing).
 5. Human review is required after Phases 2, 3, and 4 before writing tests or extracting modules.
+6. All implementation must follow `docs/monolith-modularization/ai-assisted-delivery-quality-framework.md`.
 
 ### Recommended Copilot mode
 
