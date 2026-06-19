@@ -18,7 +18,7 @@ public sealed class ExcelColumnBindingBuilder<T> where T : new()
 
     public ExcelSheetProfileBuilder<T> From(string headerName, bool required = false)
     {
-        return _profileBuilder.AddBinding(headerName, _setter, columnIndex: null, required: required);
+        return _profileBuilder.AddBinding(headerName, _setter, columnIndex: null, required, _propertyName);
     }
 
     public ExcelSheetProfileBuilder<T> AtColumn(int columnIndex, string? headerName = null, bool required = false)
@@ -27,6 +27,7 @@ public sealed class ExcelColumnBindingBuilder<T> where T : new()
             headerName ?? _propertyName,
             _setter,
             columnIndex: columnIndex,
-            required: required);
+            required: required,
+            fieldName: _propertyName);
     }
 }

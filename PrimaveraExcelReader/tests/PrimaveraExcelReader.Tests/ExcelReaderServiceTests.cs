@@ -105,7 +105,7 @@ public sealed class ExcelReaderServiceTests
             PrimaveraSheetProfiles.StandardActivityExport);
 
         Assert.Single(result.Rows);
-        Assert.Contains(result.SkippedRowReasons, reason => reason.Contains("empty row", StringComparison.OrdinalIgnoreCase));
+        Assert.Contains(result.Issues, issue => issue.Kind == ExcelReadIssueKind.EmptyRow);
     }
 
     [Fact]

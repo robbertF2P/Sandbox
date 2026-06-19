@@ -67,9 +67,10 @@ public sealed class ExcelSheetProfileBuilder<T> where T : new()
         string headerName,
         Action<T, string?> setter,
         int? columnIndex,
-        bool required)
+        bool required,
+        string? fieldName = null)
     {
-        _columnBindings.Add(new ExcelColumnBinding<T>(headerName, setter, columnIndex, required));
+        _columnBindings.Add(new ExcelColumnBinding<T>(headerName, setter, columnIndex, required, fieldName));
         return this;
     }
 

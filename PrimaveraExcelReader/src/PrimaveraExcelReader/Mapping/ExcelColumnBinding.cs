@@ -6,15 +6,19 @@ public sealed class ExcelColumnBinding<T>
         string headerName,
         Action<T, string?> setter,
         int? columnIndex = null,
-        bool required = false)
+        bool required = false,
+        string? fieldName = null)
     {
         HeaderName = headerName;
         Setter = setter;
         ColumnIndex = columnIndex;
         Required = required;
+        FieldName = fieldName ?? headerName;
     }
 
     public string HeaderName { get; }
+
+    public string FieldName { get; }
 
     public int? ColumnIndex { get; }
 
@@ -22,7 +26,7 @@ public sealed class ExcelColumnBinding<T>
 
     public Action<T, string?> Setter { get; }
 
-    public void Apply(T target, Abstractions.ExcelRowData row)
+    public void TryApply(T target, Abstractions.ExcelRowData row, ICollection<ExcelReadIssue> issues)
     {
         string? value = ColumnIndex.HasValue
             ? row.GetByIndex(ColumnIndex.Value)
@@ -30,8 +34,8 @@ public sealed class ExcelColumnBinding<T>
 
         if (Required && string.IsNullOrWhiteSpace(value))
         {
-            throw new InvalidOperationException(
-                $"Required column '{HeaderName}' is missing or empty on row {row.RowIndex + 1}.");
+            issues.Add(ExcelReadIssue.RequiredValueMissing(row.RowIndex + 1, HeaderName, ColumnIndex));
+            return;
         }
 
         try
@@ -40,7 +44,13 @@ public sealed class ExcelColumnBinding<T>
         }
         catch (ExcelCellParseException ex)
         {
-            throw new InvalidOperationException($"Row {row.RowIndex + 1}: {ex.Message}", ex);
+            issues.Add(ExcelReadIssue.ParseError(
+                row.RowIndex + 1,
+                ex.FieldName,
+                HeaderName,
+                ColumnIndex,
+                ex.RawValue,
+                ex.TargetType));
         }
     }
 }

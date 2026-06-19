@@ -1,6 +1,5 @@
 using PrimaveraExcelReader.Abstractions;
 using PrimaveraExcelReader.Mapping;
-using PrimaveraExcelReader.Primavera.Models;
 
 namespace PrimaveraExcelReader.Tests;
 
@@ -34,10 +33,11 @@ public sealed class ExcelSheetProfileBuilderTests
             },
             ["A-1", "Inspection"]);
 
-        SampleRow mapped = profile.MapRow(row);
+        ExcelRowMapResult<SampleRow> result = profile.TryMapRow(row);
 
-        Assert.Equal("A-1", mapped.Code);
-        Assert.Equal("Inspection", mapped.Note);
+        Assert.True(result.IsSuccess);
+        Assert.Equal("A-1", result.Row!.Code);
+        Assert.Equal("Inspection", result.Row.Note);
     }
 
     [Fact]
@@ -53,9 +53,10 @@ public sealed class ExcelSheetProfileBuilderTests
             new Dictionary<string, string?>(StringComparer.OrdinalIgnoreCase) { ["Code"] = "a-1" },
             ["a-1"]);
 
-        SampleRow mapped = profile.MapRow(row);
+        ExcelRowMapResult<SampleRow> result = profile.TryMapRow(row);
 
-        Assert.Equal("A-1", mapped.Code);
+        Assert.True(result.IsSuccess);
+        Assert.Equal("A-1", result.Row!.Code);
     }
 
     private sealed class SampleRow

@@ -18,20 +18,34 @@ public sealed class ExcelSheetProfile<T> where T : new()
 
     public Func<T, ExcelRowData, T>? AfterMap { get; init; }
 
-    public T MapRow(ExcelRowData row)
+    public ExcelRowMapResult<T> TryMapRow(ExcelRowData row)
     {
+        var issues = new List<ExcelReadIssue>();
         var model = new T();
 
         foreach (ExcelColumnBinding<T> binding in ColumnBindings)
         {
-            binding.Apply(model, row);
+            binding.TryApply(model, row, issues);
+        }
+
+        if (issues.Count > 0)
+        {
+            return ExcelRowMapResult<T>.Failure(issues);
         }
 
         if (AfterMap is not null)
         {
-            return AfterMap(model, row);
+            try
+            {
+                model = AfterMap(model, row);
+            }
+            catch (Exception ex)
+            {
+                issues.Add(ExcelReadIssue.MappingError(row.RowIndex + 1, ex.Message));
+                return ExcelRowMapResult<T>.Failure(issues);
+            }
         }
 
-        return model;
+        return ExcelRowMapResult<T>.Success(model);
     }
 }

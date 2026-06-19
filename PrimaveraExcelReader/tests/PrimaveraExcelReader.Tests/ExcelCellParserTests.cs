@@ -53,7 +53,7 @@ public sealed class ExcelCellParserTests
     }
 
     [Fact]
-    public void MapRow_SkipsRowWhenTypedColumnCannotBeParsed()
+    public void TryMapRow_CollectsIssueWhenTypedColumnCannotBeParsed()
     {
         ExcelSheetProfile<TypedRow> profile = ExcelSheetProfile<TypedRow>.Configure()
             .Sheet("Sample")
@@ -70,12 +70,17 @@ public sealed class ExcelCellParserTests
             },
             ["A-1", "invalid"]);
 
-        InvalidOperationException exception = Assert.Throws<InvalidOperationException>(() => profile.MapRow(row));
-        Assert.Contains("Row 2", exception.Message, StringComparison.Ordinal);
+        ExcelRowMapResult<TypedRow> result = profile.TryMapRow(row);
+
+        Assert.False(result.IsSuccess);
+        ExcelReadIssue issue = Assert.Single(result.Issues);
+        Assert.Equal(ExcelReadIssueKind.ParseError, issue.Kind);
+        Assert.Equal(2, issue.RowNumber);
+        Assert.Equal("Hours", issue.ColumnHeader);
     }
 
     [Fact]
-    public void MapRow_MapsTypedColumnsFromProfile()
+    public void TryMapRow_MapsTypedColumnsFromProfile()
     {
         ExcelSheetProfile<TypedRow> profile = ExcelSheetProfile<TypedRow>.Configure()
             .Sheet("Sample")
@@ -94,11 +99,12 @@ public sealed class ExcelCellParserTests
             },
             ["A-1", "96", "2026-04-01"]);
 
-        TypedRow mapped = profile.MapRow(row);
+        ExcelRowMapResult<TypedRow> result = profile.TryMapRow(row);
 
-        Assert.Equal("A-1", mapped.Code);
-        Assert.Equal(96m, mapped.Hours);
-        Assert.Equal(new DateOnly(2026, 4, 1), mapped.StartDate);
+        Assert.True(result.IsSuccess);
+        Assert.Equal("A-1", result.Row!.Code);
+        Assert.Equal(96m, result.Row.Hours);
+        Assert.Equal(new DateOnly(2026, 4, 1), result.Row.StartDate);
     }
 
     private sealed class TypedRow

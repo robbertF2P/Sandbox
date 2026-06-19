@@ -10,41 +10,51 @@ public sealed class ExcelReaderService(IExcelWorkbookAccessor workbookAccessor) 
         CancellationToken cancellationToken = default)
         where T : new()
     {
-        IReadOnlyList<ExcelRowData> rows = await workbookAccessor.ReadSheetAsync(
-            stream,
-            profile.SheetName,
-            profile.HeaderRowIndex,
-            profile.DataStartRowIndex,
-            cancellationToken);
+        var issues = new List<ExcelReadIssue>();
+        IReadOnlyList<ExcelRowData> rows;
+
+        try
+        {
+            rows = await workbookAccessor.ReadSheetAsync(
+                stream,
+                profile.SheetName,
+                profile.HeaderRowIndex,
+                profile.DataStartRowIndex,
+                cancellationToken);
+        }
+        catch (InvalidOperationException ex)
+        {
+            issues.Add(ExcelReadIssue.ForSheet(profile.SheetName, ex.Message, ClassifyWorkbookIssue(ex.Message)));
+            return new ExcelReadResult<T>(profile.SheetName, [], issues);
+        }
 
         var mappedRows = new List<T>();
-        var skippedReasons = new List<string>();
 
         foreach (ExcelRowData row in rows)
         {
             if (row.IsEmpty())
             {
-                skippedReasons.Add($"Row {row.RowIndex + 1}: empty row.");
+                issues.Add(ExcelReadIssue.EmptyRow(row.RowIndex + 1));
                 continue;
             }
 
             if (profile.RowFilter is not null && !profile.RowFilter(row))
             {
-                skippedReasons.Add($"Row {row.RowIndex + 1}: filtered out.");
+                issues.Add(ExcelReadIssue.FilteredOut(row.RowIndex + 1));
                 continue;
             }
 
-            try
+            ExcelRowMapResult<T> mapResult = profile.TryMapRow(row);
+            if (mapResult.IsSuccess)
             {
-                mappedRows.Add(profile.MapRow(row));
+                mappedRows.Add(mapResult.Row!);
+                continue;
             }
-            catch (Exception ex)
-            {
-                skippedReasons.Add($"Row {row.RowIndex + 1}: {ex.Message}");
-            }
+
+            issues.AddRange(mapResult.Issues);
         }
 
-        return new ExcelReadResult<T>(profile.SheetName, mappedRows, skippedReasons);
+        return new ExcelReadResult<T>(profile.SheetName, mappedRows, issues);
     }
 
     public async Task<IReadOnlyDictionary<string, ExcelReadResult<T>>> ReadManyAsync<T>(
@@ -63,6 +73,22 @@ public sealed class ExcelReaderService(IExcelWorkbookAccessor workbookAccessor) 
         }
 
         return results;
+    }
+
+    private static ExcelReadIssueKind ClassifyWorkbookIssue(string message)
+    {
+        if (message.Contains("Sheet", StringComparison.OrdinalIgnoreCase)
+            && message.Contains("not found", StringComparison.OrdinalIgnoreCase))
+        {
+            return ExcelReadIssueKind.SheetNotFound;
+        }
+
+        if (message.Contains("Header row", StringComparison.OrdinalIgnoreCase))
+        {
+            return ExcelReadIssueKind.HeaderRowMissing;
+        }
+
+        return ExcelReadIssueKind.MappingError;
     }
 
     private static MemoryStream CopyStream(Stream source)
