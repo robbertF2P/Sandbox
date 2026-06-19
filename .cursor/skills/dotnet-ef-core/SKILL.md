@@ -142,7 +142,7 @@ Install tools once: `dotnet tool install --global dotnet-ef` (or use `dotnet ef`
 ## Anti-patterns
 
 - Lazy loading enabled without understanding N+1 query cost.
-- Returning `IQueryable` from repositories through API layers (unbounded queries, context lifetime issues).
+- Returning `IQueryable` from repositories through API layers (unbounded queries, context lifetime issues). Use the `specification-pattern` skill — encapsulate query intent in named specifications.
 - Mixing EF6 and EF Core against the same database with separate migration histories without a plan.
 - `Database.EnsureCreated()` in production instead of migrations.
 - Long-lived `DbContext` across multiple requests or actor messages.
@@ -150,6 +150,7 @@ Install tools once: `dotnet tool install --global dotnet-ef` (or use `dotnet ef`
 ## Related skills
 
 - `dotnet-core-csharp-development` — DI, configuration, ASP.NET Core host, `dotnet` CLI.
+- `specification-pattern` — named query rules; keep `IQueryable` inside repositories.
 - `akka-net` — actors must not hold scoped `DbContext`; keep persistence at the host boundary.
 
 Official reference: https://learn.microsoft.com/en-us/ef/core/

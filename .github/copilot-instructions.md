@@ -15,6 +15,12 @@ Use both for modeling and implementation work on C# domain code.
 
 Use when designing configuration languages, rule engines, fluent builders, or parsers.
 
+## Specification pattern
+
+- **`specification-pattern`** — Named query/business rules, Ardalis.Specification, Repository encapsulation; avoid leaking `IQueryable` / `DbContext`.
+
+Use when designing repositories, EF queries, or reusable domain criteria.
+
 ## .NET / C#
 
 - **`dotnet-core-csharp-development`** — SDK-style projects, ASP.NET Core, DI, testing, C# style.

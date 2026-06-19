@@ -23,6 +23,7 @@ After editing skills in `.cursor/skills/`, run:
 - `domain-driven-design` — Evans DDD foundations
 - `implementing-domain-driven-design` — Vernon DDD implementation
 - `domain-specific-languages` — Fowler DSL design and implementation
+- `specification-pattern` — Specification + Repository; Ardalis.Specification; avoid IQueryable leakage
 - `dotnet-core-csharp-development` — C# / ASP.NET Core conventions
 - `dotnet-ef-core` — Entity Framework Core
 - `akka-net` — Akka.NET
