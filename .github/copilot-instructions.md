@@ -1,0 +1,20 @@
+# SandBox — Copilot instructions
+
+This repo uses **Agent Skills** for domain-specific guidance. Copilot loads them from `.github/skills/` when relevant.
+
+## Domain-driven design
+
+- **`domain-driven-design`** — Eric Evans: Ubiquitous Language, bounded contexts, tactical building blocks, strategic design.
+- **`implementing-domain-driven-design`** — Vaughn Vernon: aggregate rules, domain events, CQRS, application services, integration.
+
+Use both for modeling and implementation work on C# domain code.
+
+## .NET / C#
+
+- **`dotnet-core-csharp-development`** — SDK-style projects, ASP.NET Core, DI, testing, C# style.
+- **`dotnet-ef-core`** — EF Core DbContext, migrations, queries.
+- **`akka-net`** — Akka.NET actors, messages, persistence (see `AkkaSignalRVuePoc`).
+
+## Source of truth
+
+Skills are authored in `.cursor/skills/`. Run `./scripts/sync-agent-skills.sh` after editing to refresh `.github/skills/` and `.agents/skills/`.
