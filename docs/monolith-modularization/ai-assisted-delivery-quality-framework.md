@@ -207,6 +207,12 @@ traceability:
 
 Gap ACs (expert-confirmed, no test yet) go on the **sprint 1 test backlog** — implementation of that behaviour is blocked until a test exists or expert explicitly accepts interim risk with ticket.
 
+### Module dashboards (Azure DevOps)
+
+Each bounded-context module should expose a **simple ADO dashboard** with latest automated test results — filtered by `testRunTitle: 'Module: <Name>'` and test traits (`Module`, `Tier`, `UC`, `TC`, `AC`).
+
+See **`azure-devops-module-test-dashboards.md`** for pipeline template, widget layout, and module DoD.
+
 ---
 
 ## CI/CD requirements (external monolith + Platform 2.0)
@@ -268,6 +274,7 @@ AI has **no** approval role.
 | Regressions post-merge in pilot | Gate effectiveness | → 0 |
 | Median PR size (lines) | Slice discipline | Small, stable |
 | `[NEEDS REVIEW]` items open > 2 sprints | Hidden uncertainty | ↓ |
+| P0 pass rate per module (ADO dashboard) | Per-context health | Stable 100% on `main` |
 
 ---
 
@@ -278,6 +285,7 @@ AI has **no** approval role.
 | `copilot-analysis-instructions.md` | Phased analysis; characterization-first |
 | `claude-external-integrations-deepdive-instructions.md` | Integration story maps; Phase C expert validation |
 | `copilot-instructions-snippet.md` | Short rules for AI agents in repo |
+| `azure-devops-module-test-dashboards.md` | Per-module test dashboards in Azure DevOps |
 | `ApiImportActorPoc/docs/platform-rebuild-proposal-summary.md` | Strategic context; tests as specification |
 
 ---

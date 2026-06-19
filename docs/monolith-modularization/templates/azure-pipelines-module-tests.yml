@@ -1,0 +1,86 @@
+# Azure Pipelines — per-module test jobs (template)
+# Copy to external F2P repo as .azuredevops/pipelines/platform-module-tests.yml
+# Adjust project paths and agent pool to match your environment.
+
+trigger:
+  branches:
+    include:
+      - main
+
+pr:
+  branches:
+    include:
+      - main
+
+variables:
+  buildConfiguration: Release
+  dotnetVersion: "8.0.x"
+
+# Extend this list as modules are extracted
+parameters:
+  - name: modules
+    type: object
+    default:
+      - name: Import
+        testProject: tests/Import.Integration.Tests/Import.Integration.Tests.csproj
+      - name: Hours
+        testProject: tests/Hours.Integration.Tests/Hours.Integration.Tests.csproj
+      - name: Wbs
+        testProject: tests/Wbs.Integration.Tests/Wbs.Integration.Tests.csproj
+
+stages:
+  - stage: Build
+    displayName: Build solution
+    jobs:
+      - job: Build
+        pool:
+          vmImage: ubuntu-latest
+        steps:
+          - task: UseDotNet@2
+            displayName: Use .NET SDK
+            inputs:
+              packageType: sdk
+              version: $(dotnetVersion)
+
+          - script: dotnet restore
+            displayName: Restore
+
+          - script: dotnet build --configuration $(buildConfiguration) --no-restore
+            displayName: Build
+
+  - stage: ModuleTests
+    displayName: Module tests
+    dependsOn: Build
+    jobs:
+      - ${{ each module in parameters.modules }}:
+          - job: ${{ module.name }}_Tests
+            displayName: "Module: ${{ module.name }}"
+            pool:
+              vmImage: ubuntu-latest
+            steps:
+              - task: UseDotNet@2
+                inputs:
+                  packageType: sdk
+                  version: $(dotnetVersion)
+
+              - script: |
+                  dotnet test "${{ module.testProject }}" \
+                    --configuration $(buildConfiguration) \
+                    --logger "trx;LogFileName=${{ lower(module.name) }}.trx" \
+                    --results-directory "$(Agent.TempDirectory)/test-results/${{ lower(module.name) }}"
+                displayName: "Run ${{ module.name }} tests"
+
+              - task: PublishTestResults@2
+                displayName: "Publish ${{ module.name }} results"
+                condition: always()
+                inputs:
+                  testResultsFormat: VSTest
+                  testResultsFiles: "$(Agent.TempDirectory)/test-results/${{ lower(module.name) }}/**/*.trx"
+                  testRunTitle: "Module: ${{ module.name }}"
+                  mergeTestResults: false
+                  failTaskOnFailedTests: true
+                  publishRunAttachments: true
+
+              - script: echo "##vso[build.addbuildtag]module-${{ lower(module.name) }}"
+                displayName: "Tag build (module-${{ module.name }})"
+                condition: succeeded()
