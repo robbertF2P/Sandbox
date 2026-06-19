@@ -21,6 +21,10 @@ Use when designing configuration languages, rule engines, fluent builders, or pa
 
 Use when designing repositories, EF queries, or reusable domain criteria.
 
+## Floor2Plan V2
+
+- **`docs/floor2plan-v2-read-model-playbook.md`** — Nx Angular module layout + Specification-backed read/filter flow per bounded context.
+
 ## .NET / C#
 
 - **`dotnet-core-csharp-development`** — SDK-style projects, ASP.NET Core, DI, testing, C# style.
