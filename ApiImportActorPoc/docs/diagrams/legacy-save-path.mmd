@@ -1,0 +1,53 @@
+flowchart TB
+    subgraph FE["Frontend"]
+        C["Component<br/>(Vue · AngularJS · Razor)"]
+        JS["JavaScript service"]
+    end
+
+    subgraph WEB["ASP.NET host"]
+        CTRL["Controller action"]
+        APP["Application service"]
+    end
+
+    subgraph DOM["Domain layer"]
+        DS1["Domain service"]
+        DS2["Domain service<br/>(client override)"]
+        REPO["Repositories"]
+    end
+
+    subgraph PERSIST["Persistence"]
+        EF["EF DbContext<br/>entities"]
+        DB[("SQL Server")]
+    end
+
+    subgraph HANDLERS["On SaveChanges — implicit workflow"]
+        CH1["Change handler"]
+        CH2["Change handler"]
+        CHN["Change handler …"]
+    end
+
+    subgraph BG["Background processors"]
+        HF["Hangfire / workflow jobs"]
+        SQL["Custom SQL<br/>reads & writes"]
+    end
+
+    C --> JS
+    JS -->|"HTTP / Web API"| CTRL
+    CTRL --> APP
+    APP --> DS1
+    APP --> DS2
+    DS1 --> REPO
+    DS2 --> REPO
+    REPO -->|"read · update entities"| EF
+    EF -->|"SaveChanges()"| DB
+    EF -.->|"fires"| CH1
+    CH1 -.-> CH2
+    CH2 -.-> CHN
+    CH1 -.->|"extra reads & writes"| REPO
+    CH2 -.->|"nested SaveChanges"| EF
+    CHN -.->|"enqueue"| HF
+    HF --> SQL
+    SQL --> DB
+
+    style HANDLERS fill:#fef3c7,stroke:#d97706
+    style BG fill:#fee2e2,stroke:#dc2626
