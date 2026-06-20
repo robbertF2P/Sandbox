@@ -24,6 +24,7 @@ Use when designing repositories, EF queries, or reusable domain criteria.
 ## Floor2Plan V2
 
 - **`docs/floor2plan-v2-read-model-playbook.md`** — Nx Angular module layout + Specification-backed read/filter flow per bounded context.
+- **`docs/floor2plan-legacy-connector-submodule-antipattern.md`** — why submodule-based connectors referencing core are an anti-pattern; integration pack target.
 
 ## .NET / C#
 

@@ -12,6 +12,8 @@ Follow phases and output formats in `docs/monolith-modularization/copilot-analys
 
 For **third-party external system integrations** (SAP, Kronos, PLM, lead vs follow, integration packs), use `docs/monolith-modularization/claude-external-integrations-deepdive-instructions.md` after Phase 0. Run against the **external F2P monolith repo**, not SandBox. Phase C produces epics, user stories, and ACs reverse-engineered from integration tests for domain expert validation.
 
+For **team education** on why legacy connectors use git submodules against core (and why Platform 2.0 uses integration packs), see `docs/floor2plan-legacy-connector-submodule-antipattern.md`.
+
 ## Non-negotiable rules
 
 1. **Behaviour preservation first** — characterize legacy behaviour before refactoring.
