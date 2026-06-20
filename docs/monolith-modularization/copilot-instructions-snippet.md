@@ -14,7 +14,12 @@ For **third-party external system integrations** (SAP, Kronos, PLM, lead vs foll
 
 For **team education** on why legacy connectors use git submodules against core (and why Platform 2.0 uses integration packs), see `docs/floor2plan-legacy-connector-submodule-antipattern.md`.
 
-For a **concrete legacy → V2 pack proposal** on one connector, use `docs/floor2plan-v2-connector-migration-prompt.md` in the external monolith repo.
+For a **concrete legacy → V2 pack proposal** on one connector, use:
+
+- `docs/floor2plan-v2-connector-prompt-plm-planning.md` — **recommended first** (PLM structure → planning)
+- `docs/floor2plan-v2-connector-prompt-eshare.md` — eShare (discovery-heavy; not in SandBox)
+
+Generic template: `docs/floor2plan-v2-connector-migration-prompt.md`
 
 ## Non-negotiable rules
 
