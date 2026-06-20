@@ -9,7 +9,11 @@
   <ItemGroup>
     <PackageReference Include="ImportPipeline.Domain" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" />
     <PackageReference Include="NPOI" />
+    <PackageReference Include="Serilog" />
+    <PackageReference Include="Serilog.Extensions.Logging" />
+    <PackageReference Include="Serilog.Sinks.Console" />
   </ItemGroup>
 
 </Project>

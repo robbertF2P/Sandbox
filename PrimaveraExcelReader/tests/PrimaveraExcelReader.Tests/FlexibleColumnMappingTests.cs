@@ -74,7 +74,7 @@ public sealed class FlexibleColumnMappingTests
                     ]))
             .BuildStream();
 
-        var service = new ExcelReaderService(new NpoiExcelWorkbookAccessor());
+        var service = ExcelReaderTestRunner.CreateService(new NpoiExcelWorkbookAccessor());
 
         IReadOnlyDictionary<string, ExcelReadResult<ShipyardCombinedRow>> activityResults =
             await service.ReadManyAsync(

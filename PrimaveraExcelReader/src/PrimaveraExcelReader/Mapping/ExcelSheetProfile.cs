@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Logging;
 using PrimaveraExcelReader.Abstractions;
 using PrimaveraExcelReader.ImportPipeline;
 
@@ -19,6 +20,6 @@ public sealed class ExcelSheetProfile<T> where T : new()
 
     public Func<T, ExcelRowData, T>? AfterMap { get; init; }
 
-    public ExcelRowMapResult<T> TryMapRow(ExcelRowData row) =>
-        ImportPipelineRowMapping.TryMap(this, row);
+    public ExcelRowMapResult<T> TryMapRow(ExcelRowData row, ILogger? logger = null) =>
+        ImportPipelineRowMapping.TryMap(this, row, logger);
 }
