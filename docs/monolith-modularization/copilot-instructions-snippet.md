@@ -14,6 +14,8 @@ For **third-party external system integrations** (SAP, Kronos, PLM, lead vs foll
 
 For **team education** on why legacy connectors use git submodules against core (and why Platform 2.0 uses integration packs), see `docs/floor2plan-legacy-connector-submodule-antipattern.md`.
 
+For a **concrete legacy → V2 pack proposal** on one connector, use `docs/floor2plan-v2-connector-migration-prompt.md` in the external monolith repo.
+
 ## Non-negotiable rules
 
 1. **Behaviour preservation first** — characterize legacy behaviour before refactoring.
