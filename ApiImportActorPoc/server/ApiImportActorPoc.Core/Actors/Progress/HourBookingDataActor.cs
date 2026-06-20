@@ -4,6 +4,7 @@ using ApiImportActorPoc.Contracts.Messages.Progress;
 using ApiImportActorPoc.Core.Progress;
 using ApiImportActorPoc.Data;
 using Microsoft.EntityFrameworkCore;
+using Platform.Serilog.Logging.Correlation;
 
 namespace ApiImportActorPoc.Core.Actors.Progress;
 
@@ -15,14 +16,22 @@ public sealed class HourBookingDataActor : ReceiveActor
     public HourBookingDataActor(IDbContextFactory<ImportDbContext> dbContextFactory)
     {
         _persistService = new HourBookingPersistService(dbContextFactory);
-        ReceiveAsync<PersistHourBookingCommand>(HandlePersistAsync);
+        ReceiveAsync<CorrelatedMessageEnvelope>(DispatchAsync);
     }
 
     public static Props Props(IDbContextFactory<ImportDbContext> dbContextFactory) =>
         Akka.Actor.Props.Create(() => new HourBookingDataActor(dbContextFactory));
 
-    private async Task HandlePersistAsync(PersistHourBookingCommand command)
+    private async Task DispatchAsync(CorrelatedMessageEnvelope envelope)
     {
+        if (envelope.Message is not PersistHourBookingCommand command)
+        {
+            Unhandled(envelope);
+            return;
+        }
+
+        var sender = Sender;
+
         try
         {
             var outcome = await _persistService.PersistAsync(
@@ -32,7 +41,7 @@ public sealed class HourBookingDataActor : ReceiveActor
 
             if (!outcome.Success)
             {
-                Sender.Tell(new PersistHourBookingResult(false, null, null, outcome.ErrorMessage));
+                sender.Tell(new PersistHourBookingResult(false, null, null, outcome.ErrorMessage));
                 _log.Warning(
                     "Hour booking persist failed for processing {0}: {1}",
                     command.ProcessingId,
@@ -40,7 +49,7 @@ public sealed class HourBookingDataActor : ReceiveActor
                 return;
             }
 
-            Sender.Tell(new PersistHourBookingResult(
+            sender.Tell(new PersistHourBookingResult(
                 true,
                 outcome.Booking,
                 outcome.ProjectId,
@@ -55,7 +64,7 @@ public sealed class HourBookingDataActor : ReceiveActor
         catch (Exception exception)
         {
             _log.Error(exception, "Failed to persist hour booking for processing {0}", command.ProcessingId);
-            Sender.Tell(new PersistHourBookingResult(false, null, null, exception.Message));
+            sender.Tell(new PersistHourBookingResult(false, null, null, exception.Message));
         }
     }
 }

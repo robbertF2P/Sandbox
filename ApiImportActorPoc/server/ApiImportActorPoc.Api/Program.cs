@@ -61,6 +61,8 @@ try
 
     var app = builder.Build();
 
+    app.UsePlatformCorrelationPipeline();
+
     await ImportDatabaseInitializer.InitializeAsync(app.Services);
 
     app.UseSwagger();

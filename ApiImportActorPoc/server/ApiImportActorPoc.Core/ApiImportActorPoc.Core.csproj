@@ -12,6 +12,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\..\Platform.Serilog.Logging\src\Platform.Serilog.Logging.Akka\Platform.Serilog.Logging.Akka.csproj" />
     <ProjectReference Include="..\ApiImportActorPoc.Contracts\ApiImportActorPoc.Contracts.csproj" />
     <ProjectReference Include="..\ApiImportActorPoc.Data\ApiImportActorPoc.Data.csproj" />
   </ItemGroup>

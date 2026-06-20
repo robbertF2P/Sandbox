@@ -4,4 +4,6 @@ public sealed record HoursBookingFailed(
     Guid ProcessingId,
     int AssignmentId,
     string ErrorMessage,
-    DateTimeOffset OccurredAt) : IDataEvent;
+    DateTimeOffset OccurredAt,
+    string? CorrelationId = null,
+    string? UseCase = null) : IDataEvent;

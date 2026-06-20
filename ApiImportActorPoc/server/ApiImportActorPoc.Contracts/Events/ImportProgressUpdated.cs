@@ -5,4 +5,6 @@ public sealed record ImportProgressUpdated(
     int Step,
     int TotalSteps,
     string Message,
-    DateTimeOffset OccurredAt) : IDataEvent;
+    DateTimeOffset OccurredAt,
+    string? CorrelationId = null,
+    string? UseCase = null) : IDataEvent;

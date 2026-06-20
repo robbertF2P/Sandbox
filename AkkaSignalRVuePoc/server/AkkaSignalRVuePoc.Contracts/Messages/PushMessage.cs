@@ -4,4 +4,6 @@ public sealed record PushMessage(
     long Sequence,
     string Text,
     DateTimeOffset SentAt,
-    string Source);
+    string Source,
+    string? CorrelationId = null,
+    string? UseCase = null);

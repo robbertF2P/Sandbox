@@ -49,7 +49,28 @@ app.UsePlatformRequestLogging();
 
 **Reference:** `Platform.Serilog.Logging/SerilogLogging.cs`, `HostBuilderExtensions.cs`
 
-### 2. Test logging — Serilog xUnit sink (mandatory)
+### 2. Correlation — end-to-end use case tracing
+
+**Requirement:** Every HTTP request, actor command, domain event, and SignalR notification MUST carry a shared correlation identity so logs can be filtered as one use-case flow in Seq or Application Insights.
+
+**Packages:** `Platform.Serilog.Logging` (HTTP + Serilog) and `Platform.Serilog.Logging.Akka` (actor envelopes).
+
+| Concept | Header / property | Purpose |
+|---------|-------------------|---------|
+| `CorrelationId` | `X-Correlation-Id` | Stable ID for the full flow (generated if absent) |
+| `UseCase` | `X-Use-Case` (optional) | Semantic operation name, e.g. `Import.Start` |
+| `CausationId` | `X-Causation-Id` (optional) | Parent message ID for nested steps |
+
+**HTTP hosts:**
+
+```csharp
+app.UsePlatformCorrelationPipeline();
+app.UsePlatformRequestLogging();
+```
+
+**Actor boundaries:** wrap commands with `AskCorrelated` / `TellCorrelated` and `ReceiveCorrelated` (see [platform-correlation-standard.md](./platform-correlation-standard.md)).
+
+### 3. Test logging — Serilog xUnit sink (mandatory)
 
 **Requirement:** Every unit and integration test project MUST reference `Platform.Serilog.Logging.Testing` and route logs through **`Serilog.Sinks.XUnit3`** (`WriteTo.XUnit3TestOutput()`).
 

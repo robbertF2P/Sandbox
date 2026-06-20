@@ -4,6 +4,7 @@ using AkkaSignalRVuePoc.Contracts.Interfaces;
 using AkkaSignalRVuePoc.Contracts.Messages;
 using AkkaSignalRVuePoc.Contracts.Messages.Data;
 using AkkaSignalRVuePoc.Contracts.Models;
+using Platform.Serilog.Logging.Akka;
 
 namespace AkkaSignalRVuePoc.Api.Services;
 
@@ -17,21 +18,18 @@ public sealed class ActorSystemCommandFacade : IActorSystemCommandFacade
         _rootActor = rootActor;
     }
 
-    public void SendLiveMessage(string text)
-    {
-        _rootActor.Tell(new PublishLiveMessageCommand(text));
-    }
+    public void SendLiveMessage(string text) =>
+        _rootActor.TellCorrelated(new PublishLiveMessageCommand(text), "LiveMessage.Publish");
 
-    public void StartBackgroundProcess()
-    {
-        _rootActor.Tell(new StartBackgroundProcessCommand());
-    }
+    public void StartBackgroundProcess() =>
+        _rootActor.TellCorrelated(new StartBackgroundProcessCommand(), "Background.Start");
 
     public async Task<IReadOnlyList<OrganisationDto>> GetOrganisationsAsync(
         CancellationToken cancellationToken = default)
     {
-        var result = await _rootActor.Ask<GetAllOrganisationsResult>(
+        var result = await _rootActor.AskCorrelated<GetAllOrganisationsResult>(
             new GetAllOrganisationsQuery(),
+            "Catalog.GetOrganisations",
             _askTimeout,
             cancellationToken);
         return result.Organisations;
@@ -41,8 +39,9 @@ public sealed class ActorSystemCommandFacade : IActorSystemCommandFacade
         Guid id,
         CancellationToken cancellationToken = default)
     {
-        var result = await _rootActor.Ask<GetOrganisationByIdResult>(
+        var result = await _rootActor.AskCorrelated<GetOrganisationByIdResult>(
             new GetOrganisationByIdQuery(id),
+            "Catalog.GetOrganisation",
             _askTimeout,
             cancellationToken);
         return result.Organisation;
@@ -52,8 +51,9 @@ public sealed class ActorSystemCommandFacade : IActorSystemCommandFacade
         string name,
         CancellationToken cancellationToken = default)
     {
-        var result = await _rootActor.Ask<CreateOrganisationResult>(
+        var result = await _rootActor.AskCorrelated<CreateOrganisationResult>(
             new CreateOrganisationCommand(name),
+            "Catalog.CreateOrganisation",
             _askTimeout,
             cancellationToken);
         return result.Organisation;
@@ -62,8 +62,9 @@ public sealed class ActorSystemCommandFacade : IActorSystemCommandFacade
     public async Task<IReadOnlyList<ProjectDto>> GetProjectsAsync(
         CancellationToken cancellationToken = default)
     {
-        var result = await _rootActor.Ask<GetAllProjectsResult>(
+        var result = await _rootActor.AskCorrelated<GetAllProjectsResult>(
             new GetAllProjectsQuery(),
+            "Catalog.GetProjects",
             _askTimeout,
             cancellationToken);
         return result.Projects;
@@ -71,8 +72,9 @@ public sealed class ActorSystemCommandFacade : IActorSystemCommandFacade
 
     public async Task<ProjectDto?> GetProjectAsync(Guid id, CancellationToken cancellationToken = default)
     {
-        var result = await _rootActor.Ask<GetProjectByIdResult>(
+        var result = await _rootActor.AskCorrelated<GetProjectByIdResult>(
             new GetProjectByIdQuery(id),
+            "Catalog.GetProject",
             _askTimeout,
             cancellationToken);
         return result.Project;
@@ -82,8 +84,9 @@ public sealed class ActorSystemCommandFacade : IActorSystemCommandFacade
         Guid organisationId,
         CancellationToken cancellationToken = default)
     {
-        var result = await _rootActor.Ask<GetProjectsByOrganisationResult>(
+        var result = await _rootActor.AskCorrelated<GetProjectsByOrganisationResult>(
             new GetProjectsByOrganisationQuery(organisationId),
+            "Catalog.GetProjectsByOrganisation",
             _askTimeout,
             cancellationToken);
         return new GetProjectsByOrganisationResponse(result.OrganisationExists, result.Projects);
@@ -95,8 +98,9 @@ public sealed class ActorSystemCommandFacade : IActorSystemCommandFacade
         string? description,
         CancellationToken cancellationToken = default)
     {
-        var result = await _rootActor.Ask<CreateProjectResult>(
+        var result = await _rootActor.AskCorrelated<CreateProjectResult>(
             new CreateProjectCommand(organisationId, name, description),
+            "Catalog.CreateProject",
             _askTimeout,
             cancellationToken);
         return new CreateProjectResponse(result.OrganisationExists, result.Project);
@@ -108,8 +112,9 @@ public sealed class ActorSystemCommandFacade : IActorSystemCommandFacade
         string? description,
         CancellationToken cancellationToken = default)
     {
-        var result = await _rootActor.Ask<UpdateProjectResult>(
+        var result = await _rootActor.AskCorrelated<UpdateProjectResult>(
             new UpdateProjectCommand(id, name, description),
+            "Catalog.UpdateProject",
             _askTimeout,
             cancellationToken);
         return new UpdateProjectResponse(result.Exists, result.Project);
@@ -119,8 +124,9 @@ public sealed class ActorSystemCommandFacade : IActorSystemCommandFacade
         Guid id,
         CancellationToken cancellationToken = default)
     {
-        var result = await _rootActor.Ask<DeleteProjectResult>(
+        var result = await _rootActor.AskCorrelated<DeleteProjectResult>(
             new DeleteProjectCommand(id),
+            "Catalog.DeleteProject",
             _askTimeout,
             cancellationToken);
         return new DeleteProjectResponse(result.Exists, result.Project);

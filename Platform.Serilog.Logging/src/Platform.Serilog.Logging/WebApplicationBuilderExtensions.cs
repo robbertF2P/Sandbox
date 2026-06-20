@@ -1,6 +1,8 @@
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
+using Platform.Serilog.Logging.Correlation;
 using Serilog;
 
 namespace Platform.Serilog.Logging;
@@ -26,7 +28,28 @@ public static class WebApplicationBuilderExtensions
 
   public static WebApplication UsePlatformRequestLogging(this WebApplication app)
   {
-    app.UseSerilogRequestLogging();
+    app.UseSerilogRequestLogging(options =>
+    {
+      options.EnrichDiagnosticContext = (diagnosticContext, httpContext) =>
+      {
+        if (httpContext.Items.TryGetValue(nameof(CorrelationContext), out object? value)
+            && value is CorrelationContext context)
+        {
+          diagnosticContext.Set("CorrelationId", context.CorrelationId);
+          if (!string.IsNullOrWhiteSpace(context.UseCase))
+          {
+            diagnosticContext.Set("UseCase", context.UseCase);
+          }
+        }
+      };
+    });
+
+    return app;
+  }
+
+  public static WebApplication UsePlatformCorrelationPipeline(this WebApplication app)
+  {
+    app.UseMiddleware<CorrelationMiddleware>();
     return app;
   }
 }

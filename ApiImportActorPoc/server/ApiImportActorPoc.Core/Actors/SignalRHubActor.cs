@@ -36,32 +36,44 @@ public sealed class SignalRHubActor : ReceiveActor
                 nameof(ImportStarted),
                 started.SessionId,
                 new { started.ProjectName },
-                started.OccurredAt),
+                started.OccurredAt,
+                started.CorrelationId,
+                started.UseCase),
             ImportProgressUpdated progress => new ImportEventNotification(
                 nameof(ImportProgressUpdated),
                 progress.SessionId,
                 new { progress.Step, progress.TotalSteps, progress.Message },
-                progress.OccurredAt),
+                progress.OccurredAt,
+                progress.CorrelationId,
+                progress.UseCase),
             ImportCompleted completed => new ImportEventNotification(
                 nameof(ImportCompleted),
                 completed.SessionId,
                 new { completed.Model.Id, completed.Model.Name, ComponentCount = completed.Model.Components.Count },
-                completed.OccurredAt),
+                completed.OccurredAt,
+                completed.CorrelationId,
+                completed.UseCase),
             ImportFailed failed => new ImportEventNotification(
                 nameof(ImportFailed),
                 failed.SessionId,
                 new { failed.ErrorMessage },
-                failed.OccurredAt),
+                failed.OccurredAt,
+                failed.CorrelationId,
+                failed.UseCase),
             ImportPersisted persisted => new ImportEventNotification(
                 nameof(ImportPersisted),
                 persisted.SessionId,
                 new { persisted.ProjectId },
-                persisted.OccurredAt),
+                persisted.OccurredAt,
+                persisted.CorrelationId,
+                persisted.UseCase),
             HoursBookedProcessingStarted started => new ImportEventNotification(
                 nameof(HoursBookedProcessingStarted),
                 started.ProcessingId,
                 new { started.AssignmentId, Hours = started.Hours.Value },
-                started.OccurredAt),
+                started.OccurredAt,
+                started.CorrelationId,
+                started.UseCase),
             HoursBooked booked => new ImportEventNotification(
                 nameof(HoursBooked),
                 booked.ProcessingId,
@@ -72,7 +84,9 @@ public sealed class SignalRHubActor : ReceiveActor
                     Hours = booked.Booking.Hours.Value,
                     booked.ProjectId
                 },
-                booked.OccurredAt),
+                booked.OccurredAt,
+                booked.CorrelationId,
+                booked.UseCase),
             ProgressRecalculated recalculated => new ImportEventNotification(
                 nameof(ProgressRecalculated),
                 recalculated.ProcessingId,
@@ -83,12 +97,16 @@ public sealed class SignalRHubActor : ReceiveActor
                     HoursWorked = recalculated.Progress.HoursWorked.Value,
                     recalculated.Progress.PercentComplete
                 },
-                recalculated.OccurredAt),
+                recalculated.OccurredAt,
+                recalculated.CorrelationId,
+                recalculated.UseCase),
             HoursBookingFailed failed => new ImportEventNotification(
                 nameof(HoursBookingFailed),
                 failed.ProcessingId,
                 new { failed.AssignmentId, failed.ErrorMessage },
-                failed.OccurredAt),
+                failed.OccurredAt,
+                failed.CorrelationId,
+                failed.UseCase),
             _ => null
         };
 
@@ -98,6 +116,10 @@ public sealed class SignalRHubActor : ReceiveActor
         }
 
         await _publisher.PublishImportEventAsync(notification);
-        _log.Info("Published import event {0} for session {1}", notification.EventType, notification.SessionId);
+        _log.Info(
+            "Published import event {0} for session {1} correlation {2}",
+            notification.EventType,
+            notification.SessionId,
+            notification.CorrelationId);
     }
 }

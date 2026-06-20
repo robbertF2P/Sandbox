@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <RootNamespace>Platform.Serilog.Logging.Akka</RootNamespace>
+    <AssemblyName>Platform.Serilog.Logging.Akka</AssemblyName>
+    <Description>Akka.NET correlation helpers for the platform Serilog logging standard.</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Akka" />
+    <PackageReference Include="Platform.Serilog.Logging" Condition="'$(IsPackable)' == 'true'" />
+    <ProjectReference Include="..\Platform.Serilog.Logging\Platform.Serilog.Logging.csproj" Condition="'$(IsPackable)' != 'true'" />
+  </ItemGroup>
+
+</Project>

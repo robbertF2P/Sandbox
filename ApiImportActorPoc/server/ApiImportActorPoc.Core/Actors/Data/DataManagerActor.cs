@@ -5,10 +5,12 @@ using ApiImportActorPoc.Contracts.Messages.Data;
 using ApiImportActorPoc.Contracts.Messages.Import;
 using ApiImportActorPoc.Data;
 using Microsoft.EntityFrameworkCore;
+using Platform.Serilog.Logging.Akka;
+using Platform.Serilog.Logging.Correlation;
 
 namespace ApiImportActorPoc.Core.Actors.Data;
 
-public sealed class DataManagerActor : ReceiveActor
+public sealed class DataManagerActor : PlatformReceiveActor
 {
     private readonly IDbContextFactory<ImportDbContext> _dbContextFactory;
     private readonly ILoggingAdapter _log = Context.GetLogger();
@@ -32,23 +34,33 @@ public sealed class DataManagerActor : ReceiveActor
 
     private void Ready()
     {
-        Receive<PersistImportWithModelCommand>(HandlePersist);
+        RegisterEnvelopeHandler();
+
+        ReceiveCorrelated<PersistImportWithModelCommand>(HandlePersist);
     }
 
-    private void HandlePersist(PersistImportWithModelCommand command)
+    private void HandlePersist(PersistImportWithModelCommand command, CorrelationFlow flow, IActorRef sender)
     {
         _log.Info("Data manager starting persist for import session {0}", command.SessionId);
-        _projectImportData.Tell(new PersistProjectImportDataCommand(command.SessionId, command.Model));
-        Become(() => WaitForPersistResult(command.SessionId, Sender));
+        _projectImportData.Tell(flow.WrapChild(
+            new PersistProjectImportDataCommand(command.SessionId, command.Model),
+            "Import.PersistData"));
+        Become(() => WaitForPersistResult(command.SessionId, flow, sender));
     }
 
-    private void WaitForPersistResult(Guid sessionId, IActorRef originalSender)
+    private void WaitForPersistResult(Guid sessionId, CorrelationFlow flow, IActorRef originalSender)
     {
         Receive<PersistProjectImportDataResult>(result =>
         {
+            using CorrelationScope scope = flow.BeginScope();
             if (result.Success && result.ProjectId is int projectId)
             {
-                Context.System.EventStream.Publish(new ImportPersisted(sessionId, projectId, DateTimeOffset.UtcNow));
+                Context.System.EventStream.Publish(new ImportPersisted(
+                    sessionId,
+                    projectId,
+                    DateTimeOffset.UtcNow,
+                    flow.CorrelationId,
+                    flow.UseCase));
                 originalSender.Tell(new PersistImportResult(true, projectId, null));
                 _log.Info("Data manager completed persist for session {0} as project {1}", sessionId, projectId);
             }

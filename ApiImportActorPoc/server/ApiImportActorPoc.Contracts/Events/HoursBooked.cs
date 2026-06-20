@@ -6,4 +6,6 @@ public sealed record HoursBooked(
     Guid ProcessingId,
     HourBookingDto Booking,
     int ProjectId,
-    DateTimeOffset OccurredAt) : IDataEvent;
+    DateTimeOffset OccurredAt,
+    string? CorrelationId = null,
+    string? UseCase = null) : IDataEvent;

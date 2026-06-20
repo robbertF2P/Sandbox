@@ -20,7 +20,9 @@ public sealed class DataEventSignalRTests : ActorDatabaseTestBase<DataEventSigna
         var hubPush = CreateHubPushActor();
         var dataManager = Sys.ActorOf(DataManagerActor.Props(DatabaseFactory), "data-manager");
 
-        var result = await dataManager.Ask<CreateProjectResult>(new CreateProjectCommand(
+        var result = await ActorTestCorrelation.AskAsync<CreateProjectResult>(
+            dataManager,
+            new CreateProjectCommand(
                 CatalogSeedData.AcmeOrganisationId,
                 "Event Test Project",
                 "Created for SignalR data event test"), cancellationToken: TestContext.Current.CancellationToken);
@@ -43,7 +45,9 @@ public sealed class DataEventSignalRTests : ActorDatabaseTestBase<DataEventSigna
         var hubPush = CreateHubPushActor();
         var dataManager = Sys.ActorOf(DataManagerActor.Props(DatabaseFactory), "data-manager");
 
-        var updated = await dataManager.Ask<UpdateProjectResult>(new UpdateProjectCommand(
+        var updated = await ActorTestCorrelation.AskAsync<UpdateProjectResult>(
+            dataManager,
+            new UpdateProjectCommand(
                 CatalogSeedData.CustomerPortalProjectId,
                 "Updated Portal",
                 null), cancellationToken: TestContext.Current.CancellationToken);
@@ -65,7 +69,9 @@ public sealed class DataEventSignalRTests : ActorDatabaseTestBase<DataEventSigna
         var hubPush = CreateHubPushActor();
         var dataManager = Sys.ActorOf(DataManagerActor.Props(DatabaseFactory), "data-manager-delete");
 
-        var created = await dataManager.Ask<CreateProjectResult>(new CreateProjectCommand(
+        var created = await ActorTestCorrelation.AskAsync<CreateProjectResult>(
+            dataManager,
+            new CreateProjectCommand(
                 CatalogSeedData.AcmeOrganisationId,
                 "Delete Me",
                 null), cancellationToken: TestContext.Current.CancellationToken);
@@ -75,7 +81,10 @@ public sealed class DataEventSignalRTests : ActorDatabaseTestBase<DataEventSigna
 
         _ = await HubContext.ClientProxy.WaitForCallAsync(TimeSpan.FromSeconds(5));
 
-        var deleted = await dataManager.Ask<DeleteProjectResult>(new DeleteProjectCommand(created.Project!.Id), cancellationToken: TestContext.Current.CancellationToken);
+        var deleted = await ActorTestCorrelation.AskAsync<DeleteProjectResult>(
+            dataManager,
+            new DeleteProjectCommand(created.Project!.Id),
+            cancellationToken: TestContext.Current.CancellationToken);
 
         Assert.True(deleted.Exists);
 

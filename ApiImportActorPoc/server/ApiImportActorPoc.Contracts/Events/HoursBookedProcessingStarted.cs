@@ -6,4 +6,6 @@ public sealed record HoursBookedProcessingStarted(
     Guid ProcessingId,
     int AssignmentId,
     Hours Hours,
-    DateTimeOffset OccurredAt) : IDataEvent;
+    DateTimeOffset OccurredAt,
+    string? CorrelationId = null,
+    string? UseCase = null) : IDataEvent;

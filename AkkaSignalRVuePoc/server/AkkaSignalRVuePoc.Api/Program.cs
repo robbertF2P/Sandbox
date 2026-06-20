@@ -52,6 +52,8 @@ try
 
     var app = builder.Build();
 
+    app.UsePlatformCorrelationPipeline();
+
     await CatalogDatabaseInitializer.InitializeAsync(app.Services);
 
     app.UseSwagger();

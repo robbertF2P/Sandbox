@@ -1,15 +1,17 @@
 using Akka.Actor;
-using ApiImportActorPoc.Contracts.Events;
 using ApiImportActorPoc.Contracts.Messages.Import;
 using ApiImportActorPoc.Contracts.Messages.Progress;
+using ApiImportActorPoc.Contracts.Events;
 using ApiImportActorPoc.Core.Actors.Data;
 using ApiImportActorPoc.Core.Actors.Progress;
 using ApiImportActorPoc.Data;
 using Microsoft.EntityFrameworkCore;
+using Platform.Serilog.Logging.Akka;
+using Platform.Serilog.Logging.Correlation;
 
 namespace ApiImportActorPoc.Core.Actors;
 
-public sealed class RootActor : ReceiveActor
+public sealed class RootActor : PlatformReceiveActor
 {
     private readonly IDbContextFactory<ImportDbContext> _dbContextFactory;
     private IActorRef _importManager = ActorRefs.Nobody;
@@ -39,20 +41,23 @@ public sealed class RootActor : ReceiveActor
 
     private void Ready()
     {
-        Receive<StartImportCommand>(_importManager.Forward);
-        Receive<GetImportModelQuery>(_importManager.Forward);
-        Receive<BookHoursCommand>(_progressManager.Forward);
-        Receive<PersistImportCommand>(cmd =>
+        RegisterEnvelopeHandler();
+
+        ReceiveCorrelated<StartImportCommand>((command, flow) => _importManager.Forward(flow.Wrap(command)));
+        ReceiveCorrelated<GetImportModelQuery>((query, flow) => _importManager.Forward(flow.Wrap(query)));
+        ReceiveCorrelated<BookHoursCommand>((command, flow) => _progressManager.Forward(flow.Wrap(command)));
+        ReceiveCorrelated<PersistImportCommand>((cmd, flow, sender) =>
         {
-            _importManager.Tell(new GetImportModelQuery(cmd.SessionId));
-            Become(() => WaitForModelThenPersist(cmd.SessionId, Sender));
+            _importManager.Tell(flow.Wrap(new GetImportModelQuery(cmd.SessionId)), Self);
+            Become(() => WaitForModelThenPersist(cmd.SessionId, flow, sender));
         });
     }
 
-    private void WaitForModelThenPersist(Guid sessionId, IActorRef originalSender)
+    private void WaitForModelThenPersist(Guid sessionId, CorrelationFlow flow, IActorRef originalSender)
     {
         Receive<GetImportModelResult>(result =>
         {
+            using CorrelationScope scope = flow.BeginScope();
             if (!result.Found || result.Model is null)
             {
                 originalSender.Tell(new PersistImportResult(false, null, "Import session not found or model unavailable."));
@@ -60,15 +65,16 @@ public sealed class RootActor : ReceiveActor
                 return;
             }
 
-            _dataManager.Tell(new PersistImportWithModelCommand(sessionId, result.Model));
-            Become(() => WaitForPersistResult(originalSender));
+            _dataManager.Tell(flow.WrapChild(new PersistImportWithModelCommand(sessionId, result.Model), "Import.Persist"));
+            Become(() => WaitForPersistResult(flow, originalSender));
         });
     }
 
-    private void WaitForPersistResult(IActorRef originalSender)
+    private void WaitForPersistResult(CorrelationFlow flow, IActorRef originalSender)
     {
         Receive<PersistImportResult>(result =>
         {
+            using CorrelationScope scope = flow.BeginScope();
             originalSender.Tell(result);
             Become(Ready);
         });

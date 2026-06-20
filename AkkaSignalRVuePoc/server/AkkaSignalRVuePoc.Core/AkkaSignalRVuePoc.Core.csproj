@@ -12,6 +12,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\..\Platform.Serilog.Logging\src\Platform.Serilog.Logging.Akka\Platform.Serilog.Logging.Akka.csproj" />
     <ProjectReference Include="..\AkkaSignalRVuePoc.Contracts\AkkaSignalRVuePoc.Contracts.csproj" />
     <ProjectReference Include="..\AkkaSignalRVuePoc.Data\AkkaSignalRVuePoc.Data.csproj" />
   </ItemGroup>

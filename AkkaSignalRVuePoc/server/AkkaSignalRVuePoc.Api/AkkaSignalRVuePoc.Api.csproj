@@ -18,6 +18,7 @@
   </ItemGroup>
 
   <Import Project="..\..\..\build\Platform.Logging.Host.props" />
+  <Import Project="..\..\..\build\Platform.Logging.Akka.props" />
 
   <ItemGroup>
     <ProjectReference Include="..\AkkaSignalRVuePoc.Contracts\AkkaSignalRVuePoc.Contracts.csproj" />

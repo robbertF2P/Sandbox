@@ -25,7 +25,8 @@ public static class SerilogLogging
             .MinimumLevel.Override("System", LogEventLevel.Warning)
             .MinimumLevel.Override("Akka", LogEventLevel.Information)
             .Enrich.FromLogContext()
-            .Enrich.WithEnvironmentName();
+            .Enrich.WithEnvironmentName()
+            .Enrich.With(new Correlation.CorrelationLogEnricher());
 
         configure?.Invoke(configuration);
         return configuration;
