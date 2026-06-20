@@ -26,6 +26,7 @@ After editing skills in `.cursor/skills/`, run:
 - `specification-pattern` — Specification + Repository; Ardalis.Specification; avoid IQueryable leakage
 - `dotnet-core-csharp-development` — C# / ASP.NET Core conventions
 - `dotnet-ef-core` — Entity Framework Core
-- `akka-net` — Akka.NET
+- `akka-net` — Akka.NET (repo patterns)
+- `reactive-applications-akka-net` — Anthony Brown reactive systems / Akka.NET book
 
 Copilot-specific always-on notes: `.github/copilot-instructions.md`
