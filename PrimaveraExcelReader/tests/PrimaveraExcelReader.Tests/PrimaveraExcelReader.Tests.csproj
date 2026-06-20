@@ -29,7 +29,8 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\PrimaveraExcelReader\PrimaveraExcelReader.csproj" />
-    <ProjectReference Include="..\..\..\Platform.Serilog.Logging\src\Platform.Serilog.Logging.Testing\Platform.Serilog.Logging.Testing.csproj" />
   </ItemGroup>
+
+  <Import Project="..\..\..\build\Platform.Logging.Tests.props" />
 
 </Project>

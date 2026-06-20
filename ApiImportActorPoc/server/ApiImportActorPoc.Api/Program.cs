@@ -8,20 +8,12 @@ using ApiImportActorPoc.Data;
 using Platform.Serilog.Logging;
 using Serilog;
 
-var bootstrapConfiguration = new ConfigurationBuilder()
-    .AddJsonFile("appsettings.json", optional: true)
-    .AddJsonFile($"appsettings.{Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Production"}.json", optional: true)
-    .AddEnvironmentVariables()
-    .Build();
-Log.Logger = SerilogLogging.CreateBootstrapLogger(bootstrapConfiguration);
-
 try
 {
-    Log.Information("Starting API Import Actor POC");
-
     var builder = WebApplication.CreateBuilder(args);
+    builder.AddPlatformLogging("API Import Actor POC");
 
-    builder.Host.UsePlatformSerilog();
+    Log.Information("Starting API Import Actor POC");
 
     builder.Services.AddEndpointsApiExplorer();
     builder.Services.AddSwaggerGen(options =>
@@ -78,7 +70,7 @@ try
         options.RoutePrefix = "swagger";
     });
 
-    app.UseSerilogRequestLogging();
+    app.UsePlatformRequestLogging();
     app.UseCors("VueDevClient");
 
     app.MapGet("/", () => Results.Ok(new

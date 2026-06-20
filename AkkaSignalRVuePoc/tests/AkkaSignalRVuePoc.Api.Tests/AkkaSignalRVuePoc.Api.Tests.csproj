@@ -19,7 +19,6 @@
     <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" />
     <PackageReference Include="Moq" />
-    <PackageReference Include="Serilog.Extensions.Logging" />
     <PackageReference Include="xunit.runner.visualstudio">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
@@ -36,7 +35,8 @@
     <ProjectReference Include="..\..\server\AkkaSignalRVuePoc.Contracts\AkkaSignalRVuePoc.Contracts.csproj" />
     <ProjectReference Include="..\..\server\AkkaSignalRVuePoc.Core\AkkaSignalRVuePoc.Core.csproj" />
     <ProjectReference Include="..\..\server\AkkaSignalRVuePoc.Data\AkkaSignalRVuePoc.Data.csproj" />
-    <ProjectReference Include="..\..\..\Platform.Serilog.Logging\src\Platform.Serilog.Logging.Testing\Platform.Serilog.Logging.Testing.csproj" />
   </ItemGroup>
+
+  <Import Project="..\..\..\build\Platform.Logging.Tests.props" />
 
 </Project>

@@ -64,14 +64,22 @@ public static class SerilogLogging
 
     public static ILogger CreateBootstrapLogger(
         IConfiguration? appConfiguration = null,
-        string? environmentName = null)
+        string? environmentName = null,
+        string? applicationName = null)
     {
         string resolvedEnvironment = environmentName
             ?? Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT")
             ?? Environments.Development;
 
-        LoggerConfiguration configuration = ConfigureShared(new LoggerConfiguration())
-            .WriteTo.Console();
+        LoggerConfiguration configuration = ConfigureShared(
+            new LoggerConfiguration(),
+            enrich =>
+            {
+                if (!string.IsNullOrWhiteSpace(applicationName))
+                {
+                    enrich.Enrich.WithProperty("Application", applicationName);
+                }
+            }).WriteTo.Console();
 
         if (appConfiguration is not null)
         {

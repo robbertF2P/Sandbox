@@ -14,12 +14,12 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="OpenTelemetry" />
-    <PackageReference Include="Serilog.AspNetCore" />
     <PackageReference Include="Swashbuckle.AspNetCore" />
   </ItemGroup>
 
+  <Import Project="..\..\..\build\Platform.Logging.Host.props" />
+
   <ItemGroup>
-    <ProjectReference Include="..\..\..\Platform.Serilog.Logging\src\Platform.Serilog.Logging\Platform.Serilog.Logging.csproj" />
     <ProjectReference Include="..\AkkaSignalRVuePoc.Contracts\AkkaSignalRVuePoc.Contracts.csproj" />
     <ProjectReference Include="..\AkkaSignalRVuePoc.Core\AkkaSignalRVuePoc.Core.csproj" />
     <ProjectReference Include="..\AkkaSignalRVuePoc.Data\AkkaSignalRVuePoc.Data.csproj" />

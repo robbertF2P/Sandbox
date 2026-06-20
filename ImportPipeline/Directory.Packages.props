@@ -1,0 +1,12 @@
+<Project>
+  <PropertyGroup>
+    <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+  </PropertyGroup>
+
+  <Import Project="..\build\Platform.Logging.Versions.props" />
+
+  <ItemGroup>
+    <PackageVersion Include="Microsoft.Testing.Platform" Version="2.2.1" />
+    <PackageVersion Include="xunit.v3.mtp-v2" Version="3.2.2" />
+  </ItemGroup>
+</Project>

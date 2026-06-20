@@ -10,7 +10,8 @@
     <PackageReference Include="Microsoft.Extensions.Logging" />
     <PackageReference Include="Serilog.Extensions.Logging" />
     <PackageReference Include="Serilog.Sinks.XUnit3" />
-    <ProjectReference Include="..\Platform.Serilog.Logging\Platform.Serilog.Logging.csproj" />
+    <PackageReference Include="Platform.Serilog.Logging" Condition="'$(IsPackable)' == 'true'" />
+    <ProjectReference Include="..\Platform.Serilog.Logging\Platform.Serilog.Logging.csproj" Condition="'$(IsPackable)' != 'true'" />
   </ItemGroup>
 
 </Project>

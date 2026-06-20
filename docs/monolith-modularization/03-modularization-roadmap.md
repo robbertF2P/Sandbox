@@ -10,7 +10,7 @@
 
 | Module | Role | Status |
 |--------|------|--------|
-| `Platform.Serilog.Logging` | Shared Serilog sink routing (Seq / App Insights / tests) | Active |
+| `Platform.Serilog.Logging` | Shared Serilog sink routing (Seq / App Insights / tests) | NuGet `1.0.0` → `local-feed/` |
 | `ImportPipeline.Domain` | Config-driven row mapping kernel (NuGet) | Packaged `1.0.0` → `local-feed/` |
 | `PrimaveraExcelReader` | Primavera Excel I/O + typed profiles + import DTO bridge | Active |
 | `ApiImportActorPoc` | Actor-based import orchestration sketch | Reference |
@@ -24,7 +24,9 @@
 
 **Requirement:** All application and library code MUST log through **Serilog** using `Microsoft.Extensions.Logging.ILogger<T>` (or Akka `ILoggingAdapter` for actors). No `Console.WriteLine`, no bespoke log helpers.
 
-**Shared library:** `Platform.Serilog.Logging` — single source of truth for enrichers and environment-based sinks.
+**Shared library:** `Platform.Serilog.Logging` (NuGet) — single source of truth for enrichers and environment-based sinks.
+
+**Adoption:** import `build/Platform.Logging.*.props` per project type. See [platform-logging-standard.md](./platform-logging-standard.md).
 
 | Environment | Sinks | Configuration |
 |-------------|-------|---------------|
@@ -35,8 +37,8 @@
 **Application hosts** wire logging via:
 
 ```csharp
-builder.Host.UsePlatformSerilog();
-Log.Logger = SerilogLogging.CreateBootstrapLogger(builder.Configuration);
+builder.AddPlatformLogging("Module Name");
+app.UsePlatformRequestLogging();
 ```
 
 **Libraries** (e.g. `PrimaveraExcelReader`):
@@ -70,7 +72,14 @@ builder.AddSerilog(logger, dispose: true);
 - Consumers reference the package — not project references.
 - Repack: `./scripts/pack-import-pipeline-domain.sh [version]`
 
-### 4. Behaviour preservation
+### 4. Platform logging package boundary
+
+- `Platform.Serilog.Logging` and `Platform.Serilog.Logging.Testing` ship as **NuGet** (`1.0.0`, `local-feed/`).
+- Consumers import `build/Platform.Logging.Host.props`, `.Library.props`, or `.Tests.props` — not project references.
+- Repack: `./scripts/pack-platform-logging.sh [version]` or `./scripts/pack-local-platform-packages.sh [version]`
+- New modules: `./scripts/add-platform-logging-to-module.sh <ModuleRoot>`
+
+### 5. Behaviour preservation
 
 - Characterization tests green before and after extraction (see quality framework G5).
 - Import/read modules collect all row issues per sheet — no fail-fast on first bad row.
@@ -92,7 +101,7 @@ builder.AddSerilog(logger, dispose: true);
 
 ## Definition of done — logging (per module)
 
-- [ ] Uses `Platform.Serilog.Logging` (or documents why host-only)
+- [ ] Imports `build/Platform.Logging.*.props` (or documents why host-only)
 - [ ] Development → Seq; Production → Application Insights
 - [ ] `ILogger<T>` injected at service boundaries
 - [ ] Test project references `Platform.Serilog.Logging.Testing` with xUnit sink
@@ -105,4 +114,4 @@ builder.AddSerilog(logger, dispose: true);
 | Version | Date | Notes |
 |---------|------|-------|
 | 1.0 | 2026-06-20 | Initial SandBox POC roadmap; Serilog + xUnit sink requirement |
-| 1.1 | 2026-06-20 | Platform.Serilog.Logging; Seq (dev) + App Insights (prod) standard |
+| 1.2 | 2026-06-20 | Platform.Serilog.Logging NuGet + `build/` MSBuild adoption standard |
