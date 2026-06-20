@@ -10,7 +10,7 @@ using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using Serilog;
+using Platform.Serilog.Logging.Testing;
 
 namespace AkkaSignalRVuePoc.Api.Tests.Actors;
 
@@ -32,11 +32,10 @@ public abstract class ActorTestBase<TTest> : TestKit
 
     protected override void ConfigureLogging(ILoggingBuilder builder)
     {
-        var logger = SerilogTestLogging.CreateTestLogger();
-        Serilog.Log.Logger = logger;
+        global::Serilog.ILogger logger = SerilogTestLogging.CreateTestLogger();
+        global::Serilog.Log.Logger = logger;
 
-        builder.ClearProviders();
-        builder.AddSerilog(logger, dispose: true);
+        builder.AddPlatformSerilog(logger);
     }
 
     protected override void ConfigureAkka(AkkaConfigurationBuilder builder, IServiceProvider provider)

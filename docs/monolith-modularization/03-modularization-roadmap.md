@@ -10,6 +10,7 @@
 
 | Module | Role | Status |
 |--------|------|--------|
+| `Platform.Serilog.Logging` | Shared Serilog sink routing (Seq / App Insights / tests) | Active |
 | `ImportPipeline.Domain` | Config-driven row mapping kernel (NuGet) | Packaged `1.0.0` → `local-feed/` |
 | `PrimaveraExcelReader` | Primavera Excel I/O + typed profiles + import DTO bridge | Active |
 | `ApiImportActorPoc` | Actor-based import orchestration sketch | Reference |
@@ -19,49 +20,54 @@
 
 ## Cross-cutting requirements (all new POC modules)
 
-### 1. Structured logging — Serilog
+### 1. Structured logging — Serilog (platform standard)
 
-**Requirement:** All application and library code that participates in the modular import/read pipeline MUST use **Serilog** via `Microsoft.Extensions.Logging.ILogger<T>` (or Akka `ILoggingAdapter` where actors are involved). Do not introduce ad-hoc `Console.WriteLine` or bespoke log helpers.
+**Requirement:** All application and library code MUST log through **Serilog** using `Microsoft.Extensions.Logging.ILogger<T>` (or Akka `ILoggingAdapter` for actors). No `Console.WriteLine`, no bespoke log helpers.
 
-**Application hosts** (API, worker):
+**Shared library:** `Platform.Serilog.Logging` — single source of truth for enrichers and environment-based sinks.
 
-- Shared enrichers and minimum levels in a `SerilogLogging.ConfigureShared` helper per solution.
-- Production sinks: Console + Seq (or Application Insights) as configured.
-- Bootstrap logger for startup failures.
+| Environment | Sinks | Configuration |
+|-------------|-------|---------------|
+| **Development** (local) | Console + **Datalust Seq** | `Seq:ServerUrl` in `appsettings.Development.json` (e.g. `http://localhost:5341`) |
+| **Production** | Console + **Azure Application Insights** | `ApplicationInsights:ConnectionString` or `APPLICATIONINSIGHTS_CONNECTION_STRING` |
+| **Unit / integration tests** | **Serilog.Sinks.XUnit3** only | `Platform.Serilog.Logging.Testing` — same `ConfigureShared` pipeline as production |
+
+**Application hosts** wire logging via:
+
+```csharp
+builder.Host.UsePlatformSerilog();
+Log.Logger = SerilogLogging.CreateBootstrapLogger(builder.Configuration);
+```
 
 **Libraries** (e.g. `PrimaveraExcelReader`):
 
 - Accept `ILogger<T>` via constructor injection; default to `NullLogger` when omitted.
 - Log at meaningful boundaries: sheet read complete, row skipped/filtered, mapping invalid, parse errors, batch summary.
-- No static logging except `Log.Logger` assignment in host/test bootstrap.
+- Optional module enricher: `.Enrich.WithProperty("Application", "ModuleName")`.
 
-**Reference implementation:** `PrimaveraExcelReader/Logging/SerilogLogging.cs`, `ExcelReaderService`, `ImportPipelineRowMapping`.
+**Reference:** `Platform.Serilog.Logging/SerilogLogging.cs`, `HostBuilderExtensions.cs`
 
-### 2. Test logging — Serilog xUnit sink
+### 2. Test logging — Serilog xUnit sink (mandatory)
 
-**Requirement:** Automated tests MUST wire the **same Serilog pipeline** as production code, with **`Serilog.Sinks.XUnit3`** (`WriteTo.XUnit3TestOutput()`) so test output shows the log lines the deployed application would emit.
-
-**Pattern:**
+**Requirement:** Every unit and integration test project MUST reference `Platform.Serilog.Logging.Testing` and route logs through **`Serilog.Sinks.XUnit3`** (`WriteTo.XUnit3TestOutput()`).
 
 ```csharp
-// Tests/SerilogTestLogging.cs
-return SerilogLogging.ConfigureShared(new LoggerConfiguration())
-    .WriteTo.XUnit3TestOutput()
-    .CreateLogger();
+// Provided by Platform.Serilog.Logging.Testing
+Serilog.ILogger logger = SerilogTestLogging.CreateTestLogger();
+Log.Logger = logger;
+builder.AddSerilog(logger, dispose: true);
 ```
 
-- Assembly `[ModuleInitializer]` sets `Log.Logger` for tests.
-- Test services use `SerilogLoggerFactory` / `AddSerilog` — not a separate test-only logger implementation.
-- Goal: when a characterization test fails, engineers see **production-shaped** log context in the test run, not a divergent format.
+- Assembly `[ModuleInitializer]` in `Platform.Serilog.Logging.Testing` sets a default test logger when the assembly loads.
+- Test services use `SerilogTestLogging.CreateLogger<T>()` — **not** a separate test-only logging stack.
+- Goal: test output shows the **same structured log shape** the deployed application emits.
 
-**Reference implementation:** `PrimaveraExcelReader.Tests/SerilogTestLogging.cs`, `SerilogTestAssemblyInitializer.cs`, `ExcelReaderTestLogging.cs`.
-
-**Applies to:** `PrimaveraExcelReader`, `ApiImportActorPoc`, `AkkaSignalRVuePoc`, and every bounded-context module extracted from the monolith.
+**Applies to:** all `*.Tests` projects in SandBox POCs and every bounded-context module extracted from the monolith.
 
 ### 3. Import pipeline package boundary
 
 - `ImportPipeline.Domain` ships as **NuGet** (`ImportPipeline.Domain` 1.0.0, `local-feed/`).
-- Consumers (`PrimaveraExcelReader`, future import actors) reference the package — not project references.
+- Consumers reference the package — not project references.
 - Repack: `./scripts/pack-import-pipeline-domain.sh [version]`
 
 ### 4. Behaviour preservation
@@ -74,22 +80,23 @@ return SerilogLogging.ConfigureShared(new LoggerConfiguration())
 ## Extraction sequence (recommended)
 
 ```text
-1. ImportPipeline.Domain (pure mapping)     ← done
-2. PrimaveraExcelReader (Excel ACL + profiles + Serilog)   ← in progress
-3. Intermediate exchange format + golden files
-4. ApiImportActorPoc → production import host slice
-5. Per-integration packs (PLM, Primavera, IFS, …) as strangler adapters
+1. Platform.Serilog.Logging (observability standard)   ← done
+2. ImportPipeline.Domain (pure mapping)                ← done
+3. PrimaveraExcelReader (Excel ACL + profiles)         ← in progress
+4. Intermediate exchange format + golden files
+5. ApiImportActorPoc → production import host slice
+6. Per-integration packs (PLM, Primavera, IFS, …) as strangler adapters
 ```
 
 ---
 
 ## Definition of done — logging (per module)
 
-- [ ] `SerilogLogging.ConfigureShared` (or equivalent) exists in host/library
-- [ ] `ILogger<T>` injected at service boundaries; no silent swallow of mapping failures
-- [ ] Tests use `Serilog.Sinks.XUnit3` with shared configuration — not a parallel logging stack
+- [ ] Uses `Platform.Serilog.Logging` (or documents why host-only)
+- [ ] Development → Seq; Production → Application Insights
+- [ ] `ILogger<T>` injected at service boundaries
+- [ ] Test project references `Platform.Serilog.Logging.Testing` with xUnit sink
 - [ ] At least one integration/characterization test exercises logging on the happy path
-- [ ] Documented in this roadmap when module is complete
 
 ---
 
@@ -98,3 +105,4 @@ return SerilogLogging.ConfigureShared(new LoggerConfiguration())
 | Version | Date | Notes |
 |---------|------|-------|
 | 1.0 | 2026-06-20 | Initial SandBox POC roadmap; Serilog + xUnit sink requirement |
+| 1.1 | 2026-06-20 | Platform.Serilog.Logging; Seq (dev) + App Insights (prod) standard |

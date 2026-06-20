@@ -1,3 +1,4 @@
+using Platform.Serilog.Logging.Testing;
 using PrimaveraExcelReader.Abstractions;
 using PrimaveraExcelReader.Mapping;
 using PrimaveraExcelReader.Primavera.Models;
@@ -16,7 +17,8 @@ public sealed class SerilogLoggingTests
             PrimaveraSheetScenarios.StandardActivityHeaders,
             ["A-900", "Log Test Activity", "WBS-900", "Active", "2026-06-01", "2026-06-10", "40"]);
 
-        Log.Logger = SerilogTestLogging.CreateTestLogger();
+        global::Serilog.Log.Logger = SerilogTestLogging.CreateTestLogger(configuration =>
+            configuration.Enrich.WithProperty("Application", "PrimaveraExcelReader"));
 
         var service = new ExcelReaderService(
             ExcelReaderMoqExtensions.CreateWorkbookAccessorMock(

@@ -1,20 +1,15 @@
 using Microsoft.Extensions.Logging;
-using Serilog;
-using Serilog.Extensions.Logging;
+using Platform.Serilog.Logging.Testing;
 
 namespace PrimaveraExcelReader.Tests;
 
 public static class ExcelReaderTestLogging
 {
-    public static ILogger<T> CreateLogger<T>()
-    {
-        return CreateLoggerFactory().CreateLogger<T>();
-    }
+    public static ILogger<T> CreateLogger<T>() =>
+        SerilogTestLogging.CreateLogger<T>(configuration =>
+            configuration.Enrich.WithProperty("Application", "PrimaveraExcelReader"));
 
-    public static ILoggerFactory CreateLoggerFactory()
-    {
-        Log.Logger ??= SerilogTestLogging.CreateTestLogger();
-
-        return new SerilogLoggerFactory(Log.Logger, dispose: false);
-    }
+    public static ILoggerFactory CreateLoggerFactory() =>
+        SerilogTestLogging.CreateLoggerFactory(configuration =>
+            configuration.Enrich.WithProperty("Application", "PrimaveraExcelReader"));
 }

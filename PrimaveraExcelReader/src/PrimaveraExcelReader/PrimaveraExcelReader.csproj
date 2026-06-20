@@ -11,9 +11,8 @@
     <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" />
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" />
     <PackageReference Include="NPOI" />
-    <PackageReference Include="Serilog" />
     <PackageReference Include="Serilog.Extensions.Logging" />
-    <PackageReference Include="Serilog.Sinks.Console" />
+    <ProjectReference Include="..\..\..\Platform.Serilog.Logging\src\Platform.Serilog.Logging\Platform.Serilog.Logging.csproj" />
   </ItemGroup>
 
 </Project>

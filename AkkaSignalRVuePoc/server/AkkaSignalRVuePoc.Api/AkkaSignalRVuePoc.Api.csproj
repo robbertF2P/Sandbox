@@ -15,11 +15,11 @@
     </PackageReference>
     <PackageReference Include="OpenTelemetry" />
     <PackageReference Include="Serilog.AspNetCore" />
-    <PackageReference Include="Serilog.Sinks.Seq" />
     <PackageReference Include="Swashbuckle.AspNetCore" />
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\..\Platform.Serilog.Logging\src\Platform.Serilog.Logging\Platform.Serilog.Logging.csproj" />
     <ProjectReference Include="..\AkkaSignalRVuePoc.Contracts\AkkaSignalRVuePoc.Contracts.csproj" />
     <ProjectReference Include="..\AkkaSignalRVuePoc.Core\AkkaSignalRVuePoc.Core.csproj" />
     <ProjectReference Include="..\AkkaSignalRVuePoc.Data\AkkaSignalRVuePoc.Data.csproj" />

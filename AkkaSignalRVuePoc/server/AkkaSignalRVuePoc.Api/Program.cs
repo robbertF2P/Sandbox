@@ -1,6 +1,7 @@
 using AkkaSignalRVuePoc.Api.Endpoints;
 using AkkaSignalRVuePoc.Api.Hubs;
 using AkkaSignalRVuePoc.Api.Services;
+using Platform.Serilog.Logging;
 using AkkaSignalRVuePoc.Data;
 using Serilog;
 
@@ -12,12 +13,7 @@ try
 
     var builder = WebApplication.CreateBuilder(args);
 
-    builder.Host.UseSerilog((context, services, loggerConfiguration) =>
-    {
-        SerilogLogging.ConfigureShared(loggerConfiguration);
-        SerilogLogging.ConfigureApplicationSinks(loggerConfiguration, context.Configuration);
-        loggerConfiguration.ReadFrom.Services(services);
-    });
+    builder.Host.UsePlatformSerilog();
 
     builder.Services.AddEndpointsApiExplorer();
     builder.Services.AddSwaggerGen(options =>

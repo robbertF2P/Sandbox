@@ -1,7 +1,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Platform.Serilog.Logging;
 using PrimaveraExcelReader.Abstractions;
-using PrimaveraExcelReader.Logging;
 using PrimaveraExcelReader.Mapping;
 using PrimaveraExcelReader.Npoi;
 using Serilog;
@@ -21,7 +21,8 @@ public static class ExcelServiceCollectionExtensions
         this IServiceCollection services,
         Serilog.ILogger? logger = null)
     {
-        Serilog.ILogger applicationLogger = logger ?? SerilogLogging.CreateApplicationLogger();
+        Serilog.ILogger applicationLogger = logger ?? CreatePrimaveraLogger();
+
         Log.Logger = applicationLogger;
 
         services.AddLogging(builder =>
@@ -32,4 +33,11 @@ public static class ExcelServiceCollectionExtensions
 
         return services;
     }
+
+    private static Serilog.ILogger CreatePrimaveraLogger() =>
+        SerilogLogging.ConfigureShared(
+            new LoggerConfiguration(),
+            configuration => configuration.Enrich.WithProperty("Application", "PrimaveraExcelReader"))
+            .WriteTo.Console()
+            .CreateLogger();
 }

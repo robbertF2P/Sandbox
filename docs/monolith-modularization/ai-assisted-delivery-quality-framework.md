@@ -152,7 +152,7 @@ AI and human authors follow the **same** standards. Guidelines are not optional 
 | Actors | Messages/events in Contracts; `Tell`/`Forward` inside actors; `Ask` only at boundaries |
 | EF | One DbContext per bounded context; review migrations before commit |
 | Tests | xUnit; descriptive `Method_Scenario_Expected` names; assert behaviour not internals |
-| **Logging** | Serilog via `ILogger<T>`; shared `SerilogLogging.ConfigureShared`; tests use `Serilog.Sinks.XUnit3` — same pipeline as production (see `03-modularization-roadmap.md`) |
+| **Logging** | `Platform.Serilog.Logging`: Development → Seq, Production → Application Insights; tests → `Platform.Serilog.Logging.Testing` (xUnit sink). See `03-modularization-roadmap.md`. |
 
 ### Cursor / Claude instruction (paste for implementation work)
 

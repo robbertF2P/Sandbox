@@ -5,6 +5,7 @@ using ApiImportActorPoc.Core.Planning;
 using ApiImportActorPoc.Core.Progress;
 using ApiImportActorPoc.Core.Templates;
 using ApiImportActorPoc.Data;
+using Platform.Serilog.Logging;
 using Serilog;
 
 var bootstrapConfiguration = new ConfigurationBuilder()
@@ -20,12 +21,7 @@ try
 
     var builder = WebApplication.CreateBuilder(args);
 
-    builder.Host.UseSerilog((context, services, loggerConfiguration) =>
-    {
-        SerilogLogging.ConfigureShared(loggerConfiguration);
-        SerilogLogging.ConfigureApplicationSinks(loggerConfiguration, context.Configuration);
-        loggerConfiguration.ReadFrom.Services(services);
-    });
+    builder.Host.UsePlatformSerilog();
 
     builder.Services.AddEndpointsApiExplorer();
     builder.Services.AddSwaggerGen(options =>

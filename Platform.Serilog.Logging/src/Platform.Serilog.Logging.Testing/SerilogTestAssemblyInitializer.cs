@@ -1,12 +1,12 @@
 using System.Runtime.CompilerServices;
 using Serilog;
 
-namespace PrimaveraExcelReader.Tests;
+namespace Platform.Serilog.Logging.Testing;
 
-internal static class SerilogTestAssemblyInitializer
+public static class SerilogTestAssemblyInitializer
 {
     [ModuleInitializer]
-    internal static void Configure()
+    public static void Configure()
     {
         Log.Logger = SerilogTestLogging.CreateTestLogger();
     }
