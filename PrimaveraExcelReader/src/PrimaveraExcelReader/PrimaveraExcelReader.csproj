@@ -7,12 +7,9 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="ImportPipeline.Domain" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" />
     <PackageReference Include="NPOI" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\..\..\ImportPipeline\src\ImportPipeline.Domain\ImportPipeline.Domain.csproj" />
   </ItemGroup>
 
 </Project>

@@ -5,6 +5,7 @@
     <EnableMicrosoftTestingPlatform>true</EnableMicrosoftTestingPlatform>
     <TestingPlatformDotnetTestSupport>true</TestingPlatformDotnetTestSupport>
     <GenerateDependencyFile>true</GenerateDependencyFile>
+    <IsPackable>false</IsPackable>
   </PropertyGroup>
 
   <ItemGroup>

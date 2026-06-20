@@ -4,5 +4,12 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <LangVersion>latest</LangVersion>
+    <Version>1.0.0</Version>
+    <PackageId>ImportPipeline.Domain</PackageId>
+    <Title>Import Pipeline Domain</Title>
+    <Description>Config-driven spreadsheet row mapping domain model (ImportRow, ImportConfigRule, ImportRowMapper).</Description>
+    <Authors>Robbert-Driven-It</Authors>
+    <RepositoryUrl>https://github.com/Robbert-Driven-It/SandBox</RepositoryUrl>
+    <PackageTags>import;pipeline;domain;ddd;excel</PackageTags>
   </PropertyGroup>
 </Project>
