@@ -32,7 +32,8 @@ Use when designing repositories, EF queries, or reusable domain criteria.
 
 - **`dotnet-core-csharp-development`** — SDK-style projects, ASP.NET Core, DI, testing, C# style.
 - **`dotnet-ef-core`** — EF Core DbContext, migrations, queries.
-- **`akka-net`** — Akka.NET actors, messages, persistence (see `AkkaSignalRVuePoc`).
+- **`akka-net`** — Akka.NET actors, messages, hosting (see `AkkaSignalRVuePoc`).
+- **`reactive-applications-akka-net`** — Anthony Brown: Reactive Manifesto, supervision, scaling, clustering, persistence.
 
 ## Source of truth
 
