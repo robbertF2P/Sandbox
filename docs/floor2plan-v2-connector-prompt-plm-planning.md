@@ -78,9 +78,14 @@ Document the clone structure:
 | Path | Submodule? | Role |
 |------|------------|------|
 | core/ | yes/no | Main Floor2Plan |
+| client/ (or actual folder name) | yes/no | Derived services, sync, DI overrides |
 | connectors/plm-planning/ (or actual name) | yes/no | PLM connector |
 
-List `.gitmodules` entries. Confirm PLM connector csproj references into `core/`.
+List `.gitmodules` entries. Document:
+- csproj references from connector → core
+- csproj references from client services → core
+- DI registrations swapping base services for client subclasses
+- override methods involved in import/sync path for PLM
 
 ---
 

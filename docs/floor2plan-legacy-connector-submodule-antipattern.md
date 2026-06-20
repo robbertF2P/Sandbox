@@ -14,8 +14,10 @@
 |---------------|---------|
 | **Connector** | Code that talks to an external system (SAP, Kronos, PLM, eShare, HR, files) — own **git repository** |
 | **Core** | Main Floor2Plan application — domain, services, EF, UI — also its **own git repository** |
-| **Customized repository** | A **composite clone** used to compile a specific delivery: `core/` submodule + sibling connector folders, built as one solution |
-| **Connector repo (standalone)** | Often **cannot compile** in isolation — it needs core types at build time |
+| **Customized repository** | A **composite clone** used to compile a specific delivery: `core/` submodule + connector folders + **client-derived core services**, built as one solution |
+| **Derived core services** | Subclasses of core application/domain services (`ClientXImportService : ImportService`) with **override methods** for client data handling and sync behaviour |
+| **Sync processes** | Scheduled or triggered jobs that move data between F2P and external systems — often split across connector, derived service, and Hangfire/handler code |
+| **Connector repo (standalone)** | Often **cannot compile** in isolation — it needs core types and sometimes client service overrides at build time |
 
 In Platform 2.0, connectors become **versioned integration packs** referenced only through contracts — not folders in a customized mega-repo.
 
@@ -33,32 +35,44 @@ customized-repo/                    ← clone this to build (client / PS deliver
 │   ├── sap-wbs/
 │   ├── eshare/
 │   └── …                           ← one folder per enabled connector
-├── client-overrides/               ← optional: more submodules / forks
-└── Floor2Plan.Customized.sln       ← single solution compiling core + all connectors
+├── client/                         ← client-specific layer (names vary)
+│   ├── services/                   ← derived core services (override methods)
+│   │   ├── AcmeImportService.cs    ← : ImportService
+│   │   ├── AcmeSyncService.cs      ← sync process hooks
+│   │   └── AcmeWbsService.cs
+│   ├── sync/                       ← sync job definitions / schedulers
+│   └── …                           ← may itself be a submodule
+└── Floor2Plan.Customized.sln       ← compiles core + connectors + client overrides
 ```
 
 ```mermaid
 flowchart TB
   subgraph CustomizedRepo["Customized repository (what you clone & build)"]
     CoreFolder["core/ submodule"]
+    ClientLayer["client/ derived services + sync"]
     ConnA["connectors/plm-planning/"]
     ConnB["connectors/eshare/"]
-    SLN[".sln — compiles everything together"]
+    SLN[".sln — compiles all layers"]
   end
 
   subgraph RemoteRepos["Separate git repos"]
     CoreRepo[(Core repo)]
+    ClientRepo[(Client customizations repo)]
     PlmRepo[(PLM connector repo)]
     EshareRepo[(eShare connector repo)]
   end
 
   CoreRepo -.->|submodule| CoreFolder
+  ClientRepo -.->|submodule or folder| ClientLayer
   PlmRepo -.->|submodule| ConnA
   EshareRepo -.->|submodule| ConnB
 
+  ClientLayer -->|inherits / overrides| CoreFolder
   ConnA -->|project reference| CoreFolder
+  ConnA -->|calls overridden services| ClientLayer
   ConnB -->|project reference| CoreFolder
   SLN --> CoreFolder
+  SLN --> ClientLayer
   SLN --> ConnA
   SLN --> ConnB
 ```
@@ -66,30 +80,58 @@ flowchart TB
 **What happens at build time:**
 
 1. Clone the **customized repo** (not “the product” — a **composition** of repos).
-2. `git submodule update --init --recursive` — pin `core` + each connector to specific commits.
-3. Open the customized solution — connectors **project-reference** into `core/`.
-4. Compile one binary/deployment artefact for that combination.
+2. `git submodule update --init --recursive` — pin `core`, **client layer**, and each connector to specific commits.
+3. Open the customized solution — connectors and **derived services** **project-reference** into `core/`.
+4. DI registration (in customized repo) binds **client subclasses** instead of base core services where required.
+5. Compile one binary/deployment artefact for that **client + integration profile**.
 
-So integration code is in separate git repos for **history isolation**, but **not** separate at compile or runtime. The customized repo is a **temporary monolith assembler**.
+So integration and client variance live in separate git repos for **history isolation**, but **not** separate at compile or runtime. The customized repo is a **client-specific monolith assembler**.
+
+### Derived core services and sync processes
+
+Between raw connector code and core base classes sits a third layer teams rely on daily:
+
+```text
+Connector (vendor protocol)
+    → calls ClientAcmeImportService : ImportService   ← override in customized repo
+        → calls base ImportService / repositories     ← core submodule
+            → SaveChanges → handlers → Hangfire sync jobs
+```
+
+| Pattern | Example | Problem |
+|---------|---------|---------|
+| **Service override** | `protected override void AfterMap(...)` | Behaviour scattered; base class changes break clients silently |
+| **Virtual hook** | `OnBeforeSync`, `CustomizeWbsNode` | Implicit contract — not documented as API |
+| **Sync process** | Hangfire job in `client/sync` calling connector + service | Same sync logic duplicated in job, connector, and override |
+| **DI swap** | Register `AcmeImportService` for `IImportService` | Runtime behaviour differs per customized build — not per tenant flag |
+
+**Sync processes** (PLM structure pull, hours push, document link refresh) often span:
+
+1. Connector — talks to external system  
+2. Derived service — client-specific mapping, filtering, “what counts as changed”  
+3. Core handler/job — persistence side effects nobody documented  
+
+A developer fixing “PLM sync” must read **three layers in three repos**, none of which has a stable public contract.
 
 ### Why connectors cannot compile standalone
 
 A typical connector project references:
 
 - Core **entity types** and **DbContext**
-- **Application/domain services** (`ImportService`, `WbsService`, …)
-- Types from **client-specific** sibling folders in the same customized repo
-- Shared **handler** and **job** registration that lives under `core/`
+- **Application/domain services** — often the **client subclass**, not the base
+- **Override methods** or types defined only in the customized `client/` folder
+- Shared **handler**, **sync**, and **job** registration across core + client layer
 
-Opening only the PLM connector repo in Visual Studio → **missing references, build fails**. That is by design of the current model, not an accident.
+Opening only the PLM connector repo in Visual Studio → **missing references, build fails**. Opening connector + core but **without** client overrides → may compile but **wrong runtime behaviour** for that customer.
 
 ### What this is not
 
 | Misconception | Reality |
 |---------------|---------|
-| “Connector is a plug-in DLL” | It is source compiled **into** the same solution as core |
-| “Separate repo = separate deployment unit” | Deployment is the **customized build**, not the connector repo alone |
-| “Core is the product, connectors are optional extras” | **Core commit + connector commits** define what runs |
+| “Connector is a plug-in DLL” | It is source compiled **into** the same solution as core **and** client overrides |
+| “Separate repo = separate deployment unit” | Deployment is the **customized build**, not any single repo |
+| “Core is the product, connectors are optional extras” | **Core + client overrides + connector SHAs** define what runs |
+| “Sync is owned by the connector” | Sync logic is usually split across connector, derived service, and core jobs |
 
 ---
 
@@ -100,9 +142,10 @@ Opening only the PLM connector repo in Visual Studio → **missing references, b
 | **Isolate client/vendor code** | Acme SAP mapping should not pollute default core |
 | **Per-customer delivery** | Ship connector only when customer pays for integration |
 | **Parallel teams** | Integrator works in submodule without merging to main daily |
-| **Reuse core logic** | Why rewrite import if `ImportService` already exists? |
+| **Client-specific data rules** | Override `MapHours`, `ShouldImportNode`, custom validation in derived service |
+| **Reuse core logic** | Why rewrite import if `ImportService` already exists — subclass it |
 
-Those goals are still valid. **Git submodules pointing at core are the wrong mechanism** once you have many connectors, clients, and release trains.
+Those goals are still valid. **Customized repos with submodules + inheritance overrides** are the wrong mechanism at platform scale.
 
 ---
 
@@ -131,8 +174,8 @@ This violates **Dependency Inversion**: high-level core should not be the concre
 With customized repos you do not ship **one product** — you ship **compositions**:
 
 ```text
-customized-repo-A  =  core@v2025.14  +  plm-planning@abc  +  eshare@def
-customized-repo-B  =  core@v2025.14  +  sap@ghi           +  client-x@jkl
+customized-repo-A  =  core@v2025.14  +  client-acme@main  +  plm@abc  +  eshare@def
+customized-repo-B  =  core@v2025.14  +  client-contoso@x  +  sap@ghi
 ```
 
 | Combination | Risk |
@@ -147,22 +190,18 @@ customized-repo-B  =  core@v2025.14  +  sap@ghi           +  client-x@jkl
 
 ---
 
-### 4.3 Mixed concerns in one connector
+### 4.3 Mixed concerns: connector + client overrides + sync
 
-Because the connector compiles against core, integrators naturally:
+Because connectors call **derived core services**, not stable ports:
 
-- Call **domain services** directly instead of sending commands
-- Touch **EF entities** and **SaveChanges** side effects
-- Register logic in **handler chains** shared with unrelated features
-- Duplicate the same SAP field mapping in a **job**, a **handler**, and the **submodule**
+- Vendor mapping may live in the **connector**, while “what to do with the result” lives in a **service override**
+- **Sync schedules** in `client/sync` re-invoke the same paths as manual import — often with slightly different code
+- The same client rule appears in **override**, **connector**, and **Hangfire job** — kept in sync manually
+- Code review: “Is this PLM behaviour or client-specific handling?” — requires client layer + connector + core base
 
-There is no clear line between:
+There is no line between **integration**, **customization**, and **domain** — all compiled into one binary.
 
-- “Map SAP IDoc → our model” (connector job)
-- “Enforce WBS invariants” (core domain)
-- “Trigger replan after import” (orchestration)
-
-**Effect:** Integration bugs look like core bugs. Code review requires reading three repos and handler order docs.
+**Effect:** Integration bugs look like core bugs. Fixing “sync” means tracing connector → `ClientXSyncService` override → Hangfire job → SaveChanges handlers.
 
 ---
 
@@ -247,7 +286,9 @@ If you have said any of these, you are paying the customized-repo tax:
 - “We need to merge core before we can merge the connector.”
 - “Which **submodule SHAs** is the client running?”
 - “Our customized repo pins core to a branch the connector team doesn’t use.”
-- “The connector repo doesn’t build — you need the parent repo with `core/` checked out.”
+- “The connector repo doesn’t build — you need the parent repo with `core/` and `client/` checked out.”
+- “Which **override** of `ImportService` is registered for this deployment?”
+- “Sync failed — is it the connector, the `AcmeSyncService` override, or the Hangfire job?”
 
 These are **structural** problems, not lack of discipline.
 
@@ -276,9 +317,11 @@ These are **structural** problems, not lack of discipline.
 | Principle | Implementation |
 |-----------|----------------|
 | **Stable boundary** | Intermediate exchange format (inbound) + OpenAPI ports (outbound) |
-| **Pack owns vendor** | SAP IDoc / Kronos API / PLM XML → canonical format |
+| **Pack owns vendor** | SAP / PLM / eShare protocol → canonical format |
+| **Pack or customization pack owns client variance** | Tenant profile + versioned packs — **not** `ClientXService : BaseService` in a customized clone |
 | **Core owns domain** | One import pipeline; idempotent upsert; external IDs |
-| **Tenant enables pack** | Configuration, not submodule checkout |
+| **Sync is explicit** | Actor/workflow with correlation ID — not override + handler chain |
+| **Tenant enables pack** | Configuration, not customized repo + DI subclass swap |
 | **Testability** | Golden files: vendor sample → intermediate JSON → import result |
 | **Lead vs follow explicit** | Per entity type — documented, not assumed (see integrations deep-dive) |
 
@@ -292,11 +335,12 @@ Policy (approved direction): **no new git submodules for connectors or client co
 
 | Legacy habit | Replace with |
 |--------------|--------------|
-| Connector calls `WbsService` | `ImportProject` command / REST API / actor message |
+| Connector calls `WbsService` | `ImportProject` command / canonical batch / actor message |
 | Connector builds `Activity` entities | Map to **DTO / intermediate format**; core materializes entities |
+| Client override `AcmeImportService` | **Customization pack** hook or tenant profile rule on canonical payload |
+| Sync in client folder + Hangfire | **Supervised workflow actor** per integration; observable pipeline |
 | Connector shares `DbContext` | Core persistence only; connector never opens SQL |
-| Client-specific rules in submodule | **Customization pack** or tenant profile hook |
-| Reuse mapping in job + UI | One pack module; one mapping library inside pack |
+| DI registers subclass per client | Host registers **packs per tenant** — one core binary |
 
 **Rule of thumb:** If the connector **cannot be compiled** without the core solution, the boundary is wrong.
 
@@ -362,4 +406,4 @@ Yes — **strangler**: adapter calls legacy until pack produces intermediate for
 
 ## 11. One-slide summary
 
-> **Legacy:** Each connector has its own git repo but **cannot compile** without `core/` as a submodule inside a **customized repository** that assembles core + connectors into one solution. That gives git separation without architectural separation — and a combinatorial release matrix. **V2:** Connectors are packs that depend on **contracts**, compiled against core only at the **host**, enabled per tenant without a new customized clone.
+> **Legacy:** Each connector has its own repo but cannot compile without a **customized repository**: `core/` submodule, **client-derived service overrides**, connector siblings, and sync jobs — all built as one solution. That gives git separation without architectural separation. **V2:** One core binary; **integration packs** (vendor) and **customization packs** (tenant rules) depend on contracts; sync is explicit orchestration — not inheritance overrides in a per-client clone.

@@ -91,7 +91,8 @@ connector_scope:
 | Path | Submodule URL | Role |
 |------|---------------|------|
 | core/ | | Floor2Plan application |
-| connectors/<name>/ | | This connector |
+| client/ (or similar) | | Derived services, sync jobs, DI overrides |
+| connectors/<name>/ | | Vendor connector |
 
 ---
 

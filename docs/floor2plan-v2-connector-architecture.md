@@ -187,14 +187,13 @@ flowchart LR
 ## 6. Comparison to legacy (one picture)
 
 ```text
-LEGACY                          V2
-──────                          ──
-
-customized-repo/                Platform host (one product)
-├── core/ submodule             ├── F2P core modules
-└── connectors/* submodules     └── integration packs (NuGet/deployable)
-     all project-ref core            packs ref contracts only
-     cannot build connector alone     tenant enables pack — no new clone
+LEGACY customized-repo              V2 platform
+──────────────────────              ────────────
+core/ submodule                     one core deployable
+client/ derived service overrides   customization pack (tenant rules)
+connectors/* submodules             integration packs (vendor)
+sync jobs + handler chains          explicit workflow actors
+DI: ClientXService : BaseService    DI: packs enabled per tenant
 ```
 
 ---
