@@ -15,8 +15,8 @@ paths:
   - "**/AkkaSignalRVuePoc/**"
   - "**/ApiImportActorPoc/**"
 metadata:
-  version: 1.0.0
-  source: "Anthony Brown — Reactive Applications with Akka .NET (Manning, 2019)"
+  version: 1.1.0
+  source: "Anthony Brown — Reactive Applications with Akka .NET (Manning, 2019, ISBN 9781617292989)"
 ---
 
 # Reactive Applications with Akka .NET
@@ -37,37 +37,54 @@ For concrete patterns already used in this repo (`AkkaSignalRVuePoc`, `ApiImport
 
 Do not conflate them. Akka.NET builds **reactive systems**; you may still use reactive programming inside actors for local streams.
 
+**Brown's distinction:** reactive programming (e.g. Rx) is **event-driven** — data broadcast to all listeners. Reactive systems are **message-driven** — individually addressable components receive **targeted** messages. Akka.NET is the latter.
+
 ## Reactive Manifesto (design lens)
 
-Every architectural choice should support these traits:
+Brown frames the Manifesto as the outcome of patterns seen across IoT, e-commerce, finance, and petabyte-scale analytics. **Responsiveness is the most important property** — timely behavior under normal and degraded conditions. The other traits exist to preserve it.
 
-| Trait | Meaning in practice |
-|-------|---------------------|
-| **Responsive** | Timely responses under normal and failure conditions; degrade gracefully |
-| **Resilient** | Failures stay isolated; recovery without full-system restart |
-| **Elastic** | Scale up/out under load; scale down when idle |
-| **Message-driven** | Async messages between loosely coupled components; back-pressure where needed |
+| Trait | Meaning in practice (Brown) |
+|-------|------------------------------|
+| **Responsive** | Timely under load and failure; definition varies by domain (HTTP latency vs streaming throughput) |
+| **Resilient** | Failures **contained** to the smallest area; automatic recovery without burdening the client |
+| **Elastic** | Expand under load, **shrink** during inactivity — avoid paying for idle capacity |
+| **Message-driven** | Async, non-blocking communication; reroute at runtime when components fail or bottleneck |
+
+**How they connect:** messaging powers resilience, elasticity, and responsiveness. Resilience infrastructure also enables elasticity — they are shared concerns, not independent add-ons.
 
 **Red flag:** shared mutable state, synchronous RPC chains, or one global lock for concurrency.
 
 ## When to use Akka.NET
 
-**Good fits:**
+**Good fits (ch. 1–2):**
 
-- High concurrency with **isolated units of work** (sessions, orders, devices, imports)
+- Integrating **many components** that must react immediately to each other's results (e.g. airport gate displays fed by ATC, runway ops, airline scheduling)
+- High concurrency with **isolated units of work** (sessions, carts, orders, devices, imports)
 - **Stateful** processing where one mailbox serializes access per unit
 - **Failure domains** that should restart independently (supervision trees)
 - **Distributed** or clustered workloads (routers, remoting, cluster sharding)
 - Long-running background processes with timers and lifecycle
+- E-commerce-style flows: cart actor → checkout → payment gateway → shipping, with routers for throughput and pub/sub for downstream reactions (pricing, recommendations)
 
-**Poor fits:**
+**Poor fits (ch. 1):**
 
-- Simple CRUD with no concurrency or resilience requirements
+- Simple CRUD backed by a basic database — Akka.NET surfaces distributed-system complexity (partial failure, consistency, harder debugging) without benefit
+- Systems with **no real concurrency** need — adds mental overhead for data races and deadlocks without simplifying anything
 - Request/response-only APIs with no stateful or streaming behavior
 - Teams unwilling to adopt message-passing mental model
 - Replacing a well-working `async`/`await` pipeline with actors "for consistency"
 
+Akka.NET is a **platform for reactive systems** across IoT, e-commerce, and finance — fit depends on integration complexity and concurrency needs, not domain label alone.
+
 ## Actor model fundamentals
+
+Brown condenses the actor into three concepts — **communication**, **processing**, and **state** — forming a sealed boundary (ch. 3):
+
+| Concept | Role |
+|---------|------|
+| **Communication** | Unique address + mailbox; async message passing (like SMS to a phone number) |
+| **Processing** | Behavior invoked per message; at most one message processed at a time per actor |
+| **State** | Private memory; no external direct access — ask via messages only |
 
 An **actor** embodies:
 
@@ -76,12 +93,25 @@ An **actor** embodies:
 - **Behavior** — how incoming messages are handled
 - **Mailbox** — FIFO queue; one message processed at a time per actor
 
+**Immutability is required** for messages — mutable messages break concurrency safety guarantees.
+
 An actor can:
 
 - **Send** messages (`Tell`, `Ask`)
-- **Create** child actors (`Context.ActorOf`)
+- **Create** child actors (`Context.ActorOf`) — delegate like assigning work to another person
 - **Change behavior** (`Become` / `Unbecome`, or FSM)
 - **Supervise** children (restart/stop/resume on failure)
+- **Ignore** a message (sender may retry if important)
+
+### `IActorRef` vs `ActorSelection` (ch. 3, 6)
+
+| | `IActorRef` | `ActorSelection` |
+|---|-------------|------------------|
+| Points to | Specific actor instance | Path that resolves to current instance |
+| On restart | Reference may change | Still resolves to restarted actor |
+| Use when | Normal tell/ask to known actor | At-least-once delivery, remote targets that may restart |
+
+For guaranteed delivery across failures, prefer `ActorSelection` over `IActorRef` when the target may be recreated.
 
 ### Messaging conventions
 
@@ -99,11 +129,11 @@ An actor can:
 - Never block inside `Receive` (no `.Result`, `.Wait()`, `Thread.Sleep`).
 - One `ActorSystem` per application — not per request.
 
-### Props and deployment
+### Props, HOCON, and deployment
 
-- **`Props`** — recipe for creating an actor (type + constructor args + dispatcher/router config).
-- **Actor system** — root container; hosts guardians, dispatchers, event stream.
-- **HOCON** — configuration for dispatchers, mailboxes, remoting, cluster (load via `ActorSystem` or hosting extensions).
+- **`Props`** — recipe for creating an actor (type + constructor args + dispatcher/router config). Use `system.DI().Props<T>()` when integrating Autofac/Ninject/Windsor adapters.
+- **Actor system** — root container; hosts guardians, dispatchers, event stream. One per application.
+- **HOCON** (Human Optimized Config Object Notation) — Akka.NET's config format (JSON superset with comments, `key = value`, dotted paths, time units like `120 s` / `2 m`). Load via `ConfigurationFactory.ParseString` or embedded `App.config` CDATA. Only override what differs from defaults.
 
 Resolve dependencies at **Props creation time**, not by injecting `IServiceProvider` into actors.
 
@@ -135,25 +165,48 @@ Parents supervise children. On child failure, the supervisor chooses:
 
 | Directive | Effect |
 |-----------|--------|
-| **Restart** | New actor instance; state lost unless persisted |
+| **Restart** | New actor instance; **state lost** unless persisted |
 | **Stop** | Terminate child permanently |
 | **Resume** | Continue with same instance |
 | **Escalate** | Delegate failure to own supervisor |
 
-Design supervision to match **failure domains** — restart the smallest unit that can recover cleanly.
+Design supervision to match **failure domains** — restart the smallest unit that can recover cleanly. A **strong actor hierarchy** (ch. 6) limits blast radius so one conversation's failure does not take down unrelated work.
+
+### Error kernel pattern (ch. 6)
+
+Push **dangerous or stateless work** to child actors. Keep long-lived state in the parent. If the child fails and restarts, the parent's accumulated state survives. Without this, frequent restarts wipe in-memory state.
+
+### Actor lifecycle (ch. 6)
+
+States: Starting → Running → Stopping → Terminated. Override `PreStart`, `PreRestart`, `PostRestart` for lifecycle hooks.
+
+| Shutdown | Behavior |
+|----------|----------|
+| **`PoisonPill`** | Process all queued messages first, then stop — graceful drain |
+| **`Context.Stop(ref)`** | Stop after current message — immediate |
+
+Messages to **terminated** actors go to the **dead letters** mailbox (logged, not delivered).
+
+**`PreRestart`:** receive the failing message and `Self.Tell(message)` to retry after restart.
+
+### DeathWatch and reaper pattern (ch. 6)
+
+- **`Context.Watch(ref)`** + `Receive<Terminated>` — react when another actor dies
+- **Reaper pattern** — a coordinator watches N workers; when all have terminated (often via `PoisonPill` after work), proceed past a barrier (e.g. shutdown cluster node)
 
 ### Application-level failures
 
 - **Fail fast** inside actors; let supervision handle recovery.
-- Use **`Watch`** / `Receive<Terminated>` to react when other actors die.
-- Distinguish **interface-level** failures (bad input) from **infrastructure** failures (network, DB).
+- Distinguish **interface-level** failures (bad input — may be unrecoverable, stop not restart) from **infrastructure** failures (network, DB).
+- Supervision reduces over-dependence on external services — failure handling is core to Akka.NET.
 
 ### Transport-level failures
 
 In distributed systems:
 
 - Messages may be **lost** or **duplicated** — design idempotent handlers where needed.
-- Use **at-least-once** delivery patterns (Akka.Persistence, acknowledgments) when required.
+- **At-least-once delivery** actors use a simple FSM: awaiting acknowledgment ↔ successfully delivered (ch. 6).
+- Use **`ActorSelection`** (not `IActorRef`) when target may restart across network failures.
 - **DeathWatch** across remoting detects remote actor loss.
 
 ## Scaling
@@ -180,12 +233,32 @@ Distribute messages across routees:
 
 **Pools** — router creates/manages routees. **Groups** — router forwards to existing actor paths.
 
-### Cluster (Akka.Cluster)
+### Cluster (Akka.Cluster) — ch. 12
 
-- **Cluster-aware routers** — route across nodes
-- **Cluster singleton** — one actor instance cluster-wide
-- **Cluster sharding** — entity actors by shard key; passivation under memory pressure
-- **Distributed pub/sub** — topic or point-to-point messaging across cluster
+**Glossary:**
+
+| Term | Role |
+|------|------|
+| **Node** | One actor system instance in the cluster |
+| **Seed node** | Well-known join address for new nodes |
+| **Gossip protocol** | Propagates membership changes to all nodes |
+| **Leader** | Deterministically chosen node that applies membership changes |
+| **Failure detector** | Heartbeat-based unreachability detection |
+| **Role** | Tags nodes for workload affinity (e.g. `network` vs `compute`) |
+
+**Benefits:** elastic scale-out, fault tolerance (redeploy actors from failed nodes), peer-to-peer (no coordinator bottleneck or single point of failure).
+
+**Cluster-aware routers** — same router types as ch. 7, but react to gossip (add/remove routees as nodes join/leave). Prefer over raw Akka.Remote router paths that create single-node failure points.
+
+**Cluster sharding** — partition entities by shard key across nodes. **Partition at a locality boundary** (e.g. per-home in IoT) so related child actors stay on the same machine for fast communication.
+
+**Cluster singleton** — one actor instance cluster-wide (with failover).
+
+**Distributed pub/sub** — topic or point-to-point messaging; react to cluster events immediately.
+
+**Cluster client** — lightweight client talking to cluster without hosting actors.
+
+**Config essentials:** `actor.provider = ClusterActorRefProvider`, remote port/hostname, `seed-nodes`, optional `cluster.roles`. All nodes must share the **same actor system name**.
 
 ## Composing actor systems
 
@@ -210,16 +283,19 @@ Keep actors **pure**; push IO to the edges:
 
 This repo's `AkkaSignalRVuePoc` follows this: `ISignalrHubWrapper` injected via Props, hub actor bridges to SignalR.
 
-## Persistence and event sourcing
+## Persistence and event sourcing (ch. 11)
 
 **Akka.Persistence** for actors that must survive restarts:
 
-- **Event sourcing** — persist events; replay to rebuild state
+- **Event sourcing** — persist events; replay to rebuild state (not every reading — persist behavior-changing events)
 - **Snapshots** — periodic state checkpoints for faster recovery
-- **Journals** — pluggable storage backends
+- **Journals** — pluggable storage backends; async write journals for throughput
 - **At-least-once delivery** — reliable messaging across restarts
+- **Upgrade strategies** — evolve event-sourced schemas without breaking replay
 
-Use when actor state is **authoritative** and must survive crashes — not for every actor.
+Use when actor state is **authoritative** and must survive crashes. For cluster sharding, Brown recommends persistent actors when entities may move between nodes.
+
+**Anti-pattern:** active record pattern inside actors — persistence belongs in the event/journal model, not ad-hoc DB writes scattered in handlers.
 
 ## Testing
 
@@ -240,15 +316,31 @@ This repo uses `Akka.Hosting.TestKit` — see `ActorTestBase<T>` in `ApiImportAc
 
 ## Reactive application design workflow
 
-Brown's e-commerce case study pattern (generalized):
+Brown's e-commerce case study (ch. 2) and production IoT case study (ch. 13) share this progression:
 
-1. **Identify bounded capabilities** — cart, catalog, payment, shipping as separate actor areas
-2. **Assign state** — one actor (or shard) per shopping cart, order, session
-3. **Define messages** — commands in imperative form; events in past tense
-4. **Plan failure domains** — which actors restart together under one supervisor
-5. **Plan scale paths** — routers for throughput; cluster sharding for entity count
-6. **Integrate at edges** — HTTP/SignalR in; persistence at actors that own state
-7. **Test by scenario** — case-study chapters map to integration tests
+1. **Identify bounded capabilities** — cart, catalog, payment, shipping (or home → room → sensor hierarchy)
+2. **Assign state** — one actor (or shard) per cart, order, session, or home
+3. **Define messages** — commands in imperative form; events in past tense; immutable types
+4. **Model lifecycle** — FSM or `Become` for cart/checkout states
+5. **Plan failure domains** — error kernel: stateful parent, risky children; supervision per area
+6. **Scale throughput** — routers (pools for compute, consistent hash for sticky sessions)
+7. **Expose to clients** — Akka.Remote proxy or ASP.NET/SignalR at the edge (ch. 8, 10)
+8. **Persist authoritative state** — Akka.Persistence for carts/orders that must survive restart
+9. **Scale out** — Akka.Cluster with sharding at a locality boundary; autoscaled nodes
+10. **React to changes** — distributed pub/sub for downstream systems (recommendations, pricing)
+11. **Test by scenario** — unit (behavior), integration (flows), multinode (partitions)
+
+### Production checklist (ch. 13)
+
+| Concern | Book guidance |
+|---------|---------------|
+| Actor design | Independent actors, no direct dependencies — place anywhere in cluster |
+| Failure | Supervision + persistence; partition at entity boundary |
+| Scale | Cluster sharding; add nodes on demand |
+| Configuration | HOCON per environment; roles per hardware profile |
+| Data ingestion | Dedicated ingest actors; don't block mailbox on IO |
+| Real-time UI | SignalR bridge actor (ch. 10) |
+| Testing | TestKit + MultiNode for distributed behavior |
 
 ## Practical workflow for agents
 
@@ -266,6 +358,7 @@ When designing or reviewing Akka.NET code:
 ## Red flags (challenge the design)
 
 - Blocking or `.Result`/`.Wait()` inside `Receive`
+- **Mutable messages** — breaks actor concurrency guarantees
 - Shared static mutable state between actors
 - `IServiceProvider` injected into actors instead of resolved dependencies in Props
 - One giant actor owning unrelated concerns
@@ -273,7 +366,10 @@ When designing or reviewing Akka.NET code:
 - New `ActorSystem` per HTTP request
 - Direct ASP.NET/EF types inside actor classes
 - Supervision that restarts without addressing root cause (restart loops)
+- Restarting **stateful parent** actors instead of using error kernel pattern
+- Using `IActorRef` for at-least-once delivery when target may restart
 - Using actors where a simple background service would do
+- Basic CRUD with Akka.NET "for scalability" — debugging and consistency cost with no concurrency win
 
 ## C# mapping cheatsheet
 
@@ -285,6 +381,9 @@ When designing or reviewing Akka.NET code:
 | Tell | `_orderActor.Tell(new PlaceOrder(…));` |
 | Ask | `await _orderActor.Ask<OrderPlaced>(cmd, timeout);` |
 | Supervision | `SupervisorStrategy` on parent or `OneForOneStrategy` in `SupervisorStrategy` override |
+| Shutdown | `actor.Tell(PoisonPill.Instance)` or `Context.Stop(ref)` |
+| Watch | `Context.Watch(ref); Receive<Terminated>(…)` |
+| Reaper | Coordinator actor watches workers until all `Terminated` |
 | FSM | `class CartFsm : FSM<CartState, CartData>` |
 | Router | `FromConfig.Instance` or `RouterPool` in HOCON / `Props.WithRouter` |
 | Persistence | `class OrderActor : ReceivePersistentActor` |
@@ -296,5 +395,5 @@ When designing or reviewing Akka.NET code:
 - **`dotnet-core-csharp-development`** — ASP.NET Core host, DI, testing
 - **`dotnet-ef-core`** — DbContext scoping rules for actor boundaries
 - **`domain-driven-design`** — actors orchestrate; domain holds business rules
-- Anthony Brown — *Reactive Applications with Akka .NET* (Manning, 2019) — this skill's source
+- Anthony Brown — *Reactive Applications with Akka .NET* (Manning, 2019, ISBN 9781617292989) — this skill's source; 13 chapters, sample code at [manning.com/books/reactive-applications-with-akka-net](https://www.manning.com/books/reactive-applications-with-akka-net)
 - Official docs: https://getakka.net/
