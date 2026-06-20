@@ -2,7 +2,18 @@
 
 Copy the **prompt block** below into Claude (Cursor) with the **external Floor2Plan monolith** open as workspace root.
 
-**Goal:** Find one legacy connector built the old way (submodule / core references) and produce a **concrete** V2 integration-pack design — project names, ports, sample payloads, migration steps — not a generic architecture essay.
+**Goal:** Find one legacy connector built the old way (**customized repo** with `core/` submodule + sibling connector folders) and produce a **concrete** V2 integration-pack design.
+
+**Legacy layout (confirm in Phase 1):**
+
+```text
+customized-repo/
+├── core/                 ← submodule → Floor2Plan main repo
+├── connectors/<name>/    ← submodule → connector repo (cannot compile alone)
+└── *.sln                 ← builds core + connectors together
+```
+
+Open the **customized repository** clone if the connector repo alone does not build.
 
 **Prerequisite docs** (in SandBox repo — paste paths or attach files to Claude if the monolith repo does not contain them):
 
@@ -27,7 +38,7 @@ connector_scope:
   direction: "<inbound | outbound | bidirectional>"   # best guess; Claude validates
 ```
 
-Open the **legacy monolith repository**, not SandBox.
+Open the **customized repository** (or core monolith if that is the workspace). If only a connector repo is open and it does not compile, stop and request the parent customized repo path.
 
 ---
 
@@ -69,6 +80,21 @@ connector_scope:
 
 ---
 
+## PHASE 0 — Identify repository layout (required first)
+
+| Layout | How to recognize | Action |
+|--------|------------------|--------|
+| Customized repo | core/ + connectors/ + umbrella .sln | Document .gitmodules |
+| Core only | Single monolith | Find embedded integration |
+| Connector only | Broken refs to core | STOP — need customized repo |
+
+| Path | Submodule URL | Role |
+|------|---------------|------|
+| core/ | | Floor2Plan application |
+| connectors/<name>/ | | This connector |
+
+---
+
 ## PHASE 1 — Forensic: find the legacy connector (evidence only)
 
 Search the workspace and document HOW this connector is built today.
@@ -76,8 +102,10 @@ Search the workspace and document HOW this connector is built today.
 ### 1.1 Discovery search
 
 Search for:
+- **Customized repo layout:** `core/`, `connectors/`, `.gitmodules`, umbrella solution file
 - Git submodule paths and .gitmodules entries matching legacy_hints
-- Project references FROM connector/submodule TO core (csproj Reference Include)
+- Project references FROM `connectors/<vendor>/` TO `core/` (csproj Reference Include)
+- Prove connector repo **fails to build** without core (list missing references if visible)
 - Classes named *Connector*, *Integration*, *Import*, *Sync*, *Export* for this vendor
 - Hangfire / IHostedService / scheduled jobs for this vendor
 - SaveChanges handlers, workflow handlers touching this vendor

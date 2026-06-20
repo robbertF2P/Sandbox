@@ -2,9 +2,9 @@
 
 **Recommended first example** — aligns with `ApiImportActorPoc` external IDs and integration templates in this repo.
 
-**Run in:** external Floor2Plan monolith workspace (Cursor + Claude).
+**Run in:** external **customized Floor2Plan repository** (clone with `core/` + `connectors/`). If only the PLM connector repo is available, Phase 0 must fail fast and request the parent customized repo.
 
-**Attach or paste:** `docs/floor2plan-v2-connector-architecture.md`, `docs/floor2plan-legacy-connector-submodule-antipattern.md`, `ApiImportActorPoc/README.md` (from SandBox).
+**Attach or paste:** `docs/floor2plan-legacy-connector-submodule-antipattern.md` (customized-repo layout), `docs/floor2plan-v2-connector-architecture.md`, `ApiImportActorPoc/README.md` (from SandBox).
 
 **Output:** `docs/modularization/integrations/v2-proposals/plm-structure-inbound-v1.md`
 
@@ -37,7 +37,9 @@ connector_scope:
   name: "PLM project structure import (WBS / components / activities for planning)"
   vendor: "PLM"
   legacy_hints:
-    - "submodules"                    # search .gitmodules for PLM-related paths
+    - "core/"                         # submodule root in customized repo
+    - "connectors/"                   # sibling connector folders
+    - ".gitmodules"
     - "PlmImport"
     - "PlmStructure"
     - "PlmPlanning"
@@ -66,6 +68,19 @@ hypothesis_from_templates:
     - "tests/**/Plm*Test*"
     - "TestData/**/Plm*"
     - "TestData/**/PLM*"
+
+---
+
+## PHASE 0 — Customized repository layout
+
+Document the clone structure:
+
+| Path | Submodule? | Role |
+|------|------------|------|
+| core/ | yes/no | Main Floor2Plan |
+| connectors/plm-planning/ (or actual name) | yes/no | PLM connector |
+
+List `.gitmodules` entries. Confirm PLM connector csproj references into `core/`.
 
 ---
 

@@ -190,11 +190,11 @@ flowchart LR
 LEGACY                          V2
 ──────                          ──
 
-Connector submodule ──► Core    Pack ──► Contracts ◄── Core
-     (compile deps)                  (stable handoff)
-
-Many cores in practice          One core + many packs
-Matrix: core × submodule        Matrix: pack × contract (smaller)
+customized-repo/                Platform host (one product)
+├── core/ submodule             ├── F2P core modules
+└── connectors/* submodules     └── integration packs (NuGet/deployable)
+     all project-ref core            packs ref contracts only
+     cannot build connector alone     tenant enables pack — no new clone
 ```
 
 ---

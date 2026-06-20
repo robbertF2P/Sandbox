@@ -1,10 +1,8 @@
 # Ready prompt — eShare connector → V2 pack
 
-**Run in:** external Floor2Plan monolith workspace (Cursor + Claude).
+**Run in:** external **customized repository** (`core/` + `connectors/eshare/` or similar). Connector repo alone typically does not compile.
 
-**Note:** No eShare references exist in SandBox — discovery in Phase 1 is critical. Claude must map what eShare actually does in your monolith (documents, transmittals, links to activities, etc.) before designing the pack.
-
-**Attach or paste:** `docs/floor2plan-v2-connector-architecture.md`, `docs/floor2plan-legacy-connector-submodule-antipattern.md`.
+**Attach or paste:** `docs/floor2plan-legacy-connector-submodule-antipattern.md`, `docs/floor2plan-v2-connector-architecture.md`.
 
 **Output:** `docs/modularization/integrations/v2-proposals/eshare-<domain>-v1.md` (Claude picks domain after Phase 1)
 
@@ -37,6 +35,9 @@ connector_scope:
   name: "eShare connector"
   vendor: "EShare"
   legacy_hints:
+    - "core/"
+    - "connectors/"
+    - ".gitmodules"
     - "eshare"
     - "EShare"
     - "E-Share"
@@ -54,6 +55,17 @@ connector_scope:
     - "What does eShare integrate — documents, drawings, transmittals, activity attachments?"
     - "Is eShare system of record for documents while F2P owns activities?"
     - "Is this a submodule referencing core like other legacy connectors?"
+
+---
+
+## PHASE 0 — Customized repository layout
+
+| Path | Submodule URL | Role |
+|------|---------------|------|
+| core/ | | |
+| connectors/<eshare-folder>/ | | eShare connector |
+
+If workspace is connector-only and does not build, STOP.
 
 ---
 

@@ -12,43 +12,84 @@
 
 | Term (legacy) | Meaning |
 |---------------|---------|
-| **Connector** | Code that talks to an external system (SAP, Kronos, PLM, HR, files, webhooks) — import, export, or sync |
-| **Core** | Main Floor2Plan application: domain entities, services, EF `DbContext`, SaveChanges handlers, UI |
-| **Submodule folder** | Separate git repo mounted inside the solution so a connector (or client variant) can compile against core types |
+| **Connector** | Code that talks to an external system (SAP, Kronos, PLM, eShare, HR, files) — own **git repository** |
+| **Core** | Main Floor2Plan application — domain, services, EF, UI — also its **own git repository** |
+| **Customized repository** | A **composite clone** used to compile a specific delivery: `core/` submodule + sibling connector folders, built as one solution |
+| **Connector repo (standalone)** | Often **cannot compile** in isolation — it needs core types at build time |
 
-In the target platform, connectors become part of **versioned integration packs** — not forks of core.
+In Platform 2.0, connectors become **versioned integration packs** referenced only through contracts — not folders in a customized mega-repo.
 
 ---
 
-## 2. The legacy pattern (simplified)
+## 2. The legacy pattern (how it actually works)
+
+Each connector lives in **its own repo**, but connectors typically **do not compile alone**. Teams assemble a **customized repository** for a client or integration profile:
 
 ```text
-┌─────────────────────────────────────────────────────────────┐
-│  Floor2Plan solution                                         │
-│                                                              │
-│  ┌──────────────────────┐    project reference / shared   │
-│  │  Core application     │◄─── types, services, entities    │
-│  │  (monolith)           │                                 │
-│  └──────────▲───────────┘                                 │
-│             │ compile-time dependency                        │
-│  ┌──────────┴───────────┐                                 │
-│  │  Connector submodule  │  (git submodule per vendor/     │
-│  │  e.g. SAP / Client X  │   client / integration)         │
-│  └──────────────────────┘                                 │
-└─────────────────────────────────────────────────────────────┘
-              │
-              ▼
-     External system (SAP, Kronos, …)
+customized-repo/                    ← clone this to build (client / PS delivery)
+├── core/                           ← git submodule → Floor2Plan main application
+├── connectors/
+│   ├── plm-planning/               ← git submodule → PLM connector repo
+│   ├── sap-wbs/
+│   ├── eshare/
+│   └── …                           ← one folder per enabled connector
+├── client-overrides/               ← optional: more submodules / forks
+└── Floor2Plan.Customized.sln       ← single solution compiling core + all connectors
 ```
 
-Typical connector needs:
+```mermaid
+flowchart TB
+  subgraph CustomizedRepo["Customized repository (what you clone & build)"]
+    CoreFolder["core/ submodule"]
+    ConnA["connectors/plm-planning/"]
+    ConnB["connectors/eshare/"]
+    SLN[".sln — compiles everything together"]
+  end
+
+  subgraph RemoteRepos["Separate git repos"]
+    CoreRepo[(Core repo)]
+    PlmRepo[(PLM connector repo)]
+    EshareRepo[(eShare connector repo)]
+  end
+
+  CoreRepo -.->|submodule| CoreFolder
+  PlmRepo -.->|submodule| ConnA
+  EshareRepo -.->|submodule| ConnB
+
+  ConnA -->|project reference| CoreFolder
+  ConnB -->|project reference| CoreFolder
+  SLN --> CoreFolder
+  SLN --> ConnA
+  SLN --> ConnB
+```
+
+**What happens at build time:**
+
+1. Clone the **customized repo** (not “the product” — a **composition** of repos).
+2. `git submodule update --init --recursive` — pin `core` + each connector to specific commits.
+3. Open the customized solution — connectors **project-reference** into `core/`.
+4. Compile one binary/deployment artefact for that combination.
+
+So integration code is in separate git repos for **history isolation**, but **not** separate at compile or runtime. The customized repo is a **temporary monolith assembler**.
+
+### Why connectors cannot compile standalone
+
+A typical connector project references:
 
 - Core **entity types** and **DbContext**
 - **Application/domain services** (`ImportService`, `WbsService`, …)
-- **Client-specific subclasses** living in another submodule
-- **Hangfire jobs** and **SaveChanges handlers** registered in core
+- Types from **client-specific** sibling folders in the same customized repo
+- Shared **handler** and **job** registration that lives under `core/`
 
-So the connector is not a plug-in — it is a **branch of the monolith** that happens to live in another git repo.
+Opening only the PLM connector repo in Visual Studio → **missing references, build fails**. That is by design of the current model, not an accident.
+
+### What this is not
+
+| Misconception | Reality |
+|---------------|---------|
+| “Connector is a plug-in DLL” | It is source compiled **into** the same solution as core |
+| “Separate repo = separate deployment unit” | Deployment is the **customized build**, not the connector repo alone |
+| “Core is the product, connectors are optional extras” | **Core commit + connector commits** define what runs |
 
 ---
 
@@ -87,18 +128,20 @@ This violates **Dependency Inversion**: high-level core should not be the concre
 
 ### 4.2 Version matrix explosion
 
-With submodules you do not ship **one product** — you ship **combinations**:
+With customized repos you do not ship **one product** — you ship **compositions**:
 
 ```text
-Core v2025.14  ×  SAP submodule A  ×  Kronos submodule B  ×  Client Acme fork
+customized-repo-A  =  core@v2025.14  +  plm-planning@abc  +  eshare@def
+customized-repo-B  =  core@v2025.14  +  sap@ghi           +  client-x@jkl
 ```
 
 | Combination | Risk |
 |-------------|------|
-| Core upgraded, submodule not | Build breaks or subtle runtime errors |
-| Two submodules need different core APIs | Deadlock — cannot upgrade either |
-| Client on old core + new connector fix | Production-only bug |
-| PS installs “the SAP connector” | Wrong submodule commit checked out |
+| Core submodule bumped, connector submodules not | Customized clone build breaks |
+| Two connectors need incompatible core APIs | Cannot assemble one customized repo |
+| PS maintains customized-repo fork for one client | Product repo diverges from delivery repo |
+| Developer clones connector repo only | **Does not compile** — must know parent customized repo |
+| QA asks “which Floor2Plan?” | Answer is **SHA tuple** across submodules, not a version number |
 
 **Testing:** You cannot test “Floor2Plan” — you test one cell in the matrix. QA and support ask *which git SHAs* are running; business thinks they bought one product.
 
@@ -167,13 +210,15 @@ You cannot strangler-migrate a domain while connectors surgically attach to the 
 
 ### 4.6 Onboarding and operability
 
-| Task | Submodule world |
-|------|-----------------|
-| New developer clones repo | `git submodule update --init` — easy to get wrong commit |
-| CI build | Must orchestrate submodule refs per client profile |
-| Security patch core | Retest every connector submodule combination |
-| “Which SAP fields map to Activity?” | Search core + submodule + client override |
-| Enable integration for tenant | Often = add submodule + config + redeploy **custom** build |
+| Task | Customized-repo world |
+|------|------------------------|
+| New developer clones connector repo | Build fails — must clone **parent customized repo** and init submodules |
+| New developer clones customized repo | `git submodule update --init --recursive`; easy to get wrong SHAs |
+| CI build | Must reproduce exact submodule manifest per client profile |
+| Security patch core | Retest **every customized composition** that pins that core commit |
+| “Which SAP fields map to Activity?” | Search core + connector submodule + client folder in **that** clone |
+| Enable integration for tenant | New customized repo variant or submodule pin — not a runtime flag |
+| Open PLM connector in IDE alone | **Cannot compile** — architectural constraint of current model |
 
 Platform 2.0 target: **enable integration pack in admin backoffice** — not add a git submodule.
 
@@ -195,15 +240,14 @@ Target: **external ID registry** + mapping in the pack; core keeps stable invari
 
 ## 5. Symptoms your team already recognizes
 
-If you have said any of these, you are paying the submodule tax:
+If you have said any of these, you are paying the customized-repo tax:
 
+- “Clone the **customized** repo, not the connector repo alone.”
 - “It works on my machine but not on the patch environment.”
 - “We need to merge core before we can merge the connector.”
-- “Don’t touch `ImportService` — three clients inherit from it.”
-- “The Hangfire job and the submodule both do the SAP mapping — keep them in sync.”
-- “Who owns this bug — core or integration?”
-- “We can’t upgrade EF until the PLM submodule is updated.”
-- “Professional services shipped a connector branch; product doesn’t have it.”
+- “Which **submodule SHAs** is the client running?”
+- “Our customized repo pins core to a branch the connector team doesn’t use.”
+- “The connector repo doesn’t build — you need the parent repo with `core/` checked out.”
 
 These are **structural** problems, not lack of discipline.
 
@@ -318,4 +362,4 @@ Yes — **strangler**: adapter calls legacy until pack produces intermediate for
 
 ## 11. One-slide summary
 
-> **Legacy connectors reference core through git submodules, so every integration is compiled into the monolith’s guts. That creates a combinatorial release matrix, hides orchestration, and prevents modular, multi-tenant Platform 2.0. Connectors should be versioned packs that speak a stable contract to core — not sibling repos that `#include` the domain.**
+> **Legacy:** Each connector has its own git repo but **cannot compile** without `core/` as a submodule inside a **customized repository** that assembles core + connectors into one solution. That gives git separation without architectural separation — and a combinatorial release matrix. **V2:** Connectors are packs that depend on **contracts**, compiled against core only at the **host**, enabled per tenant without a new customized clone.
