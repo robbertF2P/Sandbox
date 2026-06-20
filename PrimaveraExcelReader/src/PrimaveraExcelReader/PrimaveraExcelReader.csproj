@@ -11,4 +11,8 @@
     <PackageReference Include="NPOI" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\ImportPipeline\src\ImportPipeline.Domain\ImportPipeline.Domain.csproj" />
+  </ItemGroup>
+
 </Project>

@@ -28,6 +28,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\PrimaveraExcelReader\PrimaveraExcelReader.csproj" />
+    <ProjectReference Include="..\..\..\ImportPipeline\src\ImportPipeline.Domain\ImportPipeline.Domain.csproj" />
   </ItemGroup>
 
 </Project>
