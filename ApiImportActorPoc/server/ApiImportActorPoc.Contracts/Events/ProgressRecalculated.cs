@@ -6,4 +6,6 @@ public sealed record ProgressRecalculated(
     Guid ProcessingId,
     int ProjectId,
     ProgressSummary Progress,
-    DateTimeOffset OccurredAt) : IDataEvent;
+    DateTimeOffset OccurredAt,
+    string? CorrelationId = null,
+    string? UseCase = null) : IDataEvent;

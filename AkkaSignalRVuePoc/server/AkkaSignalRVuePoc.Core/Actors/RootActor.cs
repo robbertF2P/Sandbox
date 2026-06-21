@@ -6,6 +6,7 @@ using AkkaSignalRVuePoc.Core.Actors.Background;
 using AkkaSignalRVuePoc.Core.Actors.Data;
 using AkkaSignalRVuePoc.Data;
 using Microsoft.EntityFrameworkCore;
+using Platform.Serilog.Logging.Correlation;
 
 namespace AkkaSignalRVuePoc.Core.Actors;
 
@@ -31,18 +32,7 @@ public sealed class RootActor : ReceiveActor
             Context.System.Name,
             DateTimeOffset.UtcNow));
 
-        Receive<PublishLiveMessageCommand>(HandlePublish);
-        Receive<StartBackgroundProcessCommand>(ForwardToBackgroundManager);
-
-        Receive<GetAllOrganisationsQuery>(ForwardToDataManager);
-        Receive<GetOrganisationByIdQuery>(ForwardToDataManager);
-        Receive<CreateOrganisationCommand>(ForwardToDataManager);
-        Receive<GetAllProjectsQuery>(ForwardToDataManager);
-        Receive<GetProjectByIdQuery>(ForwardToDataManager);
-        Receive<GetProjectsByOrganisationQuery>(ForwardToDataManager);
-        Receive<CreateProjectCommand>(ForwardToDataManager);
-        Receive<UpdateProjectCommand>(ForwardToDataManager);
-        Receive<DeleteProjectCommand>(ForwardToDataManager);
+        ReceiveAsync<CorrelatedMessageEnvelope>(DispatchAsync);
     }
 
     public static Props Props(
@@ -61,17 +51,62 @@ public sealed class RootActor : ReceiveActor
             "data-manager");
     }
 
-    private void ForwardToBackgroundManager(StartBackgroundProcessCommand command) => _backgroundManager.Forward(command);
+    private async Task DispatchAsync(CorrelatedMessageEnvelope envelope)
+    {
+        var sender = Sender;
+        var flow = new CorrelationFlow(envelope.CorrelationId, envelope.UseCase, envelope.CausationId);
+        using CorrelationScope scope = flow.BeginScope();
 
-    private void ForwardToDataManager(object message) => _dataManager.Forward(message);
+        switch (envelope.Message)
+        {
+            case PublishLiveMessageCommand command:
+                HandlePublish(command, flow, sender);
+                break;
+            case StartBackgroundProcessCommand command:
+                _backgroundManager.Forward(flow.Wrap(command));
+                break;
+            case GetAllOrganisationsQuery query:
+                _dataManager.Forward(flow.Wrap(query));
+                break;
+            case GetOrganisationByIdQuery query:
+                _dataManager.Forward(flow.Wrap(query));
+                break;
+            case CreateOrganisationCommand command:
+                _dataManager.Forward(flow.Wrap(command));
+                break;
+            case GetAllProjectsQuery query:
+                _dataManager.Forward(flow.Wrap(query));
+                break;
+            case GetProjectByIdQuery query:
+                _dataManager.Forward(flow.Wrap(query));
+                break;
+            case GetProjectsByOrganisationQuery query:
+                _dataManager.Forward(flow.Wrap(query));
+                break;
+            case CreateProjectCommand command:
+                _dataManager.Forward(flow.Wrap(command));
+                break;
+            case UpdateProjectCommand command:
+                _dataManager.Forward(flow.Wrap(command));
+                break;
+            case DeleteProjectCommand command:
+                _dataManager.Forward(flow.Wrap(command));
+                break;
+            default:
+                Unhandled(envelope);
+                break;
+        }
 
-    private void HandlePublish(PublishLiveMessageCommand command)
+        await Task.CompletedTask;
+    }
+
+    private void HandlePublish(PublishLiveMessageCommand command, CorrelationFlow flow, IActorRef sender)
     {
         if (string.IsNullOrWhiteSpace(command.Text))
         {
-            if (!Sender.IsNobody())
+            if (!sender.IsNobody())
             {
-                Sender.Tell(new Status.Failure(new ArgumentException("Text is required.", nameof(command.Text))));
+                sender.Tell(new Status.Failure(new ArgumentException("Text is required.", nameof(command.Text))));
             }
 
             return;
@@ -81,8 +116,10 @@ public sealed class RootActor : ReceiveActor
             Sequence: ++_sequence,
             Text: command.Text.Trim(),
             SentAt: DateTimeOffset.UtcNow,
-            Source: Self.Path.ToStringWithoutAddress());
+            Source: Self.Path.ToStringWithoutAddress(),
+            CorrelationId: flow.CorrelationId,
+            UseCase: flow.UseCase);
 
-        _hubPushActor.Tell(new PublishActorMessage(message));
+        _hubPushActor.Tell(flow.Wrap(new PublishActorMessage(message)));
     }
 }

@@ -5,6 +5,7 @@ using AkkaSignalRVuePoc.Core.Data;
 using AkkaSignalRVuePoc.Data;
 using AkkaSignalRVuePoc.Data.Entities;
 using Microsoft.EntityFrameworkCore;
+using Platform.Serilog.Logging.Correlation;
 
 namespace AkkaSignalRVuePoc.Core.Actors.Data;
 
@@ -16,16 +17,36 @@ public sealed class OrganisationDataActor : ReceiveActor
     public OrganisationDataActor(IDbContextFactory<CatalogDbContext> dbContextFactory)
     {
         _dbContextFactory = dbContextFactory;
-
-        ReceiveAsync<GetAllOrganisationsQuery>(HandleGetAllAsync);
-        ReceiveAsync<GetOrganisationByIdQuery>(HandleGetByIdAsync);
-        ReceiveAsync<CreateOrganisationCommand>(HandleCreateAsync);
+        ReceiveAsync<CorrelatedMessageEnvelope>(DispatchAsync);
     }
 
     public static Props Props(IDbContextFactory<CatalogDbContext> dbContextFactory) =>
         Akka.Actor.Props.Create(() => new OrganisationDataActor(dbContextFactory));
 
-    private async Task HandleGetAllAsync(GetAllOrganisationsQuery query)
+    private async Task DispatchAsync(CorrelatedMessageEnvelope envelope)
+    {
+        var sender = Sender;
+        var flow = new CorrelationFlow(envelope.CorrelationId, envelope.UseCase, envelope.CausationId);
+        using CorrelationScope scope = flow.BeginScope();
+
+        switch (envelope.Message)
+        {
+            case GetAllOrganisationsQuery query:
+                await HandleGetAllAsync(query, sender);
+                break;
+            case GetOrganisationByIdQuery query:
+                await HandleGetByIdAsync(query, sender);
+                break;
+            case CreateOrganisationCommand command:
+                await HandleCreateAsync(command, sender);
+                break;
+            default:
+                Unhandled(envelope);
+                break;
+        }
+    }
+
+    private async Task HandleGetAllAsync(GetAllOrganisationsQuery query, IActorRef sender)
     {
         await using var db = await _dbContextFactory.CreateDbContextAsync();
         var organisations = await db.Organisations
@@ -33,25 +54,25 @@ public sealed class OrganisationDataActor : ReceiveActor
             .OrderBy(organisation => organisation.Name)
             .ToListAsync();
 
-        Sender.Tell(new GetAllOrganisationsResult(organisations.ConvertAll(CatalogEntityMapper.ToDto)));
+        sender.Tell(new GetAllOrganisationsResult(organisations.ConvertAll(CatalogEntityMapper.ToDto)));
     }
 
-    private async Task HandleGetByIdAsync(GetOrganisationByIdQuery query)
+    private async Task HandleGetByIdAsync(GetOrganisationByIdQuery query, IActorRef sender)
     {
         await using var db = await _dbContextFactory.CreateDbContextAsync();
         var organisation = await db.Organisations
             .AsNoTracking()
             .FirstOrDefaultAsync(entity => entity.Id == query.Id);
 
-        Sender.Tell(new GetOrganisationByIdResult(
+        sender.Tell(new GetOrganisationByIdResult(
             organisation is null ? null : CatalogEntityMapper.ToDto(organisation)));
     }
 
-    private async Task HandleCreateAsync(CreateOrganisationCommand command)
+    private async Task HandleCreateAsync(CreateOrganisationCommand command, IActorRef sender)
     {
         if (string.IsNullOrWhiteSpace(command.Name))
         {
-            Sender.Tell(new Status.Failure(new ArgumentException("Name is required.", nameof(command.Name))));
+            sender.Tell(new Status.Failure(new ArgumentException("Name is required.", nameof(command.Name))));
             return;
         }
 
@@ -67,6 +88,6 @@ public sealed class OrganisationDataActor : ReceiveActor
         await db.SaveChangesAsync();
 
         _log.Info("Created organisation {OrganisationId} ({Name})", organisation.Id, organisation.Name);
-        Sender.Tell(new CreateOrganisationResult(CatalogEntityMapper.ToDto(organisation)));
+        sender.Tell(new CreateOrganisationResult(CatalogEntityMapper.ToDto(organisation)));
     }
 }

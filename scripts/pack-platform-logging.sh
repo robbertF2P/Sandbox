@@ -3,7 +3,7 @@ set -euo pipefail
 
 root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 feed="${root}/local-feed"
-version="${1:-1.0.0}"
+version="${1:-1.1.0}"
 
 mkdir -p "${feed}"
 
@@ -49,6 +49,14 @@ pack \
   "Platform Serilog Logging Testing" \
   "xUnit Serilog test sink wired to the shared platform logging pipeline." \
   "serilog logging testing xunit platform" \
+  "${root}/build/nuget.pack.config"
+
+pack \
+  "${root}/Platform.Serilog.Logging/src/Platform.Serilog.Logging.Akka/Platform.Serilog.Logging.Akka.csproj" \
+  "Platform.Serilog.Logging.Akka" \
+  "Platform Serilog Logging Akka" \
+  "Akka.NET correlation helpers for the platform logging standard" \
+  "serilog logging akka correlation platform" \
   "${root}/build/nuget.pack.config"
 
 echo "Packed Platform.Serilog.Logging packages to ${feed}"

@@ -5,6 +5,7 @@ using ApiImportActorPoc.Contracts.Messages.Data;
 using ApiImportActorPoc.Core.Import;
 using ApiImportActorPoc.Data;
 using Microsoft.EntityFrameworkCore;
+using Platform.Serilog.Logging.Correlation;
 
 namespace ApiImportActorPoc.Core.Actors.Data;
 
@@ -16,14 +17,24 @@ public sealed class ProjectImportDataActor : ReceiveActor
     public ProjectImportDataActor(IDbContextFactory<ImportDbContext> dbContextFactory)
     {
         _upsertService = new ProjectImportUpsertService(dbContextFactory);
-        ReceiveAsync<PersistProjectImportDataCommand>(HandlePersistAsync);
+        ReceiveAsync<CorrelatedMessageEnvelope>(DispatchAsync);
     }
 
     public static Props Props(IDbContextFactory<ImportDbContext> dbContextFactory) =>
         Akka.Actor.Props.Create(() => new ProjectImportDataActor(dbContextFactory));
 
-    private async Task HandlePersistAsync(PersistProjectImportDataCommand command)
+    private async Task DispatchAsync(CorrelatedMessageEnvelope envelope)
     {
+        if (envelope.Message is not PersistProjectImportDataCommand command)
+        {
+            Unhandled(envelope);
+            return;
+        }
+
+        var sender = Sender;
+        var flow = new CorrelationFlow(envelope.CorrelationId, envelope.UseCase, envelope.CausationId);
+        using CorrelationScope scope = flow.BeginScope();
+
         try
         {
             var result = await _upsertService.UpsertAsync(
@@ -33,10 +44,12 @@ public sealed class ProjectImportDataActor : ReceiveActor
                     progress.Step,
                     progress.TotalSteps,
                     progress.Message,
-                    DateTimeOffset.UtcNow)),
+                    DateTimeOffset.UtcNow,
+                    flow.CorrelationId,
+                    flow.UseCase)),
                 default);
 
-            Sender.Tell(new PersistProjectImportDataResult(true, result.ProjectId, result.Created, null));
+            sender.Tell(new PersistProjectImportDataResult(true, result.ProjectId, result.Created, null));
             _log.Info(
                 "Persisted import session {0} as project {1} ({2})",
                 command.SessionId,
@@ -46,7 +59,7 @@ public sealed class ProjectImportDataActor : ReceiveActor
         catch (Exception exception)
         {
             _log.Error(exception, "Failed to persist import session {0}", command.SessionId);
-            Sender.Tell(new PersistProjectImportDataResult(false, null, false, exception.Message));
+            sender.Tell(new PersistProjectImportDataResult(false, null, false, exception.Message));
         }
     }
 }

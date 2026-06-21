@@ -14,11 +14,25 @@ public sealed class DataActorIntegrationTests : ActorDatabaseTestBase<DataActorI
     }
 
     [Fact]
+    public async Task Project_data_actor_returns_seeded_projects()
+    {
+        var actor = Sys.ActorOf(ProjectDataActor.Props(DatabaseFactory), "project-data-read");
+
+        var result = await ActorTestCorrelation.AskAsync<GetAllProjectsResult>(
+            actor,
+            new GetAllProjectsQuery(),
+            cancellationToken: TestContext.Current.CancellationToken);
+
+        Assert.Contains(result.Projects, project => project.Name == "Akka SignalR POC");
+    }
+
+    [Fact]
     public async Task Data_manager_returns_seeded_organisations()
     {
         var dataManager = Sys.ActorOf(DataManagerActor.Props(DatabaseFactory), "data-manager");
 
-        var result = await dataManager.Ask<GetAllOrganisationsResult>(
+        var result = await ActorTestCorrelation.AskAsync<GetAllOrganisationsResult>(
+            dataManager,
             new GetAllOrganisationsQuery(),
             cancellationToken: TestContext.Current.CancellationToken);
 
@@ -28,19 +42,34 @@ public sealed class DataActorIntegrationTests : ActorDatabaseTestBase<DataActorI
     }
 
     [Fact]
+    public async Task Data_manager_returns_seeded_projects()
+    {
+        var dataManager = Sys.ActorOf(DataManagerActor.Props(DatabaseFactory), "data-manager-projects");
+
+        var result = await ActorTestCorrelation.AskAsync<GetAllProjectsResult>(
+            dataManager,
+            new GetAllProjectsQuery(),
+            cancellationToken: TestContext.Current.CancellationToken);
+
+        Assert.Contains(result.Projects, project => project.Name == "Akka SignalR POC");
+    }
+
+    [Fact]
     public async Task Organisation_data_actor_creates_and_reads_organisation()
     {
         var actor = Sys.ActorOf(
             OrganisationDataActor.Props(DatabaseFactory),
             "organisation-data");
 
-        var created = await actor.Ask<CreateOrganisationResult>(
+        var created = await ActorTestCorrelation.AskAsync<CreateOrganisationResult>(
+            actor,
             new CreateOrganisationCommand("New Org"),
             cancellationToken: TestContext.Current.CancellationToken);
 
         Assert.Equal("New Org", created.Organisation.Name);
 
-        var fetched = await actor.Ask<GetOrganisationByIdResult>(
+        var fetched = await ActorTestCorrelation.AskAsync<GetOrganisationByIdResult>(
+            actor,
             new GetOrganisationByIdQuery(created.Organisation.Id),
             cancellationToken: TestContext.Current.CancellationToken);
 
@@ -53,7 +82,8 @@ public sealed class DataActorIntegrationTests : ActorDatabaseTestBase<DataActorI
     {
         var actor = Sys.ActorOf(ProjectDataActor.Props(DatabaseFactory), "project-data");
 
-        var created = await actor.Ask<CreateProjectResult>(
+        var created = await ActorTestCorrelation.AskAsync<CreateProjectResult>(
+            actor,
             new CreateProjectCommand(
                 CatalogSeedData.AcmeOrganisationId,
                 "Billing API",
@@ -64,7 +94,8 @@ public sealed class DataActorIntegrationTests : ActorDatabaseTestBase<DataActorI
         Assert.NotNull(created.Project);
         Assert.Equal("Billing API", created.Project!.Name);
 
-        var projects = await actor.Ask<GetProjectsByOrganisationResult>(
+        var projects = await ActorTestCorrelation.AskAsync<GetProjectsByOrganisationResult>(
+            actor,
             new GetProjectsByOrganisationQuery(CatalogSeedData.AcmeOrganisationId),
             cancellationToken: TestContext.Current.CancellationToken);
 
@@ -77,7 +108,9 @@ public sealed class DataActorIntegrationTests : ActorDatabaseTestBase<DataActorI
     {
         var dataManager = Sys.ActorOf(DataManagerActor.Props(DatabaseFactory), "data-manager-update");
 
-        var updated = await dataManager.Ask<UpdateProjectResult>(new UpdateProjectCommand(
+        var updated = await ActorTestCorrelation.AskAsync<UpdateProjectResult>(
+            dataManager,
+            new UpdateProjectCommand(
                 CatalogSeedData.AkkaPocProjectId,
                 "Renamed Akka POC",
                 "Updated description"), cancellationToken: TestContext.Current.CancellationToken);
@@ -96,7 +129,8 @@ public sealed class DataActorIntegrationTests : ActorDatabaseTestBase<DataActorI
             RootActor.Props(hubPushActor, DatabaseFactory),
             "live-message-root");
 
-        var projects = await root.Ask<GetAllProjectsResult>(
+        var projects = await ActorTestCorrelation.AskAsync<GetAllProjectsResult>(
+            root,
             new GetAllProjectsQuery(),
             cancellationToken: TestContext.Current.CancellationToken);
 

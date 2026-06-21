@@ -1,6 +1,7 @@
 using Akka.Actor;
 using Akka.Event;
 using AkkaSignalRVuePoc.Contracts.Messages;
+using Platform.Serilog.Logging.Correlation;
 
 namespace AkkaSignalRVuePoc.Core.Actors.Background;
 
@@ -16,7 +17,7 @@ public sealed class BackgroundManagerActor : ReceiveActor
     {
         _hubPushActor = hubPushActor;
         _timing = timing;
-        Receive<StartBackgroundProcessCommand>(HandleStart);
+        ReceiveAsync<CorrelatedMessageEnvelope>(DispatchAsync);
         Receive<Terminated>(_ => _activeProcess = null);
     }
 
@@ -25,7 +26,22 @@ public sealed class BackgroundManagerActor : ReceiveActor
             hubPushActor,
             timing ?? BackgroundProcessTiming.Default));
 
-    private void HandleStart(StartBackgroundProcessCommand command)
+    private Task DispatchAsync(CorrelatedMessageEnvelope envelope)
+    {
+        var flow = new CorrelationFlow(envelope.CorrelationId, envelope.UseCase, envelope.CausationId);
+        using CorrelationScope scope = flow.BeginScope();
+
+        if (envelope.Message is StartBackgroundProcessCommand command)
+        {
+            HandleStart(command, flow);
+            return Task.CompletedTask;
+        }
+
+        Unhandled(envelope);
+        return Task.CompletedTask;
+    }
+
+    private void HandleStart(StartBackgroundProcessCommand command, CorrelationFlow flow)
     {
         if (_activeProcess is { } existing && !existing.IsNobody())
         {
@@ -35,10 +51,18 @@ public sealed class BackgroundManagerActor : ReceiveActor
 
         var processId = $"background-process-{++_processCounter}";
         _activeProcess = Context.ActorOf(
-            LongRunningProcessActor.Props(_hubPushActor, processId, _timing),
+            LongRunningProcessActor.Props(
+                _hubPushActor,
+                processId,
+                _timing,
+                flow.CorrelationId,
+                flow.UseCase),
             processId);
         Context.Watch(_activeProcess);
 
-        _log.Info("Started long-running background process {0}", processId);
+        _log.Info(
+            "Started long-running background process {0} correlation {1}",
+            processId,
+            flow.CorrelationId);
     }
 }

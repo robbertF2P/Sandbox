@@ -4,6 +4,7 @@ using ApiImportActorPoc.Contracts.Messages.Import;
 using ApiImportActorPoc.Contracts.Messages.Progress;
 using ApiImportActorPoc.Contracts.Models.Import;
 using ApiImportActorPoc.Contracts.Values;
+using Platform.Serilog.Logging.Akka;
 
 namespace ApiImportActorPoc.Api.Services;
 
@@ -20,25 +21,38 @@ public sealed class ActorSystemCommandFacade : IActorSystemCommandFacade
     public Task<StartImportResult> StartImportAsync(
         ProjectImportPayload payload,
         CancellationToken cancellationToken = default) =>
-        _rootActor.Ask<StartImportResult>(new StartImportCommand(payload), _askTimeout, cancellationToken);
+        _rootActor.AskCorrelated<StartImportResult>(
+            new StartImportCommand(payload),
+            "Import.Start",
+            _askTimeout,
+            cancellationToken);
 
     public Task<GetImportModelResult> GetImportModelAsync(
         Guid sessionId,
         CancellationToken cancellationToken = default) =>
-        _rootActor.Ask<GetImportModelResult>(new GetImportModelQuery(sessionId), _askTimeout, cancellationToken);
+        _rootActor.AskCorrelated<GetImportModelResult>(
+            new GetImportModelQuery(sessionId),
+            "Import.GetModel",
+            _askTimeout,
+            cancellationToken);
 
     public Task<PersistImportResult> PersistImportAsync(
         Guid sessionId,
         CancellationToken cancellationToken = default) =>
-        _rootActor.Ask<PersistImportResult>(new PersistImportCommand(sessionId), _askTimeout, cancellationToken);
+        _rootActor.AskCorrelated<PersistImportResult>(
+            new PersistImportCommand(sessionId),
+            "Import.Persist",
+            _askTimeout,
+            cancellationToken);
 
     public Task<BookHoursResult> BookHoursAsync(
         int assignmentId,
         Hours hours,
         string? notes,
         CancellationToken cancellationToken = default) =>
-        _rootActor.Ask<BookHoursResult>(
+        _rootActor.AskCorrelated<BookHoursResult>(
             new BookHoursCommand(assignmentId, hours, notes),
+            "Hours.Book",
             _askTimeout,
             cancellationToken);
 }

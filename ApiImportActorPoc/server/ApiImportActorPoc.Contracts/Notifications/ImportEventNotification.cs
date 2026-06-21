@@ -4,4 +4,6 @@ public sealed record ImportEventNotification(
     string EventType,
     Guid SessionId,
     object? Payload,
-    DateTimeOffset OccurredAt);
+    DateTimeOffset OccurredAt,
+    string? CorrelationId = null,
+    string? UseCase = null);

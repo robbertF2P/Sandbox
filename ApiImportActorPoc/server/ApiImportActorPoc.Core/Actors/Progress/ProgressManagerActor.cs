@@ -6,10 +6,12 @@ using ApiImportActorPoc.Contracts.Values;
 using ApiImportActorPoc.Core.Progress;
 using ApiImportActorPoc.Data;
 using Microsoft.EntityFrameworkCore;
+using Platform.Serilog.Logging.Akka;
+using Platform.Serilog.Logging.Correlation;
 
 namespace ApiImportActorPoc.Core.Actors.Progress;
 
-public sealed class ProgressManagerActor : ReceiveActor
+public sealed class ProgressManagerActor : PlatformReceiveActor
 {
     private readonly IDbContextFactory<ImportDbContext> _dbContextFactory;
     private readonly ProjectProgressLoader _progressLoader;
@@ -35,14 +37,16 @@ public sealed class ProgressManagerActor : ReceiveActor
 
     private void Ready()
     {
-        Receive<BookHoursCommand>(HandleBookHours);
+        RegisterEnvelopeHandler();
+
+        ReceiveCorrelated<BookHoursCommand>(HandleBookHours);
     }
 
-    private void HandleBookHours(BookHoursCommand command)
+    private void HandleBookHours(BookHoursCommand command, CorrelationFlow flow, IActorRef sender)
     {
         if (command.Hours <= Hours.Zero)
         {
-            Sender.Tell(new BookHoursResult(false, null, "Hours must be greater than zero."));
+            sender.Tell(new BookHoursResult(false, null, "Hours must be greater than zero."));
             return;
         }
 
@@ -53,26 +57,29 @@ public sealed class ProgressManagerActor : ReceiveActor
             processingId,
             command.AssignmentId,
             command.Hours,
-            occurredAt));
+            occurredAt,
+            flow.CorrelationId,
+            flow.UseCase));
 
         _log.Info(
             "Progress manager started hour booking processing {0} for assignment {1}",
             processingId,
             command.AssignmentId);
 
-        _hourBookingData.Tell(new PersistHourBookingCommand(
+        _hourBookingData.Tell(flow.WrapChild(new PersistHourBookingCommand(
             processingId,
             command.AssignmentId,
             command.Hours,
-            command.Notes));
+            command.Notes), "Hours.Persist"));
 
-        Become(() => WaitForPersist(processingId, command.AssignmentId, Sender));
+        Become(() => WaitForPersist(processingId, command.AssignmentId, flow, sender));
     }
 
-    private void WaitForPersist(Guid processingId, int assignmentId, IActorRef originalSender)
+    private void WaitForPersist(Guid processingId, int assignmentId, CorrelationFlow flow, IActorRef originalSender)
     {
         ReceiveAsync<PersistHourBookingResult>(async result =>
         {
+            using CorrelationScope scope = flow.BeginScope();
             if (!result.Success || result.Booking is null || result.ProjectId is not int projectId)
             {
                 var errorMessage = result.ErrorMessage ?? "Hour booking failed.";
@@ -80,7 +87,9 @@ public sealed class ProgressManagerActor : ReceiveActor
                     processingId,
                     assignmentId,
                     errorMessage,
-                    DateTimeOffset.UtcNow));
+                    DateTimeOffset.UtcNow,
+                    flow.CorrelationId,
+                    flow.UseCase));
 
                 originalSender.Tell(new BookHoursResult(false, null, errorMessage));
                 _log.Warning(
@@ -97,7 +106,9 @@ public sealed class ProgressManagerActor : ReceiveActor
                 processingId,
                 result.Booking,
                 projectId,
-                occurredAt));
+                occurredAt,
+                flow.CorrelationId,
+                flow.UseCase));
 
             var projectProgress = await _progressLoader.LoadAsync(projectId);
             if (projectProgress is not null)
@@ -106,7 +117,9 @@ public sealed class ProgressManagerActor : ReceiveActor
                     processingId,
                     projectId,
                     projectProgress.Progress,
-                    DateTimeOffset.UtcNow));
+                    DateTimeOffset.UtcNow,
+                    flow.CorrelationId,
+                    flow.UseCase));
             }
 
             originalSender.Tell(new BookHoursResult(true, result.Booking, null));

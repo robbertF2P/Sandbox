@@ -5,6 +5,7 @@ using AkkaSignalRVuePoc.Core.Data;
 using AkkaSignalRVuePoc.Data;
 using AkkaSignalRVuePoc.Data.Entities;
 using Microsoft.EntityFrameworkCore;
+using Platform.Serilog.Logging.Correlation;
 
 namespace AkkaSignalRVuePoc.Core.Actors.Data;
 
@@ -16,19 +17,45 @@ public sealed class ProjectDataActor : ReceiveActor
     public ProjectDataActor(IDbContextFactory<CatalogDbContext> dbContextFactory)
     {
         _dbContextFactory = dbContextFactory;
-
-        ReceiveAsync<GetAllProjectsQuery>(HandleGetAllAsync);
-        ReceiveAsync<GetProjectByIdQuery>(HandleGetByIdAsync);
-        ReceiveAsync<GetProjectsByOrganisationQuery>(HandleGetByOrganisationAsync);
-        ReceiveAsync<CreateProjectCommand>(HandleCreateAsync);
-        ReceiveAsync<UpdateProjectCommand>(HandleUpdateAsync);
-        ReceiveAsync<DeleteProjectCommand>(HandleDeleteAsync);
+        ReceiveAsync<CorrelatedMessageEnvelope>(DispatchAsync);
     }
 
     public static Props Props(IDbContextFactory<CatalogDbContext> dbContextFactory) =>
         Akka.Actor.Props.Create(() => new ProjectDataActor(dbContextFactory));
 
-    private async Task HandleGetAllAsync(GetAllProjectsQuery query)
+    private async Task DispatchAsync(CorrelatedMessageEnvelope envelope)
+    {
+        var sender = Sender;
+        var flow = new CorrelationFlow(envelope.CorrelationId, envelope.UseCase, envelope.CausationId);
+        using CorrelationScope scope = flow.BeginScope();
+
+        switch (envelope.Message)
+        {
+            case GetAllProjectsQuery query:
+                await HandleGetAllAsync(query, sender);
+                break;
+            case GetProjectByIdQuery query:
+                await HandleGetByIdAsync(query, sender);
+                break;
+            case GetProjectsByOrganisationQuery query:
+                await HandleGetByOrganisationAsync(query, sender);
+                break;
+            case CreateProjectCommand command:
+                await HandleCreateAsync(command, sender);
+                break;
+            case UpdateProjectCommand command:
+                await HandleUpdateAsync(command, sender);
+                break;
+            case DeleteProjectCommand command:
+                await HandleDeleteAsync(command, sender);
+                break;
+            default:
+                Unhandled(envelope);
+                break;
+        }
+    }
+
+    private async Task HandleGetAllAsync(GetAllProjectsQuery query, IActorRef sender)
     {
         await using var db = await _dbContextFactory.CreateDbContextAsync();
         var projects = await db.Projects
@@ -36,21 +63,21 @@ public sealed class ProjectDataActor : ReceiveActor
             .OrderBy(project => project.Name)
             .ToListAsync();
 
-        Sender.Tell(new GetAllProjectsResult(projects.ConvertAll(CatalogEntityMapper.ToDto)));
+        sender.Tell(new GetAllProjectsResult(projects.ConvertAll(CatalogEntityMapper.ToDto)));
     }
 
-    private async Task HandleGetByIdAsync(GetProjectByIdQuery query)
+    private async Task HandleGetByIdAsync(GetProjectByIdQuery query, IActorRef sender)
     {
         await using var db = await _dbContextFactory.CreateDbContextAsync();
         var project = await db.Projects
             .AsNoTracking()
             .FirstOrDefaultAsync(entity => entity.Id == query.Id);
 
-        Sender.Tell(new GetProjectByIdResult(
+        sender.Tell(new GetProjectByIdResult(
             project is null ? null : CatalogEntityMapper.ToDto(project)));
     }
 
-    private async Task HandleGetByOrganisationAsync(GetProjectsByOrganisationQuery query)
+    private async Task HandleGetByOrganisationAsync(GetProjectsByOrganisationQuery query, IActorRef sender)
     {
         await using var db = await _dbContextFactory.CreateDbContextAsync();
         var organisationExists = await db.Organisations
@@ -59,7 +86,7 @@ public sealed class ProjectDataActor : ReceiveActor
 
         if (!organisationExists)
         {
-            Sender.Tell(new GetProjectsByOrganisationResult(query.OrganisationId, false, []));
+            sender.Tell(new GetProjectsByOrganisationResult(query.OrganisationId, false, []));
             return;
         }
 
@@ -69,23 +96,23 @@ public sealed class ProjectDataActor : ReceiveActor
             .OrderBy(project => project.Name)
             .ToListAsync();
 
-        Sender.Tell(new GetProjectsByOrganisationResult(
+        sender.Tell(new GetProjectsByOrganisationResult(
             query.OrganisationId,
             true,
             projects.ConvertAll(CatalogEntityMapper.ToDto)));
     }
 
-    private async Task HandleCreateAsync(CreateProjectCommand command)
+    private async Task HandleCreateAsync(CreateProjectCommand command, IActorRef sender)
     {
         if (string.IsNullOrWhiteSpace(command.Name))
         {
-            Sender.Tell(new Status.Failure(new ArgumentException("Name is required.", nameof(command.Name))));
+            sender.Tell(new Status.Failure(new ArgumentException("Name is required.", nameof(command.Name))));
             return;
         }
 
         if (command.OrganisationId == Guid.Empty)
         {
-            Sender.Tell(new Status.Failure(
+            sender.Tell(new Status.Failure(
                 new ArgumentException("OrganisationId is required.", nameof(command.OrganisationId))));
             return;
         }
@@ -97,7 +124,7 @@ public sealed class ProjectDataActor : ReceiveActor
 
         if (!organisationExists)
         {
-            Sender.Tell(new CreateProjectResult(false, null));
+            sender.Tell(new CreateProjectResult(false, null));
             return;
         }
 
@@ -116,14 +143,14 @@ public sealed class ProjectDataActor : ReceiveActor
         await db.SaveChangesAsync();
 
         _log.Info("Created project {ProjectId} ({Name})", project.Id, project.Name);
-        Sender.Tell(new CreateProjectResult(true, CatalogEntityMapper.ToDto(project)));
+        sender.Tell(new CreateProjectResult(true, CatalogEntityMapper.ToDto(project)));
     }
 
-    private async Task HandleUpdateAsync(UpdateProjectCommand command)
+    private async Task HandleUpdateAsync(UpdateProjectCommand command, IActorRef sender)
     {
         if (command.Id == Guid.Empty)
         {
-            Sender.Tell(new Status.Failure(new ArgumentException("Id is required.", nameof(command.Id))));
+            sender.Tell(new Status.Failure(new ArgumentException("Id is required.", nameof(command.Id))));
             return;
         }
 
@@ -131,7 +158,7 @@ public sealed class ProjectDataActor : ReceiveActor
         var hasDescription = command.Description is not null;
         if (!hasName && !hasDescription)
         {
-            Sender.Tell(new Status.Failure(
+            sender.Tell(new Status.Failure(
                 new ArgumentException("At least one of Name or Description must be provided.")));
             return;
         }
@@ -140,7 +167,7 @@ public sealed class ProjectDataActor : ReceiveActor
         var project = await db.Projects.FirstOrDefaultAsync(entity => entity.Id == command.Id);
         if (project is null)
         {
-            Sender.Tell(new UpdateProjectResult(false, null));
+            sender.Tell(new UpdateProjectResult(false, null));
             return;
         }
 
@@ -159,14 +186,14 @@ public sealed class ProjectDataActor : ReceiveActor
         await db.SaveChangesAsync();
 
         _log.Info("Updated project {ProjectId} ({Name})", project.Id, project.Name);
-        Sender.Tell(new UpdateProjectResult(true, CatalogEntityMapper.ToDto(project)));
+        sender.Tell(new UpdateProjectResult(true, CatalogEntityMapper.ToDto(project)));
     }
 
-    private async Task HandleDeleteAsync(DeleteProjectCommand command)
+    private async Task HandleDeleteAsync(DeleteProjectCommand command, IActorRef sender)
     {
         if (command.Id == Guid.Empty)
         {
-            Sender.Tell(new Status.Failure(new ArgumentException("Id is required.", nameof(command.Id))));
+            sender.Tell(new Status.Failure(new ArgumentException("Id is required.", nameof(command.Id))));
             return;
         }
 
@@ -174,7 +201,7 @@ public sealed class ProjectDataActor : ReceiveActor
         var project = await db.Projects.FirstOrDefaultAsync(entity => entity.Id == command.Id);
         if (project is null)
         {
-            Sender.Tell(new DeleteProjectResult(false, null));
+            sender.Tell(new DeleteProjectResult(false, null));
             return;
         }
 
@@ -183,6 +210,6 @@ public sealed class ProjectDataActor : ReceiveActor
         await db.SaveChangesAsync();
 
         _log.Info("Deleted project {ProjectId} ({Name})", project.Id, project.Name);
-        Sender.Tell(new DeleteProjectResult(true, dto));
+        sender.Tell(new DeleteProjectResult(true, dto));
     }
 }
