@@ -16,6 +16,7 @@
 | `starter-kit/README.md` | **Module refactor starter kit** — copy into monolith (see below) |
 | `module-composition-di.md` | **DI standard** — `IServiceCollection` extensions; no ABP in new modules |
 | `platform-frontend-standard.md` | **Frontend standard** — `@floorganise/css` + `@floorganise/ui` for all V2 modules |
+| `platform-authentication-standard.md` | **Auth design** — OIDC, cloud multi-tenant vs on-prem install config |
 | `../floor2plan-v2-connector-architecture.md` | Integration pack dependency rules |
 
 ---

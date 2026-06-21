@@ -66,6 +66,6 @@ When working on **monolith modularization** or **new bounded-context modules** (
 - Bridge legacy ABP via **`[StranglerAdapter]`** in Infrastructure; do not extend `AbpModule` for new code.
 - **V2 frontend:** **`@floorganise/css`** (Tailwind + Floorganise tokens) on every frontend module; shared widgets from **`@floorganise/ui`** — no per-module design systems.
 
-Details: `docs/monolith-modularization/module-composition-di.md` · Plan: `docs/monolith-modularization/foundation-and-pilot-plan.md` · Frontend: `docs/monolith-modularization/platform-frontend-standard.md` · Agent rules: `docs/monolith-modularization/agent-instructions-snippet.md` (copy to monolith as `agent-rules.md` + `.github/copilot-instructions.md`).
+Details: `docs/monolith-modularization/module-composition-di.md` · Plan: `docs/monolith-modularization/foundation-and-pilot-plan.md` · Frontend: `docs/monolith-modularization/platform-frontend-standard.md` · Auth: `docs/monolith-modularization/platform-authentication-standard.md` · Agent rules: `docs/monolith-modularization/agent-instructions-snippet.md` (copy to monolith as `agent-rules.md` + `.github/copilot-instructions.md`).
 
 **SandBox** uses Cursor for brainstorming and skill authoring (`.cursor/skills/`). The monolith does not need Cursor — use the agent snippet for Copilot and Claude.
