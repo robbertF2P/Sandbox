@@ -1,34 +1,41 @@
-SandBox
-=======
+# Floorganise SandBox
 
-## Compose development container
+Reference implementations, platform packages, and AI-assisted modularization assets for the **Floor2Plan (F2P) Platform 2.0** strangler refactor.
 
-This repository includes a Compose file that works with either Docker Compose or
-Podman Compose. The service uses a fully qualified image name so Podman does not
-prompt for a registry when it pulls the Mono image.
+This repo is the Floorganise-owned home for F2P refactor work. Personal experiments and unrelated sandboxes live elsewhere.
 
-Start the development container with Podman:
+## Start here
 
-```sh
-podman compose up
+| Audience | Entry |
+|----------|--------|
+| **AI agents** | `AGENTS.md` → `sandbox-starter-kit` skill |
+| **Humans** | [docs/ai-starter-kit.md](docs/ai-starter-kit.md) |
+| **Monolith program** | [docs/monolith-modularization/foundation-and-pilot-plan.md](docs/monolith-modularization/foundation-and-pilot-plan.md) |
+
+## Repo map
+
+| Area | Path |
+|------|------|
+| Modularization program | `docs/monolith-modularization/` |
+| Floorganise design system | `FloorganiseCss/` (`@floorganise/css`, showcase apps) |
+| Platform logging + correlation | `Platform.Serilog.Logging/`, `build/Platform.Logging.*.props` |
+| Import domain kernel | `ImportPipeline/` |
+| Reference POCs | `ApiImportActorPoc/`, `AkkaSignalRVuePoc/`, `PrimaveraExcelReader/` |
+| Agent skills (source) | `.cursor/skills/` — sync with `./scripts/sync-agent-skills.sh` |
+
+## Two-repo model
+
+| Repo | Role |
+|------|------|
+| **This SandBox** | POCs, templates, standards, shared NuGet packages |
+| **F2P monolith** (external) | Production code, characterization tests, extractions |
+
+Copy artifacts from here into the monolith per `foundation-and-pilot-plan.md` — do not project-reference SandBox from production.
+
+## Quick verify
+
+```bash
+dotnet build Platform.Serilog.Logging
+dotnet test ImportPipeline
+dotnet test PrimaveraExcelReader
 ```
-
-If your Podman installation uses the standalone Compose wrapper, run:
-
-```sh
-podman-compose up
-```
-
-Or with Docker:
-
-```sh
-docker compose up
-```
-
-Open a shell in the running container:
-
-```sh
-podman compose exec dev sh
-```
-
-The repository is bind-mounted at `/workspace` inside the container.
