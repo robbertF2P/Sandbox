@@ -2,6 +2,14 @@
 
 This repo uses **Agent Skills** for domain-specific guidance. Copilot loads them from `.github/skills/` when relevant.
 
+**Start here:** `sandbox-starter-kit` (repo map, workflow, skill router). Human index: `docs/ai-starter-kit.md`.
+
+## SandBox starter kit
+
+- **`sandbox-starter-kit`** — entry point: where code lives, which skill to use, quality gates, new-module checklist.
+- **`platform-logging`** — `Platform.Serilog.Logging` via `build/Platform.Logging.*.props`; Seq / App Insights / xUnit sink.
+- **`platform-correlation`** — `CorrelationId` + `UseCase` across HTTP, Akka (`AskCorrelated`), events, SignalR.
+
 ## Domain-driven design
 
 - **`domain-driven-design`** — Eric Evans: Ubiquitous Language, bounded contexts, tactical building blocks, strategic design.

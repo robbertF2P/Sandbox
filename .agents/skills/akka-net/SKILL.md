@@ -125,6 +125,8 @@ dotnet test AkkaSignalRVuePoc.slnx --filter "FullyQualifiedName~Actors"
 
 ## Related skills and rules
 
+- `platform-correlation` — `AskCorrelated`/`TellCorrelated`, envelopes, async `Sender` capture (required for EF actors).
+- `platform-logging` — Serilog + correlation enricher on actor log lines.
 - `reactive-applications-akka-net` — Anthony Brown's book: reactive design, supervision, scaling, clustering, persistence (conceptual foundation).
 - `dotnet-core-csharp-development` — ASP.NET Core host, DI, and `dotnet` CLI.
 - `.cursor/rules/actor-system-contracts.mdc` — message/event placement and naming.
