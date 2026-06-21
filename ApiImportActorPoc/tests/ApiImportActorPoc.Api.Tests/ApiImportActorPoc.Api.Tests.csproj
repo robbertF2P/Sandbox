@@ -28,4 +28,6 @@
     <ProjectReference Include="..\..\server\ApiImportActorPoc.Contracts\ApiImportActorPoc.Contracts.csproj" />
   </ItemGroup>
 
+  <Import Project="..\..\..\build\Platform.Logging.Tests.props" />
+
 </Project>

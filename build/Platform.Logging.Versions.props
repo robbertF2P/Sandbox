@@ -1,0 +1,13 @@
+<Project>
+  <!-- Central package versions for Platform.Serilog.Logging adoption. Import from module Directory.Packages.props. -->
+  <PropertyGroup>
+    <PlatformSerilogLoggingVersion>1.0.0</PlatformSerilogLoggingVersion>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageVersion Include="Platform.Serilog.Logging" Version="$(PlatformSerilogLoggingVersion)" />
+    <PackageVersion Include="Platform.Serilog.Logging.Testing" Version="$(PlatformSerilogLoggingVersion)" />
+    <PackageVersion Include="Serilog.AspNetCore" Version="10.0.0" />
+    <PackageVersion Include="Serilog.Extensions.Logging" Version="10.0.0" />
+  </ItemGroup>
+</Project>

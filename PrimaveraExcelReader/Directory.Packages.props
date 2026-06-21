@@ -3,9 +3,13 @@
     <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
   </PropertyGroup>
 
+  <Import Project="..\build\Platform.Logging.Versions.props" />
+
   <ItemGroup>
     <PackageVersion Include="coverlet.collector" Version="10.0.1" />
+    <PackageVersion Include="ImportPipeline.Domain" Version="1.0.0" />
     <PackageVersion Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="10.0.8" />
+    <PackageVersion Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.8" />
     <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="18.5.1" />
     <PackageVersion Include="Moq" Version="4.20.72" />
     <PackageVersion Include="NPOI" Version="2.7.5" />

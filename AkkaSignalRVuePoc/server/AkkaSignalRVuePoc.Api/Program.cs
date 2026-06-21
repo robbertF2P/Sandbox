@@ -1,23 +1,16 @@
 using AkkaSignalRVuePoc.Api.Endpoints;
 using AkkaSignalRVuePoc.Api.Hubs;
 using AkkaSignalRVuePoc.Api.Services;
+using Platform.Serilog.Logging;
 using AkkaSignalRVuePoc.Data;
 using Serilog;
 
-Log.Logger = SerilogLogging.CreateBootstrapLogger();
-
 try
 {
-    Log.Information("Starting Akka.NET + SignalR + Vue POC API");
-
     var builder = WebApplication.CreateBuilder(args);
+    builder.AddPlatformLogging("Akka SignalR Vue POC API");
 
-    builder.Host.UseSerilog((context, services, loggerConfiguration) =>
-    {
-        SerilogLogging.ConfigureShared(loggerConfiguration);
-        SerilogLogging.ConfigureApplicationSinks(loggerConfiguration, context.Configuration);
-        loggerConfiguration.ReadFrom.Services(services);
-    });
+    Log.Information("Starting Akka.NET + SignalR + Vue POC API");
 
     builder.Services.AddEndpointsApiExplorer();
     builder.Services.AddSwaggerGen(options =>
@@ -68,7 +61,7 @@ try
         options.RoutePrefix = "swagger";
     });
 
-    app.UseSerilogRequestLogging();
+    app.UsePlatformRequestLogging();
     app.UseCors("VueDevClient");
 
     app.MapGet("/", () => Results.Ok(new

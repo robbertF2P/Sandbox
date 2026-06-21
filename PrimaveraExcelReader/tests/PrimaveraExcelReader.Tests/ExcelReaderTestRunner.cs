@@ -9,6 +9,9 @@ public static class ExcelReaderTestRunner
 {
     private static readonly IExcelWorkbookAccessor DefaultAccessor = new NpoiExcelWorkbookAccessor();
 
+    public static ExcelReaderService CreateService(IExcelWorkbookAccessor? accessor = null) =>
+        new(accessor ?? DefaultAccessor, ExcelReaderTestLogging.CreateLogger<ExcelReaderService>());
+
     public static async Task<ExcelReadResult<T>> ReadSheetAsync<T>(
         TestSheetDefinition sheet,
         ExcelSheetProfile<T> profile,
@@ -22,7 +25,7 @@ public static class ExcelReaderTestRunner
             .AddSheet(sheet)
             .BuildStream();
 
-        return await new ExcelReaderService(accessor).ReadAsync(stream, profile, cancellationToken);
+        return await CreateService(accessor).ReadAsync(stream, profile, cancellationToken);
     }
 
     public static Task<ExcelReadResult<T>> ReadRowsAsync<T>(
@@ -34,6 +37,6 @@ public static class ExcelReaderTestRunner
             profile.SheetName,
             rows);
 
-        return new ExcelReaderService(accessorMock.Object).ReadAsync(Stream.Null, profile);
+        return CreateService(accessorMock.Object).ReadAsync(Stream.Null, profile);
     }
 }

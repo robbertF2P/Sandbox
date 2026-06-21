@@ -7,8 +7,12 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="ImportPipeline.Domain" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" />
     <PackageReference Include="NPOI" />
   </ItemGroup>
+
+  <Import Project="..\..\..\build\Platform.Logging.Library.props" />
 
 </Project>

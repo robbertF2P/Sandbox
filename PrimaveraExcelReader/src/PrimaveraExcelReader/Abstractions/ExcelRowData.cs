@@ -49,4 +49,9 @@ public sealed class ExcelRowData
     {
         return _cellsByIndex.All(cell => string.IsNullOrWhiteSpace(cell));
     }
+
+    /// <summary>
+    /// Header-keyed cell values for the import pipeline domain layer.
+    /// </summary>
+    public IReadOnlyDictionary<string, string?> AsHeaderCells() => _cellsByHeader;
 }

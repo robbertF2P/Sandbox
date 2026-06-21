@@ -5,11 +5,14 @@
     <EnableMicrosoftTestingPlatform>true</EnableMicrosoftTestingPlatform>
     <TestingPlatformDotnetTestSupport>true</TestingPlatformDotnetTestSupport>
     <GenerateDependencyFile>true</GenerateDependencyFile>
+    <IsPackable>false</IsPackable>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.Testing.Platform" Version="2.2.1" />
-    <PackageReference Include="xunit.v3.mtp-v2" Version="3.2.2" />
+    <PackageReference Include="Microsoft.Testing.Platform" />
+    <PackageReference Include="xunit.v3.mtp-v2" />
     <ProjectReference Include="..\..\src\ImportPipeline.Domain\ImportPipeline.Domain.csproj" />
   </ItemGroup>
+
+  <Import Project="..\..\..\build\Platform.Logging.Tests.props" />
 </Project>

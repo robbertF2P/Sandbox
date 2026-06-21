@@ -31,6 +31,7 @@ Generic template: `docs/floor2plan-v2-connector-migration-prompt.md`
 6. **No big-bang** — one strangler slice per change set.
 7. **Quality framework** — follow `docs/monolith-modularization/ai-assisted-delivery-quality-framework.md` for anti-slop rules, DoD, and CI gates.
 8. **Module dashboards** — each bounded context publishes ADO test results per `azure-devops-module-test-dashboards.md`.
+9. **Serilog platform logging** — `Platform.Serilog.Logging`: Development → Seq, Production → Application Insights; all tests → `Platform.Serilog.Logging.Testing` (xUnit sink). See `03-modularization-roadmap.md`.
 
 ## Target architecture
 

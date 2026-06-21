@@ -1,4 +1,6 @@
+using Microsoft.Extensions.Logging;
 using PrimaveraExcelReader.Abstractions;
+using PrimaveraExcelReader.ImportPipeline;
 
 namespace PrimaveraExcelReader.Mapping;
 
@@ -18,34 +20,6 @@ public sealed class ExcelSheetProfile<T> where T : new()
 
     public Func<T, ExcelRowData, T>? AfterMap { get; init; }
 
-    public ExcelRowMapResult<T> TryMapRow(ExcelRowData row)
-    {
-        var issues = new List<ExcelReadIssue>();
-        var model = new T();
-
-        foreach (ExcelColumnBinding<T> binding in ColumnBindings)
-        {
-            binding.TryApply(model, row, issues);
-        }
-
-        if (issues.Count > 0)
-        {
-            return ExcelRowMapResult<T>.Failure(issues);
-        }
-
-        if (AfterMap is not null)
-        {
-            try
-            {
-                model = AfterMap(model, row);
-            }
-            catch (Exception ex)
-            {
-                issues.Add(ExcelReadIssue.MappingError(row.RowIndex + 1, ex.Message));
-                return ExcelRowMapResult<T>.Failure(issues);
-            }
-        }
-
-        return ExcelRowMapResult<T>.Success(model);
-    }
+    public ExcelRowMapResult<T> TryMapRow(ExcelRowData row, ILogger? logger = null) =>
+        ImportPipelineRowMapping.TryMap(this, row, logger);
 }

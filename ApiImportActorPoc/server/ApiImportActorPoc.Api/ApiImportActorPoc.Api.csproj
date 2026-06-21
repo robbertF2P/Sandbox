@@ -14,10 +14,10 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="OpenTelemetry" />
-    <PackageReference Include="Serilog.AspNetCore" />
-    <PackageReference Include="Serilog.Sinks.Seq" />
     <PackageReference Include="Swashbuckle.AspNetCore" />
   </ItemGroup>
+
+  <Import Project="..\..\..\build\Platform.Logging.Host.props" />
 
   <ItemGroup>
     <ProjectReference Include="..\ApiImportActorPoc.Contracts\ApiImportActorPoc.Contracts.csproj" />

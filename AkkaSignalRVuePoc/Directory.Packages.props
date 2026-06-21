@@ -3,6 +3,8 @@
     <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
   </PropertyGroup>
 
+  <Import Project="..\build\Platform.Logging.Versions.props" />
+
   <ItemGroup>
     <PackageVersion Include="Akka" Version="1.5.68" />
     <PackageVersion Include="Akka.Hosting" Version="1.5.68" />
@@ -22,8 +24,6 @@
     <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="18.5.1" />
     <PackageVersion Include="Moq" Version="4.20.72" />
     <PackageVersion Include="OpenTelemetry" Version="1.15.3" />
-    <PackageVersion Include="Serilog.AspNetCore" Version="10.0.0" />
-    <PackageVersion Include="Serilog.Extensions.Logging" Version="10.0.0" />
     <PackageVersion Include="Serilog.Sinks.Seq" Version="9.0.0" />
     <PackageVersion Include="Serilog.Sinks.XUnit3" Version="1.2.0" />
     <PackageVersion Include="Swashbuckle.AspNetCore" Version="9.0.6" />

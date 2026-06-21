@@ -152,6 +152,7 @@ AI and human authors follow the **same** standards. Guidelines are not optional 
 | Actors | Messages/events in Contracts; `Tell`/`Forward` inside actors; `Ask` only at boundaries |
 | EF | One DbContext per bounded context; review migrations before commit |
 | Tests | xUnit; descriptive `Method_Scenario_Expected` names; assert behaviour not internals |
+| **Logging** | `Platform.Serilog.Logging`: Development → Seq, Production → Application Insights; tests → `Platform.Serilog.Logging.Testing` (xUnit sink). See `03-modularization-roadmap.md`. |
 
 ### Cursor / Claude instruction (paste for implementation work)
 
@@ -285,6 +286,7 @@ AI has **no** approval role.
 | `copilot-analysis-instructions.md` | Phased analysis; characterization-first |
 | `claude-external-integrations-deepdive-instructions.md` | Integration story maps; Phase C expert validation |
 | `copilot-instructions-snippet.md` | Short rules for AI agents in repo |
+| `03-modularization-roadmap.md` | SandBox POC cross-cutting standards (Serilog, NuGet import package, extraction order) |
 | `azure-devops-module-test-dashboards.md` | Per-module test dashboards in Azure DevOps |
 | `ApiImportActorPoc/docs/platform-rebuild-proposal-summary.md` | Strategic context; tests as specification |
 

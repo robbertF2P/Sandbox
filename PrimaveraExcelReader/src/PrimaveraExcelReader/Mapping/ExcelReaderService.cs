@@ -1,9 +1,14 @@
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 using PrimaveraExcelReader.Abstractions;
 
 namespace PrimaveraExcelReader.Mapping;
 
-public sealed class ExcelReaderService(IExcelWorkbookAccessor workbookAccessor) : IExcelReaderService
+public sealed class ExcelReaderService(
+    IExcelWorkbookAccessor workbookAccessor,
+    ILogger<ExcelReaderService>? logger = null) : IExcelReaderService
 {
+    private readonly ILogger<ExcelReaderService> _logger = logger ?? NullLogger<ExcelReaderService>.Instance;
     public async Task<ExcelReadResult<T>> ReadAsync<T>(
         Stream stream,
         ExcelSheetProfile<T> profile,
@@ -24,9 +29,19 @@ public sealed class ExcelReaderService(IExcelWorkbookAccessor workbookAccessor) 
         }
         catch (InvalidOperationException ex)
         {
+            _logger.LogWarning(
+                ex,
+                "Failed to read sheet {SheetName}: {Message}",
+                profile.SheetName,
+                ex.Message);
             issues.Add(ExcelReadIssue.ForSheet(profile.SheetName, ex.Message, ClassifyWorkbookIssue(ex.Message)));
             return new ExcelReadResult<T>(profile.SheetName, [], issues);
         }
+
+        _logger.LogInformation(
+            "Read {RowCount} data rows from sheet {SheetName}",
+            rows.Count,
+            profile.SheetName);
 
         var mappedRows = new List<T>();
 
@@ -34,25 +49,38 @@ public sealed class ExcelReaderService(IExcelWorkbookAccessor workbookAccessor) 
         {
             if (row.IsEmpty())
             {
+                _logger.LogDebug("Skipping empty row {RowNumber} on sheet {SheetName}", row.RowIndex + 1, profile.SheetName);
                 issues.Add(ExcelReadIssue.EmptyRow(row.RowIndex + 1));
                 continue;
             }
 
             if (profile.RowFilter is not null && !profile.RowFilter(row))
             {
+                _logger.LogDebug("Filtered out row {RowNumber} on sheet {SheetName}", row.RowIndex + 1, profile.SheetName);
                 issues.Add(ExcelReadIssue.FilteredOut(row.RowIndex + 1));
                 continue;
             }
 
-            ExcelRowMapResult<T> mapResult = profile.TryMapRow(row);
+            ExcelRowMapResult<T> mapResult = profile.TryMapRow(row, _logger);
             if (mapResult.IsSuccess)
             {
                 mappedRows.Add(mapResult.Row!);
                 continue;
             }
 
+            _logger.LogWarning(
+                "Row {RowNumber} on sheet {SheetName} produced {IssueCount} mapping issue(s)",
+                row.RowIndex + 1,
+                profile.SheetName,
+                mapResult.Issues.Count);
             issues.AddRange(mapResult.Issues);
         }
+
+        _logger.LogInformation(
+            "Mapped sheet {SheetName}: {MappedRowCount} succeeded, {IssueCount} issue(s)",
+            profile.SheetName,
+            mappedRows.Count,
+            issues.Count);
 
         return new ExcelReadResult<T>(profile.SheetName, mappedRows, issues);
     }

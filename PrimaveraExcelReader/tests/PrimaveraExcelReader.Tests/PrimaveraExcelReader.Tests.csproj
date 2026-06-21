@@ -12,6 +12,7 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
+    <PackageReference Include="ImportPipeline.Domain" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" />
     <PackageReference Include="Moq" />
     <PackageReference Include="NPOI" />
@@ -29,5 +30,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\src\PrimaveraExcelReader\PrimaveraExcelReader.csproj" />
   </ItemGroup>
+
+  <Import Project="..\..\..\build\Platform.Logging.Tests.props" />
 
 </Project>
