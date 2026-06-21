@@ -33,7 +33,7 @@ v2 is a **control plane**. A tenant's **deployment profile** decides whether use
 |---------|------------------|----------------------|----------------|
 | Product UI | Routes only | Owns 100% | Owns 100% |
 | Domain logic | None | Legacy services/handlers | v2 core + packs |
-| Database | Connection metadata | Legacy schema | Canonical schema |
+| Database | Connection metadata | Legacy DB (per tenant) | Canonical schema in **tenant's own DB** |
 | Customization | Pack IDs + flags | Submodule/build profile | Versioned packs |
 | Auth | IdP, tenant binding | Legacy session or shared SSO | v2 auth |
 | Provisioning | Creates profile + runtime | Deploy legacy instance/DB | Create tenant row + DB |
@@ -51,7 +51,7 @@ One row in the control-plane DB. Keep it small.
   "status": "active",
   "deploymentProfile": {
     "mode": "legacy_hosted",
-    "dataTier": "dedicated_database",
+    "dataTier": "dedicated_sql_server",
     "region": "eu-west",
     "legacy": {
       "buildProfileId": "acme-onprem-2024",
@@ -82,7 +82,7 @@ Native tenant — same shape, `mode: "native"`, `legacy: null`, `native` populat
 ```json
 "deploymentProfile": {
   "mode": "native",
-  "dataTier": "shared_database",
+  "dataTier": "shared_sql_server",
   "region": "eu-west",
   "legacy": null,
   "native": {
@@ -99,7 +99,7 @@ Native tenant — same shape, `mode: "native"`, `legacy: null`, `native` populat
 | Field | Type | Purpose |
 |-------|------|---------|
 | `mode` | `legacy_hosted` \| `native` | Where user traffic goes |
-| `dataTier` | `shared_database` \| `dedicated_database` | Isolation + cost model |
+| `dataTier` | `shared_sql_server` \| `dedicated_sql_server` | SQL Server instance tier — **one database per tenant always**; shared tier = multiple tenant DBs on one server |
 | `region` | string | Data residency / latency |
 
 ### Legacy-hosted only
@@ -114,7 +114,7 @@ Native tenant — same shape, `mode: "native"`, `legacy: null`, `native` populat
 
 | Field | Type | Purpose |
 |-------|------|---------|
-| `databaseConnectionRef` | secret ref | Native schema DB (shared or dedicated) |
+| `databaseConnectionRef` | secret ref | This tenant's native database (dedicated DB; server may be shared or dedicated) |
 | `apiBaseUrl` | string | Versioned platform API for this tenant |
 
 ### Pack entitlements (metadata in v2; enforcement in runtime)
@@ -181,7 +181,7 @@ No mixed mode per tenant at the edge. One tenant, one runtime.
 ### B. Native (pilot / post-migration)
 
 1. Create tenant row: `mode = native`, `status = provisioning`
-2. Provision native DB (`TenantId` row in shared DB or dedicated instance)
+2. Provision native database for the tenant (own DB on shared or dedicated SQL Server instance)
 3. Apply enabled packs in control plane
 4. Optional: import from intermediate format
 5. `status = active` — users get **native SPA only**

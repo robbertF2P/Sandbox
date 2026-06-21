@@ -23,6 +23,7 @@
 | **One product binary** | Same API + SPA artefact for cloud SaaS and on-prem; behaviour differs by **deployment profile + installation config**, not separate auth code paths. |
 | **OIDC-first** | Browser users authenticate via OpenID Connect (Authorization Code + PKCE). Machine clients use client credentials or API keys where appropriate. |
 | **Tenant-scoped identity** | Every authenticated session is bound to exactly one tenant. Cross-tenant access is impossible at the API and data layers. |
+| **Per-tenant database** | Every tenant has its own SQL Server **database**. Cloud may host many tenant DBs on one shared SQL Server **instance**; enterprise tier may use a dedicated instance — never a shared database with row-level `TenantId` isolation. |
 | **IdP flexibility** | Cloud: Floorganise-hosted or customer-owned IdP per tenant. On-prem: customer AD / Entra / LDAP / SAML configured at install. |
 | **Strangler-safe** | `legacy_hosted` tenants may keep legacy sessions during migration; control plane still owns SSO binding metadata. |
 | **No ABP in new modules** | Identity module registers via `IServiceCollection` extensions — see `module-composition-di.md`. |
@@ -52,7 +53,7 @@
          ▼                      ▼                      ▼
 ┌─────────────────┐   ┌─────────────────┐   ┌─────────────────┐
 │ Control plane   │   │ Identity module │   │ Domain APIs     │
-│ (cloud SaaS)    │   │ users · roles   │   │ TenantId scope  │
+│ (cloud SaaS)    │   │ users · roles   │   │ tenant DB conn  │
 │ tenant registry │   │ permissions     │   │ on every query  │
 │ SSO bindings    │   │ token exchange  │   │                 │
 └─────────────────┘   └─────────────────┘   └─────────────────┘
@@ -169,11 +170,18 @@ sequenceDiagram
 1. **Edge:** slug → `tenantId` before any auth redirect (prevents wrong IdP).
 2. **Token exchange:** callback handler verifies `state` encodes expected `tenantId`.
 3. **API middleware:** `tid` claim must match resolved tenant for the request host.
-4. **Data layer:** global query filter `WHERE TenantId = @currentTenant` on every DbContext; integration tests assert cross-tenant reads fail.
+4. **Data layer:** resolve this tenant's **dedicated database** from deployment profile (`databaseConnectionRef`); open DbContext against that connection only. JWT `tid` must match the tenant that owns the connection. Optional `TenantId` columns in schema are for portability/export — not the primary isolation mechanism.
 
-### 4.4 Shared-database vs dedicated-database
+### 4.4 Per-tenant database (SQL Server tier)
 
-Auth is identical. Data tier only changes **connection string** in deployment profile (`TenantDataTier` in `TenantDeploymentProfile`). JWT always carries `tid`; dedicated DB still scopes by `TenantId` for consistency and future migration.
+**Every tenant gets its own database.** V2 does not offer a shared-database multi-tenant model (one DB, many tenants, row-level `TenantId`).
+
+| `dataTier` | Meaning |
+|------------|---------|
+| `shared_sql_server` | Tenant DB on a **shared SQL Server instance** (typical cloud SaaS) |
+| `dedicated_sql_server` | Tenant DB on a **dedicated SQL Server instance** (enterprise / isolation) |
+
+Auth is identical across tiers. `dataTier` only affects **which server hosts the tenant's database** and provisioning/cost — not login flow. JWT always carries `tid`; the API uses it to select the correct `databaseConnectionRef`.
 
 ### 4.5 Legacy-hosted tenant (cloud)
 
@@ -204,7 +212,7 @@ Supplied at install (wizard, `appsettings.Production.json`, environment variable
       "topology": "on_prem_single_tenant",
       "tenantId": "fixed-guid-from-install-or-generated",
       "tenantDisplayName": "Acme Shipyard",
-      "dataTier": "dedicated_database",
+      "dataTier": "dedicated_sql_server",
       "databaseConnectionRef": "secrets/db-connection"
     },
     "Authentication": {
@@ -366,11 +374,11 @@ From `platform-frontend-standard.md` and read-model playbook:
 | 2 | OIDC login + callback + token exchange | ✓ | ✓ |
 | 3 | SAML SP support (or bridge to external proxy) | Per tenant | Common |
 | 4 | Platform JWT signing + rotation | Central KMS | Install-time cert |
-| 5 | Refresh token store | Shared DB | Local DB |
+| 5 | Refresh token store | Control-plane DB | Local SQL |
 | 6 | User / role / permission store | Per control plane region | Local SQL |
 | 7 | JIT provisioning + group → role mapping | ✓ | ✓ |
 | 8 | Tenant resolution middleware | Slug-based | Config-based |
-| 9 | EF global `TenantId` filter | ✓ | ✓ |
+| 9 | Tenant → database connection resolution | ✓ | ✓ |
 | 10 | Auth binding in tenant registry | ✓ | N/A (install config) |
 | 11 | Legacy auth bridge adapter | If `legacy_hosted` | If `legacy_hosted` |
 | 12 | Install wizard / config schema validation | N/A | ✓ |
@@ -433,7 +441,7 @@ Aligned with deployment-profile-sketch sprint ordering:
 
 1. **Install config schema** + validation (on-prem path exercises single-tenant early).
 2. **OIDC login + platform JWT** for one fixed tenant (on-prem or staging).
-3. **Tenant resolution middleware** + EF `TenantId` filter.
+3. **Tenant resolution middleware** + per-tenant database connection routing.
 4. **Control plane auth binding** + slug-based login (cloud).
 5. **Group → role mapping** + JIT provisioning.
 6. **Refresh tokens** + revocation.
@@ -460,3 +468,4 @@ Aligned with deployment-profile-sketch sprint ordering:
 - Platform-managed MFA (delegate to IdP).
 - Cross-tenant admin impersonation without audited break-glass flow.
 - Inline secrets in tenant or install JSON files.
+- Shared-database multi-tenancy (one database, many tenants, row-level `TenantId` isolation).
