@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <title>Platform 2.0 — Authentication &amp; tenant user lifecycle</title>
+  <style>
+    @page { size: A4; margin: 14mm; }
+    * { box-sizing: border-box; }
+    body {
+      font-family: "Segoe UI", system-ui, sans-serif;
+      color: #0f172a;
+      line-height: 1.45;
+      max-width: 210mm;
+      margin: 0 auto;
+      padding: 12mm;
+      font-size: 11pt;
+    }
+    h1 { font-size: 20pt; margin: 0 0 4px; }
+    h2 { font-size: 14pt; margin: 22px 0 8px; border-bottom: 1px solid #cbd5e1; padding-bottom: 4px; page-break-after: avoid; }
+    h3 { font-size: 12pt; margin: 14px 0 6px; page-break-after: avoid; }
+    p, li { margin: 0 0 6px; }
+    .meta { color: #475569; font-size: 10pt; margin-bottom: 18px; }
+    .diagram { width: 100%; margin: 12px 0 18px; page-break-inside: avoid; }
+    table { width: 100%; border-collapse: collapse; margin: 8px 0 14px; font-size: 10pt; page-break-inside: avoid; }
+    th, td { border: 1px solid #cbd5e1; padding: 6px 8px; text-align: left; vertical-align: top; }
+    th { background: #f1f5f9; }
+    code { background: #f1f5f9; padding: 1px 4px; border-radius: 3px; font-size: 9.5pt; }
+    .page-break { page-break-before: always; }
+    ul { margin: 0 0 10px; padding-left: 18px; }
+    .footer { margin-top: 24px; font-size: 9pt; color: #64748b; border-top: 1px solid #e2e8f0; padding-top: 8px; }
+  </style>
+</head>
+<body>
+  <h1>Platform 2.0 — Authentication &amp; tenant user lifecycle</h1>
+  <p class="meta">Design document (not implemented) · SandBox repo · Generated from <code>platform-authentication-standard.md</code></p>
+
+  <h2>1. Summary</h2>
+  <ul>
+    <li><strong>One product binary</strong> for cloud SaaS and on-prem; behaviour driven by deployment profile and install config.</li>
+    <li><strong>OIDC + PKCE</strong> for browser login; platform issues its own JWT with <code>tid</code>, <code>sub</code>, and roles.</li>
+    <li><strong>One database per tenant</strong> — optional shared SQL Server <em>instance</em>, never a shared multi-tenant database.</li>
+    <li><strong>Identity module</strong> (<code>F2P.Identity</code> / <code>@f2p/identity</code>) owns login accounts, roles, and tenant-admin user management.</li>
+    <li><strong>Admin backoffice</strong> (separate) provisions tenants; <strong>tenant admins</strong> manage operational users who book hours and edit planning data.</li>
+  </ul>
+
+  <h2>2. Cloud authentication flow</h2>
+  <img class="diagram" src="diagrams/platform-v2-auth-flow.svg" alt="Cloud authentication flow diagram"/>
+
+  <table>
+    <tr><th>Step</th><th>Actor</th><th>Action</th></tr>
+    <tr><td>1</td><td>Browser</td><td>User opens <code>https://{slug}.app.example</code></td></tr>
+    <tr><td>2</td><td>Edge</td><td>Resolve slug via control plane → tenantId + OIDC settings</td></tr>
+    <tr><td>3</td><td>Shell</td><td>Redirect to customer IdP with PKCE <code>code_challenge</code></td></tr>
+    <tr><td>4</td><td>IdP</td><td>User authenticates (MFA enforced by customer IdP)</td></tr>
+    <tr><td>5</td><td>Identity API</td><td>Exchange auth code; map IdP subject → platform user</td></tr>
+    <tr><td>6</td><td>Identity API</td><td>Issue platform JWT (<code>tid</code>, <code>sub</code>, roles)</td></tr>
+    <tr><td>7</td><td>Domain APIs</td><td>Validate JWT; open connection to tenant's dedicated database</td></tr>
+  </table>
+
+  <h3>On-prem variant</h3>
+  <p>Fixed host and <code>tenantId</code> from install config replace slug lookup. Same OIDC sequence; signing keys and user store may be customer-managed.</p>
+
+  <div class="page-break"></div>
+
+  <h2>3. Tenant user lifecycle</h2>
+  <img class="diagram" src="diagrams/platform-v2-tenant-user-lifecycle.svg" alt="Tenant user lifecycle diagram"/>
+
+  <h3>Three user layers</h3>
+  <table>
+    <tr><th>Layer</th><th>UI / API</th><th>Responsibility</th></tr>
+    <tr><td>Platform operator</td><td>Admin backoffice</td><td>Provision tenant, bind SSO, enable packs, bootstrap first tenant admin</td></tr>
+    <tr><td>Tenant administrator</td><td><code>@f2p/identity</code></td><td>Create/edit/disable users; assign roles; link Person records</td></tr>
+    <tr><td>End user</td><td>Planning, Hours, WBS, …</td><td>Book hours, view components, edit activities (permission-gated)</td></tr>
+  </table>
+
+  <h3>User states</h3>
+  <table>
+    <tr><th>State</th><th>Meaning</th><th>Typical transition</th></tr>
+    <tr><td><strong>Invited</strong></td><td>Pre-provisioned by tenant admin; not yet signed in</td><td>Admin creates user with email + roles</td></tr>
+    <tr><td><strong>Pending</strong></td><td>Awaiting first successful login</td><td>Invite sent or JIT record created</td></tr>
+    <tr><td><strong>Active</strong></td><td>Can sign in and use product per roles</td><td>First OIDC / local login succeeds</td></tr>
+    <tr><td><strong>Disabled</strong></td><td>Login blocked; data retained</td><td>Admin disable or seat reclaim</td></tr>
+    <tr><td><strong>Retired</strong></td><td>Offboarded; audit trail kept</td><td>Admin retires after project end</td></tr>
+  </table>
+
+  <h3>Login account vs Person</h3>
+  <p>Legacy F2P separates <strong>User</strong> (authentication) from <strong>Person</strong> (workforce entity for hours and assignments). V2 preserves this:</p>
+  <ul>
+    <li><strong>Identity.User</strong> — login principal, roles, enabled/disabled</li>
+    <li><strong>Resources.Person</strong> — who appears on timesheets and WBS assignments</li>
+    <li>Tenant admin flow should support <strong>create user + link Person</strong> in one wizard where hour booking is required</li>
+  </ul>
+
+  <h3>Provisioning modes (hybrid recommended)</h3>
+  <table>
+    <tr><th>Mode</th><th>Tenant admin</th><th>When</th></tr>
+    <tr><td><strong>Admin-provisioned</strong></td><td>Creates user before first login; assigns roles</td><td>Default — most shipyard customers</td></tr>
+    <tr><td><strong>JIT from IdP</strong></td><td>Upgrades roles after auto-created login</td><td>IdP-led onboarding; <code>jitProvisioning=true</code></td></tr>
+    <tr><td><strong>Local accounts</strong></td><td>Creates username/password</td><td>On-prem air-gap; <code>allowLocalLogin=true</code></td></tr>
+  </table>
+
+  <h3>Example roles for operational users</h3>
+  <table>
+    <tr><th>Persona</th><th>Example permissions</th></tr>
+    <tr><td>Viewer</td><td><code>Planning.Read</code>, <code>Wbs.Read</code></td></tr>
+    <tr><td>Planner</td><td><code>Planning.Read/Write</code>, <code>Wbs.Read</code></td></tr>
+    <tr><td>Hour booker</td><td><code>Hours.Write</code> + project read scope</td></tr>
+    <tr><td>Team lead</td><td>Above + hour approvals</td></tr>
+    <tr><td>Tenant admin</td><td><code>Identity.Admin</code></td></tr>
+  </table>
+
+  <h3>Tenant profile flags</h3>
+  <table>
+    <tr><th>Flag</th><th>Effect</th></tr>
+    <tr><td><code>adminCanCreateUsers</code></td><td>Tenant admin can pre-provision users (recommended <strong>true</strong>)</td></tr>
+    <tr><td><code>jitProvisioning</code></td><td>Auto-create user on first IdP login</td></tr>
+    <tr><td><code>allowLocalLogin</code></td><td>Local account UI (on-prem)</td></tr>
+    <tr><td><code>seatLimit</code></td><td>Block create when license cap reached</td></tr>
+    <tr><td><code>defaultRoleOnJit</code></td><td>e.g. <code>Viewer</code> until admin upgrades</td></tr>
+  </table>
+
+  <h2>4. Module placement</h2>
+  <table>
+    <tr><th>Artefact</th><th>Type</th><th>Owns</th></tr>
+    <tr><td><code>F2P.Identity</code></td><td>Backend bounded-context <strong>module</strong></td><td>Auth API, users, roles, permissions</td></tr>
+    <tr><td><code>@f2p/identity</code></td><td>Frontend context module</td><td>User/role admin screens under Settings</td></tr>
+    <tr><td><code>f2p-shell</code></td><td>Host <strong>app</strong> (not a domain module)</td><td>Login, callback, shell chrome, lazy routes</td></tr>
+    <tr><td>Admin backoffice</td><td>Separate app</td><td>Tenant provisioning, SSO binding, first admin bootstrap</td></tr>
+  </table>
+
+  <p class="footer">Canonical source: <code>docs/monolith-modularization/platform-authentication-standard.md</code> · Diagrams: <code>docs/monolith-modularization/diagrams/</code></p>
+</body>
+</html>

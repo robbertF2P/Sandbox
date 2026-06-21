@@ -1,0 +1,106 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 560" font-family="Segoe UI, system-ui, sans-serif">
+  <defs>
+    <marker id="arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+      <path d="M0,0 L8,4 L0,8 Z" fill="#334155"/>
+    </marker>
+    <style>
+      .title { font-size: 18px; font-weight: 700; fill: #0f172a; }
+      .subtitle { font-size: 12px; fill: #475569; }
+      .state { fill: #f8fafc; stroke: #334155; stroke-width: 1.5; rx: 10; }
+      .state-active { fill: #dcfce7; stroke: #16a34a; stroke-width: 1.5; rx: 10; }
+      .state-pending { fill: #fef9c3; stroke: #ca8a04; stroke-width: 1.5; rx: 10; }
+      .state-disabled { fill: #fee2e2; stroke: #dc2626; stroke-width: 1.5; rx: 10; }
+      .label { font-size: 12px; font-weight: 600; fill: #0f172a; }
+      .detail { font-size: 10px; fill: #475569; }
+      .actor { fill: #eff6ff; stroke: #2563eb; stroke-width: 1.5; rx: 8; }
+      .line { stroke: #334155; stroke-width: 1.3; fill: none; marker-end: url(#arrow); }
+      .note { font-size: 10px; fill: #64748b; }
+    </style>
+  </defs>
+
+  <text x="20" y="28" class="title">Platform 2.0  Tenant user lifecycle</text>
+  <text x="20" y="48" class="subtitle">Tenant administrators manage operational users (hours, planning, components) via @f2p/identity</text>
+
+  <!-- Actors -->
+  <rect x="20" y="68" width="150" height="44" class="actor"/>
+  <text x="95" y="88" text-anchor="middle" class="label">Platform operator</text>
+  <text x="95" y="102" text-anchor="middle" class="detail">admin backoffice</text>
+
+  <rect x="190" y="68" width="150" height="44" class="actor"/>
+  <text x="265" y="88" text-anchor="middle" class="label">Tenant admin</text>
+  <text x="265" y="102" text-anchor="middle" class="detail">@f2p/identity</text>
+
+  <rect x="360" y="68" width="150" height="44" class="actor"/>
+  <text x="435" y="88" text-anchor="middle" class="label">End user</text>
+  <text x="435" y="102" text-anchor="middle" class="detail">planner / hour booker</text>
+
+  <rect x="530" y="68" width="150" height="44" class="actor"/>
+  <text x="605" y="88" text-anchor="middle" class="label">Person record</text>
+  <text x="605" y="102" text-anchor="middle" class="detail">Resources context</text>
+
+  <!-- States -->
+  <rect x="40" y="150" width="130" height="50" class="state-pending"/>
+  <text x="105" y="172" text-anchor="middle" class="label">Invited</text>
+  <text x="105" y="188" text-anchor="middle" class="detail">pre-provisioned</text>
+
+  <rect x="220" y="150" width="130" height="50" class="state-pending"/>
+  <text x="285" y="172" text-anchor="middle" class="label">Pending</text>
+  <text x="285" y="188" text-anchor="middle" class="detail">awaiting first login</text>
+
+  <rect x="400" y="150" width="130" height="50" class="state-active"/>
+  <text x="465" y="172" text-anchor="middle" class="label">Active</text>
+  <text x="465" y="188" text-anchor="middle" class="detail">can use product</text>
+
+  <rect x="580" y="150" width="130" height="50" class="state-disabled"/>
+  <text x="645" y="172" text-anchor="middle" class="label">Disabled</text>
+  <text x="645" y="188" text-anchor="middle" class="detail">login blocked</text>
+
+  <rect x="760" y="150" width="120" height="50" class="state"/>
+  <text x="820" y="172" text-anchor="middle" class="label">Retired</text>
+  <text x="820" y="188" text-anchor="middle" class="detail">archived</text>
+
+  <!-- Transitions row 1 -->
+  <line x1="170" y1="175" x2="218" y2="175" class="line"/>
+  <text x="194" y="168" text-anchor="middle" class="note">invite</text>
+
+  <line x1="350" y1="175" x2="398" y2="175" class="line"/>
+  <text x="374" y="168" text-anchor="middle" class="note">first SSO / local login</text>
+
+  <line x1="530" y1="175" x2="578" y2="175" class="line"/>
+  <text x="554" y="168" text-anchor="middle" class="note">admin disable</text>
+
+  <line x1="710" y1="175" x2="758" y2="175" class="line"/>
+  <text x="734" y="168" text-anchor="middle" class="note">offboard</text>
+
+  <!-- Bootstrap path -->
+  <rect x="40" y="250" width="820" height="90" fill="#f8fafc" stroke="#cbd5e1" rx="8"/>
+  <text x="55" y="272" class="label">Bootstrap (new tenant)</text>
+  <text x="55" y="292" class="detail">1. Platform operator provisions tenant in backoffice (SSO binding, packs, seat limit)</text>
+  <text x="55" y="308" class="detail">2. Backoffice creates first tenant admin user (or invites via IdP group)</text>
+  <text x="55" y="324" class="detail">3. Tenant admin signs in ’ manages all subsequent operational users in @f2p/identity</text>
+
+  <!-- Day-to-day path -->
+  <rect x="40" y="360" width="400" height="170" fill="#eff6ff" stroke="#93c5fd" rx="8"/>
+  <text x="55" y="382" class="label">Admin-provisioned (recommended default)</text>
+  <text x="55" y="402" class="detail">" Tenant admin: POST /users { email, name, roles }</text>
+  <text x="55" y="418" class="detail">" Optional: link or create Person for hours / assignments</text>
+  <text x="55" y="434" class="detail">" User state = Invited or Pending until first login</text>
+  <text x="55" y="450" class="detail">" First OIDC login matches email/UPN ’ Active</text>
+  <text x="55" y="466" class="detail">" Roles gate Planning.Read, Hours.Write, Wbs.Read, &</text>
+  <text x="55" y="482" class="detail">" Admin can edit roles / disable without IdP change</text>
+  <text x="55" y="498" class="detail">" Seat limit enforced on create</text>
+
+  <rect x="460" y="360" width="400" height="170" fill="#fefce8" stroke="#fde047" rx="8"/>
+  <text x="475" y="382" class="label">JIT from IdP (optional per tenant)</text>
+  <text x="475" y="402" class="detail">" User logs in via SSO without pre-provision</text>
+  <text x="475" y="418" class="detail">" Identity creates user if jitProvisioning = true</text>
+  <text x="475" y="434" class="detail">" Default role from groupRoleMappings or defaultRoleOnJit</text>
+  <text x="475" y="450" class="detail">" Tenant admin upgrades roles after first login</text>
+  <text x="475" y="466" class="detail">" Person link may be required before Hours.Write</text>
+  <text x="475" y="482" class="detail">" Use when IT prefers IdP-led onboarding</text>
+  <text x="475" y="498" class="detail">" adminCanCreateUsers can still be true (hybrid)</text>
+
+  <!-- User vs Person -->
+  <rect x="40" y="545" width="820" height="1" fill="#cbd5e1"/>
+  <text x="450" y="538" text-anchor="middle" class="note">Login account (Identity.User) ` Person (Resources)  link 1:1 for hour booking and assignments</text>
+</svg>
