@@ -14,6 +14,7 @@
 | `../Modularization/00-inventory.md` | **Example** Phase 0 output for F2P (regenerate in monolith) |
 | SandBox `03-modularization-roadmap.md` | POC cross-cutting standards (Serilog, NuGet boundaries) |
 | `starter-kit/README.md` | **Module refactor starter kit** — copy into monolith (see below) |
+| `module-composition-di.md` | **DI standard** — `IServiceCollection` extensions; no ABP in new modules |
 | `../floor2plan-v2-connector-architecture.md` | Integration pack dependency rules |
 
 ---
@@ -87,7 +88,7 @@ Define the **canonical layout** for every extracted bounded context:
 │   ├── <Context>.Domain/              ← entities, value objects, domain services; no EF, no HTTP
 │   ├── <Context>.Application/         ← use cases, ports (interfaces), DTOs
 │   ├── <Context>.Infrastructure/      ← EF, external adapters, Hangfire job impls
-│   ├── <Context>.Api/                 ← IModule registration, minimal endpoints
+│   └── <Context>.Api/                 ← Add<Context>Module + Map<Context>Endpoints
 │   └── <Context>.Contracts/           ← public integration surface (events, DTOs) if shared
 └── tests/
     ├── <Context>.Unit.Tests/
@@ -102,17 +103,20 @@ Define the **canonical layout** for every extracted bounded context:
 | Domain | Domain only | EF, ASP.NET, Hangfire, vendor SDKs, other contexts' Domain |
 | Application | Domain + own ports | Infrastructure, DbContext |
 | Infrastructure | Application + Domain | Other contexts' Infrastructure |
-| Api / IModule | Application | Other modules' internals |
+| Api | Application + Infrastructure (via extension methods) | Other modules' internals |
 | Integration pack | `Integration.Abstractions` only | Core Domain, DbContext |
 
-Add a **blank reference module** scaffolded from the **starter kit** (see A7) — e.g. `Reference.Module` — with one trivial use case to validate the solution builds, tests run, and `IModule` registers in the host.
+Add a **blank reference module** scaffolded from the **starter kit** (see A7) — e.g. `Reference.Module` — with one trivial use case to validate the solution builds, tests run, and `AddReferenceModule` / `MapReferenceModule` register in the host.
+
+**Composition standard:** `docs/monolith-modularization/module-composition-di.md` — `IServiceCollection` extension methods only; **no ABP** in new module code.
 
 ### A3. Composition host sketch
 
 Do **not** replace `UI.Floor2Plan` yet. Add a **composition root** pattern the monolith can grow into:
 
 - Existing host remains the traffic router.
-- New modules register via `IModule` (or ABP module equivalent) from a single `ModuleCatalog`.
+- New modules register via **`IServiceCollection` extension methods** (`builder.Services.Add<Context>Module(configuration)`) and **`WebApplication` mapping** (`app.Map<Context>Module()`) — see `module-composition-di.md`.
+- **Do not** introduce `AbpModule`, `[DependsOn]`, or new `Volo.Abp.*` dependencies for extracted modules.
 - Feature flags / route prefixes decide legacy vs new path per slice.
 
 Document the adapter contract:
@@ -179,7 +183,7 @@ The starter kit is the **concrete Phase A deliverable** — not optional documen
 | Claude invents folder layout per session | One canonical layout; AI fills slots |
 | Inconsistent test project wiring | Characterization + integration harness pre-wired |
 | Logging/CI/analyzers renegotiated each PR | MSBuild props + traits baked in |
-| "Reference module" stays hypothetical | Runnable proof the host accepts `IModule` |
+| "Reference module" stays hypothetical | Runnable proof the host calls `Add*Module` / `Map*Module` |
 
 **Kit contents** (maintained in SandBox under `docs/monolith-modularization/starter-kit/`):
 
@@ -192,11 +196,10 @@ The starter kit is the **concrete Phase A deliverable** — not optional documen
 | `scripts/add-platform-logging-to-module.sh` | Wire logging props to a module root | SandBox → monolith `scripts/` |
 | `templates/pr-module-extraction.md` | PR checklist (UC/AC, slice_id, characterization) | SandBox → monolith `.github/` |
 | `templates/CharacterizationTest.cs` | Smoke test stub (`WebApplicationFactory`, traits) | In module template |
+| `templates/DependencyInjection.cs` | `Add<Context>Module` + `Map<Context>Endpoints` stubs (no ABP) | In module template |
 | `templates/StranglerAdapter.cs` | Marked adapter base with removal ticket placeholder | In module template |
 | `templates/azure-pipelines-module-tests.yml` | Per-module ADO jobs | SandBox → monolith pipelines folder |
 | Analysis YAML schemas | use-case, test-case, integration schemas | Already in `templates/` |
-
-**Consume via NuGet (do not copy source):**
 
 | Package | Source repo |
 |---------|-------------|
@@ -237,17 +240,16 @@ dotnet build && dotnet test
 
 ```text
 Scaffold bounded context "<Context>" using Src/Modules/_template/ and
-docs/modularization/starter-kit/README.md. Do not invent layout.
-Register IModule in the host. Add one smoke characterization test from
-templates/CharacterizationTest.cs. No domain logic yet.
+docs/modularization/module-composition-di.md. Use Add<Context>Module and
+Map<Context>Endpoints — no AbpModule or Volo.Abp packages. Add one smoke
+characterization test from templates/CharacterizationTest.cs. No domain logic yet.
 ```
 
 ### Foundation exit criteria (Gate G4-ready)
 
 - [ ] Starter kit copied to monolith (`Build/Platform/`, `scripts/`, `_template/`)
 - [ ] `docs/modularization/00-inventory.md` reviewed (G0)
-- [ ] Reference module **scaffolded from kit** builds in monolith solution
-- [ ] Reference module registers in host without breaking existing startup
+- [ ] Reference module **scaffolded from kit**; `Add*Module` / `Map*Module` in host
 - [ ] One smoke characterization test green in CI (from kit template)
 - [ ] Platform logging props adopted on reference module + its tests
 - [ ] PR template + agent rules committed
@@ -361,7 +363,8 @@ Keep these visible in every Claude session:
 
 | Constraint | Implication |
 |------------|-------------|
-| ABP + `DisableTransitiveProjectReferences=true` | Explicit project refs at every layer; module `.csproj` must list all deps |
+| ABP in **legacy** monolith (inventory) | New modules: **no** `Volo.Abp.*`; strangler adapters call legacy ABP services |
+| `DisableTransitiveProjectReferences=true` | Explicit project refs at every layer; module `.csproj` must list all deps |
 | 55+ EF change handlers on `Floor2PlanDbContext` | Do not extract entities still wired to handlers until handler strategy defined |
 | Hangfire `default` + `sync` queues | Import pilot uses `sync`; don't merge queue semantics early |
 | Multiple DbContexts already | Reporting, Files, Auth, etc. — align module cuts with existing DB boundaries where possible |
@@ -393,6 +396,7 @@ IMPLEMENTATION QUALITY (when coding):
 3. Fix analyzer warnings in touched files
 4. Link changes to UC-### / AC-### / slice_id
 5. Tag adapters [StranglerAdapter] with removal ticket
+6. New modules: IServiceCollection Add*Module / Map*Endpoints only — no AbpModule (see module-composition-di.md)
 ```
 
 ### Session types
@@ -424,11 +428,10 @@ cp "$SB/docs/monolith-modularization/foundation-and-pilot-plan.md"     "$MONO/do
 cp "$SB/docs/monolith-modularization/copilot-analysis-instructions.md" "$MONO/docs/modularization/"
 cp "$SB/docs/monolith-modularization/ai-assisted-delivery-quality-framework.md" "$MONO/docs/modularization/"
 cp "$SB/docs/monolith-modularization/copilot-instructions-snippet.md" "$MONO/docs/modularization/"
+cp "$SB/docs/monolith-modularization/module-composition-di.md"           "$MONO/docs/modularization/"
 cp "$SB/docs/monolith-modularization/templates/"*                      "$MONO/docs/modularization/templates/"
 cp -R "$SB/docs/monolith-modularization/starter-kit/"*                   "$MONO/docs/modularization/starter-kit/"
 cp "$SB/docs/floor2plan-v2-connector-architecture.md"                  "$MONO/docs/modularization/"
-
-# Module refactor starter kit (Phase A)
 mkdir -p "$MONO/Build/Platform" "$MONO/scripts"
 cp "$SB/build/Platform.Logging."*.props                                 "$MONO/Build/Platform/"
 cp "$SB/scripts/scaffold-module.sh"                                     "$MONO/scripts/" 2>/dev/null || true
@@ -495,4 +498,4 @@ Second sprint: Pilot 1 slice 2 (routing/flag) + begin Pilot 2 analysis.
 | Version | Date | Notes |
 |---------|------|-------|
 | 1.0 | 2026-06-21 | Foundation + dual-pilot plan for external F2P monolith |
-| 1.1 | 2026-06-21 | Added required module refactor starter kit (Phase A7) |
+| 1.1 | 2026-06-21 | Starter kit (Phase A7); module-composition-di (no ABP) |

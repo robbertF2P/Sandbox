@@ -32,8 +32,9 @@ Point monolith `nuget.config` at your internal feed for `Platform.Serilog.Loggin
 | `README.md` | **done** | This manifest |
 | `templates/module/` | **planned** | Domain / Application / Infrastructure / Api / test `.csproj` + stub types |
 | `templates/integration-pack/` | **planned** | Pack manifest + ports-only layout (Pilot 2) |
+| `templates/DependencyInjection.cs` | **planned** | `Add<Context>Module` + `Map<Context>Endpoints` stubs (no ABP) |
 | `templates/CharacterizationTest.cs` | **planned** | WebApplicationFactory smoke test with `Module`/`Tier` traits |
-| `templates/StranglerAdapter.cs` | **planned** | Adapter marker + removal ticket comment |
+| `../module-composition-di.md` | **done** | DI standard — extension methods, no ABP |
 | `templates/pr-module-extraction.md` | **planned** | PR body checklist |
 | SandBox `build/Platform.Logging.*.props` | **done** | Serilog MSBuild imports |
 | SandBox `scripts/add-platform-logging-to-module.sh` | **done** | Wire logging to module root |
@@ -51,7 +52,7 @@ Src/Modules/<Context>/
 │   ├── <Context>.Domain/
 │   ├── <Context>.Application/
 │   ├── <Context>.Infrastructure/
-│   └── <Context>.Api/              ← IModule + DI registration
+│   └── <Context>.Api/              ← Add<Context>Module + Map<Context>Endpoints
 └── tests/
     ├── <Context>.Unit.Tests/
     ├── <Context>.Integration.Tests/
@@ -63,8 +64,9 @@ Src/Modules/<Context>/
 - **Domain** — no EF, ASP.NET, Hangfire, vendor SDKs
 - **Application** — ports only; no Infrastructure references
 - **Infrastructure** — EF, Hangfire, external IO
-- **Api** — composition for the module; registers services + endpoints
+- **Api** — `DependencyInjection.cs` with `Add<Context>Module`; endpoint mapping via `Map<Context>Endpoints`
 - **Legacy → new** allowed via feature flag; **new → legacy** only via `[StranglerAdapter]`
+- **No ABP** — no `AbpModule`, `Volo.Abp.*`, or `AbpDbContext` in new module projects (see `../module-composition-di.md`)
 
 ---
 
@@ -77,7 +79,7 @@ Src/Modules/<Context>/
 # 2. Wire platform logging
 ./scripts/add-platform-logging-to-module.sh Src/Modules/Import
 
-# 3. Register IModule in UI.Floor2Plan / host startup
+# 3. Register in host: builder.Services.Add<Context>Module(config); app.Map<Context>Module();
 
 # 4. Run smoke characterization test from templates/CharacterizationTest.cs
 
@@ -91,10 +93,10 @@ Until `scaffold-module.sh` exists, copy `_template/` manually and rename `Refere
 ## Claude instruction (paste when scaffolding)
 
 ```text
-Use docs/modularization/starter-kit/README.md and Src/Modules/_template/.
+Use docs/modularization/starter-kit/README.md and module-composition-di.md.
 Do not invent project layout. Scaffold <Context> with Domain/Application/
-Infrastructure/Api + three test projects. Register IModule. Add smoke
-characterization test from starter-kit templates. Link to slice_id in PR template.
+Infrastructure/Api + three test projects. Use Add<Context>Module and
+Map<Context>Endpoints — no AbpModule. Add smoke characterization test.
 ```
 
 ---

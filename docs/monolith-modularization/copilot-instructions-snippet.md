@@ -12,6 +12,8 @@ You are assisting with **monolith-to-modular migration** using a strangler-fig a
 
 **Starter kit:** `docs/monolith-modularization/starter-kit/README.md` — copy into monolith Phase A; scaffold every module from it.
 
+**Module DI (no ABP):** `docs/monolith-modularization/module-composition-di.md` — register modules with `IServiceCollection` / `WebApplication` extension methods only; do not use `AbpModule` or new `Volo.Abp.*` in extracted modules.
+
 Follow phases and output formats in `docs/monolith-modularization/copilot-analysis-instructions.md` (or the copy in this repo under `docs/modularization/`).
 
 For **third-party external system integrations** (SAP, Kronos, PLM, lead vs follow, integration packs), use `docs/monolith-modularization/claude-external-integrations-deepdive-instructions.md` after Phase 0. Run against the **external F2P monolith repo**, not SandBox. Phase C produces epics, user stories, and ACs reverse-engineered from integration tests for domain expert validation.
@@ -36,10 +38,11 @@ Generic template: `docs/floor2plan-v2-connector-migration-prompt.md`
 7. **Quality framework** — follow `docs/monolith-modularization/ai-assisted-delivery-quality-framework.md` for anti-slop rules, DoD, and CI gates.
 8. **Module dashboards** — each bounded context publishes ADO test results per `azure-devops-module-test-dashboards.md`.
 9. **Serilog platform logging** — `Platform.Serilog.Logging`: Development → Seq, Production → Application Insights; all tests → `Platform.Serilog.Logging.Testing` (xUnit sink). See `03-modularization-roadmap.md`.
+10. **Module composition** — `Add<Context>Module` / `Map<Context>Endpoints` via `IServiceCollection` and `WebApplication` extensions; **no ABP** in new modules (`module-composition-di.md`).
 
 ## Target architecture
 
-- Backend: composed ASP.NET gateway host, 7 bounded contexts as `IModule` libraries
+- Backend: composed ASP.NET host; bounded contexts as libraries registered with **`Add*Module` extension methods** (not ABP modules)
 - Frontend: Nx Angular shell, lazy-loaded context libraries
 - Data: one DbContext per context; integration via events/contracts
 - Cross-screen reads: BFF endpoints in gateway only when needed
@@ -51,6 +54,7 @@ Write analysis artifacts to `docs/modularization/` using schemas in `templates/`
 ## When asked to implement
 
 - Prefer characterization tests through existing public entry points.
+- Register modules with `IServiceCollection.Add<Context>Module` and `WebApplication.Map<Context>Module` — explicit DI only; no `AbpModule`.
 - Adapters may delegate to legacy; legacy must not depend on new modules.
 - Tag temporary code `[StranglerAdapter]` with removal ticket.
 

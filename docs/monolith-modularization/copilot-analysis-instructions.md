@@ -361,11 +361,11 @@ Tasks:
    - adapter_strategy (facade, strangler route, feature flag)
    - rollback_plan
    - done_criteria
-3. Propose target project structure matching composed gateway pattern:
+3. Propose target project structure matching composed host pattern:
    - <Context>.Domain
    - <Context>.Application
    - <Context>.Infrastructure
-   - <Context>.Api (IModule)
+   - <Context>.Api (`Add<Context>Module`, `Map<Context>Endpoints` — **not** ABP `AbpModule`)
 4. List blockers (shared kernel, god services, shared DbContext).
 
 Output: docs/modularization/03-modularization-roadmap.md
@@ -390,6 +390,7 @@ IMPLEMENTATION GUARDRAILS (always apply):
 6. Cross-context calls become contracts + integration events, not project references.
 7. Every extraction PR links to UC- IDs and test cases it satisfies.
 8. Mark adapters with [StranglerAdapter] and ticket to remove.
+9. New modules use IServiceCollection / WebApplication extension methods only — no Volo.Abp or AbpModule (see module-composition-di.md).
 ```
 
 ---

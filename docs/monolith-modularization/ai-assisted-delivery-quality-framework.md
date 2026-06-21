@@ -147,7 +147,7 @@ AI and human authors follow the **same** standards. Guidelines are not optional 
 | Layout | One public type per file; file-scoped namespaces; `sealed` by default |
 | Naming | PascalCase types; `_camelCase` private fields; `Async` suffix |
 | API | Minimal APIs in static `*Endpoints` classes; DTOs as records where appropriate |
-| DI | Constructor injection; explicit lifetimes; no service locator |
+| DI | Constructor injection; explicit lifetimes; `Add<Context>Module` extension methods; no service locator; **no ABP in new modules** |
 | Domain | No vendor-specific types in `*.Domain`; ports in `*.Application` |
 | Actors | Messages/events in Contracts; `Tell`/`Forward` inside actors; `Ask` only at boundaries |
 | EF | One DbContext per bounded context; review migrations before commit |
@@ -166,6 +166,7 @@ IMPLEMENTATION QUALITY (mandatory):
 5. No behaviour change without a test; no test change without explaining which AC it serves.
 6. One strangler slice per PR; no drive-by refactors.
 7. If uncertain about a business rule, stop — do not invent. Mark [NEEDS REVIEW].
+8. Module registration: IServiceCollection Add*Module + WebApplication Map*Module only — no AbpModule (module-composition-di.md).
 ```
 
 ---
@@ -191,7 +192,7 @@ IMPLEMENTATION QUALITY (mandatory):
 | **Characterization** | Legacy output unchanged | Before every extraction PR |
 | **Integration** | Use case / AC end-to-end | P0/P1 features; story-map ACs |
 | **Golden file** | Converter → intermediate format | Every integration pack inbound path |
-| **Contract** | Module boundary stable | After `IModule` extraction |
+| **Contract** | Module boundary stable | After `Add<Context>Module` extraction |
 
 ### Story map → test traceability
 

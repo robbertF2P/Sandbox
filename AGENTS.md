@@ -30,3 +30,15 @@ After editing skills in `.cursor/skills/`, run:
 - `reactive-applications-akka-net` — Anthony Brown reactive systems / Akka.NET book
 
 Copilot-specific always-on notes: `.github/copilot-instructions.md`
+
+## Platform 2.0 module composition (F2P refactor)
+
+When working on **monolith modularization** or **new bounded-context modules**:
+
+- **No ABP** in new extracted modules — no `Volo.Abp.*`, `AbpModule`, or `AbpDbContext`.
+- Register modules with **`IServiceCollection` extension methods** (`Add<Context>Module`, layer-specific `Add*` helpers) per [Microsoft DI guidance](https://learn.microsoft.com/en-us/aspnet/core/fundamentals/dependency-injection).
+- Map endpoints with **`WebApplication` extensions** (`Map<Context>Endpoints`).
+- Host (`Program.cs`) is the **only composition root** — explicit, grep-able service registration.
+- Bridge legacy ABP via **`[StranglerAdapter]`** in Infrastructure; do not extend `AbpModule` for new code.
+
+Details: `docs/monolith-modularization/module-composition-di.md` · Plan: `docs/monolith-modularization/foundation-and-pilot-plan.md`

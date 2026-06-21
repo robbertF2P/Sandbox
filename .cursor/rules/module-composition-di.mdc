@@ -1,0 +1,22 @@
+---
+description: Module composition uses IServiceCollection extension methods; no ABP in new extracted modules.
+globs:
+  - "**/docs/monolith-modularization/**"
+  - "**/docs/modularization/**"
+  - "**/*Module*/**"
+  - "**/*Modules*/**"
+alwaysApply: false
+---
+
+# Module composition (no ABP)
+
+When scaffolding or extracting bounded-context modules (Platform 2.0 / F2P strangler):
+
+1. **Do not** add `Volo.Abp.*`, `AbpModule`, `AbpDbContext`, or ABP dynamic DI to **new** module code.
+2. **Do** register each module via `IServiceCollection` extension methods (`Add<Context>Module`, `Add<Context>Infrastructure`, etc.) — Microsoft’s standard DI pattern.
+3. **Do** map HTTP endpoints with `WebApplication` / `IEndpointRouteBuilder` extensions (`Map<Context>Endpoints`).
+4. **Host only** calls module `Add*` / `Map*` methods — modules are libraries; the web host is the composition root.
+5. **Explicit registrations** — grep-able `AddScoped`/`AddSingleton`; no magic convention scanning unless explicitly approved.
+6. **Legacy ABP** in the monolith is bridged via `[StranglerAdapter]` in Infrastructure, not by extending ABP modules.
+
+Full standard: `docs/monolith-modularization/module-composition-di.md`

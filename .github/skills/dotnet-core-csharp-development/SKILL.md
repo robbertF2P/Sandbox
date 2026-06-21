@@ -67,6 +67,7 @@ Apply this skill for C# and ASP.NET Core work in this repository. Prefer existin
 - Register interfaces with explicit lifetimes: `Singleton` for caches and facades, `Scoped` for per-request state.
 - Avoid service locator; inject dependencies via constructors.
 - Extension methods like `AddAkkaActors` keep registration cohesive.
+- **Extracted bounded-context modules:** use `IServiceCollection.Add<Context>Module` and `WebApplication.Map<Context>Module` per `docs/monolith-modularization/module-composition-di.md`. Do **not** use ABP (`AbpModule`, `Volo.Abp.*`) in new module code.
 
 ### Configuration
 
