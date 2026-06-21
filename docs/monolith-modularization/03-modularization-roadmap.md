@@ -2,7 +2,7 @@
 
 **Purpose:** Cross-cutting standards and extraction order for Platform 2.0 POCs in this repo, ahead of the full monolith strangler program in the external F2P repository.
 
-**Related:** `docs/monolith-modularization/copilot-analysis-instructions.md`, `docs/monolith-modularization/ai-assisted-delivery-quality-framework.md`
+**Related:** `docs/monolith-modularization/analysis-instructions.md`, `docs/monolith-modularization/ai-assisted-delivery-quality-framework.md`
 
 ---
 

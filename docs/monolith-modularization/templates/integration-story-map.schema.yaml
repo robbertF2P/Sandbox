@@ -1,5 +1,5 @@
 # Integration story map schema — reverse-engineered from integration tests
-# Claude: emit under key `story_map` in integrations/contexts/<slug>/story-map.yaml
+# Agent: emit under key `story_map` in integrations/contexts/<slug>/story-map.yaml
 # Bundle epics by bounded_context; one file per context plus optional rollup.
 
 story_map:

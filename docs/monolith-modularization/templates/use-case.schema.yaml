@@ -1,5 +1,5 @@
 # Use case record schema — one item per use case in use-cases.yaml
-# Copilot: emit a YAML array under key `use_cases`
+# Agent: emit a YAML array under key `use_cases`
 
 use_cases:
   - id: UC-ORDERS-001                    # required, stable
@@ -108,6 +108,6 @@ use_cases:
 
   metadata:
     status: draft                    # draft | reviewed | approved
-    author: copilot
+    author: agent
     reviewed_by: null
     last_updated: 2026-06-17

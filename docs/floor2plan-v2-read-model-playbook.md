@@ -2,7 +2,7 @@
 
 Combined conventions for **backend query encapsulation** and the **Nx Angular frontend module plan**, aligned with Platform 2.0 modularization targets in this repo.
 
-**Sources:** `docs/monolith-modularization/copilot-instructions-snippet.md`, `ApiImportActorPoc/docs/platform-rebuild-proposal-summary.md` (Section 10), `specification-pattern` skill.
+**Sources:** `docs/monolith-modularization/agent-instructions-snippet.md`, `ApiImportActorPoc/docs/platform-rebuild-proposal-summary.md` (Section 10), `specification-pattern` skill.
 
 **Audience:** Engineers building V2 list screens, filters, and context libraries during strangler migration.
 
@@ -383,7 +383,7 @@ Each slice delivers **both** API specs and matching Nx feature lib — avoid “
 | `specification-pattern` skill | Spec + repository rules |
 | `domain-driven-design` skill | Naming, bounded contexts |
 | `dotnet-ef-core` skill | DbContext per context, lifetimes |
-| `docs/monolith-modularization/copilot-instructions-snippet.md` | Target topology summary |
+| `docs/monolith-modularization/agent-instructions-snippet.md` | Target topology summary |
 | `ApiImportActorPoc/docs/platform-rebuild-proposal-summary.md` | SPA strangler, performance SLOs |
 | `FloorganiseCss/showcase-angular/` | Shell/tile DOM contract for smoke tests |
 | `Floor2PlanSmokeTests/` | Cypress smoke harness |

@@ -28,6 +28,13 @@ Use when designing repositories, EF queries, or reusable domain criteria.
 - **`docs/floor2plan-v2-connector-architecture.md`** — V2 connector dependency model, diagrams, ground rules.
 - **`docs/floor2plan-v2-connector-migration-prompt.md`** — copy-paste Claude prompt: legacy connector → concrete V2 pack proposal.
 
+## Floor2Plan / Platform 2.0 modularization
+
+- **`docs/monolith-modularization/foundation-and-pilot-plan.md`** — foundation-first strangler plan for the external F2P monolith.
+- **`docs/monolith-modularization/agent-instructions-snippet.md`** — agent-agnostic rules (copy to monolith `agent-rules.md` + `.github/copilot-instructions.md`).
+- **`docs/monolith-modularization/module-composition-di.md`** — no ABP in new modules; `IServiceCollection` / `WebApplication` extension methods.
+- **`docs/monolith-modularization/starter-kit/README.md`** — module scaffold kit (copy into monolith).
+
 ## .NET / C#
 
 - **`dotnet-core-csharp-development`** — SDK-style projects, ASP.NET Core, DI, testing, C# style.

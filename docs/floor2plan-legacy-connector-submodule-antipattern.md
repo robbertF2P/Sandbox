@@ -397,7 +397,7 @@ Yes — **strangler**: adapter calls legacy until pack produces intermediate for
 
 | Document | Topic |
 |----------|--------|
-| `docs/monolith-modularization/claude-external-integrations-deepdive-instructions.md` | Lead/follow, integration catalog, packs |
+| `docs/monolith-modularization/external-integrations-deepdive-instructions.md` | Lead/follow, integration catalog, packs |
 | `ApiImportActorPoc/docs/platform-rebuild-proposal-summary.md` | Submodule policy, portability hub, journey stages |
 | `ApiImportActorPoc/README.md` | External IDs, import actor boundary |
 | `docs/floor2plan-v2-read-model-playbook.md` | V2 read paths (orthogonal but same boundary thinking) |

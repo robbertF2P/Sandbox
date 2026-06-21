@@ -2,7 +2,7 @@
 
 **Purpose:** Give management and engineering a shared, enforceable answer to: *How do we prevent nonsensical AI output and ensure new code is high quality, correct, and follows our guidelines?*
 
-**Audience:** Management, tech leads, domain experts, engineers using Claude/Copilot on the modularization program.
+**Audience:** Management, tech leads, domain experts, engineers using AI assistants (GitHub Copilot, Claude Code, etc.) on the modularization program.
 
 **Scope:** Analysis artifacts (story maps, use cases, integration catalogs) **and** implementation (module extraction, integration packs, new APIs).
 
@@ -134,8 +134,8 @@ AI and human authors follow the **same** standards. Guidelines are not optional 
 
 ### Binding sources (apply in order)
 
-1. **Repo-local rules** — `.cursor/rules/*.mdc` in the workspace (e.g. `actor-system-contracts.mdc`, `csharp-resharper-style.mdc`)
-2. **Skills** — `.cursor/skills/` (`dotnet-core-csharp-development`, `dotnet-ef-core`, `akka-net`)
+1. **Repo-local rules** — agent config and rules in the workspace (e.g. `docs/modularization/agent-rules.md`, `.github/copilot-instructions.md`, `.cursor/rules/*.mdc` where used)
+2. **Skills** — `.cursor/skills/` / `.github/skills/` (`dotnet-core-csharp-development`, `dotnet-ef-core`, `akka-net`)
 3. **Solution style guides** — e.g. `AkkaSignalRVuePoc/STYLEGUIDE.md`
 4. **Neighbouring code** — match patterns in the module being edited
 5. **MSBuild / analyzers** — `Directory.Build.props`, `EnforceCodeStyleInBuild`, `AnalysisLevel`
@@ -147,25 +147,26 @@ AI and human authors follow the **same** standards. Guidelines are not optional 
 | Layout | One public type per file; file-scoped namespaces; `sealed` by default |
 | Naming | PascalCase types; `_camelCase` private fields; `Async` suffix |
 | API | Minimal APIs in static `*Endpoints` classes; DTOs as records where appropriate |
-| DI | Constructor injection; explicit lifetimes; no service locator |
+| DI | Constructor injection; explicit lifetimes; `Add<Context>Module` extension methods; no service locator; **no ABP in new modules** |
 | Domain | No vendor-specific types in `*.Domain`; ports in `*.Application` |
 | Actors | Messages/events in Contracts; `Tell`/`Forward` inside actors; `Ask` only at boundaries |
 | EF | One DbContext per bounded context; review migrations before commit |
 | Tests | xUnit; descriptive `Method_Scenario_Expected` names; assert behaviour not internals |
 | **Logging** | `Platform.Serilog.Logging`: Development → Seq, Production → Application Insights; tests → `Platform.Serilog.Logging.Testing` (xUnit sink). See `03-modularization-roadmap.md`. |
 
-### Cursor / Claude instruction (paste for implementation work)
+### AI agent instruction (paste for implementation work)
 
 ```text
 IMPLEMENTATION QUALITY (mandatory):
 
-1. Read and follow .cursor/rules and .cursor/skills for this repo before writing code.
+1. Read and follow docs/modularization/agent-rules.md (or .github/copilot-instructions.md) and repo skills before writing code.
 2. Match style of files you edit; run dotnet build and dotnet test before finishing.
 3. Fix all analyzer warnings in touched files.
 4. Link every change to UC-### or US-### / AC-### from approved artifacts.
 5. No behaviour change without a test; no test change without explaining which AC it serves.
 6. One strangler slice per PR; no drive-by refactors.
 7. If uncertain about a business rule, stop — do not invent. Mark [NEEDS REVIEW].
+8. Module registration: IServiceCollection Add*Module + WebApplication Map*Module only — no AbpModule (module-composition-di.md).
 ```
 
 ---
@@ -191,7 +192,7 @@ IMPLEMENTATION QUALITY (mandatory):
 | **Characterization** | Legacy output unchanged | Before every extraction PR |
 | **Integration** | Use case / AC end-to-end | P0/P1 features; story-map ACs |
 | **Golden file** | Converter → intermediate format | Every integration pack inbound path |
-| **Contract** | Module boundary stable | After `IModule` extraction |
+| **Contract** | Module boundary stable | After `Add<Context>Module` extraction |
 
 ### Story map → test traceability
 
@@ -283,9 +284,9 @@ AI has **no** approval role.
 
 | Document | Role |
 |----------|------|
-| `copilot-analysis-instructions.md` | Phased analysis; characterization-first |
-| `claude-external-integrations-deepdive-instructions.md` | Integration story maps; Phase C expert validation |
-| `copilot-instructions-snippet.md` | Short rules for AI agents in repo |
+| `analysis-instructions.md` | Phased analysis; characterization-first |
+| `external-integrations-deepdive-instructions.md` | Integration story maps; Phase C expert validation |
+| `agent-instructions-snippet.md` | Short rules for AI agents in monolith repo |
 | `03-modularization-roadmap.md` | SandBox POC cross-cutting standards (Serilog, NuGet import package, extraction order) |
 | `azure-devops-module-test-dashboards.md` | Per-module test dashboards in Azure DevOps |
 | `ApiImportActorPoc/docs/platform-rebuild-proposal-summary.md` | Strategic context; tests as specification |

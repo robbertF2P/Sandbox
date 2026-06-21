@@ -1,5 +1,5 @@
 # Integration point record schema — one item per integration in integrations.yaml
-# Claude: emit a YAML array under key `integration_points`
+# Agent: emit a YAML array under key `integration_points`
 
 integration_points:
   - id: INT-IMPORT-001                    # required, stable: INT-<CONTEXT>-###
