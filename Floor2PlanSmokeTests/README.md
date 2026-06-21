@@ -1,6 +1,6 @@
 # Floor2Plan smoke test harness
 
-This harness runs a Cypress smoke test against one or more Floor2Plan login URLs. The test logs in with service credentials, verifies the home page renders tiles, opens tile pages, opens upper-left menu pages, and records browser console warnings/errors. The default target is:
+This harness runs a Cypress smoke test against one or more Floor2Plan login URLs. The test logs in with service credentials, verifies the home page renders tiles, opens tile pages, opens upper-left menu pages, and fails when any checked page logs a console error, uncaught exception, window error, or unhandled rejection. The default target is:
 
 ```text
 https://2025-14-patch.floor2plan.com/Account/Login
@@ -173,12 +173,13 @@ Host Edge profile reuse in Docker can be limited by OS keychain encryption and p
 - `SMOKE_MENU_CLICK_LIMIT`: maximum number of discovered upper-left menu pages to test. Defaults to `40`.
 - `SMOKE_MENU_BUTTON_SELECTOR`: optional CSS selector for the upper-left menu button. Defaults to common menu button selectors.
 - `SMOKE_MENU_ITEM_SELECTOR`: optional CSS selector for menu page links. Defaults to common menu link selectors.
-- `SMOKE_FAIL_ON_CONSOLE_ERROR`: set to `false` to record browser console errors without failing the smoke test. Defaults to failing on console errors.
+- `SMOKE_FAIL_ON_CONSOLE_ERROR`: set to `false` to record browser errors without failing the smoke test. Defaults to failing on console errors, uncaught exceptions, window errors, and unhandled rejections.
+- `SMOKE_CONSOLE_SETTLE_MS`: wait after each test before checking captured browser errors. Defaults to `2000`.
 - `SMOKE_VISUAL_SETTLE_MS`: optional wait after the smoke assertion for video capture. Defaults to `0`.
 - `CYPRESS_VIEWPORT_WIDTH`: viewport width. Defaults to `1280`.
 - `CYPRESS_VIEWPORT_HEIGHT`: viewport height. Defaults to `720`.
 
-Console warnings and errors are written to `artifacts/console/*.json`. Opened and missing tile/menu targets are written to `artifacts/navigation/*.json`.
+Console warnings, errors, uncaught exceptions, window errors, and unhandled rejections are written to `artifacts/console/*.json`. Opened and missing tile/menu targets are written to `artifacts/navigation/*.json`.
 
 ## API documentation
 
