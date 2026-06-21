@@ -21,7 +21,8 @@ This repo is the Floorganise-owned home for F2P refactor work. Personal experime
 | Platform logging + correlation | `Platform.Serilog.Logging/`, `build/Platform.Logging.*.props` |
 | Import domain kernel | `ImportPipeline/` |
 | Reference POCs | `ApiImportActorPoc/`, `AkkaSignalRVuePoc/`, `PrimaveraExcelReader/` |
-| Agent skills (source) | `.cursor/skills/` — sync with `./scripts/sync-agent-skills.sh` |
+| Smoke / DOM contract tests | `Floor2PlanSmokeTests/` |
+| Agent skills + rules | `.cursor/skills/`, `.cursor/rules/` — sync with `./scripts/sync-agent-skills.sh` |
 
 ## Two-repo model
 

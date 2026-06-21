@@ -1,8 +1,0 @@
-<Solution>
-  <Folder Name="/src/">
-    <Project Path="src/EfCoreHoursNormalization/EfCoreHoursNormalization.csproj" />
-  </Folder>
-  <Folder Name="/tests/">
-    <Project Path="tests/EfCoreHoursNormalization.Tests/EfCoreHoursNormalization.Tests.csproj" />
-  </Folder>
-</Solution>
