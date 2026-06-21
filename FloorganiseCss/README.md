@@ -117,3 +117,7 @@ Production home page with `f2p-app-light` shell, module header, and clickable `f
 ## Extending
 
 Add tokens in `src/theme.css` (`@theme` block). Add aliases in `src/components/`. Use Tailwind utilities directly in Vue templates for one-off layout.
+
+## Shared UI library (`@floorganise/ui`)
+
+V2 monolith Nx modules require a shared Angular component library built on this package. See `docs/monolith-modularization/platform-frontend-standard.md`. Seed components from `showcase-angular/`; package scaffold: `FloorganiseCss/ui/` (planned).

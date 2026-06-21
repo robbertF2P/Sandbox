@@ -35,6 +35,7 @@ Point monolith `nuget.config` at your internal feed for `Platform.Serilog.Loggin
 | `templates/DependencyInjection.cs` | **planned** | `Add<Context>Module` + `Map<Context>Endpoints` stubs (no ABP) |
 | `templates/CharacterizationTest.cs` | **planned** | WebApplicationFactory smoke test with `Module`/`Tier` traits |
 | `../module-composition-di.md` | **done** | DI standard — extension methods, no ABP |
+| `../platform-frontend-standard.md` | **done** | `@floorganise/css` + `@floorganise/ui` for V2 modules |
 | `templates/pr-module-extraction.md` | **planned** | PR body checklist |
 | SandBox `build/Platform.Logging.*.props` | **done** | Serilog MSBuild imports |
 | SandBox `scripts/add-platform-logging-to-module.sh` | **done** | Wire logging to module root |
@@ -103,11 +104,13 @@ Map<Context>Endpoints — no AbpModule. Add smoke characterization test.
 
 ## NuGet vs copy
 
-| Consume via NuGet | Copy into monolith |
-|-------------------|-------------------|
+| Consume via NuGet / npm | Copy into monolith |
+|-------------------------|-------------------|
 | `Platform.Serilog.Logging` | MSBuild props, scripts, templates |
 | `Platform.Serilog.Logging.Testing` | PR template, agent rules |
 | `ImportPipeline.Domain` (Import pilot) | Module folder skeleton |
+| `@floorganise/css` | — (npm feed only) |
+| `@floorganise/ui` | — (npm feed only; scaffold in SandBox `FloorganiseCss/ui/`) |
 
 Do **not** project-reference SandBox POC repos from the monolith.
 
