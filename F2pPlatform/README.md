@@ -11,8 +11,9 @@ host/
   F2pPlatform.Host/              composition root (Program.cs)
   F2pPlatform.Host.Contracts/    platform events + actor messages
   F2pPlatform.Host.Core/         Akka root + SignalR bridge actors
-src/Modules/Reference/           template module (Domain → Api)
-tests/Modules/Reference/           unit + characterization tests
+src/Modules/Reference/           template backend module (Domain → Api)
+tests/Modules/Reference/         unit + characterization tests
+web/                             Angular f2p-shell + Reference UI libs
 ```
 
 ## Quick start
@@ -29,10 +30,21 @@ dotnet run --project host/F2pPlatform.Host
 - Reference status: `GET /api/reference/status`
 - SignalR hub: `/hubs/platform-events`
 
+### Frontend (template)
+
+```bash
+cd F2pPlatform/web
+npm install
+npm start   # http://localhost:5180 — proxies API/SignalR to :5080
+```
+
+See [web/README.md](web/README.md).
+
 ## Scaffold a new module
 
 ```bash
-./scripts/scaffold-module.sh Import
+./scripts/scaffold-module.sh Import          # backend
+./scripts/scaffold-frontend-module.sh Import # frontend libs
 ```
 
 Creates `src/Modules/Import/` from the Reference template and adds projects to `F2pPlatform.slnx`.

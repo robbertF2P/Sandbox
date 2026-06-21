@@ -32,7 +32,9 @@ Point monolith `nuget.config` at your internal feed for `Platform.Serilog.Loggin
 | Path | Status | Description |
 |------|--------|-------------|
 | `README.md` | **done** | This manifest |
-| `F2pPlatform/` (SandBox) | **done** | Runnable V2 host + Reference module; copy or scaffold from here |
+| `F2pPlatform/` (SandBox) | **done** | Runnable V2 host + Reference backend + **web/** frontend template |
+| `F2pPlatform/web/` | **done** | `f2p-shell` + `libs/reference/{data-access,feature-status}` |
+| `templates/frontend/` | **done** | Data-access + lazy-route stubs |
 | `templates/CharacterizationTest.cs` | **done** | WebApplicationFactory smoke test stub |
 | `templates/DependencyInjection.Api.cs` | **done** | `Add<Context>Module` + `Map<Context>Endpoints` stub |
 | `templates/StranglerAdapter.cs` | **done** | `[StranglerAdapter]` marker attribute |
@@ -43,6 +45,7 @@ Point monolith `nuget.config` at your internal feed for `Platform.Serilog.Loggin
 | SandBox `build/Platform.Logging.*.props` | **done** | Serilog MSBuild imports |
 | SandBox `scripts/add-platform-logging-to-module.sh` | **done** | Wire logging to module root |
 | SandBox `scripts/scaffold-module.sh` | **done** | Generate `F2pPlatform/src/Modules/<Context>/` from Reference |
+| SandBox `scripts/scaffold-frontend-module.sh` | **done** | Generate `F2pPlatform/web/libs/<context>/` from reference |
 | `../templates/azure-pipelines-module-tests.yml` | **done** | ADO per-module test jobs |
 | `../templates/*.schema.yaml` | **done** | Analysis artifact schemas |
 

@@ -17,7 +17,7 @@ This repo is the Floorganise-owned home for F2P refactor work. Personal experime
 | Area | Path |
 |------|------|
 | Modularization program | `docs/monolith-modularization/` |
-| **V2 host + module template** | `F2pPlatform/` — composed host, Reference module, scaffold script |
+| **V2 host + module template** | `F2pPlatform/` — backend host, Reference module, Angular `web/` shell |
 | Floorganise design system | `FloorganiseCss/` (`@floorganise/css`, showcase apps) |
 | Platform logging + correlation | `Platform.Serilog.Logging/`, `build/Platform.Logging.*.props` |
 | Import domain kernel | `ImportPipeline/` |

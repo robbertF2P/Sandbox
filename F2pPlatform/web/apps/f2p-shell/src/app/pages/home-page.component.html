@@ -1,0 +1,29 @@
+<div class="f2p-app-light min-h-screen">
+  <header class="border-b border-f2p-border bg-f2p-surface px-6 py-4">
+    <div class="mx-auto flex max-w-6xl items-center justify-between gap-4">
+      <div class="flex items-center gap-4">
+        <span class="text-lg font-bold text-f2p-ink">Floor2Plan</span>
+      </div>
+      <p class="text-sm text-f2p-ink-muted">f2p-shell · V2 frontend template</p>
+    </div>
+  </header>
+
+  <main class="mx-auto max-w-6xl px-6 py-8">
+    <section class="mb-8">
+      <h1 class="text-2xl font-bold text-f2p-ink">Home</h1>
+      <p class="mt-1 text-sm text-f2p-ink-muted">Lazy-loaded context features. Start the API host on :5080.</p>
+    </section>
+
+    <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      @for (tile of tiles; track tile.route) {
+        <a
+          [routerLink]="tile.route"
+          class="f2ps-tile block p-5 no-underline"
+        >
+          <h2 class="text-lg font-semibold text-f2p-ink">{{ tile.title }}</h2>
+          <p class="mt-2 text-sm text-f2p-ink-muted">{{ tile.description }}</p>
+        </a>
+      }
+    </div>
+  </main>
+</div>
