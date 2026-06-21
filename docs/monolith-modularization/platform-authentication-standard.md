@@ -13,6 +13,8 @@
 | `docs/Modularization/00-inventory.md` §5 | Legacy F2P auth (reference only) |
 | `docs/monolith-modularization/platform-correlation-standard.md` | Correlation headers after auth |
 | `docs/floor2plan-v2-read-model-playbook.md` | `@f2p/identity` frontend module |
+| `diagrams/platform-v2-auth-flow.svg` | Auth flow diagram (also in PDF) |
+| `platform-v2-authentication-flow.pdf` | Printable overview (auth flow + tenant user lifecycle) |
 
 ---
 
@@ -345,7 +347,154 @@ Provisioning APIs (`POST /admin/tenants`, pack enablement, user bootstrap) requi
 
 ---
 
-## 8. Frontend (f2p-shell)
+## 8. Tenant user lifecycle
+
+Tenant **administrators** (customer IT or site admins) manage **operational users** — people who book hours, view project components, and edit planning data. This is distinct from Floorganise **platform operators** who provision tenants in the admin backoffice.
+
+**Diagram:** [`diagrams/platform-v2-tenant-user-lifecycle.svg`](diagrams/platform-v2-tenant-user-lifecycle.svg) · **PDF:** [`platform-v2-authentication-flow.pdf`](platform-v2-authentication-flow.pdf)
+
+### 8.1 Three user layers
+
+| Layer | UI | Responsibility |
+|-------|-----|----------------|
+| **Platform operator** | Admin backoffice | Provision tenant, bind SSO, enable packs, bootstrap first tenant admin |
+| **Tenant administrator** | `@f2p/identity` | Create/edit/disable users; assign roles; link Person records |
+| **End user** | Planning, Hours, WBS, … | Book hours, view components, edit activities (permission-gated) |
+
+Backoffice creates the **first tenant admin**. All day-to-day user management for operational staff is self-service within the tenant via `@f2p/identity`.
+
+### 8.2 Login account vs Person
+
+Legacy F2P separates authentication from workforce data (`docs/Modularization/00-inventory.md`: `User` / `UserInRole` vs `Person`). V2 preserves this split:
+
+| Concept | Bounded context | Purpose |
+|---------|-----------------|---------|
+| **Platform user** | Identity | Login principal — email/UPN, roles, enabled/disabled |
+| **Person** | Resources (or org context) | Who books hours and appears on WBS assignments |
+
+A user who books hours needs **both**: an Identity account with `Hours.Write` (or equivalent) **and** a linked Person record. Tenant admin UI should support **create user + link/create Person** in one flow where required.
+
+`PersonManagement` in legacy is **not** wholly Identity — workforce/org screens may live in Resources; Identity owns the **access** side.
+
+### 8.3 User states
+
+```text
+Invited → Pending → Active ⇄ Disabled → Retired
+```
+
+| State | Meaning | How reached |
+|-------|---------|-------------|
+| `invited` | Pre-provisioned; roles assigned; no login yet | Tenant admin `POST /api/v1/identity/users` |
+| `pending` | Awaiting first successful authentication | Invite issued or JIT record created |
+| `active` | Can sign in and use product per roles | First OIDC or local login succeeds |
+| `disabled` | Login blocked; audit and data retained | Tenant admin disable or seat reclaim |
+| `retired` | Offboarded; historical reference only | Admin retires after departure |
+
+### 8.4 Provisioning modes
+
+Tenants should support a **hybrid** of admin-provisioned and IdP-driven onboarding:
+
+| Mode | Tenant admin action | First login | Typical customer |
+|------|---------------------|-------------|------------------|
+| **Admin-provisioned** *(default)* | Create user (email/UPN, name, roles); optional Person link | Matches pre-provisioned row → `active` | Most shipyards — IT doesn't ticket Floorganise per new planner |
+| **JIT from IdP** | Upgrades roles after auto-created user | Identity creates user if `jitProvisioning=true` | Strict Entra/Okta-led shops |
+| **Local account** | Creates username + password | Direct local login | On-prem air-gap (`allowLocalLogin=true`) |
+
+**Recommended default:** `adminCanCreateUsers=true` **and** `jitProvisioning=true`. Admin can pre-provision planners before day one; unknown IdP users still get a controlled default role until upgraded.
+
+### 8.5 Lifecycle flows
+
+#### Bootstrap (new tenant)
+
+```mermaid
+sequenceDiagram
+    participant OP as Platform operator
+    participant BO as Admin backoffice
+    participant TA as Tenant admin
+    participant ID as Identity API
+
+    OP->>BO: Provision tenant (SSO, packs, seatLimit)
+    BO->>ID: Create bootstrap tenant admin user
+    TA->>ID: First login via OIDC
+    Note over TA,ID: Tenant admin manages all operational users thereafter
+```
+
+#### Admin-provisioned operational user
+
+```mermaid
+sequenceDiagram
+    participant AD as Tenant admin
+    participant ID as Identity API
+    participant RS as Resources API
+    participant U as End user
+
+    AD->>ID: POST /users { email, roles }
+    AD->>RS: POST /persons or link existing (if hour booking)
+    ID-->>AD: user state = invited
+    U->>ID: First OIDC login (email/UPN match)
+    ID->>ID: state = active; issue JWT with roles
+    U->>U: Book hours, edit planning per permissions
+```
+
+#### Disable / offboard
+
+1. Tenant admin sets `disabled` — immediate login block; refresh tokens revoked.
+2. IdP account may remain (customer HR); product access is independent.
+3. Person record may be marked inactive in Resources; historical hours retained.
+4. `retired` after agreed retention period (optional automation).
+
+### 8.6 Roles for operational users
+
+Tenant admins assign **roles**, not individual permission toggles (advanced matrix optional later):
+
+| Persona | Example roles / permissions |
+|---------|----------------------------|
+| View only | `Viewer` → `Planning.Read`, `Wbs.Read` |
+| Planner | `Planner` → `Planning.Read/Write`, `Wbs.Read` |
+| Hour booker | `HourEntry` → `Hours.Write` + project read scope |
+| Team lead | `TeamLead` → above + hour approvals |
+| Tenant admin | `TenantAdmin` → `Identity.Admin` |
+
+Domain modules enforce permissions on endpoints (`Planning.Read`, `Hours.Write`, …). Identity module owns role → permission mapping.
+
+### 8.7 Tenant profile flags (user lifecycle)
+
+| Flag | Default | Effect |
+|------|---------|--------|
+| `adminCanCreateUsers` | `true` | Tenant admin can pre-provision users in `@f2p/identity` |
+| `jitProvisioning` | `true` | Auto-create user on first IdP login when no pre-provisioned row |
+| `allowLocalLogin` | `false` (cloud) / configurable (on-prem) | Local account create/reset UI |
+| `seatLimit` | from billing | `POST /users` rejected when active + invited count ≥ limit |
+| `defaultRoleOnJit` | `Viewer` | Role assigned on JIT until admin upgrades |
+| `requirePersonLinkForHours` | `true` | Block `Hours.Write` until User ↔ Person link exists |
+
+### 8.8 Identity API surface (tenant admin)
+
+| Operation | Endpoint | Permission |
+|-----------|----------|------------|
+| List users | `GET /api/v1/identity/users` | `Identity.Admin` |
+| Create user | `POST /api/v1/identity/users` | `Identity.Admin` |
+| Update user / roles | `PUT /api/v1/identity/users/{id}` | `Identity.Admin` |
+| Disable user | `POST /api/v1/identity/users/{id}/disable` | `Identity.Admin` |
+| List roles | `GET /api/v1/identity/roles` | `Identity.Admin` or read-only for auditors |
+| Link Person | `PUT /api/v1/identity/users/{id}/person` | `Identity.Admin` (delegates to Resources port) |
+
+Audit every mutation with `CorrelationId` (login success/failure, role change, disable).
+
+### 8.9 `@f2p/identity` UI (tenant admin)
+
+| Screen | Actions |
+|--------|---------|
+| Users list | Search, filter by role/state, seat usage banner |
+| Add user | Email/UPN, display name, roles, create/link Person |
+| Edit user | Change roles, enable/disable, re-link Person |
+| Roles | View role catalogue and permission summary (read-only at MVP) |
+
+End-user product screens (Gantt, timesheet, component tree) remain in Planning/Hours/WBS modules.
+
+---
+
+## 9. Frontend (f2p-shell)
 
 From `platform-frontend-standard.md` and read-model playbook:
 
@@ -364,9 +513,9 @@ From `platform-frontend-standard.md` and read-model playbook:
 
 ---
 
-## 9. Technical requirements checklist
+## 10. Technical requirements checklist
 
-### 9.1 Platform components to build
+### 10.1 Platform components to build
 
 | # | Component | Cloud | On-prem |
 |---|-----------|-------|---------|
@@ -382,8 +531,9 @@ From `platform-frontend-standard.md` and read-model playbook:
 | 10 | Auth binding in tenant registry | ✓ | N/A (install config) |
 | 11 | Legacy auth bridge adapter | If `legacy_hosted` | If `legacy_hosted` |
 | 12 | Install wizard / config schema validation | N/A | ✓ |
+| 13 | Tenant user lifecycle APIs + `@f2p/identity` UI (§8) | ✓ | ✓ |
 
-### 9.2 Security requirements
+### 10.2 Security requirements
 
 - TLS everywhere; HSTS on cloud edge.
 - Secrets by reference (`clientSecretRef`, `databaseConnectionRef`) — never in tenant JSON.
@@ -393,7 +543,7 @@ From `platform-frontend-standard.md` and read-model playbook:
 - MFA enforced by customer IdP — platform does not implement MFA for OIDC tenants.
 - CORS: allow only tenant-specific origins in cloud; fixed origin on-prem.
 
-### 9.3 Operational requirements
+### 10.3 Operational requirements
 
 | Concern | Cloud | On-prem |
 |---------|-------|---------|
@@ -404,7 +554,7 @@ From `platform-frontend-standard.md` and read-model playbook:
 
 ---
 
-## 10. Configuration comparison
+## 11. Configuration comparison
 
 | Aspect | Cloud multi-tenant | On-prem single-tenant |
 |--------|-------------------|------------------------|
@@ -419,7 +569,7 @@ From `platform-frontend-standard.md` and read-model playbook:
 
 ---
 
-## 11. Migration from legacy F2P
+## 12. Migration from legacy F2P
 
 | Legacy mechanism | V2 target |
 |------------------|-----------|
@@ -435,7 +585,7 @@ From `platform-frontend-standard.md` and read-model playbook:
 
 ---
 
-## 12. Suggested build order
+## 13. Suggested build order
 
 Aligned with deployment-profile-sketch sprint ordering:
 
@@ -447,11 +597,11 @@ Aligned with deployment-profile-sketch sprint ordering:
 6. **Refresh tokens** + revocation.
 7. **SAML** (if enterprise tenants require before cloud GA).
 8. **Legacy auth bridge** for `legacy_hosted` pilots.
-9. **@f2p/identity** admin UI (user/role management).
+9. **@f2p/identity** admin UI (tenant user lifecycle — §8).
 
 ---
 
-## 13. Open decisions [NEEDS REVIEW]
+## 14. Open decisions [NEEDS REVIEW]
 
 | Topic | Options |
 |-------|---------|
@@ -462,7 +612,7 @@ Aligned with deployment-profile-sketch sprint ordering:
 
 ---
 
-## 14. Explicit non-goals (v0)
+## 15. Explicit non-goals (v0)
 
 - Per-screen auth mode inside one tenant.
 - Platform-managed MFA (delegate to IdP).
