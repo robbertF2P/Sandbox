@@ -22,6 +22,8 @@ You are assisting with **monolith-to-modular migration** using a strangler-fig a
 
 **Module DI (no ABP):** `docs/modularization/module-composition-di.md` — `IServiceCollection` / `WebApplication` extension methods only; no `AbpModule` or new `Volo.Abp.*` in extracted modules.
 
+**Frontend (V2 modules):** `docs/modularization/platform-frontend-standard.md` — **`@floorganise/css` required** on every V2 frontend module; shared chrome and reusable widgets from **`@floorganise/ui`** (not copy-pasted per context).
+
 Follow phased analysis in `docs/modularization/analysis-instructions.md`.
 
 For **third-party integrations** (SAP, Kronos, PLM, lead vs follow, integration packs), use `docs/modularization/external-integrations-deepdive-instructions.md` after Phase 0. Run against the **external F2P monolith repo**, not SandBox.
@@ -47,11 +49,13 @@ Generic template: `docs/floor2plan-v2-connector-migration-prompt.md`
 8. **Module dashboards** — per-context ADO test results per `azure-devops-module-test-dashboards.md`.
 9. **Serilog** — `Platform.Serilog.Logging` (Seq dev / App Insights prod); tests → `Platform.Serilog.Logging.Testing`.
 10. **Module composition** — `Add<Context>Module` / `Map<Context>Endpoints`; **no ABP** in new modules.
+11. **Frontend styling** — **`@floorganise/css`** (Tailwind v4 + Floorganise tokens) on **every** V2 frontend module; no parallel design systems.
+12. **Shared UI** — shell, tiles, buttons, forms, and cross-context widgets from **`@floorganise/ui`**; context `ui` libs only for context-specific presentational components.
 
 ## Target architecture
 
 - Backend: composed ASP.NET host; bounded contexts as libraries with **`Add*Module` extension methods**
-- Frontend: Nx Angular shell, lazy-loaded context libraries
+- Frontend: Nx Angular shell, lazy-loaded context libraries; **`@floorganise/css` + `@floorganise/ui`** for all V2 screens
 - Data: one DbContext per context; integration via events/contracts
 - Cross-screen reads: BFF endpoints in gateway only when needed
 
@@ -65,6 +69,7 @@ Write analysis artifacts to `docs/modularization/` using schemas in `templates/`
 - Register modules with `IServiceCollection.Add<Context>Module` and `WebApplication.Map<Context>Module` — no `AbpModule`.
 - Adapters may delegate to legacy; legacy must not depend on new modules.
 - Tag temporary code `[StranglerAdapter]` with removal ticket.
+- **V2 UI:** import `@floorganise/css` in global styles; use `@floorganise/ui` for shared components — do not duplicate `f2ps-*` markup or brand tokens in context libs.
 
 ## When uncertain
 

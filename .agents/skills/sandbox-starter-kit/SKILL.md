@@ -25,7 +25,7 @@ Use this skill first. It routes you to focused skills and repo standards — do 
 | Platform logging | `Platform.Serilog.Logging/`, `build/Platform.Logging.*.props` | Serilog, Seq, App Insights, test sink |
 | Platform packages feed | `local-feed/` | Packed NuGet (`Platform.Serilog.Logging*`) |
 | Import domain | `ImportPipeline/` | `ImportPipeline.Domain` NuGet |
-| Modularization program | `docs/monolith-modularization/` | Roadmap, logging/correlation standards, quality framework |
+| Modularization program | `docs/monolith-modularization/` | Roadmap, logging/correlation/frontend standards, quality framework |
 | Agent skills (source) | `.cursor/skills/` | Author skills here; sync with `./scripts/sync-agent-skills.sh` |
 | Agent entry | `AGENTS.md` | Skill index for all tools |
 

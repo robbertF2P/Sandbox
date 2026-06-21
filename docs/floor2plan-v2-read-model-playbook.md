@@ -2,7 +2,7 @@
 
 Combined conventions for **backend query encapsulation** and the **Nx Angular frontend module plan**, aligned with Platform 2.0 modularization targets in this repo.
 
-**Sources:** `docs/monolith-modularization/agent-instructions-snippet.md`, `ApiImportActorPoc/docs/platform-rebuild-proposal-summary.md` (Section 10), `specification-pattern` skill.
+**Sources:** `docs/monolith-modularization/agent-instructions-snippet.md`, `docs/monolith-modularization/platform-frontend-standard.md`, `ApiImportActorPoc/docs/platform-rebuild-proposal-summary.md` (Section 10), `specification-pattern` skill.
 
 **Audience:** Engineers building V2 list screens, filters, and context libraries during strangler migration.
 
@@ -70,7 +70,8 @@ floor2plan-web/                          # Nx monorepo (separate repo or folder)
 │   └── f2p-shell/                       # Host: router, auth, shell chrome, module dropdown
 ├── libs/
 │   ├── shared/
-│   │   ├── ui/                          # @floorganise/css tokens, tiles, shell components
+│   │   ├── ui/                          # workspace alias → @floorganise/ui (shell, tiles, buttons)
+│   │   ├── styles/                      # global @import '@floorganise/css'
 │   │   ├── api-core/                    # HTTP interceptors, base URL, auth headers
 │   │   ├── api-generated/               # OpenAPI-generated clients (per version)
 │   │   └── util/                        # date ranges, paging helpers (no domain rules)
@@ -290,6 +291,32 @@ Per Platform 2.0 performance notes:
 - **Time-windowed** Gantt: spec includes `WindowStart` / `WindowEnd`; pan triggers new API call — do not load 50k rows client-side.
 - **Debounced** filter changes → one API call per burst (not per keystroke).
 
+### Styling — `@floorganise/css` + `@floorganise/ui` (required)
+
+All V2 Nx modules follow `docs/monolith-modularization/platform-frontend-standard.md`.
+
+| Concern | Package / lib | Rule |
+|---------|---------------|------|
+| Tokens, `f2ps-*` aliases, shell themes | `@floorganise/css` | Global `@import` in shell; no local brand colour variables |
+| Home tiles, buttons, forms, nav, toasts | `@floorganise/ui` | Import shared components — do not duplicate markup |
+| Context-specific widgets (e.g. Gantt row) | `libs/<context>/ui` | Presentational only; styled via `@floorganise/css` classes |
+
+```typescript
+// libs/planning/feature-activity-list/.../activity-list.component.ts
+import { F2pButton, F2pPanel } from '@floorganise/ui';
+
+@Component({
+  template: `
+    <f2p-panel>
+      <button f2pButton variant="primary">Apply filters</button>
+    </f2p-panel>
+  `,
+})
+export class ActivityListComponent { /* ... */ }
+```
+
+Reference implementation: `FloorganiseCss/showcase-angular/` (home tiles, login, buttons).
+
 ---
 
 ## 7. Cross-context reads (gateway BFF)
@@ -354,6 +381,8 @@ Each slice delivers **both** API specs and matching Nx feature lib — avoid “
 - [ ] Filter VM → DTO mapper unit-tested
 - [ ] Lazy route registered in `f2p-shell`
 - [ ] Module boundary ESLint passes
+- [ ] `@floorganise/css` imported globally; shared widgets from `@floorganise/ui`
+- [ ] Context-specific markup only in `libs/<context>/ui`
 
 **Cross-cutting**
 

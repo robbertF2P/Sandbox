@@ -15,6 +15,7 @@
 | SandBox `03-modularization-roadmap.md` | POC cross-cutting standards (Serilog, NuGet boundaries) |
 | `starter-kit/README.md` | **Module refactor starter kit** — copy into monolith (see below) |
 | `module-composition-di.md` | **DI standard** — `IServiceCollection` extensions; no ABP in new modules |
+| `platform-frontend-standard.md` | **Frontend standard** — `@floorganise/css` + `@floorganise/ui` for all V2 modules |
 | `../floor2plan-v2-connector-architecture.md` | Integration pack dependency rules |
 
 ---
@@ -258,6 +259,41 @@ Map<Context>Endpoints — no AbpModule or Volo.Abp packages. Add one smoke
 characterization test from templates/CharacterizationTest.cs. No domain logic yet.
 ```
 
+### A8. Frontend foundation (`@floorganise/css` + `@floorganise/ui`)
+
+Goal: before UI strangler slices scale, every V2 Nx context module shares one design system and one component library — no per-module CSS drift.
+
+| Deliverable | Owner | Notes |
+|-------------|-------|-------|
+| `@floorganise/css` on internal npm feed | SandBox → feed | Source: `FloorganiseCss/`; Tailwind v4 tokens + `f2ps-*` aliases |
+| `@floorganise/ui` Angular library | SandBox | Reusable shell, tiles, buttons, forms — seed from `showcase-angular/` |
+| `floor2plan-web` workspace wiring | Monolith | Global `@import '@floorganise/css'`; `libs/shared/ui` → `@floorganise/ui` |
+| Nx boundary rules | Monolith | `type:ui` presentational only; shared chrome from `@floorganise/ui` |
+
+**Standard:** `docs/monolith-modularization/platform-frontend-standard.md` — copy to monolith `docs/modularization/`.
+
+**Non-negotiable for V2 frontend modules:**
+
+1. Depend on `@floorganise/css` — no parallel global themes or ad-hoc brand colours.
+2. Use `@floorganise/ui` for cross-context widgets — do not copy `f2ps-tile` / button markup into each context lib.
+3. Context `libs/<context>/ui` — bounded-context presentational components only.
+
+**Agent prompt (frontend scaffold):**
+
+```text
+Read docs/modularization/platform-frontend-standard.md.
+Scaffold Nx lib libs/<context>/feature-<slice> with @floorganise/css in global styles
+and shared components from @floorganise/ui. No Material/Bootstrap as primary styling.
+Context-specific markup only in libs/<context>/ui.
+```
+
+**Foundation exit criteria (add to G4-ready):**
+
+- [ ] `platform-frontend-standard.md` copied to monolith `docs/modularization/`
+- [ ] `@floorganise/css` consumable from monolith npm feed (or approved `file:` bridge)
+- [ ] `@floorganise/ui` v0.1 with shell + tiles + buttons published from SandBox
+- [ ] `f2p-shell` imports both packages; showcase-angular parity spot-checked
+
 ### Foundation exit criteria (Gate G4-ready)
 
 - [ ] Starter kit copied to monolith (`Build/Platform/`, `scripts/`, `_template/`)
@@ -365,7 +401,7 @@ Only after both pilots pass:
 2. Order extractions by roadmap: low coupling → P0 tests green → shared-table resolution.
 3. Retire SaveChanges handlers **per entity family**, not per handler file.
 4. Split `Floor2PlanDbContext` only when every entity in a group has a single context owner.
-5. Frontend: Nx library per context; lazy routes — **after** backend API for that context is stable.
+5. Frontend: Nx library per context; lazy routes — **after** backend API for that context is stable. All V2 modules use **`@floorganise/css`** and **`@floorganise/ui`** per `platform-frontend-standard.md`.
 6. Sunset adapters on published dates (avoid "two systems forever").
 
 ---
@@ -381,7 +417,7 @@ Keep these visible in every implementation session with an AI assistant:
 | 55+ EF change handlers on `Floor2PlanDbContext` | Do not extract entities still wired to handlers until handler strategy defined |
 | Hangfire `default` + `sync` queues | Import pilot uses `sync`; don't merge queue semantics early |
 | Multiple DbContexts already | Reporting, Files, Auth, etc. — align module cuts with existing DB boundaries where possible |
-| Hybrid UI (Razor + Vue + API) | Backend-first; UI strangler per screen family later |
+| Hybrid UI (Razor + Vue + API) | Backend-first; UI strangler per screen family later; **V2 Nx screens** → `@floorganise/css` + `@floorganise/ui` only |
 | Tests are the spec | Characterize before refactor; `[UNDOCUMENTED]` blocks implementation |
 
 ---
@@ -410,6 +446,7 @@ IMPLEMENTATION QUALITY (when coding):
 4. Link changes to UC-### / AC-### / slice_id
 5. Tag adapters [StranglerAdapter] with removal ticket
 6. New modules: IServiceCollection Add*Module / Map*Endpoints only — no AbpModule (see module-composition-di.md)
+7. V2 frontend: @floorganise/css + @floorganise/ui — see platform-frontend-standard.md
 ```
 
 ### Session types
@@ -442,6 +479,7 @@ cp "$SB/docs/monolith-modularization/analysis-instructions.md"           "$MONO/
 cp "$SB/docs/monolith-modularization/ai-assisted-delivery-quality-framework.md" "$MONO/docs/modularization/"
 cp "$SB/docs/monolith-modularization/agent-instructions-snippet.md"      "$MONO/docs/modularization/"
 cp "$SB/docs/monolith-modularization/module-composition-di.md"           "$MONO/docs/modularization/"
+cp "$SB/docs/monolith-modularization/platform-frontend-standard.md"    "$MONO/docs/modularization/"
 cp "$SB/docs/monolith-modularization/templates/"*                      "$MONO/docs/modularization/templates/"
 cp -R "$SB/docs/monolith-modularization/starter-kit/"*                   "$MONO/docs/modularization/starter-kit/"
 cp "$SB/docs/floor2plan-v2-connector-architecture.md"                  "$MONO/docs/modularization/"
@@ -517,3 +555,4 @@ Second sprint: Pilot 1 slice 2 (routing/flag) + begin Pilot 2 analysis.
 | 1.0 | 2026-06-21 | Foundation + dual-pilot plan for external F2P monolith |
 | 1.1 | 2026-06-21 | Starter kit (Phase A7); module-composition-di (no ABP) |
 | 1.2 | 2026-06-21 | Agent-agnostic naming and setup (Copilot + Claude) |
+| 1.3 | 2026-06-21 | Phase A8 frontend standard — `@floorganise/css` + `@floorganise/ui` |

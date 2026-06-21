@@ -87,20 +87,42 @@ builder.AddSerilog(logger, dispose: true);
 
 **Applies to:** all `*.Tests` projects in SandBox POCs and every bounded-context module extracted from the monolith.
 
-### 3. Import pipeline package boundary
+### 4. Frontend design system — `@floorganise/css` (mandatory)
+
+**Requirement:** Every **V2 frontend module** (Nx context lib, shell, or strangler-replaced screen) MUST use **`@floorganise/css`** — Floorganise Tailwind v4 theme tokens and semantic component aliases (`f2ps-*`, shell, panels).
+
+- Import globally: `@import '@floorganise/css'` in shell or shared styles entry.
+- Use semantic classes for brand and components; Tailwind utilities for layout.
+- Do **not** introduce parallel global themes, ad-hoc brand colours, or third-party CSS kits as the primary styling layer.
+
+**Source:** SandBox `FloorganiseCss/` — publish to internal npm feed; monolith consumes via package version, not SandBox project references.
+
+**Reference:** [platform-frontend-standard.md](./platform-frontend-standard.md), `FloorganiseCss/showcase-angular/`
+
+### 5. Shared UI components — `@floorganise/ui` (mandatory for V2)
+
+**Requirement:** Cross-context and shell widgets (home tiles, buttons, forms, navigation, toasts, table chrome) MUST come from **`@floorganise/ui`** — a shared Angular library built on `@floorganise/css`.
+
+- Context `libs/<context>/ui` — **bounded-context presentational components only**.
+- Promote duplicated widgets to `@floorganise/ui` when used by two or more contexts.
+- Seed components from `FloorganiseCss/showcase-angular/`; develop package in SandBox Phase A8.
+
+**Applies to:** monolith `floor2plan-web` Nx workspace and any new V2 SPA modules during strangler migration.
+
+### 6. Import pipeline package boundary
 
 - `ImportPipeline.Domain` ships as **NuGet** (`ImportPipeline.Domain` 1.0.0, `local-feed/`).
 - Consumers reference the package — not project references.
 - Repack: `./scripts/pack-import-pipeline-domain.sh [version]`
 
-### 4. Platform logging package boundary
+### 7. Platform logging package boundary
 
 - `Platform.Serilog.Logging` and `Platform.Serilog.Logging.Testing` ship as **NuGet** (`1.0.0`, `local-feed/`).
 - Consumers import `build/Platform.Logging.Host.props`, `.Library.props`, or `.Tests.props` — not project references.
 - Repack: `./scripts/pack-platform-logging.sh [version]` or `./scripts/pack-local-platform-packages.sh [version]`
 - New modules: `./scripts/add-platform-logging-to-module.sh <ModuleRoot>`
 
-### 5. Behaviour preservation
+### 8. Behaviour preservation
 
 - Characterization tests green before and after extraction (see quality framework G5).
 - Import/read modules collect all row issues per sheet — no fail-fast on first bad row.
@@ -128,6 +150,14 @@ builder.AddSerilog(logger, dispose: true);
 - [ ] Test project references `Platform.Serilog.Logging.Testing` with xUnit sink
 - [ ] At least one integration/characterization test exercises logging on the happy path
 
+## Definition of done — frontend (per V2 module)
+
+- [ ] `@floorganise/css` in workspace dependencies; global styles import present
+- [ ] Shared chrome and generic widgets from `@floorganise/ui` (not local copies)
+- [ ] Context-specific markup only in `libs/<context>/ui`
+- [ ] Nx `type:ui` libs have no `data-access` / `HttpClient` imports
+- [ ] Visual parity spot-checked against `FloorganiseCss/showcase-angular` or SmokeTests DOM selectors
+
 ---
 
 ## Versioning
@@ -136,3 +166,4 @@ builder.AddSerilog(logger, dispose: true);
 |---------|------|-------|
 | 1.0 | 2026-06-20 | Initial SandBox POC roadmap; Serilog + xUnit sink requirement |
 | 1.2 | 2026-06-20 | Platform.Serilog.Logging NuGet + `build/` MSBuild adoption standard |
+| 1.3 | 2026-06-21 | `@floorganise/css` + `@floorganise/ui` required for all V2 frontend modules |
