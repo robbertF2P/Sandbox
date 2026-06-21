@@ -51,6 +51,7 @@ Generic template: `docs/floor2plan-v2-connector-migration-prompt.md`
 10. **Module composition** — `Add<Context>Module` / `Map<Context>Endpoints`; **no ABP** in new modules.
 11. **Frontend styling** — **`@floorganise/css`** (Tailwind v4 + Floorganise tokens) on **every** V2 frontend module; no parallel design systems.
 12. **Shared UI** — shell, tiles, buttons, forms, and cross-context widgets from **`@floorganise/ui`**; context `ui` libs only for context-specific presentational components.
+13. **OOP in the large, FP in detail** — structure with modules, ports, and actors at boundaries; implement rules as pure, testable functions on immutable data inside; side effects only in Infrastructure and at the host/actor shell.
 
 ## Target architecture
 

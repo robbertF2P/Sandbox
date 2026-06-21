@@ -1,0 +1,23 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <RootNamespace>F2pPlatform.Host</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Akka.Hosting" />
+    <PackageReference Include="Akka.Logger.Serilog" />
+    <PackageReference Include="Swashbuckle.AspNetCore" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\F2pPlatform.Host.Contracts\F2pPlatform.Host.Contracts.csproj" />
+    <ProjectReference Include="..\F2pPlatform.Host.Core\F2pPlatform.Host.Core.csproj" />
+    <ProjectReference Include="..\..\src\Modules\Reference\Reference.Api\Reference.Api.csproj" />
+  </ItemGroup>
+
+  <Import Project="../../../build/Platform.Logging.Host.props" />
+  <Import Project="../../../build/Platform.Logging.Akka.props" />
+
+</Project>

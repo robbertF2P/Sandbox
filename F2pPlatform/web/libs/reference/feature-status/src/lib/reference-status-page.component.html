@@ -1,0 +1,70 @@
+<div class="f2p-app-light min-h-screen">
+  <header class="border-b border-f2p-border bg-f2p-surface px-6 py-4">
+    <div class="mx-auto flex max-w-6xl items-center justify-between gap-4">
+      <div class="flex items-center gap-4">
+        <a routerLink="/" class="f2ps-btn-secondary f2ps-btn-sm">Home</a>
+        <span class="text-lg font-bold text-f2p-ink">Reference</span>
+      </div>
+      <p class="text-sm text-f2p-ink-muted">feature-status template</p>
+    </div>
+  </header>
+
+  <main class="mx-auto max-w-6xl space-y-6 px-6 py-8">
+    <section>
+      <h1 class="text-2xl font-bold text-f2p-ink">Module status</h1>
+      <p class="mt-1 text-sm text-f2p-ink-muted">
+        Calls <code class="text-f2p-ink">GET /api/reference/status</code> via shared api-core.
+      </p>
+    </section>
+
+    @if (loading()) {
+      <p class="text-sm text-f2p-ink-muted">Loading…</p>
+    } @else if (error()) {
+      <div class="panel border-f2p-danger/30 bg-f2p-danger/5 p-4 text-sm text-f2p-danger">
+        {{ error() }}
+      </div>
+      <button type="button" class="f2ps-btn-primary f2ps-btn-sm" (click)="loadStatus()">Retry</button>
+    } @else if (status()) {
+      <div class="panel grid gap-3 p-6 md:grid-cols-2">
+        <div>
+          <p class="text-xs uppercase tracking-wide text-f2p-ink-muted">Module</p>
+          <p class="text-lg font-semibold text-f2p-ink">{{ status()!.moduleName }}</p>
+        </div>
+        <div>
+          <p class="text-xs uppercase tracking-wide text-f2p-ink-muted">Health</p>
+          <p class="text-lg font-semibold text-f2p-ink">{{ status()!.health }}</p>
+        </div>
+        <div>
+          <p class="text-xs uppercase tracking-wide text-f2p-ink-muted">Registered</p>
+          <p class="text-f2p-ink">{{ status()!.moduleRegistered ? 'Yes' : 'No' }}</p>
+        </div>
+        <div>
+          <p class="text-xs uppercase tracking-wide text-f2p-ink-muted">Strangler adapter</p>
+          <p class="text-f2p-ink">{{ status()!.stranglerAdapterPresent ? 'Present' : 'None' }}</p>
+        </div>
+      </div>
+    }
+
+    <section class="panel p-6">
+      <div class="mb-4 flex items-center justify-between gap-4">
+        <h2 class="text-lg font-semibold text-f2p-ink">Platform events (SignalR)</h2>
+        <span class="text-sm text-f2p-ink-muted">
+          {{ connected() ? 'Connected' : 'Disconnected' }}
+        </span>
+      </div>
+
+      @if (recentEvents().length === 0) {
+        <p class="text-sm text-f2p-ink-muted">Waiting for events from /hubs/platform-events…</p>
+      } @else {
+        <ul class="space-y-2 text-sm">
+          @for (event of recentEvents(); track event.occurredAt + event.eventType) {
+            <li class="rounded border border-f2p-border bg-f2p-surface px-3 py-2">
+              <span class="font-medium text-f2p-ink">{{ event.eventType }}</span>
+              <span class="text-f2p-ink-muted"> · {{ event.occurredAt }}</span>
+            </li>
+          }
+        </ul>
+      }
+    </section>
+  </main>
+</div>
