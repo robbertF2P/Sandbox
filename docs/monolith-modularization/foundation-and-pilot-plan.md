@@ -1,16 +1,16 @@
 # Foundation-first modularization plan
 
-**Purpose:** Actionable plan for refactoring the **external Floor2Plan monolith** (F2P / `Floor2Plan.Core2`) using a strangler-fig approach. Use this document as the primary Claude/Cursor instruction set when working **in the monolith repo**.
+**Purpose:** Actionable plan for refactoring the **external Floor2Plan monolith** (F2P / `Floor2Plan.Core2`) using a strangler-fig approach. Use this document as the primary **AI agent instruction set** when working **in the monolith repo** (GitHub Copilot, Claude Code, or similar).
 
-**This SandBox repo** holds reference POCs, analysis templates, and cross-cutting standards. The monolith lives elsewhere — do not expect monolith source here.
+**SandBox repo** (this workspace) is for brainstorming, POCs, and templates. **Implementation and extraction** happen in the monolith with Copilot / Claude — not tied to a single vendor IDE.
 
 **Related (copy or link from monolith `docs/modularization/`):**
 
 | Document | Role |
 |----------|------|
-| `copilot-analysis-instructions.md` | Phased analysis (inventory → slice plan) |
+| `analysis-instructions.md` | Phased analysis (inventory → slice plan) |
 | `ai-assisted-delivery-quality-framework.md` | Gates, anti-slop, DoD |
-| `copilot-instructions-snippet.md` | Short agent rules block |
+| `agent-instructions-snippet.md` | Short rules — copy to Copilot + Claude config in monolith |
 | `../Modularization/00-inventory.md` | **Example** Phase 0 output for F2P (regenerate in monolith) |
 | SandBox `03-modularization-roadmap.md` | POC cross-cutting standards (Serilog, NuGet boundaries) |
 | `starter-kit/README.md` | **Module refactor starter kit** — copy into monolith (see below) |
@@ -29,11 +29,23 @@ Phase D  Pilot module 2 (prove integration OR UI)     ← second seam type
 Phase E  Scale (remaining contexts, sunset adapters)  ← only after pilots pass
 ```
 
-**Include the module refactor starter kit in Phase A.** Without it, every extraction becomes a one-off layout debate and Claude generates inconsistent project structure. The kit is copied once into the monolith; pilots and scale work **scaffold from it**, not reinvent it.
+**Include the module refactor starter kit in Phase A.** Without it, every extraction becomes a one-off layout debate and agents produce inconsistent project structure. The kit is copied once into the monolith; pilots and scale work **scaffold from it**, not reinvent it.
 
 **Core rule:** AI drafts analysis and code; **humans and green tests decide**. No module move without characterization tests on P0 behaviour.
 
 **Do not** start by splitting `Floor2PlanDbContext` or rewriting the UI. **Do** establish module shape, test harness, CI gates, and prove one vertical slice end-to-end.
+
+---
+
+# Agent setup (monolith repo)
+
+| Role | Tool | Config file |
+|------|------|-------------|
+| Implementation / analysis | GitHub Copilot | `.github/copilot-instructions.md` |
+| Implementation / analysis | Claude Code | `CLAUDE.md` or `docs/modularization/agent-rules.md` |
+| Brainstorming / POCs | Any (e.g. Cursor) | SandBox only — copy outcomes into monolith docs |
+
+**One snippet, many tools:** `agent-instructions-snippet.md` is the source; duplicate to Copilot and Claude paths so rules stay identical.
 
 ---
 
@@ -59,20 +71,21 @@ Create in the monolith repo:
 ```text
 docs/modularization/
 ├── README.md                          ← links to this plan + quality framework
-├── 00-inventory.md                    ← Phase 0 (see copilot-analysis-instructions)
+├── 00-inventory.md                    ← Phase 0 (see analysis-instructions.md)
 ├── templates/                         ← copy from SandBox templates/
 └── contexts/                          ← per-context use cases + test plans (later)
 
-.cursor/rules/monolith-modularization.mdc             ← paste copilot-instructions-snippet.md
+docs/modularization/agent-rules.md     ← paste agent-instructions-snippet.md (Claude + shared)
+.github/copilot-instructions.md        ← same snippet content (GitHub Copilot)
 ```
 
-**Claude prompt (monolith repo):**
+**Agent prompt (monolith repo):**
 
 ```text
-Read docs/modularization/README.md and copilot-instructions-snippet rules.
+Read docs/modularization/agent-rules.md (or .github/copilot-instructions.md).
 
 PHASE 0 ONLY: produce docs/modularization/00-inventory.md per
-copilot-analysis-instructions.md. Cite every claim with file paths.
+analysis-instructions.md. Cite every claim with file paths.
 Mark unknowns [NEEDS REVIEW]. Do not propose architecture yet.
 ```
 
@@ -180,7 +193,7 @@ The starter kit is the **concrete Phase A deliverable** — not optional documen
 
 | Without starter kit | With starter kit |
 |-------------------|------------------|
-| Claude invents folder layout per session | One canonical layout; AI fills slots |
+| Agent invents folder layout per session | One canonical layout; consistent scaffold |
 | Inconsistent test project wiring | Characterization + integration harness pre-wired |
 | Logging/CI/analyzers renegotiated each PR | MSBuild props + traits baked in |
 | "Reference module" stays hypothetical | Runnable proof the host calls `Add*Module` / `Map*Module` |
@@ -236,7 +249,7 @@ Floor2Plan.Core2/
 dotnet build && dotnet test
 ```
 
-**Claude prompt (after kit is installed):**
+**Agent prompt (after kit is installed):**
 
 ```text
 Scaffold bounded context "<Context>" using Src/Modules/_template/ and
@@ -269,7 +282,7 @@ Run **sequentially** in the monolith repo. Do not extract code until G1 + G2 pas
 | Phase 4 | `contexts/<slug>/test-plan.md` + `test-cases.yaml` | **G3** fixtures agreed |
 | Phase 5 | `03-modularization-roadmap.md` (monolith-specific slice order) | **G4** first slice chosen |
 
-Use prompts from `copilot-analysis-instructions.md` — one phase per Claude session.
+Use prompts from `analysis-instructions.md` — one phase per assistant session.
 
 **Scope control:** Phase 3/4 for **pilot contexts only** on first pass. Expand to all ~7 contexts after the pilot loop works.
 
@@ -359,7 +372,7 @@ Only after both pilots pass:
 
 ## Monolith-specific constraints (from inventory)
 
-Keep these visible in every Claude session:
+Keep these visible in every implementation session with an AI assistant:
 
 | Constraint | Implication |
 |------------|-------------|
@@ -373,13 +386,13 @@ Keep these visible in every Claude session:
 
 ---
 
-## Claude session playbook (monolith repo)
+## AI work session playbook (monolith repo)
 
-Copy the **session header** into every Claude/Cursor chat:
+Copy the **session header** into Copilot Chat, Claude Code, or your assistant:
 
 ```text
 CONTEXT: Floor2Plan monolith modularization (strangler fig).
-RULES: docs/modularization/README.md + ai-assisted-delivery-quality-framework.md
+RULES: docs/modularization/agent-rules.md (and .github/copilot-instructions.md)
 MODE: [analysis | characterization-tests | extraction-slice-N]
 BOUNDED CONTEXT: [name]
 SLICE ID: [from 03-modularization-roadmap.md]
@@ -391,7 +404,7 @@ Non-negotiable:
 - No vendor types in Domain; no cross-context DbContext writes in target design
 
 IMPLEMENTATION QUALITY (when coding):
-1. Read .cursor/rules and repo skills before writing code
+1. Read docs/modularization/agent-rules.md and repo skills/rules before writing code
 2. Match neighbouring file style; dotnet build + dotnet test before done
 3. Fix analyzer warnings in touched files
 4. Link changes to UC-### / AC-### / slice_id
@@ -408,7 +421,7 @@ IMPLEMENTATION QUALITY (when coding):
 | Picking pilots | "Score contexts by pilot criteria table in foundation-and-pilot-plan.md" |
 | Before coding | Phase 4 test plan; implement GAP tests first |
 | Extraction PR | "Slice `<slice_id>` only; characterization before/after; list files moved" |
-| Integration pack | `claude-external-integrations-deepdive-instructions.md` Phase C |
+| Integration pack | `external-integrations-deepdive-instructions.md` Phase C |
 | Coupling check | "Find all references from ContextA to ContextB; classify direct DB / service / message" |
 
 ---
@@ -423,15 +436,19 @@ MONO=/path/to/Floor2Plan.Core2
 SB=/path/to/SandBox
 
 # Analysis + agent docs
-mkdir -p "$MONO/docs/modularization/templates"
+mkdir -p "$MONO/docs/modularization/templates" "$MONO/.github"
 cp "$SB/docs/monolith-modularization/foundation-and-pilot-plan.md"     "$MONO/docs/modularization/"
-cp "$SB/docs/monolith-modularization/copilot-analysis-instructions.md" "$MONO/docs/modularization/"
+cp "$SB/docs/monolith-modularization/analysis-instructions.md"           "$MONO/docs/modularization/"
 cp "$SB/docs/monolith-modularization/ai-assisted-delivery-quality-framework.md" "$MONO/docs/modularization/"
-cp "$SB/docs/monolith-modularization/copilot-instructions-snippet.md" "$MONO/docs/modularization/"
+cp "$SB/docs/monolith-modularization/agent-instructions-snippet.md"      "$MONO/docs/modularization/"
 cp "$SB/docs/monolith-modularization/module-composition-di.md"           "$MONO/docs/modularization/"
 cp "$SB/docs/monolith-modularization/templates/"*                      "$MONO/docs/modularization/templates/"
 cp -R "$SB/docs/monolith-modularization/starter-kit/"*                   "$MONO/docs/modularization/starter-kit/"
 cp "$SB/docs/floor2plan-v2-connector-architecture.md"                  "$MONO/docs/modularization/"
+
+# Agent rules — same content for Copilot and Claude
+cp "$SB/docs/monolith-modularization/agent-instructions-snippet.md"      "$MONO/docs/modularization/agent-rules.md"
+cp "$SB/docs/monolith-modularization/agent-instructions-snippet.md"      "$MONO/.github/copilot-instructions.md"
 mkdir -p "$MONO/Build/Platform" "$MONO/scripts"
 cp "$SB/build/Platform.Logging."*.props                                 "$MONO/Build/Platform/"
 cp "$SB/scripts/scaffold-module.sh"                                     "$MONO/scripts/" 2>/dev/null || true
@@ -499,3 +516,4 @@ Second sprint: Pilot 1 slice 2 (routing/flag) + begin Pilot 2 analysis.
 |---------|------|-------|
 | 1.0 | 2026-06-21 | Foundation + dual-pilot plan for external F2P monolith |
 | 1.1 | 2026-06-21 | Starter kit (Phase A7); module-composition-di (no ABP) |
+| 1.2 | 2026-06-21 | Agent-agnostic naming and setup (Copilot + Claude) |

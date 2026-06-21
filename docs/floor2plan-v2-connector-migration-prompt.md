@@ -322,5 +322,5 @@ read-only fetch + canonical map only, no Import handoff. Update sections 3.2–3
 |-----|------|
 | `floor2plan-v2-connector-architecture.md` | Ground rules Claude must follow |
 | `floor2plan-legacy-connector-submodule-antipattern.md` | What to find in Phase 1 |
-| `claude-external-integrations-deepdive-instructions.md` | Broader integration catalog |
+| `external-integrations-deepdive-instructions.md` | Broader integration catalog |
 | `ApiImportActorPoc/` | Reference import + external ID behaviour |

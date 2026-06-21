@@ -20,3 +20,5 @@ When scaffolding or extracting bounded-context modules (Platform 2.0 / F2P stran
 6. **Legacy ABP** in the monolith is bridged via `[StranglerAdapter]` in Infrastructure, not by extending ABP modules.
 
 Full standard: `docs/monolith-modularization/module-composition-di.md`
+
+**Monolith:** use `docs/modularization/agent-rules.md` (not SandBox `.cursor/rules/`) for Copilot and Claude.

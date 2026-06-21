@@ -1,6 +1,6 @@
 # Module refactor starter kit
 
-**Purpose:** Copy-once scaffolding for the external F2P monolith. Every extracted bounded context starts from this kit — not from a blank Claude session.
+**Purpose:** Copy-once scaffolding for the external F2P monolith. Every extracted bounded context starts from this kit — not from a blank AI chat session.
 
 **Parent plan:** `../foundation-and-pilot-plan.md` (Phase A7)
 
@@ -90,7 +90,7 @@ Until `scaffold-module.sh` exists, copy `_template/` manually and rename `Refere
 
 ---
 
-## Claude instruction (paste when scaffolding)
+## Agent prompt (paste when scaffolding)
 
 ```text
 Use docs/modularization/starter-kit/README.md and module-composition-di.md.
