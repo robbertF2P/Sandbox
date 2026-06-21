@@ -2,7 +2,7 @@
 set -euo pipefail
 
 # One-shot: push the driven-it export branch to robbertF2P/Sandbox (main).
-# Run from any machine where YOU have push access to https://github.com/robbertF2P/Sandbox
+# Requires: push access to robbertF2P/Sandbox AND read access to Robbert-Driven-It/SandBox (private).
 #
 #   ./scripts/push-export-to-floorganise-sandbox.sh
 #
