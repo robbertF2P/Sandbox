@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <RootNamespace>Reference.Infrastructure</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Reference.Application\Reference.Application.csproj" />
+    <ProjectReference Include="..\Reference.Domain\Reference.Domain.csproj" />
+  </ItemGroup>
+
+  <Import Project="../../../../../build/Platform.Logging.Library.props" />
+
+</Project>

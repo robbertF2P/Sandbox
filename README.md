@@ -17,6 +17,7 @@ This repo is the Floorganise-owned home for F2P refactor work. Personal experime
 | Area | Path |
 |------|------|
 | Modularization program | `docs/monolith-modularization/` |
+| **V2 host + module template** | `F2pPlatform/` â€” composed host, Reference module, scaffold script |
 | Floorganise design system | `FloorganiseCss/` (`@floorganise/css`, showcase apps) |
 | Platform logging + correlation | `Platform.Serilog.Logging/`, `build/Platform.Logging.*.props` |
 | Import domain kernel | `ImportPipeline/` |
@@ -36,7 +37,8 @@ Copy artifacts from here into the monolith per `foundation-and-pilot-plan.md` â€
 ## Quick verify
 
 ```bash
+dotnet build F2pPlatform
+dotnet test F2pPlatform
 dotnet build Platform.Serilog.Logging
 dotnet test ImportPipeline
-dotnet test PrimaveraExcelReader
 ```

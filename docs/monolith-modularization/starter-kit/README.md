@@ -18,7 +18,9 @@ cp "$SB/scripts/add-platform-logging-to-module.sh" "$MONO/scripts/"
 cp -R "$SB/docs/monolith-modularization/starter-kit/" "$MONO/docs/modularization/"
 # When available:
 # cp "$SB/scripts/scaffold-module.sh" "$MONO/scripts/"
-# cp -R "$SB/docs/monolith-modularization/starter-kit/templates/module" "$MONO/Src/Modules/_template/"
+cp "$SB/scripts/scaffold-module.sh" "$MONO/scripts/"
+# Runnable reference host + module:
+# cp -R "$SB/F2pPlatform/host" "$MONO/Src/Platform/"   # adjust paths per monolith layout
 ```
 
 Point monolith `nuget.config` at your internal feed for `Platform.Serilog.Logging` packages (published from SandBox).
@@ -30,16 +32,17 @@ Point monolith `nuget.config` at your internal feed for `Platform.Serilog.Loggin
 | Path | Status | Description |
 |------|--------|-------------|
 | `README.md` | **done** | This manifest |
-| `templates/module/` | **planned** | Domain / Application / Infrastructure / Api / test `.csproj` + stub types |
+| `F2pPlatform/` (SandBox) | **done** | Runnable V2 host + Reference module; copy or scaffold from here |
+| `templates/CharacterizationTest.cs` | **done** | WebApplicationFactory smoke test stub |
+| `templates/DependencyInjection.Api.cs` | **done** | `Add<Context>Module` + `Map<Context>Endpoints` stub |
+| `templates/StranglerAdapter.cs` | **done** | `[StranglerAdapter]` marker attribute |
 | `templates/integration-pack/` | **planned** | Pack manifest + ports-only layout (Pilot 2) |
-| `templates/DependencyInjection.cs` | **planned** | `Add<Context>Module` + `Map<Context>Endpoints` stubs (no ABP) |
-| `templates/CharacterizationTest.cs` | **planned** | WebApplicationFactory smoke test with `Module`/`Tier` traits |
+| `templates/pr-module-extraction.md` | **planned** | PR body checklist |
 | `../module-composition-di.md` | **done** | DI standard — extension methods, no ABP |
 | `../platform-frontend-standard.md` | **done** | `@floorganise/css` + `@floorganise/ui` for V2 modules |
-| `templates/pr-module-extraction.md` | **planned** | PR body checklist |
 | SandBox `build/Platform.Logging.*.props` | **done** | Serilog MSBuild imports |
 | SandBox `scripts/add-platform-logging-to-module.sh` | **done** | Wire logging to module root |
-| SandBox `scripts/scaffold-module.sh` | **planned** | Generate `Src/Modules/<Context>/` from template |
+| SandBox `scripts/scaffold-module.sh` | **done** | Generate `F2pPlatform/src/Modules/<Context>/` from Reference |
 | `../templates/azure-pipelines-module-tests.yml` | **done** | ADO per-module test jobs |
 | `../templates/*.schema.yaml` | **done** | Analysis artifact schemas |
 
@@ -74,20 +77,20 @@ Src/Modules/<Context>/
 ## Scaffold workflow
 
 ```bash
-# 1. Create module tree (when scaffold-module.sh exists)
+# 1. Create module tree from Reference template
 ./scripts/scaffold-module.sh Import
 
-# 2. Wire platform logging
-./scripts/add-platform-logging-to-module.sh Src/Modules/Import
+# 2. Wire platform logging (monolith path example)
+./scripts/add-platform-logging-to-module.sh F2pPlatform/src/Modules/Import
 
 # 3. Register in host: builder.Services.Add<Context>Module(config); app.Map<Context>Module();
 
-# 4. Run smoke characterization test from templates/CharacterizationTest.cs
+# 4. Run smoke characterization test
 
-dotnet build && dotnet test
+dotnet build F2pPlatform && dotnet test F2pPlatform
 ```
 
-Until `scaffold-module.sh` exists, copy `_template/` manually and rename `Reference` → `<Context>`.
+Runnable reference: `F2pPlatform/` — `dotnet build`, `dotnet test`, `dotnet run --project F2pPlatform/host/F2pPlatform.Host`.
 
 ---
 
@@ -120,4 +123,5 @@ Do **not** project-reference SandBox POC repos from the monolith.
 
 | Version | Date | Notes |
 |---------|------|-------|
-| 0.1 | 2026-06-21 | Manifest + existing props/scripts; templates planned |
+| 0.2 | 2026-06-21 | `F2pPlatform/` host + Reference module; `scaffold-module.sh`; template stubs |
+| 0.1 | 2026-06-21 | Manifest + existing props/scripts |

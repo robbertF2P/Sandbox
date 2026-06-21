@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <RootNamespace>F2pPlatform.Host.Core</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Akka" />
+    <PackageReference Include="Akka.Hosting" />
+    <PackageReference Include="Akka.Logger.Serilog" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\F2pPlatform.Host.Contracts\F2pPlatform.Host.Contracts.csproj" />
+  </ItemGroup>
+
+  <Import Project="../../../build/Platform.Logging.Library.props" />
+  <Import Project="../../../build/Platform.Logging.Akka.props" />
+
+</Project>

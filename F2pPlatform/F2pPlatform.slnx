@@ -1,0 +1,17 @@
+<Solution>
+  <Folder Name="/host/">
+    <Project Path="host/F2pPlatform.Host/F2pPlatform.Host.csproj" />
+    <Project Path="host/F2pPlatform.Host.Contracts/F2pPlatform.Host.Contracts.csproj" />
+    <Project Path="host/F2pPlatform.Host.Core/F2pPlatform.Host.Core.csproj" />
+  </Folder>
+  <Folder Name="/src/Modules/Reference/">
+    <Project Path="src/Modules/Reference/Reference.Domain/Reference.Domain.csproj" />
+    <Project Path="src/Modules/Reference/Reference.Application/Reference.Application.csproj" />
+    <Project Path="src/Modules/Reference/Reference.Infrastructure/Reference.Infrastructure.csproj" />
+    <Project Path="src/Modules/Reference/Reference.Api/Reference.Api.csproj" />
+  </Folder>
+  <Folder Name="/tests/Modules/Reference/">
+    <Project Path="tests/Modules/Reference/Reference.Unit.Tests/Reference.Unit.Tests.csproj" />
+    <Project Path="tests/Modules/Reference/Reference.Characterization.Tests/Reference.Characterization.Tests.csproj" />
+  </Folder>
+</Solution>
