@@ -154,16 +154,23 @@ const formatConsoleArg = (arg) => {
   }
 };
 
+const recordConsoleEntry = (consoleEntries, entry) => {
+  consoleEntries.push({
+    timestamp: new Date().toISOString(),
+    ...entry,
+  });
+};
+
 const captureConsole = (win, consoleEntries) => {
   ['warn', 'error'].forEach((level) => {
     const original = win.console[level];
 
     win.console[level] = (...args) => {
-      consoleEntries.push({
+      recordConsoleEntry(consoleEntries, {
         level,
+        source: `console.${level}`,
         url: win.location.href,
         message: args.map(formatConsoleArg).join(' '),
-        timestamp: new Date().toISOString(),
       });
 
       if (typeof original === 'function') {
@@ -171,7 +178,42 @@ const captureConsole = (win, consoleEntries) => {
       }
     };
   });
+
+  win.addEventListener('error', (event) => {
+    recordConsoleEntry(consoleEntries, {
+      level: 'error',
+      source: 'window error',
+      url: win.location.href,
+      message: `${event.message || 'window error'} ${event.filename || ''}:${event.lineno || ''}`.trim(),
+    });
+  });
+
+  win.addEventListener('unhandledrejection', (event) => {
+    recordConsoleEntry(consoleEntries, {
+      level: 'error',
+      source: 'unhandled rejection',
+      url: win.location.href,
+      message: `Unhandled rejection: ${formatConsoleArg(event.reason)}`,
+    });
+  });
 };
+
+let activeConsoleEntries;
+
+Cypress.on('uncaught:exception', (error) => {
+  if (!activeConsoleEntries) {
+    return undefined;
+  }
+
+  recordConsoleEntry(activeConsoleEntries, {
+    level: 'error',
+    source: 'uncaught exception',
+    url: 'uncaught exception',
+    message: `${error.name}: ${error.message}`,
+  });
+
+  return false;
+});
 
 const assertPageLoaded = (name) => {
   cy.location('href', { timeout: 30000 }).then((href) => {
@@ -180,7 +222,12 @@ const assertPageLoaded = (name) => {
   cy.get('body', { timeout: 30000 })
     .should('be.visible')
     .and(($body) => {
-      expect($body.text().trim(), `${name} body text`).to.not.equal('');
+      const text = $body.text().trim();
+
+      expect(text, `${name} body text`).to.not.equal('');
+      expect(text, `${name} error page`).to.not.include('An error occurred');
+      expect(text, `${name} error page`).to.not.include('Object reference not set');
+      expect(text, `${name} error page`).to.not.include('HTTP Error 500');
     });
 };
 
@@ -347,6 +394,7 @@ splitTargetUrls().forEach((targetUrl) => {
     beforeEach(() => {
       consoleEntries = [];
       navigationEntries = [];
+      activeConsoleEntries = consoleEntries;
 
       cy.on('window:before:load', (win) => {
         captureConsole(win, consoleEntries);
@@ -356,15 +404,23 @@ splitTargetUrls().forEach((targetUrl) => {
     afterEach(() => {
       const consoleArtifact = consoleArtifactName(targetUrl, Cypress.currentTest.title);
       const navigationArtifact = navigationArtifactName(targetUrl, Cypress.currentTest.title);
+      const consoleSettleMs = numberEnv('consoleSettleMs', 2000);
 
+      cy.wait(consoleSettleMs);
       cy.writeFile(navigationArtifact, navigationEntries, { log: true });
       cy.writeFile(consoleArtifact, consoleEntries, { log: true })
         .then(() => {
+          activeConsoleEntries = null;
+
           const consoleErrors = consoleEntries.filter((entry) => entry.level === 'error');
 
           if (Cypress.env('failOnConsoleError') && consoleErrors.length > 0) {
+            const details = consoleErrors
+              .map(({ source, url, message }) => `[${source || 'error'}] ${url}\n${message}`)
+              .join('\n\n');
+
             throw new Error(
-              `${consoleErrors.length} browser console error(s) were recorded. See ${consoleArtifact}.`,
+              `${consoleErrors.length} browser error(s) were recorded. See ${consoleArtifact}.\n\n${details}`,
             );
           }
         });
