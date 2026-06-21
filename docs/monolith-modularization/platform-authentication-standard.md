@@ -15,6 +15,7 @@
 | `docs/floor2plan-v2-read-model-playbook.md` | `@f2p/identity` frontend module |
 | `diagrams/platform-v2-auth-flow.svg` | Auth flow diagram (also in PDF) |
 | `platform-v2-authentication-flow.pdf` | Printable overview (auth flow + tenant user lifecycle) |
+| `scripts/generate-auth-flow-pdf.sh` | Regenerate PDF (inlines SVG diagrams into HTML first) |
 
 ---
 

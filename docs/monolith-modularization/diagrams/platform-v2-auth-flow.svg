@@ -16,10 +16,9 @@
     </style>
   </defs>
 
-  <text x="20" y="28" class="title">Platform 2.0  Cloud login flow (native runtime)</text>
-  <text x="20" y="48" class="subtitle">OIDC Authorization Code + PKCE · platform-issued JWT · one database per tenant</text>
+  <text x="20" y="28" class="title">Platform 2.0 - Cloud login flow (native runtime)</text>
+  <text x="20" y="48" class="subtitle">OIDC Authorization Code + PKCE | platform-issued JWT | one database per tenant</text>
 
-  <!-- Actors -->
   <rect x="20" y="70" width="110" height="52" class="box"/>
   <text x="75" y="92" text-anchor="middle" class="label">Browser</text>
   <text x="75" y="108" text-anchor="middle" class="detail">f2p-shell</text>
@@ -44,7 +43,6 @@
   <text x="830" y="92" text-anchor="middle" class="label">Domain APIs</text>
   <text x="830" y="108" text-anchor="middle" class="detail">tenant database</text>
 
-  <!-- Steps -->
   <text x="30" y="155" class="step">1</text>
   <line x1="75" y1="122" x2="75" y2="145" class="line"/>
   <line x1="75" y1="145" x2="215" y2="145" class="line"/>
@@ -73,7 +71,7 @@
   <text x="30" y="355" class="step">6</text>
   <line x1="75" y1="315" x2="75" y2="345" class="line"/>
   <line x1="75" y1="345" x2="665" y2="345" class="line"/>
-  <text x="370" y="340" class="detail">/auth/callback?code=&</text>
+  <text x="370" y="340" class="detail">/auth/callback?code=...</text>
 
   <text x="30" y="395" class="step">7</text>
   <line x1="665" y1="355" x2="665" y2="385" class="line"/>
@@ -82,14 +80,14 @@
 
   <text x="30" y="435" class="step">8</text>
   <line x1="665" y1="395" x2="665" y2="425" class="line"/>
-  <text x="680" y="420" class="detail">map IdP subject ’ platform user</text>
+  <text x="680" y="420" class="detail">map IdP subject to platform user</text>
   <text x="680" y="435" class="detail">issue JWT (tid, sub, roles)</text>
 
   <text x="30" y="475" class="step">9</text>
   <line x1="75" y1="445" x2="75" y2="465" class="line"/>
   <line x1="75" y1="465" x2="830" y2="465" class="line"/>
-  <text x="450" y="460" class="detail">API calls with Bearer token ’ tenant DB connection</text>
+  <text x="450" y="460" class="detail">API calls with Bearer token to tenant DB</text>
 
   <rect x="20" y="490" width="880" height="24" fill="#f1f5f9" stroke="#cbd5e1" rx="4"/>
-  <text x="30" y="506" class="detail">On-prem: fixed host + install config replaces steps 12 (no control plane lookup). Legacy-hosted: edge may proxy to legacy runtime after login.</text>
+  <text x="30" y="506" class="detail">On-prem: fixed host + install config replaces steps 1-2. Legacy-hosted: edge may proxy to legacy runtime after login.</text>
 </svg>

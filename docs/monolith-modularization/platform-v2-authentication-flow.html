@@ -20,7 +20,7 @@
     h3 { font-size: 12pt; margin: 14px 0 6px; page-break-after: avoid; }
     p, li { margin: 0 0 6px; }
     .meta { color: #475569; font-size: 10pt; margin-bottom: 18px; }
-    .diagram { width: 100%; margin: 12px 0 18px; page-break-inside: avoid; }
+    .diagram { width: 100%; height: auto; display: block; margin: 12px 0 18px; page-break-inside: avoid; }
     table { width: 100%; border-collapse: collapse; margin: 8px 0 14px; font-size: 10pt; page-break-inside: avoid; }
     th, td { border: 1px solid #cbd5e1; padding: 6px 8px; text-align: left; vertical-align: top; }
     th { background: #f1f5f9; }
@@ -44,7 +44,99 @@
   </ul>
 
   <h2>2. Cloud authentication flow</h2>
-  <img class="diagram" src="diagrams/platform-v2-auth-flow.svg" alt="Cloud authentication flow diagram"/>
+  <div class="diagram"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 920 520" font-family="Segoe UI, system-ui, sans-serif">
+  <defs>
+    <marker id="auth-arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+      <path d="M0,0 L8,4 L0,8 Z" fill="#334155"/>
+    </marker>
+    <style>
+      .title { font-size: 18px; font-weight: 700; fill: #0f172a; }
+      .subtitle { font-size: 12px; fill: #475569; }
+      .box { fill: #f8fafc; stroke: #334155; stroke-width: 1.5; rx: 8; }
+      .box-accent { fill: #eff6ff; stroke: #2563eb; stroke-width: 1.5; rx: 8; }
+      .box-idp { fill: #fef3c7; stroke: #d97706; stroke-width: 1.5; rx: 8; }
+      .label { font-size: 13px; font-weight: 600; fill: #0f172a; }
+      .detail { font-size: 11px; fill: #475569; }
+      .step { font-size: 11px; fill: #1e293b; font-weight: 600; }
+      .line { stroke: #334155; stroke-width: 1.5; fill: none; marker-end: url(#auth-arrow); }
+    </style>
+  </defs>
+
+  <text x="20" y="28" class="title">Platform 2.0 - Cloud login flow (native runtime)</text>
+  <text x="20" y="48" class="subtitle">OIDC Authorization Code + PKCE | platform-issued JWT | one database per tenant</text>
+
+  <rect x="20" y="70" width="110" height="52" class="box"/>
+  <text x="75" y="92" text-anchor="middle" class="label">Browser</text>
+  <text x="75" y="108" text-anchor="middle" class="detail">f2p-shell</text>
+
+  <rect x="160" y="70" width="110" height="52" class="box"/>
+  <text x="215" y="92" text-anchor="middle" class="label">Edge</text>
+  <text x="215" y="108" text-anchor="middle" class="detail">slug resolve</text>
+
+  <rect x="300" y="70" width="130" height="52" class="box-accent"/>
+  <text x="365" y="92" text-anchor="middle" class="label">Control plane</text>
+  <text x="365" y="108" text-anchor="middle" class="detail">tenant + SSO binding</text>
+
+  <rect x="460" y="70" width="110" height="52" class="box-idp"/>
+  <text x="515" y="92" text-anchor="middle" class="label">Customer IdP</text>
+  <text x="515" y="108" text-anchor="middle" class="detail">Entra / Okta / SAML</text>
+
+  <rect x="600" y="70" width="130" height="52" class="box-accent"/>
+  <text x="665" y="92" text-anchor="middle" class="label">Identity API</text>
+  <text x="665" y="108" text-anchor="middle" class="detail">token exchange</text>
+
+  <rect x="760" y="70" width="140" height="52" class="box"/>
+  <text x="830" y="92" text-anchor="middle" class="label">Domain APIs</text>
+  <text x="830" y="108" text-anchor="middle" class="detail">tenant database</text>
+
+  <text x="30" y="155" class="step">1</text>
+  <line x1="75" y1="122" x2="75" y2="145" class="line"/>
+  <line x1="75" y1="145" x2="215" y2="145" class="line"/>
+  <text x="130" y="140" class="detail">GET acme.app.example</text>
+
+  <text x="30" y="195" class="step">2</text>
+  <line x1="215" y1="155" x2="215" y2="185" class="line"/>
+  <line x1="215" y1="185" x2="365" y2="185" class="line"/>
+  <text x="285" y="180" class="detail">resolve slug</text>
+
+  <text x="30" y="235" class="step">3</text>
+  <line x1="365" y1="195" x2="365" y2="225" class="line"/>
+  <line x1="365" y1="225" x2="75" y2="225" class="line"/>
+  <text x="220" y="220" class="detail">authority, clientId, tenantId</text>
+
+  <text x="30" y="275" class="step">4</text>
+  <line x1="75" y1="235" x2="75" y2="265" class="line"/>
+  <line x1="75" y1="265" x2="515" y2="265" class="line"/>
+  <text x="295" y="260" class="detail">redirect + PKCE code_challenge</text>
+
+  <text x="30" y="315" class="step">5</text>
+  <line x1="515" y1="275" x2="515" y2="305" class="line"/>
+  <line x1="515" y1="305" x2="75" y2="305" class="line"/>
+  <text x="295" y="300" class="detail">login (MFA at IdP)</text>
+
+  <text x="30" y="355" class="step">6</text>
+  <line x1="75" y1="315" x2="75" y2="345" class="line"/>
+  <line x1="75" y1="345" x2="665" y2="345" class="line"/>
+  <text x="370" y="340" class="detail">/auth/callback?code=...</text>
+
+  <text x="30" y="395" class="step">7</text>
+  <line x1="665" y1="355" x2="665" y2="385" class="line"/>
+  <line x1="665" y1="385" x2="515" y2="385" class="line"/>
+  <text x="590" y="380" class="detail">exchange code</text>
+
+  <text x="30" y="435" class="step">8</text>
+  <line x1="665" y1="395" x2="665" y2="425" class="line"/>
+  <text x="680" y="420" class="detail">map IdP subject to platform user</text>
+  <text x="680" y="435" class="detail">issue JWT (tid, sub, roles)</text>
+
+  <text x="30" y="475" class="step">9</text>
+  <line x1="75" y1="445" x2="75" y2="465" class="line"/>
+  <line x1="75" y1="465" x2="830" y2="465" class="line"/>
+  <text x="450" y="460" class="detail">API calls with Bearer token to tenant DB</text>
+
+  <rect x="20" y="490" width="880" height="24" fill="#f1f5f9" stroke="#cbd5e1" rx="4"/>
+  <text x="30" y="506" class="detail">On-prem: fixed host + install config replaces steps 1-2. Legacy-hosted: edge may proxy to legacy runtime after login.</text>
+</svg></div>
 
   <table>
     <tr><th>Step</th><th>Actor</th><th>Action</th></tr>
@@ -63,7 +155,106 @@
   <div class="page-break"></div>
 
   <h2>3. Tenant user lifecycle</h2>
-  <img class="diagram" src="diagrams/platform-v2-tenant-user-lifecycle.svg" alt="Tenant user lifecycle diagram"/>
+  <div class="diagram"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 560" font-family="Segoe UI, system-ui, sans-serif">
+  <defs>
+    <marker id="lifecycle-arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+      <path d="M0,0 L8,4 L0,8 Z" fill="#334155"/>
+    </marker>
+    <style>
+      .title { font-size: 18px; font-weight: 700; fill: #0f172a; }
+      .subtitle { font-size: 12px; fill: #475569; }
+      .state { fill: #f8fafc; stroke: #334155; stroke-width: 1.5; rx: 10; }
+      .state-active { fill: #dcfce7; stroke: #16a34a; stroke-width: 1.5; rx: 10; }
+      .state-pending { fill: #fef9c3; stroke: #ca8a04; stroke-width: 1.5; rx: 10; }
+      .state-disabled { fill: #fee2e2; stroke: #dc2626; stroke-width: 1.5; rx: 10; }
+      .label { font-size: 12px; font-weight: 600; fill: #0f172a; }
+      .detail { font-size: 10px; fill: #475569; }
+      .actor { fill: #eff6ff; stroke: #2563eb; stroke-width: 1.5; rx: 8; }
+      .line { stroke: #334155; stroke-width: 1.3; fill: none; marker-end: url(#lifecycle-arrow); }
+      .note { font-size: 10px; fill: #64748b; }
+    </style>
+  </defs>
+
+  <text x="20" y="28" class="title">Platform 2.0 - Tenant user lifecycle</text>
+  <text x="20" y="48" class="subtitle">Tenant administrators manage operational users via @f2p/identity</text>
+
+  <rect x="20" y="68" width="150" height="44" class="actor"/>
+  <text x="95" y="88" text-anchor="middle" class="label">Platform operator</text>
+  <text x="95" y="102" text-anchor="middle" class="detail">admin backoffice</text>
+
+  <rect x="190" y="68" width="150" height="44" class="actor"/>
+  <text x="265" y="88" text-anchor="middle" class="label">Tenant admin</text>
+  <text x="265" y="102" text-anchor="middle" class="detail">@f2p/identity</text>
+
+  <rect x="360" y="68" width="150" height="44" class="actor"/>
+  <text x="435" y="88" text-anchor="middle" class="label">End user</text>
+  <text x="435" y="102" text-anchor="middle" class="detail">planner / hour booker</text>
+
+  <rect x="530" y="68" width="150" height="44" class="actor"/>
+  <text x="605" y="88" text-anchor="middle" class="label">Person record</text>
+  <text x="605" y="102" text-anchor="middle" class="detail">Resources context</text>
+
+  <rect x="40" y="150" width="130" height="50" class="state-pending"/>
+  <text x="105" y="172" text-anchor="middle" class="label">Invited</text>
+  <text x="105" y="188" text-anchor="middle" class="detail">pre-provisioned</text>
+
+  <rect x="220" y="150" width="130" height="50" class="state-pending"/>
+  <text x="285" y="172" text-anchor="middle" class="label">Pending</text>
+  <text x="285" y="188" text-anchor="middle" class="detail">awaiting first login</text>
+
+  <rect x="400" y="150" width="130" height="50" class="state-active"/>
+  <text x="465" y="172" text-anchor="middle" class="label">Active</text>
+  <text x="465" y="188" text-anchor="middle" class="detail">can use product</text>
+
+  <rect x="580" y="150" width="130" height="50" class="state-disabled"/>
+  <text x="645" y="172" text-anchor="middle" class="label">Disabled</text>
+  <text x="645" y="188" text-anchor="middle" class="detail">login blocked</text>
+
+  <rect x="760" y="150" width="120" height="50" class="state"/>
+  <text x="820" y="172" text-anchor="middle" class="label">Retired</text>
+  <text x="820" y="188" text-anchor="middle" class="detail">archived</text>
+
+  <line x1="170" y1="175" x2="218" y2="175" class="line"/>
+  <text x="194" y="168" text-anchor="middle" class="note">invite</text>
+
+  <line x1="350" y1="175" x2="398" y2="175" class="line"/>
+  <text x="374" y="168" text-anchor="middle" class="note">first SSO / local login</text>
+
+  <line x1="530" y1="175" x2="578" y2="175" class="line"/>
+  <text x="554" y="168" text-anchor="middle" class="note">admin disable</text>
+
+  <line x1="710" y1="175" x2="758" y2="175" class="line"/>
+  <text x="734" y="168" text-anchor="middle" class="note">offboard</text>
+
+  <rect x="40" y="250" width="820" height="90" fill="#f8fafc" stroke="#cbd5e1" rx="8"/>
+  <text x="55" y="272" class="label">Bootstrap (new tenant)</text>
+  <text x="55" y="292" class="detail">1. Platform operator provisions tenant in backoffice (SSO binding, packs, seat limit)</text>
+  <text x="55" y="308" class="detail">2. Backoffice creates first tenant admin user (or invites via IdP group)</text>
+  <text x="55" y="324" class="detail">3. Tenant admin signs in and manages operational users in @f2p/identity</text>
+
+  <rect x="40" y="360" width="400" height="170" fill="#eff6ff" stroke="#93c5fd" rx="8"/>
+  <text x="55" y="382" class="label">Admin-provisioned (recommended default)</text>
+  <text x="55" y="402" class="detail">- Tenant admin: POST /users { email, name, roles }</text>
+  <text x="55" y="418" class="detail">- Optional: link or create Person for hours / assignments</text>
+  <text x="55" y="434" class="detail">- User state = Invited or Pending until first login</text>
+  <text x="55" y="450" class="detail">- First OIDC login matches email/UPN to Active</text>
+  <text x="55" y="466" class="detail">- Roles gate Planning.Read, Hours.Write, Wbs.Read</text>
+  <text x="55" y="482" class="detail">- Admin can edit roles / disable without IdP change</text>
+  <text x="55" y="498" class="detail">- Seat limit enforced on create</text>
+
+  <rect x="460" y="360" width="400" height="170" fill="#fefce8" stroke="#fde047" rx="8"/>
+  <text x="475" y="382" class="label">JIT from IdP (optional per tenant)</text>
+  <text x="475" y="402" class="detail">- User logs in via SSO without pre-provision</text>
+  <text x="475" y="418" class="detail">- Identity creates user if jitProvisioning = true</text>
+  <text x="475" y="434" class="detail">- Default role from groupRoleMappings or defaultRoleOnJit</text>
+  <text x="475" y="450" class="detail">- Tenant admin upgrades roles after first login</text>
+  <text x="475" y="466" class="detail">- Person link may be required before Hours.Write</text>
+  <text x="475" y="482" class="detail">- Use when IT prefers IdP-led onboarding</text>
+  <text x="475" y="498" class="detail">- adminCanCreateUsers can still be true (hybrid)</text>
+
+  <rect x="40" y="545" width="820" height="1" fill="#cbd5e1"/>
+  <text x="450" y="538" text-anchor="middle" class="note">Login account (Identity.User) and Person (Resources) are linked 1:1 for hour booking</text>
+</svg></div>
 
   <h3>Three user layers</h3>
   <table>
