@@ -13,6 +13,7 @@
 | `copilot-instructions-snippet.md` | Short agent rules block |
 | `../Modularization/00-inventory.md` | **Example** Phase 0 output for F2P (regenerate in monolith) |
 | SandBox `03-modularization-roadmap.md` | POC cross-cutting standards (Serilog, NuGet boundaries) |
+| `starter-kit/README.md` | **Module refactor starter kit** — copy into monolith (see below) |
 | `../floor2plan-v2-connector-architecture.md` | Integration pack dependency rules |
 
 ---
@@ -20,12 +21,14 @@
 ## Executive summary
 
 ```text
-Phase A  Foundation (in monolith + shared packages)     ← no behaviour change
+Phase A  Foundation + starter kit (monolith)          ← no behaviour change
 Phase B  Analysis gates (inventory → context map)     ← docs only, human validated
 Phase C  Pilot module 1 (prove extract + test loop)   ← one strangler slice
 Phase D  Pilot module 2 (prove integration OR UI)     ← second seam type
 Phase E  Scale (remaining contexts, sunset adapters)  ← only after pilots pass
 ```
+
+**Include the module refactor starter kit in Phase A.** Without it, every extraction becomes a one-off layout debate and Claude generates inconsistent project structure. The kit is copied once into the monolith; pilots and scale work **scaffold from it**, not reinvent it.
 
 **Core rule:** AI drafts analysis and code; **humans and green tests decide**. No module move without characterization tests on P0 behaviour.
 
@@ -102,7 +105,7 @@ Define the **canonical layout** for every extracted bounded context:
 | Api / IModule | Application | Other modules' internals |
 | Integration pack | `Integration.Abstractions` only | Core Domain, DbContext |
 
-Add a **blank reference module** (e.g. `Reference.Module`) with one trivial use case to validate the solution builds, tests run, and `IModule` registers in the host.
+Add a **blank reference module** scaffolded from the **starter kit** (see A7) — e.g. `Reference.Module` — with one trivial use case to validate the solution builds, tests run, and `IModule` registers in the host.
 
 ### A3. Composition host sketch
 
@@ -165,14 +168,90 @@ Add or confirm as **required PR checks**:
 
 See `ai-assisted-delivery-quality-framework.md` for full DoD.
 
+### A7. Module refactor starter kit (required)
+
+The starter kit is the **concrete Phase A deliverable** — not optional documentation. Copy it from SandBox into the monolith once; every new bounded context clones or scaffolds from it.
+
+**Why include it:**
+
+| Without starter kit | With starter kit |
+|-------------------|------------------|
+| Claude invents folder layout per session | One canonical layout; AI fills slots |
+| Inconsistent test project wiring | Characterization + integration harness pre-wired |
+| Logging/CI/analyzers renegotiated each PR | MSBuild props + traits baked in |
+| "Reference module" stays hypothetical | Runnable proof the host accepts `IModule` |
+
+**Kit contents** (maintained in SandBox under `docs/monolith-modularization/starter-kit/`):
+
+| Artifact | Purpose | Lives in |
+|----------|---------|----------|
+| `templates/module/` | Domain / Application / Infrastructure / Api / Tests `.csproj` skeletons | SandBox → copied to monolith `Src/Modules/_template/` |
+| `templates/integration-pack/` | Pack manifest + abstractions-only layout (Pilot 2 option) | SandBox → monolith `Src/IntegrationPacks/_template/` |
+| `build/Platform.Logging.*.props` | Serilog adoption (or NuGet-only equivalent) | SandBox `build/` → monolith `Build/Platform/` |
+| `scripts/scaffold-module.sh` | `./scaffold-module.sh Import` → project tree + solution entries | SandBox → monolith `scripts/` |
+| `scripts/add-platform-logging-to-module.sh` | Wire logging props to a module root | SandBox → monolith `scripts/` |
+| `templates/pr-module-extraction.md` | PR checklist (UC/AC, slice_id, characterization) | SandBox → monolith `.github/` |
+| `templates/CharacterizationTest.cs` | Smoke test stub (`WebApplicationFactory`, traits) | In module template |
+| `templates/StranglerAdapter.cs` | Marked adapter base with removal ticket placeholder | In module template |
+| `templates/azure-pipelines-module-tests.yml` | Per-module ADO jobs | SandBox → monolith pipelines folder |
+| Analysis YAML schemas | use-case, test-case, integration schemas | Already in `templates/` |
+
+**Consume via NuGet (do not copy source):**
+
+| Package | Source repo |
+|---------|-------------|
+| `Platform.Serilog.Logging` (+ `.Testing`) | SandBox → internal feed |
+| `ImportPipeline.Domain` | SandBox → internal feed (Import pilot) |
+
+**Read-only reference (do not copy into monolith deployment):**
+
+| POC | Use when |
+|-----|----------|
+| `ApiImportActorPoc/` | Import pilot considers actor orchestration |
+| `AkkaSignalRVuePoc/` | Reactive hosting patterns |
+| `PrimaveraExcelReader/` | Excel import ACL |
+
+**Monolith install target** (after one-time copy):
+
+```text
+Floor2Plan.Core2/
+├── Build/Platform/                    ← Platform.Logging.*.props
+├── Src/Modules/
+│   ├── _template/                     ← starter kit module skeleton (do not deploy)
+│   └── Reference/                     ← first runnable module from kit
+├── Src/IntegrationPacks/_template/      ← optional; Pilot 2 if pack-based
+├── scripts/scaffold-module.sh
+├── docs/modularization/                 ← plan + analysis artifacts
+└── .github/pull_request_template.md     ← module extraction section
+```
+
+**Scaffold workflow (every new context):**
+
+```bash
+./scripts/scaffold-module.sh Import          # creates Src/Modules/Import/...
+./scripts/add-platform-logging-to-module.sh Src/Modules/Import
+dotnet build && dotnet test
+```
+
+**Claude prompt (after kit is installed):**
+
+```text
+Scaffold bounded context "<Context>" using Src/Modules/_template/ and
+docs/modularization/starter-kit/README.md. Do not invent layout.
+Register IModule in the host. Add one smoke characterization test from
+templates/CharacterizationTest.cs. No domain logic yet.
+```
+
 ### Foundation exit criteria (Gate G4-ready)
 
+- [ ] Starter kit copied to monolith (`Build/Platform/`, `scripts/`, `_template/`)
 - [ ] `docs/modularization/00-inventory.md` reviewed (G0)
-- [ ] Module template builds in monolith solution
+- [ ] Reference module **scaffolded from kit** builds in monolith solution
 - [ ] Reference module registers in host without breaking existing startup
-- [ ] One smoke characterization test green in CI
+- [ ] One smoke characterization test green in CI (from kit template)
 - [ ] Platform logging props adopted on reference module + its tests
 - [ ] PR template + agent rules committed
+- [ ] `scaffold-module.sh` verified (dry run → `Import` test tree builds)
 
 ---
 
@@ -339,16 +418,28 @@ Minimum bootstrap (one-time):
 MONO=/path/to/Floor2Plan.Core2
 SB=/path/to/SandBox
 
+# Analysis + agent docs
 mkdir -p "$MONO/docs/modularization/templates"
 cp "$SB/docs/monolith-modularization/foundation-and-pilot-plan.md"     "$MONO/docs/modularization/"
 cp "$SB/docs/monolith-modularization/copilot-analysis-instructions.md" "$MONO/docs/modularization/"
 cp "$SB/docs/monolith-modularization/ai-assisted-delivery-quality-framework.md" "$MONO/docs/modularization/"
 cp "$SB/docs/monolith-modularization/copilot-instructions-snippet.md" "$MONO/docs/modularization/"
 cp "$SB/docs/monolith-modularization/templates/"*                      "$MONO/docs/modularization/templates/"
+cp -R "$SB/docs/monolith-modularization/starter-kit/"*                   "$MONO/docs/modularization/starter-kit/"
 cp "$SB/docs/floor2plan-v2-connector-architecture.md"                  "$MONO/docs/modularization/"
+
+# Module refactor starter kit (Phase A)
+mkdir -p "$MONO/Build/Platform" "$MONO/scripts"
+cp "$SB/build/Platform.Logging."*.props                                 "$MONO/Build/Platform/"
+cp "$SB/scripts/scaffold-module.sh"                                     "$MONO/scripts/" 2>/dev/null || true
+cp "$SB/scripts/add-platform-logging-to-module.sh"                      "$MONO/scripts/"
+cp -R "$SB/docs/monolith-modularization/starter-kit/templates/"*         "$MONO/Src/Modules/_template/" 2>/dev/null || true
+
+# NuGet: point monolith at internal feed for Platform.Serilog.Logging packages
+# (configure nuget.config — do not project-reference SandBox)
 ```
 
-Optional: symlink or submodule SandBox for POC reference — **do not** submodule SandBox into production deployment paths.
+Optional: symlink SandBox POC folders for local reading — **do not** submodule SandBox into production deployment paths.
 
 ---
 
@@ -383,16 +474,17 @@ Optional: symlink or submodule SandBox for POC reference — **do not** submodul
 
 | # | Task | Owner | Gate |
 |---|------|-------|------|
-| 1 | Copy docs + agent rules to monolith | Eng | — |
+| 1 | Copy docs + **starter kit** + agent rules to monolith | Eng | — |
 | 2 | Run Phase 0 inventory (refresh `00-inventory.md`) | AI + TL review | G0 |
 | 3 | Phase 1 entry points | AI + TL | — |
 | 4 | Phase 2 context map workshop | AI draft + domain/eng | G1 |
-| 5 | Add module template + reference module | Eng | — |
-| 6 | Smoke characterization test in CI | Eng | — |
+| 5 | Scaffold **Reference** module from starter kit | Eng | — |
+| 6 | Smoke characterization test in CI (kit template) | Eng | — |
 | 7 | Adopt Platform.Serilog.Logging on reference module | Eng | — |
-| 8 | Phase 3/4 for Pilot 1 (Import) only | AI + domain | G2, G3 |
-| 9 | Implement 5 characterization tests for import slice | Eng | G3 |
-| 10 | Slice 1 extraction PR (Import) | AI + review | G5 |
+| 8 | Verify `scaffold-module.sh Import` produces buildable tree | Eng | — |
+| 9 | Phase 3/4 for Pilot 1 (Import) only | AI + domain | G2, G3 |
+| 10 | Implement 5 characterization tests for import slice | Eng | G3 |
+| 11 | Slice 1 extraction PR (Import) — scaffold from kit | AI + review | G5 |
 
 Second sprint: Pilot 1 slice 2 (routing/flag) + begin Pilot 2 analysis.
 
@@ -403,3 +495,4 @@ Second sprint: Pilot 1 slice 2 (routing/flag) + begin Pilot 2 analysis.
 | Version | Date | Notes |
 |---------|------|-------|
 | 1.0 | 2026-06-21 | Foundation + dual-pilot plan for external F2P monolith |
+| 1.1 | 2026-06-21 | Added required module refactor starter kit (Phase A7) |
