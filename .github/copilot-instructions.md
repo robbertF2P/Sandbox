@@ -47,6 +47,7 @@ Use when designing repositories, EF queries, or reusable domain criteria.
 
 - **`dotnet-core-csharp-development`** — SDK-style projects, ASP.NET Core, DI, testing, C# style.
 - **`dotnet-ef-core`** — EF Core DbContext, migrations, queries.
+- **`immutable-domain-ef-core`** — immutable aggregates, `With*` copy helpers, EF graph reconciliation ([immutable-domain-tools](https://github.com/zoran-horvat/immutable-domain-tools)).
 - **`akka-net`** — Akka.NET actors, messages, hosting (see `AkkaSignalRVuePoc`).
 - **`reactive-applications-akka-net`** — Anthony Brown: Reactive Manifesto, supervision, scaling, clustering, persistence.
 
