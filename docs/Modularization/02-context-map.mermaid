@@ -1,0 +1,123 @@
+%%  Floor2Plan Bounded Context Map — Phase 2
+%%  DRAFT — REQUIRES HUMAN VALIDATION
+%%  Generated: 2026-06-20
+
+flowchart TD
+    %% ── Node definitions ──────────────────────────────────────────────────
+
+    PLAN["**1 · Planning**
+    Activities · Assignments · Relations
+    Baselines · Task Readiness
+    DistributionsDbContext (assignments)
+    ─────────────────────────────────
+    UI: Plan area
+    Domain.Service/Planning
+    Processors: RefreshActivitySummary
+    Change handlers: Activity, Assignment"]
+
+    PBS["**2 · Project & Resource Structure (PBS)**
+    Projects · Components · Structures
+    Persons · Organisations · Disciplines
+    Assets · Materials · WORs · Roles
+    ─────────────────────────────────
+    UI: Pbs · Material · FloorSpace areas
+    Domain.Service: Project, Component, Person…
+    FileDbContext · DocumentStoreDbContext"]
+
+    TS["**3 · Timesheet & Work Execution**
+    TimeSheets · TimesheetEntries
+    Clocking Terminals · Shop Floor Terminals
+    ERP Hourlines · Correction Timesheets
+    ─────────────────────────────────
+    UI: Do · Devices areas
+    Domain.Service/Timesheets · Clocking
+    Processors: TimesheetEntry, HoursProcessors"]
+
+    HR["**4 · HR & Workforce Management**
+    Schedules · Allocations · Holidays
+    Balances · BalancePolicies · OffTime
+    ─────────────────────────────────
+    UI: HR area · AllocationController
+    Domain.Service/Balances · Schedules
+    Processors: BalanceProcessors"]
+
+    RPT["**5 · Reporting, KPI & Prediction**
+    KPIs · SPI/CPI · S-Curves
+    Long/Short-term Predictions
+    ReportingDbContext · DistributionsDbContext
+    ─────────────────────────────────
+    UI: Check · Prediction areas
+    Domain.Service/Kpi · Distributions
+    Processors: Prediction · Distributions"]
+
+    SYNC["**6 · Data Integration & Sync**
+    ImportConfig · SyncLog · Connectors
+    Import jobs: XER · Excel · Aspose · ERP
+    ─────────────────────────────────
+    UI: Sync area
+    Application.Sync (full project)
+    Processors: SyncProcessors · EntryTimes"]
+
+    PLT["**7 · Platform & Operations**
+    Auth · Permissions · AppSettings
+    Hangfire · Elsa Workflows · Audit
+    Health · Files · Mail · ProcessLog
+    Tickets · StopWorkOrders
+    ─────────────────────────────────
+    UI: System area · Ticket area
+    Infrastructure.* projects
+    Application.SystemActions"]
+
+    %% ── Relationships ─────────────────────────────────────────────────────
+
+    PLAN -->|"reads master data\n(Component, Project, Person)"| PBS
+    PLAN -->|"reads capacity\n(Schedule, Allocation, Holiday)"| HR
+    PLAN -->|"cache invalidation\nvia change handler"| TS
+    PLAN -->|"IFireAndForget · Elsa activities"| PLT
+
+    PBS -->|"file storage · cache processors\nvia IFireAndForget"| PLT
+    PBS -.->|"import writes\n(Component, Person, Org…)"| SYNC
+
+    TS -->|"reads activity & assignment\nfor booking validation"| PLAN
+    TS -->|"balance update trigger\nvia change handler"| HR
+    TS -->|"IFireAndForget processors"| PLT
+    TS -.->|"ERP callback\n(TimesheetController.Status)"| SYNC
+
+    HR -->|"reads Person, Organisation\nmaster data"| PBS
+    HR -->|"allocation change →\nperson availability"| PLAN
+    HR -->|"IFireAndForget processors"| PLT
+
+    RPT -->|"reads Activity, Assignment\nSummary, Baseline"| PLAN
+    RPT -->|"reads Component, Project\nOrg, Discipline"| PBS
+    RPT -->|"reads Schedule, Allocation"| HR
+    RPT -->|"reads TimesheetEntry\nfor actuals"| TS
+    RPT -->|"IFireAndForget · file storage"| PLT
+
+    SYNC -->|"import writes to\nActivity, Assignment"| PLAN
+    SYNC -->|"import writes to\nComponent, Person, Org…"| PBS
+    SYNC -->|"import writes to\nTimesheetEntry, Allocation"| TS
+    SYNC -->|"sync queue · ProcessLog · mail"| PLT
+    SYNC -->|"ActivityConnector\nchange handler"| PLAN
+
+    PLT -->|"Elsa: SetActivityStatus\nCreateMitigatingActivity"| PLAN
+    PLT -.->|"auth · config · audit\nprovided to ALL contexts"| PLAN
+    PLT -.->|"auth · config · audit\nprovided to ALL contexts"| PBS
+    PLT -.->|"auth · config · audit\nprovided to ALL contexts"| TS
+    PLT -.->|"auth · config · audit\nprovided to ALL contexts"| HR
+    PLT -.->|"auth · config · audit\nprovided to ALL contexts"| RPT
+    PLT -.->|"auth · config · audit\nprovided to ALL contexts"| SYNC
+
+    %% ── Styling ───────────────────────────────────────────────────────────
+
+    classDef domain    fill:#dbeafe,stroke:#2563eb,color:#1e3a5f,rx:6
+    classDef infra     fill:#fef9c3,stroke:#ca8a04,color:#713f12,rx:6
+    classDef reporting fill:#d1fae5,stroke:#059669,color:#064e3b,rx:6
+    classDef sync      fill:#ede9fe,stroke:#7c3aed,color:#3b0764,rx:6
+    classDef platform  fill:#fce7f3,stroke:#be185d,color:#500724,rx:6
+
+    class PLAN,HR domain
+    class PBS infra
+    class TS domain
+    class RPT reporting
+    class SYNC sync
+    class PLT platform
