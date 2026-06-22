@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <IsTestProject>true</IsTestProject>
+    <OutputType>Exe</OutputType>
+    <EnableMicrosoftTestingPlatform>true</EnableMicrosoftTestingPlatform>
+    <TestingPlatformDotnetTestSupport>true</TestingPlatformDotnetTestSupport>
+    <GenerateDependencyFile>true</GenerateDependencyFile>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" />
+    <PackageReference Include="Microsoft.Testing.Platform" />
+    <PackageReference Include="xunit.v3.mtp-v2" />
+    <ProjectReference Include="..\..\src\ShipyardPlanning.Domain\ShipyardPlanning.Domain.csproj" />
+    <ProjectReference Include="..\..\src\ShipyardPlanning.Infrastructure\ShipyardPlanning.Infrastructure.csproj" />
+  </ItemGroup>
+</Project>
