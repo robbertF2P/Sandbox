@@ -1,0 +1,12 @@
+<Solution>
+  <Folder Name="/lib/">
+    <Project Path="lib/ImmutableDomain.EntityFrameworkCore/ImmutableDomain.EntityFrameworkCore.csproj" />
+  </Folder>
+  <Folder Name="/src/">
+    <Project Path="src/ShipyardPlanning.Domain/ShipyardPlanning.Domain.csproj" />
+    <Project Path="src/ShipyardPlanning.Infrastructure/ShipyardPlanning.Infrastructure.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/ShipyardPlanning.Tests/ShipyardPlanning.Tests.csproj" />
+  </Folder>
+</Solution>
