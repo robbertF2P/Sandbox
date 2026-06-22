@@ -150,6 +150,7 @@ Install tools once: `dotnet tool install --global dotnet-ef` (or use `dotnet ef`
 ## Related skills
 
 - `dotnet-core-csharp-development` — DI, configuration, ASP.NET Core host, `dotnet` CLI.
+- `immutable-domain-ef-core` — immutable aggregates, `With*` copy helpers, EF graph reconciliation (Zoran Horvat pattern).
 - `specification-pattern` — named query rules; keep `IQueryable` inside repositories.
 - `akka-net` — actors must not hold scoped `DbContext`; keep persistence at the host boundary.
 

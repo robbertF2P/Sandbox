@@ -49,6 +49,7 @@ After editing skills in `.cursor/skills/`, run:
 
 - `dotnet-core-csharp-development` — C# / ASP.NET Core conventions
 - `dotnet-ef-core` — Entity Framework Core
+- `immutable-domain-ef-core` — immutable aggregates with EF Core (With* helpers, graph reconciliation)
 - `akka-net` — Akka.NET (repo patterns)
 - `reactive-applications-akka-net` — Anthony Brown reactive systems / Akka.NET book
 - `functional-programming-csharp` — functional patterns in C#

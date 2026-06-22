@@ -39,6 +39,7 @@ Use this skill first. It routes you to focused skills and repo standards — do 
 | Repositories, specifications, query rules | `specification-pattern` |
 | C# / ASP.NET Core hosts, DI, tests | `dotnet-core-csharp-development` |
 | EF Core, migrations, DbContext | `dotnet-ef-core` |
+| Immutable aggregates + EF Core persistence | `immutable-domain-ef-core` |
 | Actors, messages, SignalR integration | `akka-net`, `reactive-applications-akka-net` |
 | DSLs, fluent APIs, parsers | `domain-specific-languages` |
 | Serilog, MSBuild logging props, test sink | `platform-logging` |

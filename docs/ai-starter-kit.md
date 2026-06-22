@@ -42,6 +42,7 @@ After editing skills in `.cursor/skills/`:
 |-------|------|
 | `dotnet-core-csharp-development` | C#, ASP.NET Core, DI, tests |
 | `dotnet-ef-core` | EF Core, migrations |
+| `immutable-domain-ef-core` | Immutable aggregates + EF Core persistence |
 | `akka-net` | Actors, messages, hosting (see POCs) |
 | `reactive-applications-akka-net` | Reactive systems patterns |
 | `functional-programming-csharp` | FP style in C# |
