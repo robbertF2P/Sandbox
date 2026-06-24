@@ -7,7 +7,7 @@ Demonstrates:
 - Supporting bounded context **`PlanningApprovals`** beside Planning
 - Per-assignment **`AssignmentApprovalRequest`** aggregates (scales to hundreds)
 - Append-only **`ApprovalDecision`** audit trail + immutable **`ApprovedPlanSnapshot`**
-- Fingerprint-based staleness when new progress or recalculated plans arrive
+- Append-only **`AssignmentPlanningCheckpoint`** history + **~1 week lookback baseline** on each request
 - Optional **`ForemanApprovalBatch`** for bulk UI workflow
 
 ## Run

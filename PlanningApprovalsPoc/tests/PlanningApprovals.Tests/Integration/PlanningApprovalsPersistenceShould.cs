@@ -73,6 +73,7 @@ public sealed class PlanningApprovalsPersistenceShould
             Assert.Equal(loadedDecision.PublicId, loadedSnapshot.DecisionPublicId);
             Assert.Equal(progress.Fingerprint, loadedSnapshot.ProgressRevision.Fingerprint);
             Assert.Equal(plan.Fingerprint, loadedSnapshot.PlanSnapshot.Fingerprint);
+            Assert.Equal(30m, loadedRequest.LookbackBaseline.ProgressRevision.PercentComplete);
         }
         finally
         {
@@ -159,6 +160,47 @@ public sealed class PlanningApprovalsPersistenceShould
 
             Assert.Equal(secondProgress.RevisionId, pending.ProgressRevision.RevisionId);
             Assert.Equal(firstApproval.Snapshot!.PublicId, pending.LastApprovedSnapshotId);
+        }
+        finally
+        {
+            if (File.Exists(databasePath))
+            {
+                File.Delete(databasePath);
+            }
+        }
+    }
+
+    [Fact]
+    public async Task Persists_planning_checkpoints_for_lookback_resolution()
+    {
+        string databasePath = Path.Combine(Path.GetTempPath(), $"planning-approvals-{Guid.NewGuid():N}.db");
+        PlanningApprovalsDbContextFactory factory = new($"Data Source={databasePath}");
+
+        try
+        {
+            long assignmentId = Floor2PlanApprovalScenario.AssignmentWelding;
+            AssignmentPlanningCheckpoint checkpoint = Floor2PlanApprovalScenario.Checkpoint(
+                assignmentId,
+                Now.AddDays(-8),
+                Floor2PlanApprovalScenario.Progress(assignmentId, 1, 30m, 90m, Now.AddDays(-8)),
+                Floor2PlanApprovalScenario.Plan(new DateOnly(2026, 6, 1), new DateOnly(2026, 6, 18), 200m, "p", "r1"));
+
+            await using (PlanningApprovalsDbContext writeContext = factory.CreateDbContext())
+            {
+                writeContext.PlanningCheckpoints.Add(checkpoint);
+                await writeContext.SaveChangesAsync();
+            }
+
+            await using PlanningApprovalsDbContext readContext = factory.CreateDbContext();
+
+            AssignmentPlanningCheckpoint loaded = await readContext.PlanningCheckpoints.SingleAsync();
+            PlanningStateSnapshot? baseline = LookbackBaselineResolver.Resolve(
+                [loaded],
+                Now,
+                ApprovalLookbackWindow.OneWeek);
+
+            Assert.NotNull(baseline);
+            Assert.Equal(30m, baseline.ProgressRevision.PercentComplete);
         }
         finally
         {

@@ -44,14 +44,24 @@ public static class PlanningApprovalCoordinator
         long assignmentId,
         ProgressRevisionRef currentProgress,
         PlanSnapshot proposedPlan,
+        IEnumerable<AssignmentPlanningCheckpoint> checkpointHistory,
         AssignmentApprovalRequest? openPendingRequest,
         ApprovedPlanSnapshot? lastApproved,
         DateTimeOffset occurredAt,
-        string openedByProcess)
+        string openedByProcess,
+        ApprovalLookbackWindow? lookbackWindow = null)
     {
+        ApprovalLookbackWindow window = lookbackWindow ?? ApprovalLookbackWindow.OneWeek;
+
+        PlanningStateSnapshot? lookbackBaseline = LookbackBaselineResolver.Resolve(
+            checkpointHistory,
+            occurredAt,
+            window);
+
         StalenessEvaluation evaluation = ApprovalStalenessEvaluator.Evaluate(
             currentProgress,
             proposedPlan,
+            lookbackBaseline,
             lastApproved);
 
         if (!evaluation.RequiresApproval)
@@ -65,6 +75,10 @@ public static class PlanningApprovalCoordinator
         {
             return ApprovalSyncResult.NoAction;
         }
+
+        PlanningStateSnapshot baseline = lookbackBaseline
+            ?? throw new InvalidOperationException(
+                $"No planning checkpoint found at or before the {window.Duration.TotalDays:0}-day lookback for assignment {assignmentId}.");
 
         List<ApprovalSyncAction> actions = [];
 
@@ -80,6 +94,7 @@ public static class PlanningApprovalCoordinator
             evaluation.RequiredBecause,
             currentProgress,
             proposedPlan,
+            baseline,
             lastApproved,
             occurredAt,
             openedByProcess);

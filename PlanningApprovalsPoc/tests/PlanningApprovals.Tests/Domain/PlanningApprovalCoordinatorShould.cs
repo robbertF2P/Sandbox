@@ -8,15 +8,17 @@ namespace PlanningApprovals.Tests.Domain;
 
 public sealed class PlanningApprovalCoordinatorShould
 {
-    private static readonly DateTimeOffset Day1 = new(2026, 6, 24, 8, 0, 0, TimeSpan.Zero);
+    private static readonly DateTimeOffset Day1 = Floor2PlanApprovalScenario.Today;
     private static readonly DateTimeOffset Day2 = Day1.AddDays(1);
 
     [Fact]
-    public void Opens_request_when_progress_and_plan_change_after_approval()
+    public void Opens_request_when_progress_and_plan_change_since_week_ago_baseline()
     {
+        long assignmentId = Floor2PlanApprovalScenario.AssignmentWelding;
+
         ProgressRevisionRef firstProgress = Floor2PlanApprovalScenario.Progress(
-            Floor2PlanApprovalScenario.AssignmentWelding,
-            revisionId: 1,
+            assignmentId,
+            revisionId: 2,
             percentComplete: 40m,
             bookedHours: 120m,
             Day1);
@@ -29,7 +31,7 @@ public sealed class PlanningApprovalCoordinatorShould
             "run-1");
 
         ApprovalSyncResult firstSync = Floor2PlanApprovalScenario.ApplyPlanningChange(
-            Floor2PlanApprovalScenario.AssignmentWelding,
+            assignmentId,
             firstProgress,
             firstPlan,
             openPending: null,
@@ -40,12 +42,15 @@ public sealed class PlanningApprovalCoordinatorShould
             .Single(action => action.Kind == ApprovalSyncActionKind.OpenRequest)
             .OpenedRequest!;
 
+        Assert.Equal(30m, pending.LookbackBaseline.ProgressRevision.PercentComplete);
+        Assert.Equal(Day1.AddDays(-8), pending.LookbackBaseline.CapturedAt);
+
         ForemanDecisionResult approved = Floor2PlanApprovalScenario.Approve(pending, Day1.AddHours(2));
         ApprovedPlanSnapshot snapshot = approved.Snapshot!;
 
         ProgressRevisionRef secondProgress = Floor2PlanApprovalScenario.Progress(
-            Floor2PlanApprovalScenario.AssignmentWelding,
-            revisionId: 2,
+            assignmentId,
+            revisionId: 3,
             percentComplete: 55m,
             bookedHours: 165m,
             Day2);
@@ -58,7 +63,7 @@ public sealed class PlanningApprovalCoordinatorShould
             "run-2");
 
         ApprovalSyncResult secondSync = Floor2PlanApprovalScenario.ApplyPlanningChange(
-            Floor2PlanApprovalScenario.AssignmentWelding,
+            assignmentId,
             secondProgress,
             secondPlan,
             openPending: null,
@@ -75,13 +80,44 @@ public sealed class PlanningApprovalCoordinatorShould
     }
 
     [Fact]
+    public void Skips_approval_when_current_matches_week_ago_baseline()
+    {
+        long assignmentId = Floor2PlanApprovalScenario.AssignmentFitting;
+        DateTimeOffset occurredAt = Day1;
+
+        IReadOnlyList<AssignmentPlanningCheckpoint> history = Floor2PlanApprovalScenario.DefaultWeekAgoHistory(
+            assignmentId,
+            occurredAt,
+            baselinePercent: 25m,
+            baselineHours: 50m,
+            planFinish: new DateOnly(2026, 6, 18));
+
+        AssignmentPlanningCheckpoint baseline = history[0];
+        ProgressRevisionRef unchangedProgress = baseline.ProgressRevision;
+        PlanSnapshot unchangedPlan = baseline.PlanSnapshot;
+
+        ApprovalSyncResult sync = Floor2PlanApprovalScenario.ApplyPlanningChange(
+            assignmentId,
+            unchangedProgress,
+            unchangedPlan,
+            history,
+            openPending: null,
+            lastApproved: null,
+            occurredAt);
+
+        Assert.False(sync.RequiresPersistence);
+    }
+
+    [Fact]
     public void Supersedes_open_pending_request_when_new_progress_arrives()
     {
+        long assignmentId = Floor2PlanApprovalScenario.AssignmentFitting;
+
         ProgressRevisionRef progressV1 = Floor2PlanApprovalScenario.Progress(
-            Floor2PlanApprovalScenario.AssignmentFitting,
+            assignmentId,
             revisionId: 10,
-            percentComplete: 20m,
-            bookedHours: 40m,
+            percentComplete: 35m,
+            bookedHours: 70m,
             Day1);
 
         PlanSnapshot planV1 = Floor2PlanApprovalScenario.Plan(
@@ -92,7 +128,7 @@ public sealed class PlanningApprovalCoordinatorShould
             "run-a");
 
         ApprovalSyncResult firstSync = Floor2PlanApprovalScenario.ApplyPlanningChange(
-            Floor2PlanApprovalScenario.AssignmentFitting,
+            assignmentId,
             progressV1,
             planV1,
             openPending: null,
@@ -104,10 +140,10 @@ public sealed class PlanningApprovalCoordinatorShould
             .OpenedRequest!;
 
         ProgressRevisionRef progressV2 = Floor2PlanApprovalScenario.Progress(
-            Floor2PlanApprovalScenario.AssignmentFitting,
+            assignmentId,
             revisionId: 11,
-            percentComplete: 25m,
-            bookedHours: 50m,
+            percentComplete: 40m,
+            bookedHours: 80m,
             Day1.AddHours(4));
 
         PlanSnapshot planV2 = Floor2PlanApprovalScenario.Plan(
@@ -118,7 +154,7 @@ public sealed class PlanningApprovalCoordinatorShould
             "run-b");
 
         ApprovalSyncResult secondSync = Floor2PlanApprovalScenario.ApplyPlanningChange(
-            Floor2PlanApprovalScenario.AssignmentFitting,
+            assignmentId,
             progressV2,
             planV2,
             openPending,
@@ -155,8 +191,8 @@ public sealed class PlanningApprovalCoordinatorShould
             ProgressRevisionRef progress = Floor2PlanApprovalScenario.Progress(
                 assignmentId,
                 revisionId: assignmentId,
-                percentComplete: 10m,
-                bookedHours: 8m,
+                percentComplete: 40m,
+                bookedHours: 16m,
                 openedAt);
 
             PlanSnapshot plan = Floor2PlanApprovalScenario.Plan(

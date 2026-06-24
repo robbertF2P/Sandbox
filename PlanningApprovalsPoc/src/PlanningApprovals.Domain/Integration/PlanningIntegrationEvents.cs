@@ -21,3 +21,13 @@ public sealed record AdjustedPlanProposed(
     PlanSnapshot ProposedPlan,
     DateTimeOffset OccurredAt,
     string CalculationRunId);
+
+/// <summary>
+/// Published by Planning when assignment progress and plan are captured for lookback (nightly or on event).
+/// </summary>
+public sealed record AssignmentPlanningCheckpointCaptured(
+    long AssignmentId,
+    DateTimeOffset CapturedAt,
+    ProgressRevisionRef ProgressRevision,
+    PlanSnapshot PlanSnapshot,
+    string CaptureSource);

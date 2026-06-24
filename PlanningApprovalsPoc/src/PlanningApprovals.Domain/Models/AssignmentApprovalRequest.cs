@@ -16,6 +16,7 @@ public sealed class AssignmentApprovalRequest
         ApprovalRequiredBecause requiredBecause,
         ProgressRevisionRef progressRevision,
         PlanSnapshot proposedPlan,
+        PlanningStateSnapshot lookbackBaseline,
         Guid? lastApprovedSnapshotId,
         DateTimeOffset openedAt,
         string openedByProcess)
@@ -25,6 +26,8 @@ public sealed class AssignmentApprovalRequest
             throw new ArgumentException("Opened-by process is required.", nameof(openedByProcess));
         }
 
+        ArgumentNullException.ThrowIfNull(lookbackBaseline);
+
         PublicId = publicId;
         ProjectId = projectId;
         AssignmentId = assignmentId;
@@ -32,6 +35,9 @@ public sealed class AssignmentApprovalRequest
         RequiredBecause = requiredBecause;
         ProgressRevision = progressRevision;
         ProposedPlan = proposedPlan;
+        LookbackCapturedAt = lookbackBaseline.CapturedAt;
+        LookbackProgress = lookbackBaseline.ProgressRevision;
+        LookbackPlan = lookbackBaseline.PlanSnapshot;
         LastApprovedSnapshotId = lastApprovedSnapshotId;
         OpenedAt = openedAt;
         OpenedByProcess = openedByProcess;
@@ -53,6 +59,15 @@ public sealed class AssignmentApprovalRequest
 
     public PlanSnapshot ProposedPlan { get; private init; } = null!;
 
+    public DateTimeOffset LookbackCapturedAt { get; private init; }
+
+    public ProgressRevisionRef LookbackProgress { get; private init; } = null!;
+
+    public PlanSnapshot LookbackPlan { get; private init; } = null!;
+
+    public PlanningStateSnapshot LookbackBaseline =>
+        new(LookbackCapturedAt, LookbackProgress, LookbackPlan);
+
     public Guid? LastApprovedSnapshotId { get; private init; }
 
     public DateTimeOffset OpenedAt { get; private init; }
@@ -67,6 +82,7 @@ public sealed class AssignmentApprovalRequest
         ApprovalRequiredBecause requiredBecause,
         ProgressRevisionRef progressRevision,
         PlanSnapshot proposedPlan,
+        PlanningStateSnapshot lookbackBaseline,
         ApprovedPlanSnapshot? lastApproved,
         DateTimeOffset openedAt,
         string openedByProcess) =>
@@ -77,6 +93,7 @@ public sealed class AssignmentApprovalRequest
             requiredBecause,
             progressRevision,
             proposedPlan,
+            lookbackBaseline,
             lastApproved?.PublicId,
             openedAt,
             openedByProcess);

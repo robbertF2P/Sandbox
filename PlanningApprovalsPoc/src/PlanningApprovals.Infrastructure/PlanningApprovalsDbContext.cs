@@ -15,6 +15,8 @@ public sealed class PlanningApprovalsDbContext(DbContextOptions<PlanningApproval
 
     public DbSet<ForemanApprovalBatch> ApprovalBatches => Set<ForemanApprovalBatch>();
 
+    public DbSet<AssignmentPlanningCheckpoint> PlanningCheckpoints => Set<AssignmentPlanningCheckpoint>();
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
@@ -35,8 +37,27 @@ public sealed class PlanningApprovalsDbContext(DbContextOptions<PlanningApproval
             entity.Property(request => request.OpenedByProcess).IsRequired().HasMaxLength(128);
             entity.Property(request => request.LastApprovedSnapshotId);
 
-            ConfigureProgressRevision(entity.OwnsOne(request => request.ProgressRevision));
-            ConfigurePlanSnapshot(entity.OwnsOne(request => request.ProposedPlan));
+            ConfigureProgressRevision(entity.OwnsOne(request => request.ProgressRevision), "progress_");
+            ConfigurePlanSnapshot(entity.OwnsOne(request => request.ProposedPlan), "plan_");
+            entity.Property(request => request.LookbackCapturedAt).HasColumnName("lookback_captured_at");
+            ConfigureProgressRevision(entity.OwnsOne(request => request.LookbackProgress), "lookback_progress_");
+            ConfigurePlanSnapshot(entity.OwnsOne(request => request.LookbackPlan), "lookback_plan_");
+        });
+
+        modelBuilder.Entity<AssignmentPlanningCheckpoint>(entity =>
+        {
+            entity.ToTable("assignment_planning_checkpoints");
+            entity.HasKey(checkpoint => checkpoint.Id);
+            entity.HasIndex(checkpoint => checkpoint.PublicId).IsUnique();
+            entity.HasIndex(checkpoint => new { checkpoint.AssignmentId, checkpoint.CapturedAt });
+
+            entity.Property(checkpoint => checkpoint.PublicId).IsRequired();
+            entity.Property(checkpoint => checkpoint.AssignmentId).IsRequired();
+            entity.Property(checkpoint => checkpoint.CapturedAt).IsRequired();
+            entity.Property(checkpoint => checkpoint.CaptureSource).IsRequired().HasMaxLength(64);
+
+            ConfigureProgressRevision(entity.OwnsOne(checkpoint => checkpoint.ProgressRevision), "progress_");
+            ConfigurePlanSnapshot(entity.OwnsOne(checkpoint => checkpoint.PlanSnapshot), "plan_");
         });
 
         modelBuilder.Entity<ApprovalDecision>(entity =>
@@ -56,8 +77,8 @@ public sealed class PlanningApprovalsDbContext(DbContextOptions<PlanningApproval
             entity.Property(decision => decision.Comment).HasMaxLength(2000);
             entity.Property(decision => decision.BatchPublicId);
 
-            ConfigureProgressRevision(entity.OwnsOne(decision => decision.ProgressRevisionAtDecision));
-            ConfigurePlanSnapshot(entity.OwnsOne(decision => decision.ProposedPlanAtDecision));
+            ConfigureProgressRevision(entity.OwnsOne(decision => decision.ProgressRevisionAtDecision), "decision_progress_");
+            ConfigurePlanSnapshot(entity.OwnsOne(decision => decision.ProposedPlanAtDecision), "decision_plan_");
         });
 
         modelBuilder.Entity<ApprovedPlanSnapshot>(entity =>
@@ -72,8 +93,8 @@ public sealed class PlanningApprovalsDbContext(DbContextOptions<PlanningApproval
             entity.Property(snapshot => snapshot.AssignmentId).IsRequired();
             entity.Property(snapshot => snapshot.ApprovedByPersonId).IsRequired();
 
-            ConfigureProgressRevision(entity.OwnsOne(snapshot => snapshot.ProgressRevision));
-            ConfigurePlanSnapshot(entity.OwnsOne(snapshot => snapshot.PlanSnapshot));
+            ConfigureProgressRevision(entity.OwnsOne(snapshot => snapshot.ProgressRevision), "snapshot_progress_");
+            ConfigurePlanSnapshot(entity.OwnsOne(snapshot => snapshot.PlanSnapshot), "snapshot_plan_");
         });
 
         modelBuilder.Entity<ForemanApprovalBatch>(entity =>
@@ -101,25 +122,28 @@ public sealed class PlanningApprovalsDbContext(DbContextOptions<PlanningApproval
     }
 
     private static void ConfigureProgressRevision<T>(
-        OwnedNavigationBuilder<T, Domain.ValueObjects.ProgressRevisionRef> owned) where T : class
+        OwnedNavigationBuilder<T, Domain.ValueObjects.ProgressRevisionRef> owned,
+        string columnPrefix = "") where T : class
     {
-        owned.Property(revision => revision.AssignmentId).HasColumnName("progress_assignment_id");
-        owned.Property(revision => revision.RevisionId).HasColumnName("progress_revision_id");
-        owned.Property(revision => revision.RecordedAt).HasColumnName("progress_recorded_at");
-        owned.Property(revision => revision.PercentComplete).HasColumnName("progress_percent_complete");
-        owned.Property(revision => revision.BookedHours).HasColumnName("progress_booked_hours");
-        owned.Property(revision => revision.Source).HasColumnName("progress_source").HasMaxLength(64);
-        owned.Property(revision => revision.Fingerprint).HasColumnName("progress_fingerprint").HasMaxLength(64);
+        owned.Property(revision => revision.AssignmentId).HasColumnName($"{columnPrefix}assignment_id");
+        owned.Property(revision => revision.RevisionId).HasColumnName($"{columnPrefix}revision_id");
+        owned.Property(revision => revision.RecordedAt).HasColumnName($"{columnPrefix}recorded_at");
+        owned.Property(revision => revision.PercentComplete).HasColumnName($"{columnPrefix}percent_complete");
+        owned.Property(revision => revision.BookedHours).HasColumnName($"{columnPrefix}booked_hours");
+        owned.Property(revision => revision.Source).HasColumnName($"{columnPrefix}source").HasMaxLength(64);
+        owned.Property(revision => revision.Fingerprint).HasColumnName($"{columnPrefix}fingerprint").HasMaxLength(64);
     }
 
     private static void ConfigurePlanSnapshot<T>(
-        OwnedNavigationBuilder<T, Domain.ValueObjects.PlanSnapshot> owned) where T : class
+        OwnedNavigationBuilder<T, Domain.ValueObjects.PlanSnapshot> owned,
+        string columnPrefix = "") where T : class
     {
-        owned.Property(plan => plan.PlannedStart).HasColumnName("plan_planned_start");
-        owned.Property(plan => plan.PlannedFinish).HasColumnName("plan_planned_finish");
-        owned.Property(plan => plan.PlannedHours).HasColumnName("plan_planned_hours");
-        owned.Property(plan => plan.ProfileFingerprint).HasColumnName("plan_profile_fingerprint").HasMaxLength(64);
-        owned.Property(plan => plan.CalculationRunId).HasColumnName("plan_calculation_run_id").HasMaxLength(64);
-        owned.Property(plan => plan.Fingerprint).HasColumnName("plan_fingerprint").HasMaxLength(64);
+        owned.Property(plan => plan.PlannedStart).HasColumnName($"{columnPrefix}planned_start");
+        owned.Property(plan => plan.PlannedFinish).HasColumnName($"{columnPrefix}planned_finish");
+        owned.Property(plan => plan.PlannedHours).HasColumnName($"{columnPrefix}planned_hours");
+        owned.Property(plan => plan.ProfileFingerprint).HasColumnName($"{columnPrefix}profile_fingerprint").HasMaxLength(64);
+        owned.Property(plan => plan.CalculationRunId).HasColumnName($"{columnPrefix}calculation_run_id").HasMaxLength(64);
+        owned.Property(plan => plan.Fingerprint).HasColumnName($"{columnPrefix}fingerprint").HasMaxLength(64);
     }
 }
+

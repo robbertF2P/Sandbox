@@ -50,13 +50,28 @@ Integration uses **stable IDs** (`AssignmentId`, `ProgressRevisionId`) and integ
 | **Approval request** | Assignment needs foreman review |
 | **Approval decision** | Append-only grant/reject |
 | **Approved plan snapshot** | Frozen progress + plan at approval time |
-| **Stale approval** | Snapshot no longer matches current progress or proposed plan |
+| **Lookback baseline** | Progress + plan from ~1 week ago — foreman comparison starting point |
+| **Planning checkpoint** | Append-only capture of assignment state used to resolve lookback |
+| **Stale approval** | Current state differs from lookback baseline and is not yet foreman-approved |
 
 ---
 
 ## 4. Aggregates
 
-### 4.1 `AssignmentApprovalRequest` (root — one per assignment workflow)
+### 4.1 `AssignmentPlanningCheckpoint` (append-only)
+
+Planning publishes nightly or on-event captures. Approvals stores them for lookback resolution.
+
+```
+AssignmentPlanningCheckpoint
+├── PublicId, AssignmentId
+├── CapturedAt
+├── ProgressRevisionRef
+├── PlanSnapshot
+└── CaptureSource
+```
+
+### 4.2 `AssignmentApprovalRequest` (root — one per assignment workflow)
 
 One **open** pending request per assignment at a time.
 
@@ -67,20 +82,21 @@ AssignmentApprovalRequest
 ├── RequiredBecause: ProgressChanged | PlanRecalculated | Both
 ├── ProgressRevisionRef
 ├── PlanSnapshot (proposed)
+├── LookbackBaseline (PlanningStateSnapshot — ~1 week ago)
 ├── LastApprovedSnapshotId?
 ├── OpenedAt, OpenedByProcess
 └── ClosedAt?
 ```
 
-### 4.2 `ApprovalDecision` (append-only)
+### 4.3 `ApprovalDecision` (append-only)
 
 Never updated or deleted. Full audit copy of progress + plan at decision time.
 
-### 4.3 `ApprovedPlanSnapshot` (immutable)
+### 4.4 `ApprovedPlanSnapshot` (immutable)
 
 Written only on **Approved**. Baseline for staleness detection.
 
-### 4.4 `ForemanApprovalBatch` (workflow only)
+### 4.5 `ForemanApprovalBatch` (workflow only)
 
 Groups request IDs for one foreman session. Not the consistency boundary.
 
@@ -119,14 +135,41 @@ record PlanSnapshot(
 
 ---
 
-## 6. Staleness rules
+## 6. One-week lookback
 
-Re-approval required when **either**:
+Default window: **`ApprovalLookbackWindow.OneWeek`** (7 days, tenant-configurable [NEEDS REVIEW]).
 
-1. `currentProgress.Fingerprint != lastApproved.ProgressRevision.Fingerprint`, or  
-2. `currentProposedPlan.Fingerprint != lastApproved.PlanSnapshot.Fingerprint`.
+### Resolve baseline
 
-No prior approval → always required.
+```text
+cutoff = asOf - 7 days
+baseline = latest AssignmentPlanningCheckpoint where CapturedAt <= cutoff
+```
+
+Implemented in `LookbackBaselineResolver`.
+
+### Approval rules
+
+1. If current matches **last foreman-approved snapshot** → no approval needed.
+2. Else if current matches **lookback baseline** (~1 week ago) → no approval needed.
+3. Else → open `AssignmentApprovalRequest` with `LookbackBaseline` embedded for foreman UI ("since [date]: progress X→Y, plan shifted…").
+
+```text
+AssignmentPlanningCheckpointCaptured (Planning, nightly/event)
+  → stored in assignment_planning_checkpoints
+
+AdjustedPlanProposed / AssignmentProgressRevisionRecorded
+  → LookbackBaselineResolver.Resolve(history, asOf, OneWeek)
+  → ApprovalStalenessEvaluator.Evaluate(current, lookback, lastApproved)
+```
+
+---
+
+## 7. Staleness rules (summary)
+
+Re-approval required when current state **differs from lookback baseline** and is **not already covered** by the last foreman approval.
+
+No checkpoint before cutoff → treat as requiring approval (`Both`) [NEEDS REVIEW].
 
 ### Event flow
 
@@ -142,10 +185,11 @@ Idempotency key: `(AssignmentId, ProgressRevisionId, CalculationRunId)`.
 
 ---
 
-## 7. Persistence (`planning_approvals` schema)
+## 8. Persistence (`planning_approvals` schema)
 
 | Table | Notes |
 |-------|-------|
+| `assignment_planning_checkpoints` | Append-only; index `(assignment_id, captured_at)` |
 | `assignment_approval_requests` | Index `(project_id, status, opened_at)`, `(assignment_id, status)` |
 | `approval_decisions` | Append-only; index `(assignment_id, decided_at)` |
 | `approved_plan_snapshots` | Index `(assignment_id, approved_at DESC)` |
@@ -155,7 +199,7 @@ Separate **`PlanningApprovalsDbContext`** — not `Floor2PlanDbContext`.
 
 ---
 
-## 8. CQRS read model (foreman queue)
+## 9. CQRS read model (foreman queue)
 
 Denormalized `AssignmentApprovalQueueItem`:
 
@@ -165,7 +209,7 @@ Denormalized `AssignmentApprovalQueueItem`:
 
 ---
 
-## 9. Authorization
+## 10. Authorization
 
 Extend operational roles (see platform auth standard):
 
@@ -177,7 +221,7 @@ Extend operational roles (see platform auth standard):
 
 ---
 
-## 10. SandBox POC
+## 11. SandBox POC
 
 Runnable reference: [`PlanningApprovalsPoc/`](../PlanningApprovalsPoc/)
 
@@ -190,6 +234,7 @@ Key types:
 
 | POC | Path |
 |-----|------|
+| Lookback resolver | `PlanningApprovals.Domain/Services/LookbackBaselineResolver.cs` |
 | Staleness | `PlanningApprovals.Domain/Services/ApprovalStalenessEvaluator.cs` |
 | Coordinator | `PlanningApprovals.Domain/Services/PlanningApprovalCoordinator.cs` |
 | EF | `PlanningApprovals.Infrastructure/PlanningApprovalsDbContext.cs` |
@@ -197,7 +242,7 @@ Key types:
 
 ---
 
-## 11. Open points [NEEDS REVIEW]
+## 12. Open points [NEEDS REVIEW]
 
 1. **Reject** — block schedule commit or only record dissent?
 2. **Auto-approve** below a progress delta threshold?
@@ -206,10 +251,10 @@ Key types:
 
 ---
 
-## 12. Monolith adoption path
+## 13. Monolith adoption path
 
 1. Extract `PlanningApprovals` module with `AddPlanningApprovalsModule` + `MapPlanningApprovalsEndpoints`.
-2. Publish `AssignmentProgressRevisionRecorded` / `AdjustedPlanProposed` from Planning (outbox).
+2. Publish `AssignmentPlanningCheckpointCaptured` (nightly job from Planning) + `AdjustedPlanProposed` / `AssignmentProgressRevisionRecorded`.
 3. Subscribe in PlanningApprovals application handler → call `PlanningApprovalCoordinator`.
 4. Foreman UI in `@f2p/planning` feature module — approval queue read API.
 5. Retire any approval flags added to `Assignment` during legacy experiments.
