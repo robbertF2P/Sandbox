@@ -58,6 +58,7 @@ After editing skills in `.cursor/skills/`:
 
 - [platform-logging-standard.md](monolith-modularization/platform-logging-standard.md)
 - [platform-correlation-standard.md](monolith-modularization/platform-correlation-standard.md)
+- [platform-actor-standard.md](monolith-modularization/platform-actor-standard.md)
 - [03-modularization-roadmap.md](monolith-modularization/03-modularization-roadmap.md)
 
 ## Minimal agent workflow

@@ -24,6 +24,8 @@ You are assisting with **monolith-to-modular migration** using a strangler-fig a
 
 **Frontend (V2 modules):** `docs/modularization/platform-frontend-standard.md` — **`@floorganise/css` required** on every V2 frontend module; shared chrome and reusable widgets from **`@floorganise/ui`** (not copy-pasted per context).
 
+**Actor orchestration:** `docs/modularization/platform-actor-standard.md` — Akka.NET workflows for integrations, tenant packs, and legacy strangler bridges; one persist boundary per workflow.
+
 Follow phased analysis in `docs/modularization/analysis-instructions.md`.
 
 For **third-party integrations** (SAP, Kronos, PLM, lead vs follow, integration packs), use `docs/modularization/external-integrations-deepdive-instructions.md` after Phase 0. Run against the **external F2P monolith repo**, not SandBox.
@@ -52,12 +54,14 @@ Generic template: `docs/floor2plan-v2-connector-migration-prompt.md`
 11. **Frontend styling** — **`@floorganise/css`** (Tailwind v4 + Floorganise tokens) on **every** V2 frontend module; no parallel design systems.
 12. **Shared UI** — shell, tiles, buttons, forms, and cross-context widgets from **`@floorganise/ui`**; context `ui` libs only for context-specific presentational components.
 13. **OOP in the large, FP in detail** — structure with modules, ports, and actors at boundaries; implement rules as pure, testable functions on immutable data inside; side effects only in Infrastructure and at the host/actor shell.
+14. **Actor orchestration** — long-running workflows (import, integration, legacy handoff) use explicit actor pipelines per `platform-actor-standard.md`; client variance via packs, not core branches; `[StranglerAdapter]` for unavoidable legacy.
 
 ## Target architecture
 
 - Backend: composed ASP.NET host; bounded contexts as libraries with **`Add*Module` extension methods**
 - Frontend: Nx Angular shell, lazy-loaded context libraries; **`@floorganise/css` + `@floorganise/ui`** for all V2 screens
 - Data: one DbContext per context; integration via events/contracts
+- Workflows: Akka.NET actor pipelines at boundaries; tenant packs composed at host (`platform-actor-standard.md`)
 - Cross-screen reads: BFF endpoints in gateway only when needed
 
 ## Default outputs

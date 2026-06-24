@@ -218,4 +218,5 @@ DI: ClientXService : BaseService    DI: packs enabled per tenant
 | `floor2plan-legacy-connector-submodule-antipattern.md` | Why V1 failed |
 | `monolith-modularization/external-integrations-deepdive-instructions.md` | Lead/follow, catalog |
 | `ApiImportActorPoc/` | Import boundary, external IDs, actors |
+| `monolith-modularization/platform-actor-standard.md` | Workflow orchestration, packs, legacy strangler |
 | `ApiImportActorPoc/docs/platform-rebuild-proposal-summary.md` | Intermediate format, journey |

@@ -17,6 +17,7 @@
 | `module-composition-di.md` | **DI standard** — `IServiceCollection` extensions; no ABP in new modules |
 | `platform-frontend-standard.md` | **Frontend standard** — `@floorganise/css` + `@floorganise/ui` for all V2 modules |
 | `platform-authentication-standard.md` | **Auth design** — OIDC, cloud multi-tenant vs on-prem install config |
+| `platform-actor-standard.md` | **Actor orchestration** — integrations, tenant packs, legacy strangler workflows |
 | `../floor2plan-v2-connector-architecture.md` | Integration pack dependency rules |
 
 ---
@@ -36,6 +37,8 @@ Phase E  Scale (remaining contexts, sunset adapters)  ← only after pilots pass
 **Core rule:** AI drafts analysis and code; **humans and green tests decide**. No module move without characterization tests on P0 behaviour.
 
 **Do not** start by splitting `Floor2PlanDbContext` or rewriting the UI. **Do** establish module shape, test harness, CI gates, and prove one vertical slice end-to-end.
+
+**Actor model:** Akka.NET is the **composition runtime** for client-specific integrations, tenant customization packs, and unavoidable legacy support — not optional infrastructure. Pilot slice 1 may start with a strangler adapter; the target for workflows is explicit actor pipelines per `platform-actor-standard.md`.
 
 ---
 
@@ -295,6 +298,43 @@ Context-specific markup only in libs/<context>/ui.
 - [ ] `@floorganise/ui` v0.1 with shell + tiles + buttons published from SandBox
 - [ ] `f2p-shell` imports both packages; showcase-angular parity spot-checked
 
+### A9. Actor orchestration foundation (`platform-actor-standard.md`)
+
+Goal: before integration and customization scale, every long-running workflow shares one orchestration model — explicit actor pipelines with pack composition at the host, not SaveChanges handlers or client submodules.
+
+| Deliverable | Owner | Notes |
+|-------------|-------|-------|
+| `platform-actor-standard.md` | SandBox → monolith `docs/modularization/` | Actors as integration/customization/legacy composition runtime |
+| `Platform.Serilog.Logging.Akka` | SandBox feed | Correlation envelopes + `PlatformReceiveActor` |
+| Reference workflow | `ApiImportActorPoc/` | ImportManager → DataManager → persist; external IDs |
+| Host composition pattern | `F2pPlatform/` | `AddAkkaActors`, facade, SignalR bridge |
+| Pack registration sketch | Starter kit / host | Tenant `packEntitlements` wires pipeline stages |
+
+**Standard:** `docs/monolith-modularization/platform-actor-standard.md`
+
+**Non-negotiable for workflow boundaries:**
+
+1. Core is tenant-agnostic — client variance via **integration/customization packs**, not core branches.
+2. One **persist actor** (or port) per workflow — sole EF boundary for that flow.
+3. Legacy delegation via **`[StranglerAdapter]`** with documented sunset — especially for `legacy_hosted` tenants.
+4. No SaveChanges orchestration — actor message pipelines replace handler chains over time.
+5. Correlation on every boundary command (`platform-correlation-standard.md`).
+
+**Agent prompt (workflow scaffold):**
+
+```text
+Read docs/modularization/platform-actor-standard.md and platform-correlation-standard.md.
+Design workflow "<UseCase>" as orchestrator → persist actor with pack stages registered at host.
+No DbContext outside persist boundary. Strangler adapter if legacy path required.
+Messages in Contracts; Ask only at HTTP facade.
+```
+
+**Foundation exit criteria (add to G4-ready):**
+
+- [ ] `platform-actor-standard.md` copied to monolith `docs/modularization/`
+- [ ] `Platform.Logging.Akka.props` documented in module template
+- [ ] Import pilot team agrees actor pipeline is target for sync/import workflows (slice 1 may use adapter only)
+
 ### Foundation exit criteria (Gate G4-ready)
 
 - [ ] Starter kit copied to monolith (`Build/Platform/`, `scripts/`, `_template/`)
@@ -353,7 +393,7 @@ Based on inventory (`00-inventory.md`) and SandBox POCs:
 |--------|--------|
 | **Why** | `Application.Sync` is already a seam; Hangfire `sync` queue; SandBox has `ImportPipeline.Domain`, `ApiImportActorPoc`; strangler-friendly (route one import type to new path) |
 | **Scope (slice 1)** | One import job end-to-end — e.g. **Discipline domain model Excel** or **Organisation import** (pick smallest with tests) |
-| **Not in slice 1** | All 20+ import jobs, Aspose/XER, API `ImportController`, full actor migration |
+| **Not in slice 1** | All 20+ import jobs, Aspose/XER, API `ImportController`, full actor migration (target model: `platform-actor-standard.md`) |
 | **Entry points** | One `Import*Job` + provider + reader from Phase 1 catalog |
 | **Target projects** | `Import.Domain`, `Import.Application`, `Import.Infrastructure`, `Import.Api` |
 | **Adapter** | `[StranglerAdapter]` job wrapper; legacy Hangfire registration delegates when flag off |
@@ -420,6 +460,8 @@ Keep these visible in every implementation session with an AI assistant:
 | Multiple DbContexts already | Reporting, Files, Auth, etc. — align module cuts with existing DB boundaries where possible |
 | Hybrid UI (Razor + Vue + API) | Backend-first; UI strangler per screen family later; **V2 Nx screens** → `@floorganise/css` + `@floorganise/ui` only |
 | Tests are the spec | Characterize before refactor; `[UNDOCUMENTED]` blocks implementation |
+| Client integrations | Integration/customization **packs** + actor pipelines — not submodules or service inheritance |
+| Legacy tenants | `legacy_hosted` deployment profile + strangler adapters until cutover (`platform-actor-standard.md`) |
 
 ---
 

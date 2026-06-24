@@ -26,7 +26,7 @@ Use this skill first. It routes you to focused skills and repo standards — do 
 | Platform logging | `Platform.Serilog.Logging/`, `build/Platform.Logging.*.props` | Serilog, Seq, App Insights, test sink |
 | Platform packages feed | `local-feed/` | Packed NuGet (`Platform.Serilog.Logging*`) |
 | Import domain | `ImportPipeline/` | `ImportPipeline.Domain` NuGet |
-| Modularization program | `docs/monolith-modularization/` | Roadmap, logging/correlation/frontend standards, quality framework |
+| Modularization program | `docs/monolith-modularization/` | Roadmap, logging/correlation/frontend/**actor** standards, quality framework |
 | Agent skills (source) | `.cursor/skills/` | Author skills here; sync with `./scripts/sync-agent-skills.sh` |
 | Agent entry | `AGENTS.md` | Skill index for all tools |
 
@@ -100,5 +100,6 @@ dotnet test <path/to/tests.csproj>
 
 - Logging sinks wrong? → `platform-logging`
 - Ask timeout / lost `Sender` in async actor? → `platform-correlation` (inline envelope dispatch)
+- Integration pack vs actor pipeline / legacy strangler? → `docs/monolith-modularization/platform-actor-standard.md`
 - Repository leaking EF? → `specification-pattern`
 - Unsure aggregate boundaries? → `implementing-domain-driven-design`
