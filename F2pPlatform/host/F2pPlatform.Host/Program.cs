@@ -1,6 +1,7 @@
 using F2pPlatform.Host.Hubs;
 using F2pPlatform.Host.Services;
 using Platform.Serilog.Logging;
+using ControlPlane.Api;
 using HourApprovals.Api;
 using HourApprovals.Packs.Acme;
 using Identity.Api;
@@ -31,6 +32,7 @@ try
     builder.Services.AddReferenceModule(builder.Configuration);
     builder.Services.AddAcmeHourApprovalsPack();
     builder.Services.AddHourApprovalsModule(builder.Configuration);
+    builder.Services.AddControlPlaneModule(builder.Configuration);
 
     var app = builder.Build();
 
@@ -49,6 +51,7 @@ try
         Swagger = "/swagger",
         IdentityLogin = "/api/identity/login",
         ReferenceStatus = "/api/reference/status",
+        AdminTenants = "/admin/tenants",
         Health = "/health",
         SignalRHub = "/hubs/platform-events",
     }));
@@ -58,6 +61,7 @@ try
     app.MapIdentityModule();
     app.MapReferenceModule();
     app.MapHourApprovalsModule();
+    app.MapControlPlaneModule();
     app.MapHub<PlatformEventsHub>("/hubs/platform-events");
 
     app.Run();

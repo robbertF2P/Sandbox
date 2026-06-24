@@ -6,8 +6,11 @@ Angular workspace structured like the monolith **floor2plan-web** Nx layout (pat
 
 ```text
 apps/f2p-shell/                 host SPA (router, home tiles)
+apps/f2p-admin-shell/           platform operator admin SPA (tenant provisioning)
 libs/shared/api-core/           HTTP client + correlation headers
 libs/shared/platform-events/    SignalR hub client
+libs/control-plane/data-access/ Admin API client for control plane
+libs/control-plane/feature-tenants/ Tenant list + create UI
 libs/reference/data-access/     API client for Reference backend
 libs/reference/feature-status/  lazy-loaded feature route (template)
 ```
@@ -26,6 +29,15 @@ npm start
 ```
 
 Open http://localhost:5180 → **Reference** tile → status + live platform events.
+
+### Admin console
+
+```bash
+# Terminal 2 — operator admin SPA (proxies /admin to :5080)
+npm run start:admin
+```
+
+Open http://localhost:5181 → create and list tenants.
 
 ## Scaffold a new context UI
 

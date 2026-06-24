@@ -5,7 +5,9 @@
   "description": "V2 frontend template — f2p-shell + context libs (Reference starter)",
   "scripts": {
     "start": "NG_CLI_ANALYTICS=false ng serve f2p-shell",
+    "start:admin": "NG_CLI_ANALYTICS=false ng serve f2p-admin-shell",
     "build": "ng build f2p-shell",
+    "build:admin": "ng build f2p-admin-shell",
     "watch": "ng build f2p-shell --watch --configuration development"
   },
   "dependencies": {

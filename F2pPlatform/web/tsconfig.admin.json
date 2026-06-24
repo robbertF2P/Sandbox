@@ -1,0 +1,13 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "outDir": "./out-tsc/admin",
+    "types": []
+  },
+  "files": ["apps/f2p-admin-shell/src/main.ts"],
+  "include": [
+    "apps/f2p-admin-shell/src/**/*.d.ts",
+    "libs/shared/**/*.ts",
+    "libs/control-plane/**/*.ts"
+  ]
+}
