@@ -1,390 +1,7 @@
-# Phase 1 — Entry-Point Catalog
+# Floor2Plan.Core — Entry-Point Catalog (Phase 1)
 
-> Input: [00-inventory.md](00-inventory.md)
-> Note: MVC controllers serve Razor/SPA views unless explicitly flagged **API** in the description column.
-> `existing_tests` is [NEEDS REVIEW] across the board — a dedicated test-mapping pass is required.
-
----
-
-## Domain Area: Authentication & Security
-
-| EP-### | type | location | route_or_trigger | short_description | mutates_state | existing_tests |
-|--------|------|----------|------------------|-------------------|---------------|----------------|
-| EP-001 | HTTP | `Src/UI/Floor2Plan.Api/Controllers/AuthController.cs` · `LoginAsync` | POST api/Auth/LoginAsync | JWT login with username + password; returns bearer token | yes | [NEEDS REVIEW] |
-| EP-002 | HTTP | `Src/UI/UI.Floor2Plan/Controllers/AccountController.cs` | GET/POST Account/* | Razor login/logout pages; local cookie and Azure AD sign-in | yes | [NEEDS REVIEW] |
-| EP-003 | HTTP | `Src/UI/UI.Floor2Plan/Controllers/ElsaController.cs` | GET modules/elsa/auth?returnUri=... | Auth gateway: validates `Workflow.Manage` permission and appends bearer token to returnUri for Elsa designer | no | [NEEDS REVIEW] |
-| EP-004 | Interceptor | `Src/Infrastructure/Infrastructure.Authorisation/PermissionAuthorisationInterceptor.cs` | Every method call on services decorated with `[PermissionAuthorise]` | ABP dynamic-proxy interceptor; enforces permission checks before method execution | no | [NEEDS REVIEW] |
-| EP-005 | Interceptor | `Src/Infrastructure/Infrastructure.Authorisation/Helper/ApiKeyRequirementHandler.cs` | ASP.NET `AuthorizationHandler<ApiKeyRequirement>` | Validates `X-API-KEY` header for CI/build-agent policy | no | [NEEDS REVIEW] |
-| EP-006 | Interceptor | `Src/Data/Data.Base/AzureAuthentication/AzureAuthenticationInterceptor.cs` | EF Core `DbConnectionInterceptor` — connection opening | Injects Azure AD access token into SQL connection before it opens | no | [NEEDS REVIEW] |
-
----
-
-## Domain Area: Planning (Activities, Assignments, Relations)
-
-*MVC Area: `Plan`*
-
-| EP-### | type | location | route_or_trigger | short_description | mutates_state | existing_tests |
-|--------|------|----------|------------------|-------------------|---------------|----------------|
-| EP-010 | HTTP | `Src/UI/UI.Floor2Plan/Areas/Plan/Controllers/ActivityController.cs` | GET/POST Plan/Activity/* | Activity CRUD and planning board actions | yes | [NEEDS REVIEW] |
-| EP-011 | HTTP | `Src/UI/UI.Floor2Plan/Areas/Plan/Controllers/ActivityRelationController.cs` | GET/POST Plan/ActivityRelation/* | Activity dependency/relation management | yes | [NEEDS REVIEW] |
-| EP-012 | HTTP | `Src/UI/UI.Floor2Plan/Areas/Plan/Controllers/AssignmentController.cs` | GET/POST Plan/Assignment/* | Assignment (person-to-activity) CRUD | yes | [NEEDS REVIEW] |
-| EP-013 | HTTP | `Src/UI/UI.Floor2Plan/Areas/Plan/Controllers/HolidayController.cs` | GET/POST Plan/Holiday/* | Person and organisation holiday management | yes | [NEEDS REVIEW] |
-| EP-014 | HTTP | `Src/UI/UI.Floor2Plan/Controllers/AllocationController.cs` | GET/POST Allocation/* | Person-to-organisation allocation management | yes | [NEEDS REVIEW] |
-| EP-015 | HTTP | `Src/UI/UI.Floor2Plan/Controllers/StructureController.cs` | GET/POST Structure/* | Structure and structure relation management | yes | [NEEDS REVIEW] |
-| EP-016 | HTTP | `Src/UI/UI.Floor2Plan/Controllers/SelectController.cs` | GET Select/* | Lookup/select endpoints for dropdowns (read-only) | no | [NEEDS REVIEW] |
-| EP-017 | HTTP | `Src/UI/UI.Floor2Plan/Controllers/StateController.cs` | GET/POST State/* | Component/activity state transitions | yes | [NEEDS REVIEW] |
-| EP-018 | HTTP | `Src/UI/UI.Floor2Plan/Controllers/GenericPropertyController.cs` | GET/POST GenericProperty/* | Generic property type CRUD | yes | [NEEDS REVIEW] |
-
----
-
-## Domain Area: PBS / Product Breakdown Structure
-
-*MVC Area: `Pbs`*
-
-| EP-### | type | location | route_or_trigger | short_description | mutates_state | existing_tests |
-|--------|------|----------|------------------|-------------------|---------------|----------------|
-| EP-030 | HTTP | `Src/UI/UI.Floor2Plan/Areas/Pbs/Controllers/ComponentController.cs` | GET/POST Pbs/Component/* | Component (shipyard object) CRUD | yes | [NEEDS REVIEW] |
-| EP-031 | HTTP | `Src/UI/UI.Floor2Plan/Areas/Pbs/Controllers/ComponentTypeController.cs` | GET/POST Pbs/ComponentType/* | Component type management | yes | [NEEDS REVIEW] |
-| EP-032 | HTTP | `Src/UI/UI.Floor2Plan/Areas/Pbs/Controllers/ProjectController.cs` | GET/POST Pbs/Project/* | Project CRUD and settings | yes | [NEEDS REVIEW] |
-| EP-033 | HTTP | `Src/UI/UI.Floor2Plan/Areas/Pbs/Controllers/ProjectTypeController.cs` | GET/POST Pbs/ProjectType/* | Project type management | yes | [NEEDS REVIEW] |
-| EP-034 | HTTP | `Src/UI/UI.Floor2Plan/Areas/Pbs/Controllers/ProjectScenarioController.cs` | GET/POST Pbs/ProjectScenario/* | Project scenario (what-if) CRUD | yes | [NEEDS REVIEW] |
-| EP-035 | HTTP | `Src/UI/UI.Floor2Plan/Areas/Pbs/Controllers/OrganisationController.cs` | GET/POST Pbs/Organisation/* | Organisation CRUD | yes | [NEEDS REVIEW] |
-| EP-036 | HTTP | `Src/UI/UI.Floor2Plan/Areas/Pbs/Controllers/OrganisationPropertyController.cs` | GET/POST Pbs/OrganisationProperty/* | Organisation property management | yes | [NEEDS REVIEW] |
-| EP-037 | HTTP | `Src/UI/UI.Floor2Plan/Areas/Pbs/Controllers/OrganisationCapacityController.cs` | GET/POST Pbs/OrganisationCapacity/* | Organisation capacity dashboard | no | [NEEDS REVIEW] |
-| EP-038 | HTTP | `Src/UI/UI.Floor2Plan/Areas/Pbs/Controllers/PersonController.cs` | GET/POST Pbs/Person/* | Person CRUD | yes | [NEEDS REVIEW] |
-| EP-039 | HTTP | `Src/UI/UI.Floor2Plan/Areas/Pbs/Controllers/PersonTimesheetApproverController.cs` | GET/POST Pbs/PersonTimesheetApprover/* | Timesheet approver assignments | yes | [NEEDS REVIEW] |
-| EP-040 | HTTP | `Src/UI/UI.Floor2Plan/Areas/Pbs/Controllers/DisciplineController.cs` | GET/POST Pbs/Discipline/* | Discipline CRUD | yes | [NEEDS REVIEW] |
-| EP-041 | HTTP | `Src/UI/UI.Floor2Plan/Areas/Pbs/Controllers/DisciplineCapacityController.cs` | GET/POST Pbs/DisciplineCapacity/* | Discipline capacity dashboard | no | [NEEDS REVIEW] |
-| EP-042 | HTTP | `Src/UI/UI.Floor2Plan/Areas/Pbs/Controllers/RoleController.cs` | GET/POST Pbs/Role/* | Role and permission management | yes | [NEEDS REVIEW] |
-| EP-043 | HTTP | `Src/UI/UI.Floor2Plan/Areas/Pbs/Controllers/UserController.cs` | GET/POST Pbs/User/* | User account management | yes | [NEEDS REVIEW] |
-| EP-044 | HTTP | `Src/UI/UI.Floor2Plan/Areas/Pbs/Controllers/ScheduleController.cs` | GET/POST Pbs/Schedule/* | Schedule and schedule entries | yes | [NEEDS REVIEW] |
-| EP-045 | HTTP | `Src/UI/UI.Floor2Plan/Areas/Pbs/Controllers/StructureTypeController.cs` | GET/POST Pbs/StructureType/* | Structure type management | yes | [NEEDS REVIEW] |
-| EP-046 | HTTP | `Src/UI/UI.Floor2Plan/Areas/Pbs/Controllers/ActivityPropertyController.cs` | GET/POST Pbs/ActivityProperty/* | Activity property type management | yes | [NEEDS REVIEW] |
-| EP-047 | HTTP | `Src/UI/UI.Floor2Plan/Areas/Pbs/Controllers/AssetController.cs` | GET/POST Pbs/Asset/* | Asset management | yes | [NEEDS REVIEW] |
-| EP-048 | HTTP | `Src/UI/UI.Floor2Plan/Areas/Pbs/Controllers/BaselineController.cs` | GET/POST Pbs/Baseline/* | Project baseline creation and comparison | yes | [NEEDS REVIEW] |
-| EP-049 | HTTP | `Src/UI/UI.Floor2Plan/Areas/Pbs/Controllers/CopyController.cs` | POST Pbs/Copy/* | Component/activity copy operations | yes | [NEEDS REVIEW] |
-| EP-050 | HTTP | `Src/UI/UI.Floor2Plan/Areas/Pbs/Controllers/PlanningController.cs` | GET/POST Pbs/Planning/* | Planning configuration | yes | [NEEDS REVIEW] |
-| EP-051 | HTTP | `Src/UI/UI.Floor2Plan/Areas/Pbs/Controllers/WorController.cs` | GET/POST Pbs/Wor/* | Weak object relation (WOR) management | yes | [NEEDS REVIEW] |
-| EP-052 | HTTP | `Src/UI/UI.Floor2Plan/Areas/Pbs/Controllers/IndexController.cs` | GET Pbs/Index | PBS module home view | no | [NEEDS REVIEW] |
-| EP-053 | HTTP | `Src/UI/UI.Floor2Plan/Areas/Pbs/Controllers/SettingsController.cs` | GET/POST Pbs/Settings/* | PBS-level settings | yes | [NEEDS REVIEW] |
-| EP-054 | HTTP | `Src/UI/UI.Floor2Plan/Areas/Pbs/Controllers/ShipyardController.cs` | GET/POST Pbs/Shipyard/* | Shipyard configuration view (route: system-administration/shipyard/*) | yes | [NEEDS REVIEW] |
-
----
-
-## Domain Area: Timesheet & Work Execution
-
-*MVC Area: `Do`; REST API: `api/Timesheet`*
-
-| EP-### | type | location | route_or_trigger | short_description | mutates_state | existing_tests |
-|--------|------|----------|------------------|-------------------|---------------|----------------|
-| EP-060 | HTTP | `Src/UI/UI.Floor2Plan/Areas/Do/Controllers/EmployeeTimesheetController.cs` | GET/POST Do/EmployeeTimesheet/* | Employee timesheet entry and submission | yes | [NEEDS REVIEW] |
-| EP-061 | HTTP | `Src/UI/UI.Floor2Plan/Areas/Do/Controllers/WeeklyTimesheetController.cs` | GET/POST Do/WeeklyTimesheet/* | Weekly timesheet review and approval | yes | [NEEDS REVIEW] |
-| EP-062 | HTTP | `Src/UI/UI.Floor2Plan/Areas/Do/Controllers/CorrectionTimesheetController.cs` | GET/POST Do/CorrectionTimesheet/* | Timesheet correction entry | yes | [NEEDS REVIEW] |
-| EP-063 | HTTP | `Src/UI/UI.Floor2Plan/Areas/Do/Controllers/PlanboardController.cs` | GET/POST Do/Planboard/* | Assignment planboard view | no | [NEEDS REVIEW] |
-| EP-064 | HTTP | `Src/UI/UI.Floor2Plan/Areas/Do/Controllers/FloorboardController.cs` | GET/POST Do/Floorboard/* | Floorboard (shop floor) view | no | [NEEDS REVIEW] |
-| EP-065 | HTTP | `Src/UI/UI.Floor2Plan/Areas/Do/Controllers/ReporterController.cs` | GET/POST Do/Reporter/* | Reporter dashboard view | no | [NEEDS REVIEW] |
-| EP-066 | HTTP API | `Src/UI/Floor2Plan.Api/Controllers/TimesheetController.cs` · `Status` | POST api/Timesheet/Status | External approval status update (ERP integration) | yes | [NEEDS REVIEW] |
-| EP-067 | HTTP | `Src/UI/UI.Floor2Plan/Controllers/EventController.cs` | GET/POST Event/* | Timesheet event messages and milestone events | yes | [NEEDS REVIEW] |
-| EP-068 | HTTP | `Src/UI/UI.Floor2Plan/Controllers/NewsFeedController.cs` | GET/POST NewsFeed/* | News feed messages | yes | [NEEDS REVIEW] |
-
----
-
-## Domain Area: HR / Balance / Scheduling
-
-*MVC Area: `HR`*
-
-| EP-### | type | location | route_or_trigger | short_description | mutates_state | existing_tests |
-|--------|------|----------|------------------|-------------------|---------------|----------------|
-| EP-070 | HTTP | `Src/UI/UI.Floor2Plan/Areas/HR/Controllers/BalanceController.cs` | GET/POST HR/Balance/* | Person balance overview | no | [NEEDS REVIEW] |
-| EP-071 | HTTP | `Src/UI/UI.Floor2Plan/Areas/HR/Controllers/BalancePolicyController.cs` | GET/POST HR/BalancePolicy/* | Balance policy management | yes | [NEEDS REVIEW] |
-| EP-072 | HTTP | `Src/UI/UI.Floor2Plan/Areas/HR/Controllers/BalancePolicyRuleController.cs` | GET/POST HR/BalancePolicyRule/* | Balance policy rules | yes | [NEEDS REVIEW] |
-| EP-073 | HTTP | `Src/UI/UI.Floor2Plan/Areas/HR/Controllers/BalanceAccumulationRuleController.cs` | GET/POST HR/BalanceAccumulationRule/* | Balance accumulation rules | yes | [NEEDS REVIEW] |
-| EP-074 | HTTP | `Src/UI/UI.Floor2Plan/Areas/HR/Controllers/PersonBalanceController.cs` | GET/POST HR/PersonBalance/* | Per-person balance detail | no | [NEEDS REVIEW] |
-| EP-075 | HTTP | `Src/UI/UI.Floor2Plan/Areas/HR/Controllers/OffTimeController.cs` | GET/POST HR/OffTime/* | Off-time / personal holiday requests | yes | [NEEDS REVIEW] |
-| EP-076 | HTTP | `Src/UI/UI.Floor2Plan/Areas/HR/Controllers/ScheduleManagementController.cs` | GET/POST HR/ScheduleManagement/* | Schedule management for persons and organisations | yes | [NEEDS REVIEW] |
-| EP-077 | HTTP | `Src/UI/UI.Floor2Plan/Areas/HR/Controllers/ClockingTerminalController.cs` | GET/POST HR/ClockingTerminal/* | Clocking terminal configuration | yes | [NEEDS REVIEW] |
-| EP-078 | HTTP | `Src/UI/UI.Floor2Plan/Areas/HR/Controllers/ClockingTerminalProfileController.cs` | GET/POST HR/ClockingTerminalProfile/* | Clocking terminal profile management | yes | [NEEDS REVIEW] |
-
----
-
-## Domain Area: Reporting & KPI (Check)
-
-*MVC Area: `Check`*
-
-| EP-### | type | location | route_or_trigger | short_description | mutates_state | existing_tests |
-|--------|------|----------|------------------|-------------------|---------------|----------------|
-| EP-080 | HTTP | `Src/UI/UI.Floor2Plan/Areas/Check/Controllers/ReportsController.cs` | GET Check/Reports/* (catch-all for Vue routes) | Report viewer shell | no | [NEEDS REVIEW] |
-| EP-081 | HTTP API | `Src/UI/UI.Floor2Plan/Areas/Check/Controllers/ReportsApiController.cs` | GET/POST Check/ReportsApi/* | API endpoints powering report data | no | [NEEDS REVIEW] |
-| EP-082 | HTTP | `Src/UI/UI.Floor2Plan/Areas/Check/Controllers/ReportDesignerController.cs` | GET/POST Check/ReportDesigner/* | Report designer views | yes | [NEEDS REVIEW] |
-| EP-083 | HTTP | `Src/UI/UI.Floor2Plan/Areas/Check/Controllers/KPIController.cs` | GET/POST Check/KPI/* | KPI overview | no | [NEEDS REVIEW] |
-| EP-084 | HTTP | `Src/UI/UI.Floor2Plan/Areas/Check/Controllers/Kpi/KpiSpiCpiController.cs` | GET/POST Check/KpiSpiCpi/* | SPI/CPI schedule and cost performance indexes | no | [NEEDS REVIEW] |
-| EP-085 | HTTP | `Src/UI/UI.Floor2Plan/Areas/Check/Controllers/ErpCorrectionTimesheetController.cs` | GET/POST Check/ErpCorrectionTimesheet/* | ERP timesheet correction review | yes | [NEEDS REVIEW] |
-| EP-086 | HTTP | `Src/UI/UI.Floor2Plan/Areas/Check/Controllers/ErpWeeklyTimesheetController.cs` | GET/POST Check/ErpWeeklyTimesheet/* | ERP weekly timesheet review | no | [NEEDS REVIEW] |
-
----
-
-## Domain Area: Sync / Import / Export (Data Integration)
-
-*MVC Area: `Sync`; API: `api/Import`*
-
-| EP-### | type | location | route_or_trigger | short_description | mutates_state | existing_tests |
-|--------|------|----------|------------------|-------------------|---------------|----------------|
-| EP-090 | HTTP | `Src/UI/UI.Floor2Plan/Areas/Sync/Controllers/ImportExportController.cs` | GET/POST Sync/ImportExport/* | File-based import/export trigger (Excel, XER, Aspose, Sciforma) | yes | [NEEDS REVIEW] |
-| EP-091 | HTTP | `Src/UI/UI.Floor2Plan/Areas/Sync/Controllers/ConnectorConfigurationController.cs` | GET/POST Sync/ConnectorConfiguration/* | Connector configuration management | yes | [NEEDS REVIEW] |
-| EP-092 | HTTP | `Src/UI/UI.Floor2Plan/Areas/Sync/Controllers/IndexController.cs` | GET Sync/Index | Sync module home view | no | [NEEDS REVIEW] |
-| EP-093 | HTTP | `Src/UI/UI.Floor2Plan/Areas/Sync/Controllers/PdmController.cs` | GET/POST Sync/Pdm/* | PDM (product data management) sync | yes | [NEEDS REVIEW] |
-| EP-094 | HTTP | `Src/UI/UI.Floor2Plan/Areas/Sync/Controllers/PlanningHoursController.cs` | GET/POST Sync/PlanningHours/* | Planning hours sync views | yes | [NEEDS REVIEW] |
-| EP-095 | HTTP | `Src/UI/UI.Floor2Plan/Areas/Sync/Controllers/ProductModelLinkController.cs` | GET/POST Sync/ProductModelLink/* | Product model link management | yes | [NEEDS REVIEW] |
-| EP-096 | HTTP | `Src/UI/UI.Floor2Plan/Areas/Sync/Controllers/TransferHoursController.cs` | GET/POST Sync/TransferHours/* | Hour transfer operations | yes | [NEEDS REVIEW] |
-| EP-097 | HTTP | `Src/UI/UI.Floor2Plan/Areas/Sync/Controllers/ConvertPlanningFileController.cs` | GET/POST Sync/ConvertPlanningFile/* | Planning file format conversion | yes | [NEEDS REVIEW] |
-| EP-098 | HTTP API | `Src/UI/Floor2Plan.Api/Controllers/ImportController.cs` · `ProductBreakdownAsync` | PUT+POST api/Import/ProductBreakdownAsync | REST: import product breakdown data (returns 201/202) | yes | [NEEDS REVIEW] |
-| EP-099 | HTTP API | `Src/UI/Floor2Plan.Api/Controllers/ImportController.cs` · `TaskAllocationsAsync` | PUT+POST api/Import/TaskAllocationsAsync | REST: import task allocation data | yes | [NEEDS REVIEW] |
-| EP-100 | Job | `Src/Application/Application.Sync/ImportJobs/Planning/ImportPlanningJob.cs` | Hangfire one-shot · queue: sync | Import XER/MS Project planning fields (task_name, start/end dates) | yes | [NEEDS REVIEW] |
-| EP-101 | Job | `Src/Application/Application.Sync/ImportJobs/Xer/ImportXerJob.cs` | Hangfire one-shot · queue: sync | Import Oracle Primavera P6 XER files; backwards-compat mode | yes | [NEEDS REVIEW] |
-| EP-102 | Job | `Src/Application/Application.Sync/ImportJobs/Sciforma/ImportSciformaJob.cs` | Hangfire one-shot · queue: sync | Import Sciforma project data | yes | [NEEDS REVIEW] |
-| EP-103 | Job | `Src/Application/Application.Sync/ImportJobs/HoursAndProgress/ImportHoursAndProgressJob.cs` | Hangfire one-shot · queue: sync | Import manual hours and progress | yes | [NEEDS REVIEW] |
-| EP-104 | Job | `Src/Application/Application.Sync/ImportJobs/TaskReadiness/ImportTaskReadinessJob.cs` | Hangfire one-shot · queue: sync | Import task readiness status | yes | [NEEDS REVIEW] |
-| EP-105 | Job | `Src/Application/Application.Sync/ImportJobs/ProductBreakdown/ImportProductBreakdownJob.cs` | Hangfire one-shot · queue: sync | Import product breakdown structure | yes | [NEEDS REVIEW] |
-| EP-106 | Job | `Src/Application/Application.Sync/ImportJobs/OrganisationImport/ImportOrganisationJob.cs` | Hangfire one-shot · queue: sync | Import organisation/role data via ERP service | yes | [NEEDS REVIEW] |
-| EP-107 | Job | `Src/Application/Application.Sync/ImportJobs/DisciplineImport/ImportDisciplineJob.cs` | Hangfire one-shot · queue: sync | Import discipline data | yes | [NEEDS REVIEW] |
-| EP-108 | Job | `Src/Application/Application.Sync/ImportJobs/Materials/ImportMaterialJob.cs` | Hangfire one-shot · queue: sync | Import material data | yes | [NEEDS REVIEW] |
-| EP-109 | Job | `Src/Application/Application.Sync/ImportJobs/ProjectMaterials/ImportProjectMaterialJob.cs` | Hangfire one-shot · queue: sync | Import project-level material assignments | yes | [NEEDS REVIEW] |
-| EP-110 | Job | `Src/Application/Application.Sync/ImportJobs/AccessControl/ImportAccessControlJob.cs` | Hangfire one-shot · queue: sync | Import access control settings | yes | [NEEDS REVIEW] |
-| EP-111 | Job | `Src/Application/Application.Sync/ImportJobs/HourTypes/ImportHourTypeDomainModelJob.cs` | Hangfire one-shot · queue: sync | Import hour type domain model (Excel) | yes | [NEEDS REVIEW] |
-| EP-112 | Job | `Src/Application/Application.Sync/ImportJobs/UnitTypes/ImportUnitTypeDomainModelJob.cs` | Hangfire one-shot · queue: sync | Import unit type domain model (Excel) | yes | [NEEDS REVIEW] |
-| EP-113 | Job | `Src/Application/Application.Sync/ImportJobs/ProjectStatusses/ImportProjectStatusDomainModelJob.cs` | Hangfire one-shot · queue: sync | Import project status domain model | yes | [NEEDS REVIEW] |
-| EP-114 | Job | `Src/Application/Application.Sync/ImportJobs/Disciplines/ImportDisciplineDomainModelJob.cs` | Hangfire one-shot · queue: sync | Import discipline domain model with properties | yes | [NEEDS REVIEW] |
-| EP-115 | Job | `Src/Application/Application.Sync/ImportJobs/ComponentTypes/ImportComponentTypeDomainModelJob.cs` | Hangfire one-shot · queue: sync | Import component type domain model with properties | yes | [NEEDS REVIEW] |
-| EP-116 | Job | `Src/Application/Application.Sync/ImportJobs/Organisations/ImportOrganisationDomainModelJob.cs` | Hangfire one-shot · queue: sync | Import organisation domain model with properties | yes | [NEEDS REVIEW] |
-| EP-117 | Job | `Src/Application/Application.Sync/ImportJobs/Materials/ImportMaterialDomainModelJob.cs` | Hangfire one-shot · queue: sync | Import material domain model with properties | yes | [NEEDS REVIEW] |
-| EP-118 | Job | `Src/Application/Application.Sync/ImportJobs/ActivityPhases/ImportActivityPhaseDomainModelJob.cs` | Hangfire one-shot · queue: sync | Import activity phase domain model | yes | [NEEDS REVIEW] |
-| EP-119 | Job | `Src/Application/Application.Sync/ImportJobs/ActivityStatus/ImportActivityStatusDomainModelJob.cs` | Hangfire one-shot · queue: sync | Import activity status domain model | yes | [NEEDS REVIEW] |
-| EP-120 | Job | `Src/Application/Application.Sync/ImportJobs/Persons/ImportPersonDomainModelJob.cs` | Hangfire one-shot · queue: sync | Import person domain model with properties | yes | [NEEDS REVIEW] |
-| EP-121 | Job | `Src/Infrastructure/Infrastructure.FireAndForget/Jobs/SyncFireAndForgetJob.cs` | Hangfire one-shot · queue: sync | Generic sync-queue fire-and-forget dispatcher (routes ISyncQueueJob processors) | yes | [NEEDS REVIEW] |
-
----
-
-## Domain Area: Tickets & Transport Requests
-
-*MVC Area: `Ticket`*
-
-| EP-### | type | location | route_or_trigger | short_description | mutates_state | existing_tests |
-|--------|------|----------|------------------|-------------------|---------------|----------------|
-| EP-130 | HTTP | `Src/UI/UI.Floor2Plan/Areas/Ticket/Controllers/TicketController.cs` | GET/POST Ticket/Ticket/* | General ticket CRUD and status transitions | yes | [NEEDS REVIEW] |
-| EP-131 | HTTP | `Src/UI/UI.Floor2Plan/Areas/Ticket/Controllers/TransportRequestController.cs` | GET/POST Ticket/TransportRequest/* | Transport request management | yes | [NEEDS REVIEW] |
-| EP-132 | HTTP | `Src/UI/UI.Floor2Plan/Areas/Ticket/Controllers/IssueController.cs` | GET/POST Ticket/Issue/* | Issue / defect ticket management | yes | [NEEDS REVIEW] |
-| EP-133 | HTTP | `Src/UI/UI.Floor2Plan/Areas/Ticket/Controllers/StopWorkOrderController.cs` | GET/POST Ticket/StopWorkOrder/* | Stop work order management | yes | [NEEDS REVIEW] |
-
----
-
-## Domain Area: Devices (Clocking & Shop Floor Terminals)
-
-*MVC Area: `Devices`*
-
-| EP-### | type | location | route_or_trigger | short_description | mutates_state | existing_tests |
-|--------|------|----------|------------------|-------------------|---------------|----------------|
-| EP-140 | HTTP | `Src/UI/UI.Floor2Plan/Areas/Devices/Controllers/ClockingTerminalController.cs` | GET/POST Devices/ClockingTerminal/* | Clocking terminal device management | yes | [NEEDS REVIEW] |
-| EP-141 | HTTP | `Src/UI/UI.Floor2Plan/Areas/Devices/Controllers/ShopFloorTerminalController.cs` | GET/POST Devices/ShopFloorTerminal/* | Shop floor terminal device management | yes | [NEEDS REVIEW] |
-
----
-
-## Domain Area: Material
-
-*MVC Area: `Material`*
-
-| EP-### | type | location | route_or_trigger | short_description | mutates_state | existing_tests |
-|--------|------|----------|------------------|-------------------|---------------|----------------|
-| EP-145 | HTTP | `Src/UI/UI.Floor2Plan/Areas/Material/Controllers/MaterialController.cs` | GET/POST Material/Material/* | Material management | yes | [NEEDS REVIEW] |
-| EP-146 | HTTP | `Src/UI/UI.Floor2Plan/Areas/Material/Controllers/ProjectMaterialController.cs` | GET/POST Material/ProjectMaterial/* | Project material assignments | yes | [NEEDS REVIEW] |
-
----
-
-## Domain Area: FloorSpace
-
-*MVC Area: `FloorSpace`*
-
-| EP-### | type | location | route_or_trigger | short_description | mutates_state | existing_tests |
-|--------|------|----------|------------------|-------------------|---------------|----------------|
-| EP-150 | HTTP | `Src/UI/UI.Floor2Plan/Areas/FloorSpace/Controllers/FloorSpaceController.cs` | GET/POST floorspace/* (catch-all) | FloorSpace planning and assignment view | yes | [NEEDS REVIEW] |
-| EP-151 | HTTP | `Src/UI/UI.Floor2Plan/Areas/FloorSpace/Controllers/LocationController.cs` | GET/POST FloorSpace/Location/* | Location management | yes | [NEEDS REVIEW] |
-
----
-
-## Domain Area: Prediction
-
-*MVC Area: `Prediction`*
-
-| EP-### | type | location | route_or_trigger | short_description | mutates_state | existing_tests |
-|--------|------|----------|------------------|-------------------|---------------|----------------|
-| EP-155 | HTTP | `Src/UI/UI.Floor2Plan/Areas/Prediction/PredictionController.cs` | GET/POST Prediction/* | Long/short-term prediction views | no | [NEEDS REVIEW] |
-
----
-
-## Domain Area: System Administration
-
-*MVC Area: `System`*
-
-| EP-### | type | location | route_or_trigger | short_description | mutates_state | existing_tests |
-|--------|------|----------|------------------|-------------------|---------------|----------------|
-| EP-160 | HTTP | `Src/UI/UI.Floor2Plan/Areas/System/Controllers/AdministrationController.cs` | GET System-Administration/* (catch-all) | System administration dashboard | no | [NEEDS REVIEW] |
-| EP-161 | HTTP | `Src/UI/UI.Floor2Plan/Areas/System/Controllers/SystemActionController.cs` | GET/POST System/SystemAction/* | Triggers system actions (cache refresh, SQL defrag, etc.) | yes | [NEEDS REVIEW] |
-| EP-162 | HTTP | `Src/UI/UI.Floor2Plan/Areas/System/Controllers/AppSettingController.cs` | GET/POST System/AppSetting/* | Application settings management | yes | [NEEDS REVIEW] |
-| EP-163 | HTTP | `Src/UI/UI.Floor2Plan/Areas/System/Controllers/LicenseController.cs` | GET/POST System/License/* | License management | yes | [NEEDS REVIEW] |
-| EP-164 | HTTP | `Src/UI/UI.Floor2Plan/Areas/System/Controllers/TableController.cs` | GET/POST System/Table/* | Database table viewer | no | [NEEDS REVIEW] |
-| EP-165 | HTTP | `Src/UI/UI.Floor2Plan/Areas/System/ShipyardController.cs` | GET/POST System/Shipyard/* | Shipyard-level system settings | yes | [NEEDS REVIEW] |
-| EP-166 | HTTP | `Src/UI/UI.Floor2Plan/Controllers/PermissionManagementController.cs` | GET/POST PermissionManagement/* | Role and permission assignment | yes | [NEEDS REVIEW] |
-| EP-167 | HTTP | `Src/UI/UI.Floor2Plan/Controllers/PersonManagementController.cs` | GET/POST PersonManagement/* | User and person management | yes | [NEEDS REVIEW] |
-| EP-168 | HTTP | `Src/UI/UI.Floor2Plan/Controllers/PersonInfoController.cs` | GET PersonInfo/* | Person information display (read-only) | no | [NEEDS REVIEW] |
-| EP-169 | HTTP | `Src/UI/UI.Floor2Plan/Controllers/GeneralSettingsController.cs` | GET/POST GeneralSettings/* | General application settings | yes | [NEEDS REVIEW] |
-| EP-170 | HTTP | `Src/UI/UI.Floor2Plan/Controllers/PageSettingsController.cs` | GET/POST PageSettings/* | Per-user page settings (column visibility, filters) | yes | [NEEDS REVIEW] |
-| EP-171 | HTTP | `Src/UI/UI.Floor2Plan/Controllers/TeamController.cs` | GET/POST Team/* | Team management | yes | [NEEDS REVIEW] |
-| EP-172 | HTTP | `Src/UI/UI.Floor2Plan/Controllers/TaskReadinessController.cs` | GET/POST TaskReadiness/* | Task readiness status management | yes | [NEEDS REVIEW] |
-| EP-173 | HTTP | `Src/UI/UI.Floor2Plan/Controllers/ExternalLinkController.cs` | GET ExternalLink/* | External link redirects | no | [NEEDS REVIEW] |
-| EP-174 | HTTP | `Src/UI/UI.Floor2Plan/Controllers/FileController.cs` | GET/POST File/* | File upload and download | yes | [NEEDS REVIEW] |
-| EP-175 | HTTP | `Src/UI/UI.Floor2Plan/Controllers/OptionListController.cs` | GET OptionList/* | Option list lookups | no | [NEEDS REVIEW] |
-| EP-176 | HTTP | `Src/UI/UI.Floor2Plan/Controllers/ClientInitController.cs` | GET ClientInit/* | Client-side initialisation data (read-only) | no | [NEEDS REVIEW] |
-| EP-177 | HTTP | `Src/UI/UI.Floor2Plan/Controllers/ScriptsController.cs` | GET Scripts/* | Dynamic script bundles | no | [NEEDS REVIEW] |
-| EP-178 | HTTP | `Src/UI/UI.Floor2Plan/Controllers/HomeController.cs` | GET / | Application shell / SPA entry point | no | [NEEDS REVIEW] |
-| EP-179 | CLI | `Src/DatabaseDeployer/DatabaseDeployer/Program.cs` | CLI arg: `schema-only` or none | Database migration tool: `schema-only` runs schema-only migration; default runs all EF migrations + SQL scripts | yes | [NEEDS REVIEW] |
-
----
-
-## Domain Area: Workflows & Automation (Elsa)
-
-| EP-### | type | location | route_or_trigger | short_description | mutates_state | existing_tests |
-|--------|------|----------|------------------|-------------------|---------------|----------------|
-| EP-180 | HTTP | `modules/elsa/api/*` (Elsa REST API) | Elsa built-in REST endpoints via `UseWorkflowsApi` + `ElsaF2PMiddleware` | Create/manage/trigger Elsa workflows via REST | yes | [NEEDS REVIEW] |
-| EP-181 | Other | `Src/Infrastructure/Infrastructure.Elsa/UI/WorkflowInsanceProxyHub.cs` | SignalR hub: `modules/elsa/hubs/workflow-instance-proxy` | Real-time workflow execution status for Elsa designer | no | [NEEDS REVIEW] |
-| EP-182 | Job | `Elsa: RunWorkflowJob` (via `WorkflowSchedulerLocalTimeZone.cs`) | Hangfire recurring · cron expression · local timezone | Starts a new Elsa workflow instance on cron schedule | yes | [NEEDS REVIEW] |
-| EP-183 | Job | `Elsa: ResumeWorkflowJob` (via `WorkflowSchedulerLocalTimeZone.cs`) | Hangfire recurring · cron expression · local timezone | Resumes a suspended Elsa workflow instance on schedule | yes | [NEEDS REVIEW] |
-| EP-184 | Workflow | `Src/Infrastructure/Infrastructure.Workflow/Activities/Processor/RunProcessorActivity.cs` | Elsa activity: "Run processor" | Dynamically resolves and executes a processor by type + config; Success/Fail branch | yes | [NEEDS REVIEW] |
-| EP-185 | Workflow | `Src/Infrastructure/Infrastructure.Workflow/Activities/Sync/RunConnectorActivity.cs` | Elsa activity: "Run connector" | Enqueues sync processor (Planning/EntryTime/ERP/Generic); outputs sync correlation ID | yes | [NEEDS REVIEW] |
-| EP-186 | Workflow | `Src/Infrastructure/Infrastructure.Workflow/Activities/Sync/SyncLogSendMailActivity.cs` | Elsa activity: "Send sync log mail" | Loads sync log and sends mail to recipients | no | [NEEDS REVIEW] |
-| EP-187 | Workflow | `Src/Infrastructure/Infrastructure.Workflow/Activities/Data/SetActivityStatusActivity.cs` | Elsa activity: "Set activity status" | Sets an activity's status in the database | yes | [NEEDS REVIEW] |
-| EP-188 | Workflow | `Src/Infrastructure/Infrastructure.Workflow/Activities/Data/GetActivityByIdActivity.cs` | Elsa activity: "Get activity by ID" | Reads an activity's StatusId from the database | no | [NEEDS REVIEW] |
-| EP-189 | Workflow | `Src/Infrastructure/Infrastructure.Workflow/Activities/Data/ActivityStatusGateActivity.cs` | Elsa activity: "Assert activity status" | Routes workflow Success/Fail based on activity status match | no | [NEEDS REVIEW] |
-| EP-190 | Workflow | `Src/Infrastructure/Infrastructure.Workflow/Activities/Ticket/TicketStatusUpdateActivity.cs` | Elsa activity: "Set state" | Updates TransportRequest status; optionally sends status mail | yes | [NEEDS REVIEW] |
-| EP-191 | Workflow | `Src/Infrastructure/Infrastructure.Workflow/Activities/Ticket/TicketSendMailActivity.cs` | Elsa activity: "Send transport request mail" | Sends transport request status mail to configured recipients | no | [NEEDS REVIEW] |
-| EP-192 | Workflow | `Src/Infrastructure/Infrastructure.Workflow/Activities/Ticket/TicketActivityCreateActivity.cs` | Elsa activity: "Create mitigating activity for transport request" | Creates a mitigating activity linked to the transport request | yes | [NEEDS REVIEW] |
-| EP-193 | Workflow | `Src/Infrastructure/Infrastructure.Workflow/Activities/Ticket/TicketActivityCloseActivity.cs` | Elsa activity: "Complete transport request's mitigating activities" | Sets mitigating activities to 100% progress | yes | [NEEDS REVIEW] |
-| EP-194 | Workflow | `Src/Infrastructure/Infrastructure.Workflow/Activities/Ticket/TransportRequestActivityUpdateActivity.cs` | Elsa activity: "Update mitigating activity" | Updates mitigating activity windows/constraints to match execution date | yes | [NEEDS REVIEW] |
-| EP-195 | Workflow | `Src/Infrastructure/Infrastructure.Workflow/Activities/StopWorkOrder/StopWorkOrderSendMailActivity.cs` | Elsa activity: "Send stop work order mail" | Sends stop work order email to affected persons | no | [NEEDS REVIEW] |
-| EP-196 | Message | `Src/Infrastructure/Infrastructure.Elsa/Utilities/WorkflowTransientVariablePopulator.cs` | `INotificationHandler<WorkflowExecuting>` (Elsa mediator) | Injects current IPrincipal into workflow execution context as transient variable | no | [NEEDS REVIEW] |
-
----
-
-## Domain Area: Health & Monitoring
-
-| EP-### | type | location | route_or_trigger | short_description | mutates_state | existing_tests |
-|--------|------|----------|------------------|-------------------|---------------|----------------|
-| EP-200 | HTTP | `Src/UI/UI.Floor2Plan/Floor2PlanUIWebModule.cs` | GET /Health/plain | Plain-text health check; auth: CiBuildAgent (bypassed in Debug) | no | [NEEDS REVIEW] |
-| EP-201 | HTTP | `Src/UI/UI.Floor2Plan/Floor2PlanUIWebModule.cs` | GET /Health/json | JSON health report; auth: CiBuildAgent (bypassed in Debug) | no | [NEEDS REVIEW] |
-| EP-202 | HTTP | `Src/UI/UI.Floor2Plan/Floor2PlanUIWebModule.cs` | GET /Mitigate/json | Runs mitigating actions on unhealthy checks and returns result | yes | [NEEDS REVIEW] |
-| EP-203 | Other | `Src/Infrastructure/Infrastructure.Hangfire/Floor2PlanInfrastructureHangfireModule.cs` | GET /hangfire | Hangfire dashboard; auth: HangfireDashboardAuthorizationFilter | no | [NEEDS REVIEW] |
-| EP-204 | Other | `Src/Infrastructure/Infrastructure.Health/DelayedHealthCheckPublisherHostedService.cs` | BackgroundService loop; configurable period (minutes) | Runs all health checks on schedule; publishes results to IHealthCheckPublisher | no | [NEEDS REVIEW] |
-
----
-
-## Domain Area: Fire-and-Forget Infrastructure (Cross-Cutting)
-
-| EP-### | type | location | route_or_trigger | short_description | mutates_state | existing_tests |
-|--------|------|----------|------------------|-------------------|---------------|----------------|
-| EP-210 | Job | `Src/Infrastructure/Infrastructure.FireAndForget/Jobs/FireAndForgetJob.cs` | Hangfire one-shot · queue: default | Main fire-and-forget dispatcher; runs IFireAndForgetExecutable actions (cache, balance, label processors) | yes | [NEEDS REVIEW] |
-| EP-211 | Other | `Src/Infrastructure/Infrastructure.Hangfire/JobStateEventHostedService.cs` | BackgroundService channel reader; triggered by Hangfire state changes | Dispatches IJobStateChangeEventHandler handlers when Hangfire job states change | no | [NEEDS REVIEW] |
-
----
-
-## Domain Area: External API — OData
-
-> 131 read-only entity sets are auto-generated at startup by `GenericControllerFeatureProvider` for each `IODataDto<>` implementation.
-> All use `GET /odata/{EntitySetName}` with OData query syntax ($filter, $select, $expand, $top, $skip).
-> All require `[Authorize(AuthenticationSchemes = F2PAuthenticationPolicy.Api)]` + `[PermissionAuthorise(ModulePermissions.General.OData)]`.
-
-| EP-### | type | location | route_or_trigger | short_description | mutates_state | existing_tests |
-|--------|------|----------|------------------|-------------------|---------------|----------------|
-| EP-220 | HTTP OData | `Src/UI/Floor2Plan.Api/Controllers/GenericEntityController.cs` | GET /odata/Activities | OData read: Activities | no | [NEEDS REVIEW] |
-| EP-221 | HTTP OData | (same controller, different entity) | GET /odata/Assignments | OData read: Assignments | no | [NEEDS REVIEW] |
-| EP-222 | HTTP OData | (same controller) | GET /odata/Allocations | OData read: Allocations | no | [NEEDS REVIEW] |
-| EP-223 | HTTP OData | (same controller) | GET /odata/Persons | OData read: Persons | no | [NEEDS REVIEW] |
-| EP-224 | HTTP OData | (same controller) | GET /odata/Organisations | OData read: Organisations | no | [NEEDS REVIEW] |
-| EP-225 | HTTP OData | (same controller) | GET /odata/Projects | OData read: Projects | no | [NEEDS REVIEW] |
-| EP-226 | HTTP OData | (same controller) | GET /odata/TimesheetEntries | OData read: TimesheetEntries | no | [NEEDS REVIEW] |
-| EP-227 | HTTP OData | (same controller) | GET /odata/Components | OData read: Components | no | [NEEDS REVIEW] |
-| EP-228 | HTTP OData | (same controller) | GET /odata/ClockingTerminalPunches | OData read: ClockingTerminalPunches (Guid? key) | no | [NEEDS REVIEW] |
-| EP-229 | HTTP OData | (same controller) | GET /odata/{...} (123 additional entity sets) | Full list in `Src/UI/Floor2Plan.Api/Contracts/Models/`; all read-only OData GET endpoints | no | [NEEDS REVIEW] |
-
----
-
-## Domain Area: Change Handlers (Post-SaveChanges Triggers)
-
-> All handlers implement `IEntityChangeHandler` via `BaseChangeHandler`. They fire pre- and post-`SaveChangesAsync`.
-> They are internal integration points, not external entry points, but they mutate state and trigger downstream side effects.
-> Located in: `Src/Data/Data.ChangeHandlers/`
-
-| EP-### | type | location | entity/trigger | short_description | mutates_state |
-|--------|------|----------|----------------|-------------------|---------------|
-| EP-300 | Interceptor | `RecordAuditChangeHandler.cs` | IRecordAudit (pre-save) | Sets CreatedBy/On and LastModifiedBy/On audit fields | yes |
-| EP-301 | Interceptor | `ActivityChangeHandler.cs` | Activity (post-save) | Updates component status cache, can-book-hours, windows, floor space | yes |
-| EP-302 | Interceptor | `AssignmentChangeHandler.cs` | Assignment (post-save) | Updates can-book-hours; triggers readiness state | yes |
-| EP-303 | Interceptor | `AssignmentProgressChangeHandler.cs` | Assignment (post-save) | Auto-calculates progress; updates activity status by threshold | yes |
-| EP-304 | Interceptor | `AllocationChangeHandler.cs` | Allocation (post-save) | Updates person timesheet organisation IDs; manages auto-book cache | yes |
-| EP-305 | Interceptor | `TimesheetEntryChangeHandler.cs` | TimesheetEntry (post-save) | Refreshes booked/clocked hours cache | yes |
-| EP-306 | Interceptor | `TimesheetEntryUpdateBalancesChangeHandler.cs` | TimesheetEntry (post-save) | Updates person balance pending hours on status changes | yes |
-| EP-307 | Interceptor | `ScheduleChangeHandler.cs` | Schedule, PersonSchedule, OvertimeEntry (post-save) | Refreshes timesheet entry cache and personal schedule caches | yes |
-| EP-308 | Interceptor | `BalanceChangeHandler.cs` | Balance (post-save) | Creates balance mutation history; prevents balance deletion | yes |
-| EP-309 | Interceptor | `TicketChangeHandler.cs` | TicketBase (post-save) | Generates ticket codes; creates remarks on status changes | yes |
-| EP-310 | Interceptor | `ComponentChangeHandler.cs` | Component (pre-save) | Removes WORs and resets component type defaults on delete | yes |
-| EP-311 | Interceptor | `OrganisationChangeHandler.cs` | Organisation (pre-save) | Closes allocations when organisation is disabled | yes |
-| EP-312 | Interceptor | `ActivityConnectorChangeHandler.cs` | Activity (post-save) | Syncs activity changes with external planning connectors (fire-and-forget) | yes |
-| EP-313 | Interceptor | `CacheChangeHandler.cs` | Activity, Component, Structure, Organisation + others (post-save) | Refreshes hierarchy cache via fire-and-forget processor | yes |
-| EP-314 | Interceptor | `CapacityChangeHandler.cs` | Assignment, Project, Activity (post-save) | Refreshes capacity dashboard line distributions | yes |
-| EP-315 | Interceptor | `LongTermPredictionChangeHandler.cs` | Assignment, Activity, Component (post-save) | Triggers long-term prediction processor when enabled | yes |
-| EP-316 | Interceptor | `ShortTermPredictionChangeHandler.cs` | Assignment, TimeSheetWeeklyHourline (post-save) | Triggers short-term prediction processor when enabled | yes |
-| EP-317 | Interceptor | `PermissionGrantChangeHandler.cs` | PermissionGrant (post-save) | Clears provider cache; refreshes role cache | yes |
-| EP-318 | Interceptor | `*(49 additional change handlers)*` | Various entities | Full list in `Src/Data/Data.ChangeHandlers/` — 63 total concrete handlers | yes |
-
----
-
-## Domain Area: Processors (Fire-and-Forget Background Work)
-
-> All processors are dispatched via `IFireAndForget` from change handlers or system actions, running as Hangfire `FireAndForgetJob` on the `default` queue.
-> Located in: `Src/Processors/Processors.Domain/`
-> Full list: 65 concrete processor classes.
-
-| EP-### | type | location | trigger | short_description | mutates_state |
-|--------|------|----------|---------|-------------------|---------------|
-| EP-400 | Job | `RefreshActivitySummaryProcessor` | FireAndForgetJob (default queue) | Aggregated activity summaries | yes |
-| EP-401 | Job | `RefreshDailyPersonDistributionProcessor` | FireAndForgetJob (default queue) | Daily per-person distribution data | yes |
-| EP-402 | Job | `RefreshDailyAssignmentDistributionProcessor` | FireAndForgetJob (default queue) | Daily per-assignment distribution data | yes |
-| EP-403 | Job | `HierarchyCacheProcessor` | FireAndForgetJob (default queue) | Generic hierarchy cache refresh | yes |
-| EP-404 | Job | `LongTermPredictionProcessor` | FireAndForgetJob (default queue) | Long-term capacity predictions | yes |
-| EP-405 | Job | `ShortTermPredictionProcessor` | FireAndForgetJob (default queue) | Short-term capacity predictions | yes |
-| EP-406 | Job | `SyncPlanningProcessor` | SyncFireAndForgetJob (sync queue) | Syncs planning data from external connector | yes |
-| EP-407 | Job | `SyncErpProcessor` | SyncFireAndForgetJob (sync queue) | Syncs ERP data | yes |
-| EP-408 | Job | `SyncEntryTimeProcessor` | SyncFireAndForgetJob (sync queue) | Syncs entry-time data | yes |
-| EP-409 | Job | `SyncGenericProcessor` | SyncFireAndForgetJob (sync queue) | Generic connector sync | yes |
-| EP-410 | Job | `UpdateBalanceProcessor` | FireAndForgetJob (default queue) | Person/organisation balance recalculation | yes |
-| EP-411 | Job | `FloorSpaceGenerationProcessor` | FireAndForgetJob (default queue) | FloorSpace data generation | yes |
-| EP-412 | Job | `SqlDefragmentationProcessor` | FireAndForgetJob (default queue) | SQL Server index defragmentation | yes |
-| EP-413 | Job | `*(52 additional processors)*` | FireAndForgetJob (default or sync queue) | Full list in `Src/Processors/Processors.Domain/` | yes |
-
----
-
-## Domain Area: System Actions (Admin-Triggered Background Work)
-
-> 42 system action classes invoked from `System/SystemActionController`. Each enqueues one or more processors via `IFireAndForget`.
-> Located in: `Src/Application/Application.SystemActions/`
-
-| EP-### | type | location | trigger | short_description | mutates_state |
-|--------|------|----------|---------|-------------------|---------------|
-| EP-450 | Other | `RefreshActivitySummariesSystemAction` | HTTP POST → FireAndForgetJob | Refresh all activity summaries | yes |
-| EP-451 | Other | `RefreshAllDistributionsSystemAction` | HTTP POST → FireAndForgetJob | Refresh all distribution processors | yes |
-| EP-452 | Other | `SqlDefragmentationSystemAction` | HTTP POST → FireAndForgetJob | SQL index defragmentation | yes |
-| EP-453 | Other | `UpdateBalancesSystemAction` | HTTP POST → FireAndForgetJob | Full balance recalculation | yes |
-| EP-454 | Other | `ReloadAppSettingsSystemAction` | HTTP POST (direct) | Reloads application settings in memory | yes |
-| EP-455 | Other | `RescheduleTemplatesSystemAction` | HTTP POST (direct) | Reschedules Elsa workflow templates | yes |
-| EP-456 | Other | `CleanupUserInRolesSystemAction` | HTTP POST → FireAndForgetJob | Removes inconsistent user-role assignments | yes |
-| EP-457 | Other | `*(35 additional system actions)*` | HTTP POST → FireAndForgetJob | Full list in `Src/Application/Application.SystemActions/` | yes |
+**Generated:** 2026-06-24
+**Total entry points cataloged:** ~400+
 
 ---
 
@@ -392,31 +9,507 @@
 
 | Category | Count |
 |----------|-------|
-| HTTP MVC controllers (UI Areas + root) | 75 |
-| HTTP REST API controllers (Floor2Plan.Api) | 3 |
-| HTTP OData entity sets (auto-generated) | 131 |
-| Hangfire import jobs (sync queue) | 21 |
-| Hangfire fire-and-forget dispatchers | 2 |
-| Hangfire Elsa recurring jobs | 2 |
-| Elsa workflow activities | 12 |
-| Background services (IHostedService) | 3 (1 is decorator) |
-| EF/ABP interceptors | 2 |
-| Entity change handlers | 63 |
-| Processors | 65 |
-| System actions | 42 |
-| Import providers | 25 |
-| CLI entry points | 1 |
-| SignalR hubs | 1 |
-| Health check endpoints | 3 |
-| **Total catalogued entry points** | **~525** |
+| HTTP API Endpoints (REST + OData) | 140+ |
+| MVC Web Controllers (Razor) | 100+ |
+| Hangfire Import Jobs | 25+ |
+| Elsa Workflow Activities (custom) | 12+ |
+| System Actions (on-demand / scheduled) | 39+ |
+| Domain Processors | 68+ |
+| Background Services (IHostedService) | 2 |
+| SignalR Hubs | 2 |
+| Database Deployer (CLI) | 4 |
 
 ---
 
-## Key observations for Phase 2
+## Cross-Cutting Notes
 
-- **God context anti-pattern**: `Floor2PlanDbContext` (~150 DbSets) is mutated by all 63 change handlers — no context isolation exists today.
-- **No external message bus**: all async work routes through Hangfire `FireAndForgetJob` (default queue) or `SyncFireAndForgetJob` (sync queue). There is no NServiceBus, MassTransit, or similar.
-- **Change handler pipeline is the primary integration bus**: 63 handlers fire on every `SaveChangesAsync`; they are the main coupling mechanism between bounded contexts.
-- **OData API is read-only**: all 131 OData endpoints are GET-only; writes go through the MVC controllers or REST API.
-- **Elsa workflow engine is the only scheduling/orchestration abstraction** above raw Hangfire.
-- **Two import queues**: `default` (cache/balance/label work) and `sync` (all connector and import jobs) — a natural seam for modularization.
+- **No MediatR or NServiceBus** — async patterns are Hangfire (jobs), Elsa (workflows), and `Infrastructure.FireAndForget` (fire-and-forget).
+- **Two Hangfire queues:** `default` (1 worker) and `sync` (1 worker) — prevents import jobs blocking general work.
+- **OData layer is generic** — all entity sets use `GenericEntityController<TDto,T>` with per-entity `@ODataRoute` attributes; 100+ sets follow the same pattern.
+- **System Actions** use a factory pattern; triggered on-demand via UI (`/System/SystemAction/Run`) and via internal scheduler.
+- **Processors** form a reusable data-transformation pipeline; most are idempotent cache-refresh operations invoked from System Actions or Elsa workflow activities.
+- **Elsa domain events** (Ticket, Sync, StopWorkOrder) fire from EF Core change handlers and wire into workflow triggers.
+
+---
+
+## 1. Authentication & Authorization (EP-100)
+
+| ID | Type | Location | Route / Trigger | Description | Mutates | Primary Tables | Tests |
+|----|------|----------|-----------------|-------------|---------|----------------|-------|
+| EP-101 | HTTP | `Src/UI/Floor2Plan.Api/Controllers/AuthController.cs` | POST `/api/auth/login` | Authenticate user with username/password | yes | User, Person, PersonSchedule | none found |
+| EP-102 | HTTP | `Src/UI/Floor2Plan.Api/Infrastructure/Attributes/ConfigurableEnableQueryAttribute.cs` | GET `/odata/v1/*` | OData query interceptor for filtering/expansion | no | (all) | none found |
+
+---
+
+## 2. REST API Endpoints (EP-110)
+
+| ID | Type | Location | Route / Trigger | Description | Mutates | Primary Tables | Tests |
+|----|------|----------|-----------------|-------------|---------|----------------|-------|
+| EP-111 | HTTP | `Src/UI/Floor2Plan.Api/Controllers/TimesheetController.cs` | POST `/api/timesheet/status` | External approval feedback on timesheet status | yes | TimeSheet, TimesheetEntry | none found |
+| EP-112 | HTTP | `Src/UI/Floor2Plan.Api/Controllers/ImportController.cs` | POST/PUT `/api/import/productbreakdown` | Import product breakdown tree (async or sync) | yes | Component, Project, Activity, Material | none found |
+| EP-113 | HTTP | `Src/UI/Floor2Plan.Api/Controllers/ImportController.cs` | POST/PUT `/api/import/taskallocations` | Import task allocations for a person | yes | Assignment, Activity, Person | none found |
+
+---
+
+## 3. OData Entity Sets (EP-120) — Generic Pattern
+
+All entity sets use `Src/UI/Floor2Plan.Api/Controllers/GenericEntityController.cs`. 100+ sets registered via `@ODataRoute` on Contracts/Models. Sample below; full list is `[NEEDS REVIEW]`.
+
+| ID | Route / Trigger | Primary Tables |
+|----|-----------------|----------------|
+| EP-120 | GET `/odata/v1/Activities` | Activity |
+| EP-121 | GET `/odata/v1/Assignments` | Assignment |
+| EP-122 | GET `/odata/v1/Projects` | Project |
+| EP-123 | GET `/odata/v1/Components` | Component |
+| EP-124 | GET `/odata/v1/Persons` | Person |
+| EP-125 | GET `/odata/v1/Organisations` | Organisation |
+| EP-126 | GET `/odata/v1/Materials` | Material |
+| EP-127 | GET `/odata/v1/TimeSheets` | TimeSheet |
+| EP-128 | GET `/odata/v1/Disciplines` | Discipline |
+| EP-129 | GET `/odata/v1/AccessControlTimes` | AccessControlTime, ClockingTerminalPunch |
+| EP-130 | GET `/odata/v1/ClockingTerminals` | ClockingTerminal |
+| EP-131 | GET `/odata/v1/Balances` | Balance, BalancePolicy |
+| EP-132 | GET `/odata/v1/CorrectionTimesheets` | CorrectionTimesheet |
+| EP-133 | GET `/odata/v1/Baselines` | Baseline, BaselineProject, BaselineComponent, BaselineActivity, BaselineAssignment |
+| EP-134 | GET `/odata/v1/ActivitySummaries` | ActivitySummary |
+| EP-135 | GET `/odata/v1/AssignmentSummaries` | AssignmentSummary |
+
+[NEEDS REVIEW] Full enumeration of all OData entity sets — examine `@ODataRoute` attributes across `Contracts/`.
+
+---
+
+## 4. MVC Web UI — Root Controllers (EP-200)
+
+### Authentication (EP-200)
+
+| ID | Type | Location | Route / Trigger | Description | Mutates | Primary Tables | Tests |
+|----|------|----------|-----------------|-------------|---------|----------------|-------|
+| EP-201 | HTTP | `Src/UI/UI.Floor2Plan/Controllers/AccountController.cs` | GET `/Account/Login` | Display login form | no | (none) | none found |
+| EP-202 | HTTP | `Src/UI/UI.Floor2Plan/Controllers/AccountController.cs` | POST `/Account/Login` | Process local username/password login | yes | User, Person, PersonSchedule, ClockingTerminal | none found |
+| EP-203 | HTTP | `Src/UI/UI.Floor2Plan/Controllers/AccountController.cs` | GET `/Account/AzureAdLogin` | Redirect to Azure AD SSO | no | (auth) | none found |
+| EP-204 | HTTP | `Src/UI/UI.Floor2Plan/Controllers/AccountController.cs` | GET `/Account/FloorganiseAzureAdLogin` | Redirect to Floorganise Azure AD SSO | no | (auth) | none found |
+| EP-205 | HTTP | `Src/UI/UI.Floor2Plan/Controllers/ElsaController.cs` | GET `/modules/elsa/auth` | Get JWT token for Elsa workflow UI | no | (auth) | none found |
+
+### Global MVC Actions (EP-210)
+
+| ID | Type | Location | Route / Trigger | Description | Mutates | Primary Tables | Tests |
+|----|------|----------|-----------------|-------------|---------|----------------|-------|
+| EP-210 | HTTP | `Src/UI/UI.Floor2Plan/Controllers/HomeController.cs` | GET `/` | Home page / dashboard entry | no | (none) | none found |
+| EP-211 | HTTP | `Src/UI/UI.Floor2Plan/Controllers/PersonInfoController.cs` | GET/POST `/PersonInfo/*` | View/update current user info | yes | Person, PersonSchedule | none found |
+| EP-212 | HTTP | `Src/UI/UI.Floor2Plan/Controllers/EventController.cs` | POST `/Event/*` | Handle client-side events (analytics, notifications) | yes | (varies) | none found |
+| EP-213 | HTTP | `Src/UI/UI.Floor2Plan/Controllers/AllocationController.cs` | POST `/Allocation/*` | Manage allocations (AJAX) | yes | Assignment, Activity, Person | none found |
+| EP-214 | HTTP | `Src/UI/UI.Floor2Plan/Controllers/StateController.cs` | GET/POST `/State/*` | Manage UI state / preferences | yes | PageSetting | none found |
+| EP-215 | HTTP | `Src/UI/UI.Floor2Plan/Controllers/SelectController.cs` | GET `/Select/*` | Provide select list options for dropdowns | no | (varies) | none found |
+| EP-216 | HTTP | `Src/UI/UI.Floor2Plan/Controllers/OptionListController.cs` | GET `/OptionList/*` | Provide option lists for UI | no | (varies) | none found |
+| EP-1005 | HTTP | `Src/UI/UI.Floor2Plan/Controllers/FileController.cs` | GET `/File/*` | Download/upload files | yes | File | none found |
+| EP-1006 | HTTP | `Src/UI/UI.Floor2Plan/Controllers/GeneralSettingsController.cs` | GET/POST `/GeneralSettings/*` | Global application settings | yes | AppSetting | none found |
+| EP-1007 | HTTP | `Src/UI/UI.Floor2Plan/Controllers/PageSettingsController.cs` | GET/POST `/PageSettings/*` | Page-specific UI settings | yes | PageSetting | none found |
+| EP-1008 | HTTP | `Src/UI/UI.Floor2Plan/Controllers/PermissionManagementController.cs` | POST `/PermissionManagement/*` | Manage user permissions/roles | yes | Role, Permission, UserInRole, OrganisationRole | none found |
+| EP-1009 | HTTP | `Src/UI/UI.Floor2Plan/Controllers/PersonManagementController.cs` | POST `/PersonManagement/*` | Bulk person/user management | yes | Person, User, PersonSchedule | none found |
+| EP-1010 | HTTP | `Src/UI/UI.Floor2Plan/Controllers/NewsFeedController.cs` | POST `/NewsFeed/*` | Manage news feed messages | yes | NewsFeedMessage | none found |
+| EP-1011 | HTTP | `Src/UI/UI.Floor2Plan/Controllers/ExternalLinkController.cs` | POST `/ExternalLink/*` | Configure external links | yes | ExternalLink | none found |
+| EP-1012 | HTTP | `Src/UI/UI.Floor2Plan/Controllers/GenericPropertyController.cs` | POST `/GenericProperty/*` | Manage custom properties | yes | PropertyType, PropertyTypeOption, PropertySet | none found |
+| EP-1013 | HTTP | `Src/UI/UI.Floor2Plan/Controllers/TaskReadinessController.cs` | GET/POST `/TaskReadiness/*` | Manage task readiness status | yes | TaskReadiness, TaskReadinessStatus* | none found |
+
+---
+
+## 5. MVC Area: Sync / Import (EP-300)
+
+| ID | Type | Location | Route / Trigger | Description | Mutates | Primary Tables | Tests |
+|----|------|----------|-----------------|-------------|---------|----------------|-------|
+| EP-301 | HTTP | `Src/UI/UI.Floor2Plan/Areas/Sync/Controllers/IndexController.cs` | GET `/Sync/` | Sync module home | no | (none) | none found |
+| EP-302 | HTTP | `Src/UI/UI.Floor2Plan/Areas/Sync/Controllers/IndexController.cs` | GET `/Sync/GetConnectorSyncLogsAsync` | Fetch connector sync logs | no | SyncLog | none found |
+| EP-303 | HTTP | `Src/UI/UI.Floor2Plan/Areas/Sync/Controllers/IndexController.cs` | GET `/Sync/GetSyncLogsAsync` | Fetch manual sync logs by import type | no | SyncLog | none found |
+| EP-304 | HTTP | `Src/UI/UI.Floor2Plan/Areas/Sync/Controllers/ImportExportController.cs` | GET `/Sync/Import*` | Display import form | no | (none) | none found |
+| EP-305 | HTTP | `Src/UI/UI.Floor2Plan/Areas/Sync/Controllers/ImportExportController.cs` | POST `/Sync/ImportAspose*` | Trigger Aspose (Excel) file import | yes | (varies by template) | none found |
+| EP-306 | HTTP | `Src/UI/UI.Floor2Plan/Areas/Sync/Controllers/ImportExportController.cs` | POST `/Sync/ImportXer*` | Trigger Oracle Primavera XER import | yes | Project, Activity, Assignment, Component | none found |
+| EP-307 | HTTP | `Src/UI/UI.Floor2Plan/Areas/Sync/Controllers/ImportExportController.cs` | POST `/Sync/ImportSciforma*` | Trigger Daptiv/Sciforma import | yes | Project, Activity, Assignment | none found |
+| EP-308 | HTTP | `Src/UI/UI.Floor2Plan/Areas/Sync/Controllers/ImportExportController.cs` | POST `/Sync/ImportPbs*` | Trigger PBS (personnel/structure) import | yes | Person, Discipline, Organisation, Project | none found |
+| EP-309 | HTTP | `Src/UI/UI.Floor2Plan/Areas/Sync/Controllers/ImportExportController.cs` | POST `/Sync/ImportAccessControl*` | Trigger access control (clocking) import | yes | AccessControlTime, ClockingTerminalPunch, ClockingTerminal | none found |
+| EP-310 | HTTP | `Src/UI/UI.Floor2Plan/Areas/Sync/Controllers/ImportExportController.cs` | POST `/Sync/ImportHoursAndProgress*` | Trigger hours/progress import | yes | TimeSheet, AssignmentProgressHistory, Activity | none found |
+| EP-311 | HTTP | `Src/UI/UI.Floor2Plan/Areas/Sync/Controllers/ImportExportController.cs` | POST `/Sync/ImportTimesheet*` | Trigger timesheet import from ERP | yes | TimeSheet, TimesheetEntry | none found |
+| EP-312 | HTTP | `Src/UI/UI.Floor2Plan/Areas/Sync/Controllers/ImportExportController.cs` | POST `/Sync/ImportTaskReadiness*` | Trigger task readiness import | yes | TaskReadiness, Material, Engineering | none found |
+| EP-313 | HTTP | `Src/UI/UI.Floor2Plan/Areas/Sync/Controllers/ImportExportController.cs` | POST `/Sync/ExportImportPlanningHours*` | Export/import planning hours (Excel) | yes | Activity, Assignment | none found |
+| EP-314 | HTTP | `Src/UI/UI.Floor2Plan/Areas/Sync/Controllers/ImportExportController.cs` | POST `/Sync/ExportImportTransferHours*` | Transfer hours between timesheets | yes | TimeSheet, TimesheetEntry | none found |
+| EP-315 | HTTP | `Src/UI/UI.Floor2Plan/Areas/Sync/Controllers/ImportExportController.cs` | POST `/Sync/ImportGeneric*` | Trigger generic domain model import | yes | (varies by domain) | none found |
+| EP-316 | HTTP | `Src/UI/UI.Floor2Plan/Areas/Sync/Controllers/ImportExportController.cs` | POST `/Sync/ImportProductBreakdown*` | Trigger product breakdown import | yes | Component, Project, Material | none found |
+| EP-317 | HTTP | `Src/UI/UI.Floor2Plan/Areas/Sync/Controllers/PdmController.cs` | POST `/Sync/Pdm/*` | PDM connector actions | yes | (varies) | none found |
+| EP-318 | HTTP | `Src/UI/UI.Floor2Plan/Areas/Sync/Controllers/ConnectorConfigurationController.cs` | POST `/Sync/ConnectorConfiguration/*` | Configure connector (ERP/Planning/EntryTime) | yes | ImportConfig, ImportConfigRule | none found |
+| EP-319 | HTTP | `Src/UI/UI.Floor2Plan/Areas/Sync/Controllers/ConvertPlanningFileController.cs` | POST `/Sync/ConvertPlanningFile/*` | Convert planning file formats | no | (file only) | none found |
+
+---
+
+## 6. MVC Area: PBS / Planning (EP-400)
+
+| ID | Type | Location | Route / Trigger | Description | Mutates | Primary Tables | Tests |
+|----|------|----------|-----------------|-------------|---------|----------------|-------|
+| EP-401 | HTTP | `Src/UI/UI.Floor2Plan/Areas/Pbs/Controllers/IndexController.cs` | GET `/Pbs/` | PBS module home | no | (none) | none found |
+| EP-402 | HTTP | `Src/UI/UI.Floor2Plan/Areas/Pbs/Controllers/ProjectController.cs` | POST `/Pbs/Project/*` | Create/update/delete projects | yes | Project, ProjectProperty, ProjectMaterial | none found |
+| EP-403 | HTTP | `Src/UI/UI.Floor2Plan/Areas/Pbs/Controllers/ActivityController.cs` | POST `/Pbs/Activity/*` | Create/update/delete activities | yes | Activity, ActivityProperty, ActivityRelation | none found |
+| EP-404 | HTTP | `Src/UI/UI.Floor2Plan/Areas/Pbs/Controllers/ComponentController.cs` | POST `/Pbs/Component/*` | Create/update/delete components (WBS) | yes | Component, ComponentProperty, ComponentType | none found |
+| EP-405 | HTTP | `Src/UI/UI.Floor2Plan/Areas/Pbs/Controllers/WorController.cs` | POST `/Pbs/Wor/*` | Manage work orders (WOR) | yes | Wor, WorType | none found |
+| EP-406 | HTTP | `Src/UI/UI.Floor2Plan/Areas/Pbs/Controllers/AssignmentController.cs` | POST `/Pbs/Assignment/*` | Create/update/delete assignments | yes | Assignment, AssignmentProperty, AssignmentProgressHistory | none found |
+| EP-407 | HTTP | `Src/UI/UI.Floor2Plan/Areas/Pbs/Controllers/PersonController.cs` | POST `/Pbs/Person/*` | Create/update/delete personnel | yes | Person, PersonProperty, PersonSchedule, DisciplinePerson | none found |
+| EP-408 | HTTP | `Src/UI/UI.Floor2Plan/Areas/Pbs/Controllers/DisciplineController.cs` | POST `/Pbs/Discipline/*` | Create/update/delete disciplines | yes | Discipline, DisciplinePerson, DisciplineCapacity | none found |
+| EP-409 | HTTP | `Src/UI/UI.Floor2Plan/Areas/Pbs/Controllers/OrganisationController.cs` | POST `/Pbs/Organisation/*` | Create/update/delete organisations | yes | Organisation, OrganisationProperty, OrganisationCapacity | none found |
+| EP-410 | HTTP | `Src/UI/UI.Floor2Plan/Areas/Pbs/Controllers/ScheduleController.cs` | POST `/Pbs/Schedule/*` | Create/update/delete schedules (shifts) | yes | Schedule, ScheduleEntry, PersonSchedule, OrganisationSchedule | none found |
+| EP-411 | HTTP | `Src/UI/UI.Floor2Plan/Areas/Pbs/Controllers/BaselineController.cs` | POST `/Pbs/Baseline/*` | Create/update/delete baselines (snapshots) | yes | Baseline, BaselineProject, BaselineComponent, BaselineActivity, BaselineAssignment | none found |
+| EP-412 | HTTP | `Src/UI/UI.Floor2Plan/Areas/Pbs/Controllers/AssetController.cs` | POST `/Pbs/Asset/*` | Create/update/delete assets (equipment) | yes | Asset, AssetType | none found |
+| EP-413 | HTTP | `Src/UI/UI.Floor2Plan/Areas/Pbs/Controllers/MaterialController.cs` | POST `/Pbs/Material/*` | Create/update/delete materials | yes | Material, ProjectMaterial | none found |
+| EP-414 | HTTP | `Src/UI/UI.Floor2Plan/Areas/Pbs/Controllers/RoleController.cs` | POST `/Pbs/Role/*` | Create/update/delete roles | yes | Role, UserInRole, OrganisationRole | none found |
+| EP-415 | HTTP | `Src/UI/UI.Floor2Plan/Areas/Pbs/Controllers/UserController.cs` | POST `/Pbs/User/*` | Create/update/delete users | yes | User, UserInRole | none found |
+| EP-416 | HTTP | `Src/UI/UI.Floor2Plan/Areas/Pbs/Controllers/HolidayController.cs` | POST `/Plan/Holiday/*` | Create/update/delete holidays | yes | PersonHoliday, OrganisationHoliday | none found |
+| EP-417 | HTTP | `Src/UI/UI.Floor2Plan/Areas/Pbs/Controllers/ActivityRelationController.cs` | POST `/Plan/ActivityRelation/*` | Manage activity relationships (predecessors/successors) | yes | ActivityRelation | none found |
+| EP-418 | HTTP | `Src/UI/UI.Floor2Plan/Areas/Pbs/Controllers/CopyController.cs` | POST `/Pbs/Copy/*` | Copy project/activity/component structures | yes | Project, Activity, Component, Assignment | none found |
+| EP-419 | HTTP | `Src/UI/UI.Floor2Plan/Areas/Pbs/Controllers/ProjectScenarioController.cs` | POST `/Pbs/ProjectScenario/*` | Create/update/delete project scenarios | yes | ProjectScenario, ProjectScenarioActivity | none found |
+
+---
+
+## 7. MVC Area: HR / Personnel (EP-500)
+
+| ID | Type | Location | Route / Trigger | Description | Mutates | Primary Tables | Tests |
+|----|------|----------|-----------------|-------------|---------|----------------|-------|
+| EP-501 | HTTP | `Src/UI/UI.Floor2Plan/Areas/HR/Controllers/ClockingTerminalController.cs` | POST `/HR/ClockingTerminal/*` | Manage clocking terminals | yes | ClockingTerminal, ClockingTerminalProfile | none found |
+| EP-502 | HTTP | `Src/UI/UI.Floor2Plan/Areas/HR/Controllers/ClockingTerminalProfileController.cs` | POST `/HR/ClockingTerminalProfile/*` | Configure clocking terminal profiles (RFID, access) | yes | ClockingTerminalProfile, RfidSetting | none found |
+| EP-503 | HTTP | `Src/UI/UI.Floor2Plan/Areas/HR/Controllers/PersonBalanceController.cs` | GET `/HR/PersonBalance/*` | View employee time/overtime balances | no | Balance, BalancePolicy, Person | none found |
+| EP-504 | HTTP | `Src/UI/UI.Floor2Plan/Areas/HR/Controllers/PersonBalanceController.cs` | POST `/HR/PersonBalance/*` | Update person balance policies | yes | Balance, BalancePolicy | none found |
+| EP-505 | HTTP | `Src/UI/UI.Floor2Plan/Areas/HR/Controllers/BalancePolicyController.cs` | POST `/HR/BalancePolicy/*` | Create/update/delete balance policies | yes | BalancePolicy, BalancePolicyRule, BalanceAccumulationRule | none found |
+| EP-506 | HTTP | `Src/UI/UI.Floor2Plan/Areas/HR/Controllers/BalancePolicyRuleController.cs` | POST `/HR/BalancePolicyRule/*` | Manage balance policy rules | yes | BalancePolicyRule | none found |
+| EP-507 | HTTP | `Src/UI/UI.Floor2Plan/Areas/HR/Controllers/BalanceAccumulationRuleController.cs` | POST `/HR/BalanceAccumulationRule/*` | Manage balance accumulation rules | yes | BalanceAccumulationRule | none found |
+| EP-508 | HTTP | `Src/UI/UI.Floor2Plan/Areas/HR/Controllers/OffTimeController.cs` | POST `/HR/OffTime/*` | Manage off-time / leave | yes | PersonHoliday, OffTime | none found |
+| EP-509 | HTTP | `Src/UI/UI.Floor2Plan/Areas/HR/Controllers/ScheduleManagementController.cs` | POST `/HR/ScheduleManagement/*` | Manage work schedules / shift assignments | yes | PersonSchedule, OrganisationSchedule | none found |
+
+---
+
+## 8. MVC Area: Execution / Do (EP-600)
+
+| ID | Type | Location | Route / Trigger | Description | Mutates | Primary Tables | Tests |
+|----|------|----------|-----------------|-------------|---------|----------------|-------|
+| EP-601 | HTTP | `Src/UI/UI.Floor2Plan/Areas/Do/Controllers/PlanboardController.cs` | GET `/Do/Planboard` | Display planboard (activity planning view) | no | Activity, Assignment, Component | none found |
+| EP-602 | HTTP | `Src/UI/UI.Floor2Plan/Areas/Do/Controllers/PlanboardController.cs` | POST `/Do/Planboard/*` | Update assignments on planboard (drag-drop) | yes | Assignment, AssignmentProgressHistory | none found |
+| EP-603 | HTTP | `Src/UI/UI.Floor2Plan/Areas/Do/Controllers/FloorboardController.cs` | GET `/Do/Floorboard` | Display floorboard (real-time shop floor status) | no | Activity, Assignment, Person, ClockingTerminal | none found |
+| EP-604 | HTTP | `Src/UI/UI.Floor2Plan/Areas/Do/Controllers/FloorboardController.cs` | POST `/Do/Floorboard/*` | Update shop floor status (clocking, progress) | yes | TimeSheet, ClockingTerminalPunch, Activity | none found |
+| EP-605 | HTTP | `Src/UI/UI.Floor2Plan/Areas/Do/Controllers/WeeklyTimesheetController.cs` | GET `/Do/WeeklyTimesheet` | Display weekly timesheet for user | no | TimeSheet, TimesheetEntry, Person | none found |
+| EP-606 | HTTP | `Src/UI/UI.Floor2Plan/Areas/Do/Controllers/WeeklyTimesheetController.cs` | POST `/Do/WeeklyTimesheet/Submit*` | Submit timesheet for approval | yes | TimeSheet, TimesheetEntry, TimeSheetStatus | none found |
+| EP-607 | HTTP | `Src/UI/UI.Floor2Plan/Areas/Do/Controllers/WeeklyTimesheetController.cs` | POST `/Do/WeeklyTimesheet/Update*` | Update timesheet entry lines | yes | TimesheetEntry, TimeSheet | none found |
+| EP-608 | HTTP | `Src/UI/UI.Floor2Plan/Areas/Do/Controllers/EmployeeTimesheetController.cs` | GET `/Do/EmployeeTimesheet` | View employee timesheets (manager view) | no | TimeSheet, TimesheetEntry, Person | none found |
+| EP-609 | HTTP | `Src/UI/UI.Floor2Plan/Areas/Do/Controllers/EmployeeTimesheetController.cs` | POST `/Do/EmployeeTimesheet/*` | Manage employee timesheet approvals | yes | TimeSheet, TimeSheetStatus | none found |
+| EP-610 | HTTP | `Src/UI/UI.Floor2Plan/Areas/Do/Controllers/CorrectionTimesheetController.cs` | POST `/Do/CorrectionTimesheet/*` | Submit/manage correction timesheets | yes | CorrectionTimesheet, CorrectionTimesheetWeeklyCorrectionLine | none found |
+| EP-611 | HTTP | `Src/UI/UI.Floor2Plan/Areas/Do/Controllers/ReporterController.cs` | POST `/Do/Reporter/*` | Report on activities/timesheets | yes | (varies) | none found |
+
+---
+
+## 9. MVC Area: Check / Reporting (EP-700)
+
+| ID | Type | Location | Route / Trigger | Description | Mutates | Primary Tables | Tests |
+|----|------|----------|-----------------|-------------|---------|----------------|-------|
+| EP-701 | HTTP | `Src/UI/UI.Floor2Plan/Areas/Check/Controllers/ReportsController.cs` | GET `/Check/Reports` | Display available reports | no | (none) | none found |
+| EP-702 | HTTP | `Src/UI/UI.Floor2Plan/Areas/Check/Controllers/ReportDesignerController.cs` | GET/POST `/Check/ReportDesigner` | Design/modify reports | yes | (report definitions) | none found |
+| EP-703 | HTTP | `Src/UI/UI.Floor2Plan/Areas/Check/Controllers/ReportsApiController.cs` | POST `/Check/ReportsApi/*` | Execute report queries | no | (varies by report) | none found |
+| EP-704 | HTTP | `Src/UI/UI.Floor2Plan/Areas/Check/Controllers/KPIController.cs` | GET `/Check/KPI` | View KPI dashboard | no | KpiOverdue, KpiOverDuration | none found |
+| EP-705 | HTTP | `Src/UI/UI.Floor2Plan/Areas/Check/Controllers/ErpWeeklyTimesheetController.cs` | GET `/Check/ErpWeeklyTimesheet` | View ERP timesheet integration status | no | TimeSheet, ErpHourline | none found |
+| EP-706 | HTTP | `Src/UI/UI.Floor2Plan/Areas/Check/Controllers/ErpCorrectionTimesheetController.cs` | GET `/Check/ErpCorrectionTimesheet` | View ERP correction timesheet status | no | CorrectionTimesheet, ErpHourline | none found |
+
+---
+
+## 10. MVC Area: Tickets (EP-800)
+
+| ID | Type | Location | Route / Trigger | Description | Mutates | Primary Tables | Tests |
+|----|------|----------|-----------------|-------------|---------|----------------|-------|
+| EP-801 | HTTP | `Src/UI/UI.Floor2Plan/Areas/Ticket/Controllers/TicketController.cs` | POST `/Ticket/Ticket/*` | Create/update/delete tickets | yes | Ticket, TicketProperty, TicketRemark | none found |
+| EP-802 | HTTP | `Src/UI/UI.Floor2Plan/Areas/Ticket/Controllers/TicketController.cs` | GET `/Ticket/Ticket/*` | View ticket details | no | Ticket, TicketRemark, Activity | none found |
+| EP-803 | HTTP | `Src/UI/UI.Floor2Plan/Areas/Ticket/Controllers/TransportRequestController.cs` | POST `/Ticket/TransportRequest/*` | Create/update/delete transport requests | yes | TransportRequest, Activity, Component | none found |
+| EP-804 | HTTP | `Src/UI/UI.Floor2Plan/Areas/Ticket/Controllers/StopWorkOrderController.cs` | POST `/Ticket/StopWorkOrder/*` | Create/manage stop work orders | yes | StopWorkOrder, Activity | none found |
+
+---
+
+## 11. MVC Areas: FloorSpace, Materials, Devices (EP-900)
+
+| ID | Type | Location | Route / Trigger | Description | Mutates | Primary Tables | Tests |
+|----|------|----------|-----------------|-------------|---------|----------------|-------|
+| EP-901 | HTTP | `Src/UI/UI.Floor2Plan/Areas/FloorSpace/Controllers/FloorSpaceController.cs` | POST `/FloorSpace/FloorSpace/*` | Manage floorspace configurations | yes | FloorSpace, Location | none found |
+| EP-902 | HTTP | `Src/UI/UI.Floor2Plan/Areas/FloorSpace/Controllers/LocationController.cs` | POST `/FloorSpace/Location/*` | Manage factory locations | yes | Location | none found |
+| EP-911 | HTTP | `Src/UI/UI.Floor2Plan/Areas/Material/Controllers/MaterialController.cs` | POST `/Material/Material/*` | Create/update/delete materials | yes | Material | none found |
+| EP-912 | HTTP | `Src/UI/UI.Floor2Plan/Areas/Material/Controllers/ProjectMaterialController.cs` | POST `/Material/ProjectMaterial/*` | Manage project material requirements | yes | ProjectMaterial, ProjectMaterialUsageHistory | none found |
+| EP-921 | HTTP | `Src/UI/UI.Floor2Plan/Areas/Devices/Controllers/ShopFloorTerminalController.cs` | POST `/Devices/ShopFloorTerminal/*` | Configure shop floor terminals | yes | ShopFloorTerminal, ShopFloorTerminalSetting | none found |
+| EP-922 | HTTP | `Src/UI/UI.Floor2Plan/Areas/Devices/Controllers/ClockingTerminalController.cs` | POST `/Devices/ClockingTerminal/*` | Manage clocking terminals | yes | ClockingTerminal, ClockingTerminalProfile | none found |
+
+---
+
+## 12. MVC Area: System / Admin (EP-1000)
+
+| ID | Type | Location | Route / Trigger | Description | Mutates | Primary Tables | Tests |
+|----|------|----------|-----------------|-------------|---------|----------------|-------|
+| EP-1001 | HTTP | `Src/UI/UI.Floor2Plan/Areas/System/Controllers/SystemActionController.cs` | GET `/System/SystemAction/GetAll` | List available system actions | no | (none) | none found |
+| EP-1002 | HTTP | `Src/UI/UI.Floor2Plan/Areas/System/Controllers/SystemActionController.cs` | POST `/System/SystemAction/Run` | Execute system action (run processor) | yes | (varies) | none found |
+| EP-1003 | HTTP | `Src/UI/UI.Floor2Plan/Areas/System/Controllers/TableController.cs` | GET/POST `/System/Table/*` | Manage system tables | yes | (varies) | none found |
+| EP-1004 | HTTP | `Src/UI/UI.Floor2Plan/Areas/System/Controllers/LicenseController.cs` | GET/POST `/System/License/*` | Manage licenses | yes | License | none found |
+
+---
+
+## 13. Hangfire Import Jobs (EP-2000)
+
+All jobs run on the `sync` queue (1 dedicated worker).
+
+| ID | Type | Location | Trigger | Description | Mutates | Primary Tables | Tests |
+|----|------|----------|---------|-------------|---------|----------------|-------|
+| EP-2001 | Job | `Src/Application/Application.Sync/ImportJobs/Xer/ImportXerJob.cs` | Hangfire: sync queue | Import Oracle Primavera XER file | yes | Project, Activity, Assignment, Component, Material, ActivityRelation | none found |
+| EP-2002 | Job | `Src/Application/Application.Sync/ImportJobs/Sciforma/ImportSciformaJob.cs` | Hangfire: sync queue | Import Daptiv/Sciforma planning data | yes | Project, Activity, Assignment | none found |
+| EP-2003 | Job | `Src/Application/Application.Sync/ImportJobs/Planning/ImportPlanningJob.cs` | Hangfire: sync queue | Import planning hours/progress from file | yes | Activity, Assignment, AssignmentProgressHistory | none found |
+| EP-2004 | Job | `Src/Application/Application.Sync/ImportJobs/Aspose/ImportAsposeJob.cs` | Hangfire: sync queue | Import Excel file via Aspose | yes | (varies by template) | none found |
+| EP-2005 | Job | `Src/Application/Application.Sync/ImportJobs/HoursAndProgress/ImportHoursAndProgressJob.cs` | Hangfire: sync queue | Import hours and progress data | yes | TimeSheet, AssignmentProgressHistory | none found |
+| EP-2006 | Job | `Src/Application/Application.Sync/ImportJobs/Employees/ImportEmployeeJob.cs` | Hangfire: sync queue | Import employee data (legacy) | yes | Person, DisciplinePerson | none found |
+| EP-2007 | Job | `Src/Application/Application.Sync/ImportJobs/Timesheets/ImportTimesheetJob.cs` | Hangfire: sync queue | Import timesheet entries from ERP | yes | TimeSheet, TimesheetEntry | none found |
+| EP-2008 | Job | `Src/Application/Application.Sync/ImportJobs/AccessControl/ImportAccessControlJob.cs` | Hangfire: sync queue | Import clocking/access control data | yes | AccessControlTime, ClockingTerminalPunch, ClockingTerminal | none found |
+| EP-2009 | Job | `Src/Application/Application.Sync/ImportJobs/ProductBreakdown/ImportProductBreakdownJob.cs` | Hangfire: sync queue | Import product/component breakdown | yes | Component, Project, Material | none found |
+| EP-2010 | Job | `Src/Application/Application.Sync/ImportJobs/TaskReadiness/ImportTaskReadinessJob.cs` | Hangfire: sync queue | Import task readiness data | yes | TaskReadiness, Material, Engineering | none found |
+| EP-2011 | Job | `Src/Application/Application.Sync/ImportJobs/OrganisationImport/ImportOrganisationJob.cs` | Hangfire: sync queue | Import organisation structure | yes | Organisation, Discipline | none found |
+| EP-2012 | Job | `Src/Application/Application.Sync/ImportJobs/DisciplineImport/ImportDisciplineJob.cs` | Hangfire: sync queue | Import discipline data | yes | Discipline, DisciplinePerson | none found |
+| EP-2013 | Job | `Src/Application/Application.Sync/ImportJobs/Materials/ImportMaterialJob.cs` | Hangfire: sync queue | Import materials | yes | Material | none found |
+| EP-2014 | Job | `Src/Application/Application.Sync/ImportJobs/ProjectMaterials/ImportProjectMaterialJob.cs` | Hangfire: sync queue | Import project material allocations | yes | ProjectMaterial | none found |
+| EP-2015 | Job | `Src/Application/Application.Sync/ImportJobs/Persons/ImportPersonDomainModelJob.cs` | Hangfire: sync queue | Import persons (domain model v2) | yes | Person, PersonProperty, PersonSchedule | none found |
+| EP-2016 | Job | `Src/Application/Application.Sync/ImportJobs/Organisations/ImportOrganisationDomainModelJob.cs` | Hangfire: sync queue | Import organisations (domain model v2) | yes | Organisation, OrganisationProperty | none found |
+| EP-2017 | Job | `Src/Application/Application.Sync/ImportJobs/Disciplines/ImportDisciplineDomainModelJob.cs` | Hangfire: sync queue | Import disciplines (domain model v2) | yes | Discipline, DisciplinePerson | none found |
+| EP-2018 | Job | `Src/Application/Application.Sync/ImportJobs/ComponentTypes/ImportComponentTypeDomainModelJob.cs` | Hangfire: sync queue | Import component types | yes | ComponentType, ComponentProperty | none found |
+| EP-2019 | Job | `Src/Application/Application.Sync/ImportJobs/Materials/ImportMaterialDomainModelJob.cs` | Hangfire: sync queue | Import materials (domain model v2) | yes | Material | none found |
+| EP-2020 | Job | `Src/Application/Application.Sync/ImportJobs/UnitTypes/ImportUnitTypeDomainModelJob.cs` | Hangfire: sync queue | Import unit types | yes | UnitType | none found |
+| EP-2021 | Job | `Src/Application/Application.Sync/ImportJobs/PropertyTypes/ImportPropertyTypeJob.cs` | Hangfire: sync queue | Import property type definitions | yes | PropertyType, PropertyTypeOption | none found |
+| EP-2022 | Job | `Src/Application/Application.Sync/ImportJobs/ActivityPhases/ImportActivityPhaseDomainModelJob.cs` | Hangfire: sync queue | Import activity phases | yes | ActivityPhase | none found |
+| EP-2023 | Job | `Src/Application/Application.Sync/ImportJobs/ActivityStatus/ImportActivityStatusDomainModelJob.cs` | Hangfire: sync queue | Import activity statuses | yes | ActivityStatus | none found |
+| EP-2024 | Job | `Src/Application/Application.Sync/ImportJobs/ProjectStatusses/ImportProjectStatusDomainModelJob.cs` | Hangfire: sync queue | Import project statuses | yes | ProjectStatus | none found |
+| EP-2025 | Job | `Src/Application/Application.Sync/ImportJobs/HourTypes/ImportHourTypeDomainModelJob.cs` | Hangfire: sync queue | Import hour type definitions | yes | HourType | none found |
+
+---
+
+## 14. Background Services (EP-2100)
+
+| ID | Type | Location | Trigger | Description | Mutates | Primary Tables | Tests |
+|----|------|----------|---------|-------------|---------|----------------|-------|
+| EP-2101 | IHostedService | `Src/Infrastructure/Infrastructure.Hangfire/JobStateEventHostedService.cs` | Startup | Listen to Hangfire job state changes; forward to handlers | no | (Hangfire schema) | none found |
+| EP-2102 | SignalR | `Src/Infrastructure/Infrastructure.Hangfire/JobStateEventHub.cs` | Real-time | Notify clients of job state changes (progress) | no | (none) | none found |
+| EP-2103 | IHostedService | `Src/Infrastructure/Infrastructure.Health/DelayedHealthCheckPublisherHostedService.cs` | Startup | Delayed health check publishing | no | HealthCheckLog | none found |
+
+---
+
+## 15. Elsa Workflow — Custom Activities (EP-3000)
+
+| ID | Type | Location | Trigger | Description | Mutates | Primary Tables | Tests |
+|----|------|----------|---------|-------------|---------|----------------|-------|
+| EP-3001 | Workflow | `Src/Infrastructure/Infrastructure.Workflow/Activities/Ticket/TicketStatusUpdateActivity.cs` | `Set state` activity | Update ticket/transport request status | yes | TransportRequest, Ticket | none found |
+| EP-3002 | Workflow | `Src/Infrastructure/Infrastructure.Workflow/Activities/Ticket/TicketActivityCreateActivity.cs` | `Create activity` activity | Create activity linked to ticket | yes | Activity, Ticket | none found |
+| EP-3003 | Workflow | `Src/Infrastructure/Infrastructure.Workflow/Activities/Ticket/TicketActivityCloseActivity.cs` | `Close activity` activity | Close activity related to ticket | yes | Activity, Ticket | none found |
+| EP-3004 | Workflow | `Src/Infrastructure/Infrastructure.Workflow/Activities/Ticket/TicketSendMailActivity.cs` | `Send mail` activity | Send email notification (ticket) | yes | (email log) | none found |
+| EP-3005 | Workflow | `Src/Infrastructure/Infrastructure.Workflow/Activities/Ticket/TransportRequestActivityUpdateActivity.cs` | `Update activity` activity | Update activity from transport request | yes | Activity, TransportRequest | none found |
+| EP-3006 | Workflow | `Src/Infrastructure/Infrastructure.Workflow/Activities/Sync/RunConnectorActivity.cs` | `Run connector` activity | Execute ERP/Planning/EntryTime connector sync | yes | SyncLog, (varies) | none found |
+| EP-3007 | Workflow | `Src/Infrastructure/Infrastructure.Workflow/Activities/Sync/SyncLogSendMailActivity.cs` | `Send mail` activity | Send sync result notification email | yes | (email log) | none found |
+| EP-3008 | Workflow | `Src/Infrastructure/Infrastructure.Workflow/Activities/StopWorkOrder/StopWorkOrderSendMailActivity.cs` | `Send mail` activity | Send stop work order notification | yes | (email log) | none found |
+| EP-3009 | Workflow | `Src/Infrastructure/Infrastructure.Workflow/Activities/Processor/RunProcessorActivity.cs` | `Run processor` activity | Execute a domain processor | yes | (varies) | none found |
+| EP-3010 | Workflow | `Src/Infrastructure/Infrastructure.Workflow/Activities/Data/GetActivityByIdActivity.cs` | `Get activity` activity | Retrieve activity from database | no | Activity | none found |
+| EP-3011 | Workflow | `Src/Infrastructure/Infrastructure.Workflow/Activities/Data/SetActivityStatusActivity.cs` | `Set status` activity | Update activity status | yes | Activity | none found |
+| EP-3012 | Workflow | `Src/Infrastructure/Infrastructure.Workflow/Activities/Data/ActivityStatusGateActivity.cs` | `Gate` activity | Conditional gate based on activity status | no | Activity | none found |
+
+---
+
+## 16. Elsa Workflow — Domain Event Triggers (EP-3100)
+
+| ID | Type | Location | Trigger | Description | Mutates | Primary Tables | Tests |
+|----|------|----------|---------|-------------|---------|----------------|-------|
+| EP-3101 | Workflow | `Src/Infrastructure/Infrastructure.Workflow/Events/Ticket/TicketStateChangeEvent.cs` | Domain event | Ticket status changes | yes | Ticket | none found |
+| EP-3102 | Workflow | `Src/Infrastructure/Infrastructure.Workflow/Events/Ticket/TicketRemarkAddedEvent.cs` | Domain event | New remark/comment on ticket | yes | TicketRemark | none found |
+| EP-3103 | Workflow | `Src/Infrastructure/Infrastructure.Workflow/Events/Ticket/TicketUpdatedEvent.cs` | Domain event | Generic ticket modification | yes | Ticket | none found |
+| EP-3104 | Workflow | `Src/Infrastructure/Infrastructure.Workflow/Events/Ticket/TransportRequestCreatedEvent.cs` | Domain event | New transport request created | yes | TransportRequest | none found |
+| EP-3105 | Workflow | `Src/Infrastructure/Infrastructure.Workflow/Events/Ticket/StopWorkOrder/StopWorkOrderCreatedEvent.cs` | Domain event | New stop work order | yes | StopWorkOrder | none found |
+| EP-3106 | Workflow | `Src/Infrastructure/Infrastructure.Workflow/Events/SyncFinishEvent.cs` | Domain event | Connector sync complete | yes | SyncLog | none found |
+| EP-3201 | SignalR | `Src/Infrastructure/Infrastructure.Elsa/UI/WorkflowInstanceProxyHub.cs` | Real-time | Real-time workflow execution status updates | no | (Elsa schema) | none found |
+
+---
+
+## 17. System Actions (EP-4000) — On-Demand or Scheduled
+
+Invoked via `POST /System/SystemAction/Run` or scheduled internally. All are idempotent (safe to re-run).
+
+| ID | Location | Description | Mutates | Primary Tables |
+|----|----------|-------------|---------|----------------|
+| EP-4001 | `RefreshActivityHierarchyCacheSystemAction.cs` | Refresh activity hierarchy cache | yes | Activity (cache) |
+| EP-4002 | `RefreshComponentHierarchyCacheSystemAction.cs` | Refresh component/WBS hierarchy cache | yes | Component (cache) |
+| EP-4003 | `RefreshOrganisationHierarchyCacheSystemAction.cs` | Refresh organisation structure cache | yes | Organisation (cache) |
+| EP-4004 | `RefreshDisciplineHierarchyCacheSystemAction.cs` | Refresh discipline hierarchy cache | yes | Discipline (cache) |
+| EP-4005 | `RefreshStructureHierarchyCacheSystemAction.cs` | Refresh general structure hierarchy cache | yes | Structure (cache) |
+| EP-4006 | `RefreshActivitySummariesSystemAction.cs` | Recalculate activity summary rollups | yes | ActivitySummary |
+| EP-4007 | `RefreshAllDistributionsSystemAction.cs` | Refresh all distribution caches | yes | (cache tables) |
+| EP-4008 | `RefreshCacheHoursWorkedSystemAction.cs` | Recalculate hours worked aggregates | yes | (cache) |
+| EP-4009 | `RefreshCachePersonalSchedulesSystemAction.cs` | Refresh personal schedule cache | yes | CachePersonalSchedule |
+| EP-4010 | `RefreshComponentLabelsSystemAction.cs` | Refresh component label cache | yes | (cache) |
+| EP-4011 | `RefreshStructureLabelsSystemAction.cs` | Refresh structure label cache | yes | (cache) |
+| EP-4012 | `RefreshComponentRelationCacheSystemAction.cs` | Refresh component relationship cache | yes | (cache) |
+| EP-4013 | `RefreshComponentStatusCacheSystemAction.cs` | Refresh component status cache | yes | (cache) |
+| EP-4014 | `RefreshComponentStructureHierarchySystemAction.cs` | Refresh component structure hierarchy | yes | (cache) |
+| EP-4015 | `RefreshDailyAssignmentDistributionSystemAction.cs` | Refresh daily assignment distributions | yes | (cache) |
+| EP-4016 | `RefreshDailyPersonDistributionSystemAction.cs` | Refresh daily person/resource distributions | yes | (cache) |
+| EP-4017 | `RefreshDateDistributionSystemAction.cs` | Refresh date-based distributions | yes | (cache) |
+| EP-4018 | `RefreshHoursBudgetWeightSystemAction.cs` | Recalculate hours budget weights | yes | (cache) |
+| EP-4019 | `RefreshLocationHierarchyCacheSystemAction.cs` | Refresh location hierarchy cache | yes | (cache) |
+| EP-4020 | `RefreshMaterialHierarchyCacheSystemAction.cs` | Refresh material hierarchy cache | yes | Material (cache) |
+| EP-4021 | `RefreshOrganisationCapacityDashboardLineDistributionSystemAction.cs` | Refresh organisation capacity dashboard | yes | OrganisationCapacityDashboardLine |
+| EP-4022 | `RefreshPersonCacheEfficiencySystemAction.cs` | Refresh person efficiency cache | yes | (cache) |
+| EP-4023 | `RefreshPredecessorReadySystemAction.cs` | Refresh predecessor ready status cache | yes | (cache) |
+| EP-4024 | `RefreshProjectTypeHierarchyCacheSystemAction.cs` | Refresh project type hierarchy | yes | ProjectType (cache) |
+| EP-4025 | `RefreshRoleCacheUserTypeSystemAction.cs` | Refresh role user type cache | yes | (cache) |
+| EP-4026 | `RefreshScheduleSourceTypeSystemAction.cs` | Refresh schedule source type cache | yes | (cache) |
+| EP-4027 | `RefreshStructureRelationCacheSystemAction.cs` | Refresh structure relationship cache | yes | (cache) |
+| EP-4028 | `RefreshActivitySummaryModeCacheSystemAction.cs` | Refresh activity summary mode cache | yes | (cache) |
+| EP-4029 | `RefreshAssetTypeHierarchyCacheSystemAction.cs` | Refresh asset type hierarchy | yes | AssetType (cache) |
+| EP-4030 | `RefreshCurrentPersonBalancePolicyIds.cs` | Update person balance policy cache | yes | (cache) |
+| EP-4031 | `RefreshPermissionGrantDataSystemAction.cs` | Refresh permission grants cache | yes | (cache) |
+| EP-4032 | `UpdateBalancesSystemAction.cs` | Recalculate all employee balances | yes | Balance, BalanceMutationHistory |
+| EP-4033 | `TaskReadinessStatusUpdateSystemAction.cs` | Update task readiness status | yes | TaskReadiness, Material, Engineering |
+| EP-4034 | `FloorspaceGenerationSystemAction.cs` | Generate floorspace configuration | yes | FloorSpace, Location |
+| EP-4035 | `SqlDefragmentationSystemAction.cs` | Database index/heap defragmentation | yes | (all tables — index) |
+| EP-4036 | `ReloadAppSettingsSystemAction.cs` | Reload application settings from database | yes | AppSetting |
+| EP-4037 | `CleanupUserInRolesSystemAction.cs` | Clean up orphaned user-role assignments | yes | UserInRole |
+| EP-4038 | `RefreshMessageBoxMessagesSystemAction.cs` | Refresh message box/notification cache | yes | (cache) |
+| EP-4039 | `RescheduleTemplatesSystemAction.cs` | Reschedule templates (recurring patterns) | yes | Schedule, ScheduleEntry |
+
+All System Actions are in `Src/Application/Application.SystemActions/`. Tests: none found.
+
+---
+
+## 18. Domain Processors (EP-5000) — Data Processing Pipeline
+
+Processors are invoked from System Actions (EP-4000), Elsa activities (EP-3009), or import jobs. All are in `Src/Processors/Processors.Domain/`.
+
+### Sync Processors (EP-5000)
+
+| ID | Description | Primary Tables |
+|----|-------------|----------------|
+| EP-5001 | Base processor for all sync operations | (various) |
+| EP-5002 | Process planning data (hours, progress) | Activity, Assignment, AssignmentProgressHistory |
+| EP-5003 | Process ERP timesheet/hours data | TimeSheet, TimesheetEntry, ErpHourline |
+| EP-5004 | Process entry time/clocking data | AccessControlTime, ClockingTerminalPunch, Person |
+| EP-5005 | Generic processor for flexible data mapping | (varies) |
+| EP-5006 | Process component/product breakdown | Component, Project, Material |
+
+### Cache / Hierarchy Processors (EP-5100)
+
+| ID | Description | Primary Tables |
+|----|-------------|----------------|
+| EP-5101 | Cache hierarchy structures (generic) | (cache tables) |
+| EP-5102 | Update structure relationship cache | (cache) |
+| EP-5103 | Refresh component hours aggregates | (cache) |
+| EP-5104 | Refresh personal schedule cache | CachePersonalSchedule |
+| EP-5105 | Refresh activity summary rollups | ActivitySummary |
+
+### Data Transformation / Maintenance Processors (EP-5200)
+
+| ID | Description | Primary Tables |
+|----|-------------|----------------|
+| EP-5201 | Assign hour types to ERP hourlines | ErpHourline, HourType |
+| EP-5202 | Book hours to assignments (timesheet processing) | TimeSheet, Assignment, AssignmentProgressHistory |
+| EP-5203 | Write assignment progress history | AssignmentProgressHistory |
+| EP-5204 | Apply/recalculate assignment summary | AssignmentSummary |
+| EP-5205 | Apply/recalculate activity summary | ActivitySummary |
+| EP-5206 | Recalculate budget weight distributions | (cache) |
+| EP-5207 | Set activity execution sequence | Activity, ActivityRelation |
+| EP-5208 | Create ERP hourline records | ErpHourline, TimeSheet |
+| EP-5209 | Create project baseline snapshot | Baseline, BaselineProject, BaselineComponent, BaselineActivity, BaselineAssignment |
+
+### Component / Structure Processors (EP-5300)
+
+| ID | Description | Primary Tables |
+|----|-------------|----------------|
+| EP-5301 | Create component hierarchy structures | Component, ComponentType |
+| EP-5302 | Refresh component structure hierarchy cache | (cache) |
+| EP-5303 | Refresh component relationship data | (cache) |
+
+### Distribution / Dashboard Processors (EP-5400)
+
+| ID | Description | Primary Tables |
+|----|-------------|----------------|
+| EP-5401 | Recalculate daily person distributions | (cache) |
+| EP-5402 | Recalculate daily assignment distributions | (cache) |
+| EP-5403 | Refresh date-based distributions | (cache) |
+| EP-5404 | Refresh baseline assignment distributions | (cache) |
+| EP-5405 | Recalculate organisation capacity dashboard | OrganisationCapacityDashboardLine |
+| EP-5406 | Recalculate discipline capacity dashboard | DisciplineCapacityDashboardLine |
+| EP-5407 | Refresh all distribution caches | (all cache tables) |
+
+### Prediction / Analytics Processors (EP-5500)
+
+| ID | Description | Primary Tables |
+|----|-------------|----------------|
+| EP-5501 | Calculate long-term assignment predictions | AssignmentDurationPrediction |
+| EP-5502 | Calculate short-term assignment predictions | AssignmentShortTermPrediction |
+
+### Balance / HR Processors (EP-5700)
+
+| ID | Description | Primary Tables |
+|----|-------------|----------------|
+| EP-5701 | Recalculate employee time/overtime balances | Balance, BalanceMutationHistory |
+| EP-5702 | Update pending hours in balance | Balance |
+| EP-5703 | Update balance after timesheet submission | Balance, TimeSheet, TimesheetEntry |
+
+### Maintenance / Cleanup Processors (EP-5800)
+
+| ID | Description | Primary Tables |
+|----|-------------|----------------|
+| EP-5801 | Remove orphaned page settings | PageSetting |
+| EP-5802 | Clean up orphaned allocations | Allocation |
+| EP-5803 | Clean up orphaned user-role mappings | UserInRole |
+| EP-5804 | Clean up health check logs | HealthCheckLog |
+| EP-5805 | Execute arbitrary SQL commands (admin) | (any table) |
+| EP-5806 | Database index/heap defragmentation | (all tables — index) |
+
+### FloorSpace / Timeline Processors (EP-5900)
+
+| ID | Description | Primary Tables |
+|----|-------------|----------------|
+| EP-5901 | Generate floorspace layouts | FloorSpace, Location |
+| EP-5902 | Refresh activity group surface (timeline) | (cache) |
+| EP-5903 | Refresh actual start/finish time cache | (cache) |
+
+### Miscellaneous Processors (EP-5950–5983)
+
+| ID | Description | Primary Tables |
+|----|-------------|----------------|
+| EP-5951 | Refresh file metadata cache | File (cache) |
+| EP-5952 | Refresh task ID cache | (cache) |
+| EP-5953 | Recalculate bookable hours | (cache) |
+| EP-5954 | Refresh predecessor ready status cache | (cache) |
+| EP-5955 | Refresh person balance policy cache | (cache) |
+| EP-5956 | Refresh role user type cache | (cache) |
+| EP-5957 | Refresh schedule source type cache | (cache) |
+| EP-5971 | Update task readiness predecessor status | TaskReadiness |
+| EP-5972 | Update activities from connector data | Activity, ActivityProperty |
+| EP-5973 | Process entry time/clocking records | AccessControlTime, ClockingTerminalPunch |
+| EP-5974 | Clear provider/service caches | (cache) |
+| EP-5981 | Refresh timesheet entry cache after update | (cache) |
+| EP-5982 | Refresh all timesheet entries | TimesheetEntry, (cache) |
+| EP-5983 | Refresh timesheet event messages | TimesheetEventMessage |
+
+---
+
+## 19. Database Deployer / CLI (EP-6000)
+
+| ID | Type | Location | Trigger | Description | Mutates | Primary Tables | Tests |
+|----|------|----------|---------|-------------|---------|----------------|-------|
+| EP-6001 | CLI | `Src/DatabaseDeployer/DatabaseDeployer/Program.cs` | Console entry point | EF Core migration runner (all contexts) | yes | (all tables during migration) | none found |
+| EP-6002 | Processor | `Src/DatabaseDeployer/DatabaseDeployer.Domain/Migrators/ContextMigrator.cs` | IContextMigrator | Migrate individual DbContext schemas | yes | (all tables) | none found |
+| EP-6003 | Processor | `Src/DatabaseDeployer/DatabaseDeployer.Domain/Migrators/SchemaMigrator.cs` | ISchemaMigrator | Migrate database schema | yes | (all tables) | none found |
+| EP-6004 | Processor | `Src/DatabaseDeployer/DatabaseDeployer.Domain/Utils/MigrationScriptRunner.cs` | IMigrationScriptRunner | Execute custom migration scripts | yes | (any table) | none found |
+
+---
+
+## Items Requiring Human Review
+
+| Item | Notes |
+|------|-------|
+| Full OData entity set list | [NEEDS REVIEW] Enumerate all `@ODataRoute` attributes in Contracts/ — estimated 100+ sets |
+| Connector scheduler configuration | [NEEDS REVIEW] How are Elsa workflow triggers (EP-3100) scheduled — via Elsa timer or external cron? |
+| RecurringJob registrations | [NEEDS REVIEW] Where are `RecurringJob.AddOrUpdate` calls made for import jobs? |
+| System Action scheduler | [NEEDS REVIEW] Are EP-4000 system actions also run on a cron schedule, or purely on-demand? |
+| Fire-and-Forget usage | [NEEDS REVIEW] Enumerate all callers of `IFireAndForgetService` in `Infrastructure.FireAndForget` |
+| Full HTTP route list per controller | [NEEDS REVIEW] Each controller has multiple action methods — enumerate all verbs per route |
+
+---
+
+*Phase 1 complete. Proceed to Phase 2 (bounded context map) after review.*

@@ -1,123 +1,78 @@
-%%  Floor2Plan Bounded Context Map — Phase 2
-%%  DRAFT — REQUIRES HUMAN VALIDATION
-%%  Generated: 2026-06-20
+graph TB
+    subgraph PBS["🗂️ Planning & Resource Mgmt (PBS)"]
+        PBS_agg["Project · Activity · Component\nAssignment · Baseline · WOR\nTaskReadiness · KPI · Prediction"]
+    end
 
-flowchart TD
-    %% ── Node definitions ──────────────────────────────────────────────────
+    subgraph WF["👥 Workforce & Organization (HR)"]
+        WF_agg["Person · Organisation · Discipline\nTeam · Schedule · Location(?)"]
+    end
 
-    PLAN["**1 · Planning**
-    Activities · Assignments · Relations
-    Baselines · Task Readiness
-    DistributionsDbContext (assignments)
-    ─────────────────────────────────
-    UI: Plan area
-    Domain.Service/Planning
-    Processors: RefreshActivitySummary
-    Change handlers: Activity, Assignment"]
+    subgraph TS["⏰ Timekeeping & Hours"]
+        TS_agg["TimeSheet · ErpHourline · Hourline\nBalance · BalancePolicy\nCorrectionTimesheet · HourType"]
+    end
 
-    PBS["**2 · Project & Resource Structure (PBS)**
-    Projects · Components · Structures
-    Persons · Organisations · Disciplines
-    Assets · Materials · WORs · Roles
-    ─────────────────────────────────
-    UI: Pbs · Material · FloorSpace areas
-    Domain.Service: Project, Component, Person…
-    FileDbContext · DocumentStoreDbContext"]
+    subgraph DEV["📱 Devices & Clocking"]
+        DEV_agg["ClockingTerminal · ShopFloorTerminal\nAccessControlTime · ClockingTerminalPunch\nPersonalDailyClockTimes"]
+    end
 
-    TS["**3 · Timesheet & Work Execution**
-    TimeSheets · TimesheetEntries
-    Clocking Terminals · Shop Floor Terminals
-    ERP Hourlines · Correction Timesheets
-    ─────────────────────────────────
-    UI: Do · Devices areas
-    Domain.Service/Timesheets · Clocking
-    Processors: TimesheetEntry, HoursProcessors"]
+    subgraph TKT["🎫 Workflow & Ticketing"]
+        TKT_agg["Ticket · TransportRequest\nStopWorkOrder · TicketRemark\n(Elsa state machine)"]
+    end
 
-    HR["**4 · HR & Workforce Management**
-    Schedules · Allocations · Holidays
-    Balances · BalancePolicies · OffTime
-    ─────────────────────────────────
-    UI: HR area · AllocationController
-    Domain.Service/Balances · Schedules
-    Processors: BalanceProcessors"]
+    subgraph SYN["🔄 Sync & Import Pipeline"]
+        SYN_agg["SyncLog · ImportConfig\nHangfire jobs · Connectors\n(XER · Sciforma · ERP · EntryTime)"]
+    end
 
-    RPT["**5 · Reporting, KPI & Prediction**
-    KPIs · SPI/CPI · S-Curves
-    Long/Short-term Predictions
-    ReportingDbContext · DistributionsDbContext
-    ─────────────────────────────────
-    UI: Check · Prediction areas
-    Domain.Service/Kpi · Distributions
-    Processors: Prediction · Distributions"]
+    subgraph SYS["⚙️ System Admin & Infrastructure"]
+        SYS_agg["AppSetting · License · SystemAction\nUser · Role · PageSetting\nProcessors (35+) · Cache"]
+    end
 
-    SYNC["**6 · Data Integration & Sync**
-    ImportConfig · SyncLog · Connectors
-    Import jobs: XER · Excel · Aspose · ERP
-    ─────────────────────────────────
-    UI: Sync area
-    Application.Sync (full project)
-    Processors: SyncProcessors · EntryTimes"]
+    %% Planning ↔ Workforce
+    PBS -->|"FK read: Person, Organisation\n(Assignment, Project)"| WF
 
-    PLT["**7 · Platform & Operations**
-    Auth · Permissions · AppSettings
-    Hangfire · Elsa Workflows · Audit
-    Health · Files · Mail · ProcessLog
-    Tickets · StopWorkOrders
-    ─────────────────────────────────
-    UI: System area · Ticket area
-    Infrastructure.* projects
-    Application.SystemActions"]
+    %% Planning ↔ Timekeeping
+    PBS <-->|"⚠️ Shared bridge table\nTimeSheetWeeklyHourline\n(FK: Activity + TimeSheet)"| TS
 
-    %% ── Relationships ─────────────────────────────────────────────────────
+    %% Timekeeping → Workforce
+    TS -->|"FK read: Person, PersonSchedule\napproval chain + balance policy"| WF
 
-    PLAN -->|"reads master data\n(Component, Project, Person)"| PBS
-    PLAN -->|"reads capacity\n(Schedule, Allocation, Holiday)"| HR
-    PLAN -->|"cache invalidation\nvia change handler"| TS
-    PLAN -->|"IFireAndForget · Elsa activities"| PLT
+    %% Devices → Workforce
+    DEV -->|"FK read: Person, PersonSchedule\n(punch matching)"| WF
 
-    PBS -->|"file storage · cache processors\nvia IFireAndForget"| PLT
-    PBS -.->|"import writes\n(Component, Person, Org…)"| SYNC
+    %% Devices → Timekeeping
+    DEV -->|"PersonalDailyClockTimes\n(feeds hourline calcs)"| TS
 
-    TS -->|"reads activity & assignment\nfor booking validation"| PLAN
-    TS -->|"balance update trigger\nvia change handler"| HR
-    TS -->|"IFireAndForget processors"| PLT
-    TS -.->|"ERP callback\n(TimesheetController.Status)"| SYNC
+    %% Workflow → Planning
+    TKT -->|"FK read: Activity, Component, Project\n(ActivityTicketRelation)\n[NEEDS REVIEW: mutation dir]"| PBS
 
-    HR -->|"reads Person, Organisation\nmaster data"| PBS
-    HR -->|"allocation change →\nperson availability"| PLAN
-    HR -->|"IFireAndForget processors"| PLT
+    %% Workflow → Workforce
+    TKT -->|"FK read: Person, Organisation\n(reporter, assignee)"| WF
 
-    RPT -->|"reads Activity, Assignment\nSummary, Baseline"| PLAN
-    RPT -->|"reads Component, Project\nOrg, Discipline"| PBS
-    RPT -->|"reads Schedule, Allocation"| HR
-    RPT -->|"reads TimesheetEntry\nfor actuals"| TS
-    RPT -->|"IFireAndForget · file storage"| PLT
+    %% Workflow self (Elsa events)
+    TKT -->|"Domain events\nTicketStateChange\nTransportRequestCreated\nStopWorkOrderCreated"| TKT
 
-    SYNC -->|"import writes to\nActivity, Assignment"| PLAN
-    SYNC -->|"import writes to\nComponent, Person, Org…"| PBS
-    SYNC -->|"import writes to\nTimesheetEntry, Allocation"| TS
-    SYNC -->|"sync queue · ProcessLog · mail"| PLT
-    SYNC -->|"ActivityConnector\nchange handler"| PLAN
+    %% Sync → all contexts (writes)
+    SYN -->|"ImportJobs: Project, Activity\nComponent, Assignment\nTaskReadiness, Material"| PBS
+    SYN -->|"ImportJobs: Person\nOrganisation, Discipline"| WF
+    SYN -->|"ImportJobs: TimeSheet\nHourline, HourType"| TS
+    SYN -->|"ImportJob: AccessControl\npunch records"| DEV
+    SYN -->|"SyncFinishEvent"| TKT
 
-    PLT -->|"Elsa: SetActivityStatus\nCreateMitigatingActivity"| PLAN
-    PLT -.->|"auth · config · audit\nprovided to ALL contexts"| PLAN
-    PLT -.->|"auth · config · audit\nprovided to ALL contexts"| PBS
-    PLT -.->|"auth · config · audit\nprovided to ALL contexts"| TS
-    PLT -.->|"auth · config · audit\nprovided to ALL contexts"| HR
-    PLT -.->|"auth · config · audit\nprovided to ALL contexts"| RPT
-    PLT -.->|"auth · config · audit\nprovided to ALL contexts"| SYNC
+    %% System → all (cache + processors)
+    SYS -->|"⚠️ Processors + cache flush\n(implicit orchestration)"| PBS
+    SYS -->|"Processors + cache flush"| TS
+    SYS -->|"Processors + cache flush"| WF
+    SYS -->|"Hangfire job scheduling"| SYN
+    SYS -->|"Elsa engine lifecycle"| TKT
+    SYS -.->|"AppSetting lookup\n(all contexts)"| PBS
+    SYS -.->|"AppSetting lookup"| TS
+    SYS -.->|"AppSetting lookup"| WF
 
-    %% ── Styling ───────────────────────────────────────────────────────────
-
-    classDef domain    fill:#dbeafe,stroke:#2563eb,color:#1e3a5f,rx:6
-    classDef infra     fill:#fef9c3,stroke:#ca8a04,color:#713f12,rx:6
-    classDef reporting fill:#d1fae5,stroke:#059669,color:#064e3b,rx:6
-    classDef sync      fill:#ede9fe,stroke:#7c3aed,color:#3b0764,rx:6
-    classDef platform  fill:#fce7f3,stroke:#be185d,color:#500724,rx:6
-
-    class PLAN,HR domain
-    class PBS infra
-    class TS domain
-    class RPT reporting
-    class SYNC sync
-    class PLT platform
+    %% Styling
+    style PBS fill:#dbeafe,stroke:#3b82f6
+    style WF  fill:#f3e8ff,stroke:#9333ea
+    style TS  fill:#fef9c3,stroke:#ca8a04
+    style DEV fill:#dcfce7,stroke:#16a34a
+    style TKT fill:#fce7f3,stroke:#db2777
+    style SYN fill:#ecfdf5,stroke:#059669
+    style SYS fill:#ede9fe,stroke:#7c3aed
