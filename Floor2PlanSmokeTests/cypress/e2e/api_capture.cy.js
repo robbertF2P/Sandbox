@@ -1,9 +1,7 @@
-const defaultTargetUrl = 'https://2025-14-patch.floor2plan.com/Account/Login';
-
-const splitTargetUrls = () => {
-  const configuredUrls = Cypress.env('targetUrls') || Cypress.env('targetUrl') || defaultTargetUrl;
-  return configuredUrls.split(',').map((url) => url.trim()).filter(Boolean);
-};
+const splitTargetUrls = () => Cypress.env('targetUrls')
+  .split(',')
+  .map((url) => url.trim())
+  .filter(Boolean);
 
 const tileSelectors = [
   '.f2ps-tile',
