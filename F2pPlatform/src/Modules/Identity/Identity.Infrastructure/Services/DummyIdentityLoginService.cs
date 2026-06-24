@@ -3,6 +3,21 @@ using Identity.Application.Ports;
 
 namespace Identity.Infrastructure.Services;
 
+internal static class PocUserProfiles
+{
+    public const string ApproveHoursProgress = "ApproveHoursProgress";
+
+    public static IReadOnlyList<string> ResolvePermissions(string userName)
+    {
+        if (userName.Contains("supervisor", StringComparison.OrdinalIgnoreCase))
+        {
+            return [ApproveHoursProgress];
+        }
+
+        return [];
+    }
+}
+
 /// <summary>
 /// POC login — accepts any credentials and issues a short-lived session token.
 /// Replace with OIDC / user store per platform-authentication-standard.md.
@@ -28,6 +43,7 @@ public sealed class DummyIdentityLoginService : IIdentityLoginService
             userName,
             userName,
             token,
-            expiresAtUtc));
+            expiresAtUtc,
+            PocUserProfiles.ResolvePermissions(userName)));
     }
 }

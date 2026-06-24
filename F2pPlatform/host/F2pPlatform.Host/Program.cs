@@ -1,6 +1,8 @@
 using F2pPlatform.Host.Hubs;
 using F2pPlatform.Host.Services;
 using Platform.Serilog.Logging;
+using HourApprovals.Api;
+using HourApprovals.Packs.Acme;
 using Identity.Api;
 using Reference.Api;
 using Serilog;
@@ -27,6 +29,8 @@ try
     builder.Services.AddF2pPlatformActors();
     builder.Services.AddIdentityModule(builder.Configuration);
     builder.Services.AddReferenceModule(builder.Configuration);
+    builder.Services.AddAcmeHourApprovalsPack();
+    builder.Services.AddHourApprovalsModule(builder.Configuration);
 
     var app = builder.Build();
 
@@ -53,6 +57,7 @@ try
     app.MapHealthChecks("/health");
     app.MapIdentityModule();
     app.MapReferenceModule();
+    app.MapHourApprovalsModule();
     app.MapHub<PlatformEventsHub>("/hubs/platform-events");
 
     app.Run();

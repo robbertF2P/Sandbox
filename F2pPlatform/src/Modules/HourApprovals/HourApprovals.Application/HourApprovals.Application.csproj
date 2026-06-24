@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <RootNamespace>HourApprovals.Application</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\HourApprovals.Domain\HourApprovals.Domain.csproj" />
+  </ItemGroup>
+
+  <Import Project="../../../../../build/Platform.Logging.Library.props" />
+
+</Project>

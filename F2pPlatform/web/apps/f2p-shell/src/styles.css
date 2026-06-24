@@ -1,1 +1,10 @@
 @import '@floorganise/css';
+
+.f2p-approved-field {
+  background-color: #dcfce7;
+  border-color: #86efac;
+}
+
+.f2p-pending-field {
+  background-color: #ffffff;
+}

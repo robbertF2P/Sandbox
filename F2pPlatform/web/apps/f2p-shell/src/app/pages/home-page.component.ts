@@ -16,6 +16,13 @@ export class HomePageComponent {
 
   readonly tiles: HomeTile[] = [
     {
+      label: 'Hour approvals',
+      abbreviation: 'Ha',
+      meta: 'Supervisor approve · foreman visibility',
+      route: '/hour-approvals',
+      moduleColor: 'green',
+    },
+    {
       label: 'Reference',
       abbreviation: 'Re',
       meta: 'Module status + SignalR events',

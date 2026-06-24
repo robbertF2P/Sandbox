@@ -18,5 +18,11 @@ export const routes: Routes = [
     loadChildren: () =>
       import('@f2p/reference/feature-status').then(m => m.referenceRoutes),
   },
+  {
+    path: 'hour-approvals',
+    canActivate: [authGuard],
+    loadChildren: () =>
+      import('@f2p/hour-approvals/feature-tasks').then(m => m.hourApprovalsRoutes),
+  },
   { path: '**', redirectTo: '' },
 ];

@@ -1,0 +1,142 @@
+<div class="f2p-app-light min-h-screen">
+  <header class="border-b border-f2p-border bg-f2p-surface px-6 py-4">
+    <div class="mx-auto flex max-w-6xl items-center justify-between gap-4">
+      <div class="flex items-center gap-4">
+        <a routerLink="/" class="f2ps-btn-secondary f2ps-btn-sm">Home</a>
+        <span class="text-lg font-bold text-f2p-ink">Hour approvals</span>
+      </div>
+      <p class="text-sm text-f2p-ink-muted">
+        {{ displayName }} · pack {{ capabilities()?.customizationPackId ?? '…' }}
+      </p>
+    </div>
+  </header>
+
+  <main class="mx-auto max-w-6xl space-y-6 px-6 py-8">
+    <section>
+      <h1 class="text-2xl font-bold text-f2p-ink">Active tasks</h1>
+      <p class="mt-1 text-sm text-f2p-ink-muted">
+        Supervisors approve HoursToGo, progress, and worked hours. Foremen see who approved and when.
+      </p>
+    </section>
+
+    @if (loading()) {
+      <p class="text-sm text-f2p-ink-muted">Loading…</p>
+    } @else if (error()) {
+      <div class="panel border-f2p-danger/30 bg-f2p-danger/5 p-4 text-sm text-f2p-danger">
+        {{ error() }}
+      </div>
+    } @else {
+      <div class="flex flex-wrap items-center gap-3">
+        <label class="text-sm text-f2p-ink-muted" for="approval-filter">Approval status</label>
+        <select
+          id="approval-filter"
+          class="f2p-pending-field rounded border px-3 py-2 text-sm"
+          [ngModel]="filter()"
+          (ngModelChange)="onFilterChange($event)"
+        >
+          <option value="all">All</option>
+          <option value="approved">Approved</option>
+          <option value="not_approved">Not approved</option>
+        </select>
+      </div>
+
+      <div class="grid gap-6 lg:grid-cols-[1fr_1.4fr]">
+        <section class="panel p-4">
+          <h2 class="mb-3 text-lg font-semibold text-f2p-ink">Tasks</h2>
+          <ul class="space-y-2">
+            @for (task of tasks(); track task.id) {
+              <li>
+                <button
+                  type="button"
+                  class="w-full rounded border px-3 py-2 text-left text-sm"
+                  [class.border-f2p-primary]="task.id === selectedTaskId()"
+                  [class.bg-f2p-primary/5]="task.id === selectedTaskId()"
+                  (click)="selectTask(task.id)"
+                >
+                  <div class="font-medium text-f2p-ink">{{ task.title }}</div>
+                  <div class="text-f2p-ink-muted">
+                    {{ task.activityCode }} · {{ task.approvalState }}
+                    @if (!task.isActiveForCurrentUser) {
+                      · moved to other active tasks after save
+                    }
+                  </div>
+                </button>
+              </li>
+            }
+          </ul>
+        </section>
+
+        @if (selectedTask(); as task) {
+          <section class="panel space-y-4 p-6">
+            <div class="flex items-start justify-between gap-4">
+              <div>
+                <h2 class="text-lg font-semibold text-f2p-ink">{{ task.title }}</h2>
+                <p class="text-sm text-f2p-ink-muted">{{ task.activityCode }}</p>
+              </div>
+              <span class="rounded px-2 py-1 text-xs font-medium"
+                [class.bg-emerald-100]="task.isApproved"
+                [class.text-emerald-800]="task.isApproved"
+                [class.bg-amber-100]="!task.isApproved"
+                [class.text-amber-800]="!task.isApproved">
+                {{ task.approvalState }}
+              </span>
+            </div>
+
+            @if (task.lastApproval; as approval) {
+              <div class="rounded border border-f2p-border bg-f2p-surface px-3 py-2 text-sm">
+                <span class="font-medium text-f2p-ink">Last approved by {{ approval.approvedBy }}</span>
+                <span class="text-f2p-ink-muted"> · {{ approval.approvedAtUtc | date: 'medium' }}</span>
+              </div>
+            } @else {
+              <p class="text-sm text-f2p-ink-muted">Not approved yet.</p>
+            }
+
+            @if (draftValues(); as draft) {
+              <form class="grid gap-3 md:grid-cols-2" (ngSubmit)="saveSelected()">
+                <label class="text-sm">
+                  <span class="mb-1 block text-f2p-ink-muted">Hours to go</span>
+                  <input type="number" step="0.1" class="w-full rounded border px-3 py-2" [ngClass]="inputClass('hoursToGo')" [(ngModel)]="draft.hoursToGo" name="hoursToGo" [disabled]="!canApprove()" />
+                </label>
+                <label class="text-sm">
+                  <span class="mb-1 block text-f2p-ink-muted">Progress %</span>
+                  <input type="number" step="0.1" class="w-full rounded border px-3 py-2" [ngClass]="inputClass('progress')" [(ngModel)]="draft.progress" name="progress" [disabled]="!canApprove()" />
+                </label>
+                <label class="text-sm">
+                  <span class="mb-1 block text-f2p-ink-muted">Worked hours</span>
+                  <input type="number" step="0.1" class="w-full rounded border px-3 py-2" [ngClass]="inputClass('workedHours')" [(ngModel)]="draft.workedHours" name="workedHours" [disabled]="!canApprove()" />
+                </label>
+
+                @if (capabilities()?.displaySettings.showPlannedStart) {
+                  <label class="text-sm">
+                    <span class="mb-1 block text-f2p-ink-muted">Planned start</span>
+                    <input type="date" class="w-full rounded border px-3 py-2" [ngClass]="inputClass('plannedStart')" [(ngModel)]="draft.plannedStart" name="plannedStart" [disabled]="!canApprove()" />
+                  </label>
+                }
+
+                @if (capabilities()?.displaySettings.showPlannedFinish) {
+                  <label class="text-sm">
+                    <span class="mb-1 block text-f2p-ink-muted">Planned finish</span>
+                    <input type="date" class="w-full rounded border px-3 py-2" [ngClass]="inputClass('plannedFinish')" [(ngModel)]="draft.plannedFinish" name="plannedFinish" [disabled]="!canApprove()" />
+                  </label>
+                }
+
+                <div class="md:col-span-2 flex flex-wrap gap-2">
+                  @if (canApprove()) {
+                    <button type="submit" class="f2ps-btn-primary f2ps-btn-sm" [disabled]="saving()">
+                      Save &amp; auto-approve
+                    </button>
+                    <button type="button" class="f2ps-btn-secondary f2ps-btn-sm" [disabled]="saving()" (click)="approveSelected()">
+                      Approve current values
+                    </button>
+                  } @else {
+                    <p class="text-sm text-f2p-ink-muted">Read-only — foreman can view approval metadata.</p>
+                  }
+                </div>
+              </form>
+            }
+          </section>
+        }
+      </div>
+    }
+  </main>
+</div>
