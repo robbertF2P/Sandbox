@@ -16,6 +16,8 @@
     <ProjectReference Include="..\F2pPlatform.Host.Core\F2pPlatform.Host.Core.csproj" />
     <ProjectReference Include="..\..\src\Modules\Identity\Identity.Api\Identity.Api.csproj" />
     <ProjectReference Include="..\..\src\Modules\Reference\Reference.Api\Reference.Api.csproj" />
+    <ProjectReference Include="..\..\src\Modules\HourApprovals\HourApprovals.Api\HourApprovals.Api.csproj" />
+    <ProjectReference Include="..\..\src\Packs\HourApprovals.Packs.Acme\HourApprovals.Packs.Acme.csproj" />
   </ItemGroup>
 
   <Import Project="../../../build/Platform.Logging.Host.props" />

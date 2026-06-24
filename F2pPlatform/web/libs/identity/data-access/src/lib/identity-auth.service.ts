@@ -37,6 +37,14 @@ export class IdentityAuthService {
     return this.getSession()?.displayName ?? '';
   }
 
+  getPermissions(): string[] {
+    return this.getSession()?.permissions ?? [];
+  }
+
+  canApproveHoursProgress(): boolean {
+    return this.getPermissions().includes('ApproveHoursProgress');
+  }
+
   login(userName: string, password: string, rememberMe: boolean): Observable<boolean> {
     return this.api.login({ userName, password, rememberMe }).pipe(
       tap((response) => this.persistSession(response, rememberMe)),
@@ -52,7 +60,7 @@ export class IdentityAuthService {
   }
 
   private persistSession(
-    response: { userName: string; displayName: string; token: string; expiresAtUtc: string },
+    response: { userName: string; displayName: string; token: string; expiresAtUtc: string; permissions?: string[] },
     rememberMe: boolean,
   ): void {
     const session: AuthSession = {
@@ -60,6 +68,7 @@ export class IdentityAuthService {
       displayName: response.displayName,
       token: response.token,
       expiresAtUtc: response.expiresAtUtc,
+      permissions: response.permissions ?? [],
     };
 
     localStorage.removeItem(SESSION_KEY);

@@ -16,6 +16,15 @@
     <Project Path="src/Modules/Reference/Reference.Infrastructure/Reference.Infrastructure.csproj" />
     <Project Path="src/Modules/Reference/Reference.Api/Reference.Api.csproj" />
   </Folder>
+  <Folder Name="/src/Modules/HourApprovals/">
+    <Project Path="src/Modules/HourApprovals/HourApprovals.Domain/HourApprovals.Domain.csproj" />
+    <Project Path="src/Modules/HourApprovals/HourApprovals.Application/HourApprovals.Application.csproj" />
+    <Project Path="src/Modules/HourApprovals/HourApprovals.Infrastructure/HourApprovals.Infrastructure.csproj" />
+    <Project Path="src/Modules/HourApprovals/HourApprovals.Api/HourApprovals.Api.csproj" />
+  </Folder>
+  <Folder Name="/src/Packs/">
+    <Project Path="src/Packs/HourApprovals.Packs.Acme/HourApprovals.Packs.Acme.csproj" />
+  </Folder>
   <Folder Name="/tests/Modules/Identity/">
     <Project Path="tests/Modules/Identity/Identity.Unit.Tests/Identity.Unit.Tests.csproj" />
     <Project Path="tests/Modules/Identity/Identity.Characterization.Tests/Identity.Characterization.Tests.csproj" />
@@ -23,5 +32,9 @@
   <Folder Name="/tests/Modules/Reference/">
     <Project Path="tests/Modules/Reference/Reference.Unit.Tests/Reference.Unit.Tests.csproj" />
     <Project Path="tests/Modules/Reference/Reference.Characterization.Tests/Reference.Characterization.Tests.csproj" />
+  </Folder>
+  <Folder Name="/tests/Modules/HourApprovals/">
+    <Project Path="tests/Modules/HourApprovals/HourApprovals.Unit.Tests/HourApprovals.Unit.Tests.csproj" />
+    <Project Path="tests/Modules/HourApprovals/HourApprovals.Characterization.Tests/HourApprovals.Characterization.Tests.csproj" />
   </Folder>
 </Solution>

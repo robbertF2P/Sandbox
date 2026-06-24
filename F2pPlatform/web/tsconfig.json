@@ -25,7 +25,9 @@
       "@f2p/shared/ui": ["libs/shared/ui/src/index.ts"],
       "@f2p/identity/data-access": ["libs/identity/data-access/src/index.ts"],
       "@f2p/reference/data-access": ["libs/reference/data-access/src/index.ts"],
-      "@f2p/reference/feature-status": ["libs/reference/feature-status/src/index.ts"]
+      "@f2p/reference/feature-status": ["libs/reference/feature-status/src/index.ts"],
+      "@f2p/hour-approvals/data-access": ["libs/hour-approvals/data-access/src/index.ts"],
+      "@f2p/hour-approvals/feature-tasks": ["libs/hour-approvals/feature-tasks/src/index.ts"]
     }
   }
 }

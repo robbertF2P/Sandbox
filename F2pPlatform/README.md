@@ -55,3 +55,17 @@ Creates `src/Modules/Import/` from the Reference template and adds projects to `
 - **FP in detail:** domain rules in pure static functions (`ReferenceStatusRules`).
 - **No ABP** in module projects; strangler adapters marked with `[StranglerAdapter]`.
 - **No Hangfire** in target host — scheduled/long-running work routes through actors; UI progress via SignalR.
+
+## Hour approvals POC (V2 slice)
+
+Demonstrates supervisor/foreman hour approval with:
+
+- `HourApprovals` module — approval records (`IRecordAudit`), permissions, in-memory tasks
+- **Feature flag** — `Tenant:FeatureFlags:hours-progress-approval` (route/API hidden when off)
+- **Acme customization pack** — `ShowPlannedStart` / `ShowPlannedFinish` via `HourApprovals.Packs.Acme`
+- Angular route — `/hour-approvals` (login as `supervisor.demo` or `foreman.demo`)
+
+```bash
+dotnet run --project host/F2pPlatform.Host
+cd web && npm start
+```

@@ -9,6 +9,7 @@ export interface LoginResponseDto {
   displayName: string;
   token: string;
   expiresAtUtc: string;
+  permissions: string[];
 }
 
 export interface AuthSession {
@@ -16,4 +17,5 @@ export interface AuthSession {
   displayName: string;
   token: string;
   expiresAtUtc: string;
+  permissions: string[];
 }
