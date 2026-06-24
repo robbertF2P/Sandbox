@@ -1,0 +1,72 @@
+<div class="f2p-app-light f2p-login-page client-background">
+  <div class="f2p-login-panel">
+    <div class="f2ps-tile f2ps-tile-fluid p-6">
+      <div class="mb-6 border-b border-f2p-border pb-6 text-center">
+        <p class="text-lg font-bold tracking-wide text-f2p-ink">Floor2Plan</p>
+        <p class="text-sm text-f2p-ink-muted">Login</p>
+      </div>
+
+      <div class="login-notification login-notification-success mb-4">
+        <span class="mr-2 inline-block size-6 rounded-full bg-current opacity-80" aria-hidden="true"></span>
+        <span class="uppercase">Acceptance</span>
+      </div>
+
+      @if (errorMessage()) {
+        <div class="login-notification login-notification-danger mb-4">
+          {{ errorMessage() }}
+        </div>
+      }
+
+      <form class="login" (ngSubmit)="onSubmit()">
+        <label class="field">
+          <span>Username</span>
+          <input
+            id="userName"
+            name="userName"
+            type="text"
+            placeholder="Username"
+            [ngModel]="userName()"
+            (ngModelChange)="userName.set($event)"
+            autocomplete="username"
+            required
+          />
+        </label>
+
+        <label class="field">
+          <span>Password</span>
+          <input
+            id="password"
+            name="password"
+            type="password"
+            placeholder="Password"
+            [ngModel]="password()"
+            (ngModelChange)="password.set($event)"
+            autocomplete="current-password"
+            required
+          />
+        </label>
+
+        <div class="flex items-center justify-between gap-4">
+          <label class="flex items-center gap-2 text-sm text-f2p-ink-muted">
+            <input
+              id="rememberMe"
+              name="rememberMe"
+              type="checkbox"
+              [ngModel]="rememberMe()"
+              (ngModelChange)="rememberMe.set($event)"
+            />
+            Stay logged in?
+          </label>
+
+          <button
+            class="f2ps-btn f2ps-btn-primary f2ps-btn-md"
+            type="submit"
+            [disabled]="isSubmitting()"
+          >
+            Login
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

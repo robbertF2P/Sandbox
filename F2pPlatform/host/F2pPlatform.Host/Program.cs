@@ -1,6 +1,7 @@
 using F2pPlatform.Host.Hubs;
 using F2pPlatform.Host.Services;
 using Platform.Serilog.Logging;
+using Identity.Api;
 using Reference.Api;
 using Serilog;
 
@@ -24,6 +25,7 @@ try
     builder.Services.AddHealthChecks();
     builder.Services.AddSignalR();
     builder.Services.AddF2pPlatformActors();
+    builder.Services.AddIdentityModule(builder.Configuration);
     builder.Services.AddReferenceModule(builder.Configuration);
 
     var app = builder.Build();
@@ -41,6 +43,7 @@ try
     {
         Name = "F2P Platform 2.0 Host",
         Swagger = "/swagger",
+        IdentityLogin = "/api/identity/login",
         ReferenceStatus = "/api/reference/status",
         Health = "/health",
         SignalRHub = "/hubs/platform-events",
@@ -48,6 +51,7 @@ try
     app.Lifetime.ApplicationStarted.Register(() =>
         Log.Information("Listening on: {Urls}", string.Join(", ", app.Urls)));
     app.MapHealthChecks("/health");
+    app.MapIdentityModule();
     app.MapReferenceModule();
     app.MapHub<PlatformEventsHub>("/hubs/platform-events");
 

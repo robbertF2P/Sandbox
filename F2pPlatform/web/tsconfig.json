@@ -22,6 +22,8 @@
     "paths": {
       "@f2p/shared/api-core": ["libs/shared/api-core/src/index.ts"],
       "@f2p/shared/platform-events": ["libs/shared/platform-events/src/index.ts"],
+      "@f2p/shared/ui": ["libs/shared/ui/src/index.ts"],
+      "@f2p/identity/data-access": ["libs/identity/data-access/src/index.ts"],
       "@f2p/reference/data-access": ["libs/reference/data-access/src/index.ts"],
       "@f2p/reference/feature-status": ["libs/reference/feature-status/src/index.ts"]
     }
