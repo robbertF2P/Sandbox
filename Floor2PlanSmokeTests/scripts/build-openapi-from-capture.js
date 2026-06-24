@@ -3,38 +3,13 @@
 
 const fs = require('fs');
 const path = require('path');
+const { schemaForSample, parseBody } = require('./utils');
 
 const CAPTURE_DIR = path.join(__dirname, '..', 'artifacts', 'api-discovery');
 const OPENAPI_PATH = path.join(__dirname, '..', 'swagger', 'openapi.json');
 const baseUrl = process.env.TARGET_URL
   ? new URL(process.env.TARGET_URL).origin
   : 'https://2025-14-patch.floor2plan.com';
-
-function schemaForSample(sample) {
-  if (sample === null) {
-    return { nullable: true };
-  }
-  if (Array.isArray(sample)) {
-    return { type: 'array', items: sample.length ? schemaForSample(sample[0]) : {} };
-  }
-  switch (typeof sample) {
-    case 'string':
-      return { type: 'string' };
-    case 'number':
-      return Number.isInteger(sample) ? { type: 'integer' } : { type: 'number' };
-    case 'boolean':
-      return { type: 'boolean' };
-    case 'object': {
-      const properties = {};
-      for (const [key, value] of Object.entries(sample)) {
-        properties[key] = schemaForSample(value);
-      }
-      return { type: 'object', properties };
-    }
-    default:
-      return {};
-  }
-}
 
 function shouldIncludeCapture(entry) {
   if (isExcludedPath(entry.path, entry.contentType)) {
@@ -156,21 +131,6 @@ function buildOpenApi(captures) {
     tags: [...new Set(Object.values(paths).flatMap((ops) => Object.values(ops).map((op) => op.tags[0])))].map((name) => ({ name })),
     paths,
   };
-}
-
-function parseBody(body) {
-  if (typeof body !== 'string') {
-    return body;
-  }
-  const trimmed = body.trim();
-  if (trimmed.startsWith('{') || trimmed.startsWith('[')) {
-    try {
-      return JSON.parse(trimmed);
-    } catch {
-      return body;
-    }
-  }
-  return body;
 }
 
 function main() {
