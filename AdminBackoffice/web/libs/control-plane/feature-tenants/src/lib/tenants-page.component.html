@@ -1,0 +1,66 @@
+<div class="admin-page">
+  <header class="admin-header">
+    <div>
+      <h1 class="admin-title">Tenants</h1>
+      <p class="admin-subtitle">Control-plane registry — provision and sync tenants to the v2 platform.</p>
+    </div>
+    <a routerLink="/tenants/new" class="admin-button admin-button--primary">New tenant</a>
+  </header>
+
+  @if (loading()) {
+    <p class="admin-muted">Loading tenants…</p>
+  } @else if (error()) {
+    <div class="admin-alert admin-alert--error">{{ error() }}</div>
+  } @else if (tenants().length === 0) {
+    <div class="admin-card admin-empty">
+      <p>No tenants yet.</p>
+      <a routerLink="/tenants/new" class="admin-link">Create the first tenant</a>
+    </div>
+  } @else {
+    <div class="admin-card">
+      <table class="admin-table">
+        <thead>
+          <tr>
+            <th>Slug</th>
+            <th>Display name</th>
+            <th>Mode</th>
+            <th>Status</th>
+            <th>Last synced</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (tenant of tenants(); track tenant.tenantId) {
+            <tr>
+              <td><code>{{ tenant.slug }}</code></td>
+              <td>{{ tenant.displayName }}</td>
+              <td>{{ tenant.deploymentProfile.mode }}</td>
+              <td>
+                <span [class]="statusClass(tenant.status)">{{ tenant.status }}</span>
+                @if (tenant.lastPlatformSyncError) {
+                  <div class="admin-sync-error" title="{{ tenant.lastPlatformSyncError }}">Sync error</div>
+                }
+              </td>
+              <td>
+                @if (tenant.lastSyncedToPlatformAt) {
+                  {{ tenant.lastSyncedToPlatformAt | date: 'medium' }}
+                } @else {
+                  <span class="admin-muted">Never</span>
+                }
+              </td>
+              <td class="admin-actions">
+                <button
+                  type="button"
+                  class="admin-button admin-button--ghost"
+                  [disabled]="syncingId() === tenant.tenantId"
+                  (click)="syncTenant(tenant)">
+                  {{ syncingId() === tenant.tenantId ? 'Syncing…' : 'Sync' }}
+                </button>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</div>

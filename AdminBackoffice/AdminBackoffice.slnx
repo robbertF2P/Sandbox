@@ -5,6 +5,8 @@
   <Folder Name="/src/">
     <Project Path="src/ControlPlane.Api/ControlPlane.Api.csproj" />
     <Project Path="src/ControlPlane.Application/ControlPlane.Application.csproj" />
+    <Project Path="src/ControlPlane.Contracts/ControlPlane.Contracts.csproj" />
+    <Project Path="src/ControlPlane.Core/ControlPlane.Core.csproj" />
     <Project Path="src/ControlPlane.Data.Migrations/ControlPlane.Data.Migrations.csproj" />
     <Project Path="src/ControlPlane.Infrastructure/ControlPlane.Infrastructure.csproj" />
   </Folder>

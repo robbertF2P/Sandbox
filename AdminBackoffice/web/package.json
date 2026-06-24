@@ -1,0 +1,33 @@
+{
+  "name": "@admin/backoffice-web",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Admin backoffice Angular UI — tenant provisioning",
+  "scripts": {
+    "start": "NG_CLI_ANALYTICS=false ng serve admin-shell",
+    "build": "ng build admin-shell",
+    "watch": "ng build admin-shell --watch --configuration development"
+  },
+  "dependencies": {
+    "@angular/common": "^19.2.0",
+    "@angular/compiler": "^19.2.0",
+    "@angular/core": "^19.2.0",
+    "@angular/forms": "^19.2.0",
+    "@angular/platform-browser": "^19.2.0",
+    "@angular/platform-browser-dynamic": "^19.2.0",
+    "@angular/router": "^19.2.0",
+    "@floorganise/css": "file:../../FloorganiseCss",
+    "@tailwindcss/postcss": "^4.3.1",
+    "postcss": "^8.5.15",
+    "rxjs": "~7.8.0",
+    "tailwindcss": "^4.3.1",
+    "tslib": "^2.3.0",
+    "zone.js": "~0.15.0"
+  },
+  "devDependencies": {
+    "@angular-devkit/build-angular": "^19.2.27",
+    "@angular/cli": "^19.2.27",
+    "@angular/compiler-cli": "^19.2.0",
+    "typescript": "~5.7.2"
+  }
+}

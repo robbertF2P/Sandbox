@@ -1,3 +1,4 @@
+using ControlPlane.Api.Services;
 using ControlPlane.Application;
 using ControlPlane.Infrastructure;
 using Microsoft.AspNetCore.Builder;
@@ -17,6 +18,7 @@ public static class DependencyInjection
 
         services.AddControlPlaneApplication();
         services.AddControlPlaneInfrastructure(configuration);
+        services.AddControlPlaneActors();
         return services;
     }
 
