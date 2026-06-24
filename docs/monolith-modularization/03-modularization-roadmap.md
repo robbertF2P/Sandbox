@@ -2,7 +2,7 @@
 
 **Purpose:** Cross-cutting standards and extraction order for Platform 2.0 POCs in this repo, ahead of the full monolith strangler program in the external F2P repository.
 
-**Related:** `docs/monolith-modularization/analysis-instructions.md`, `docs/monolith-modularization/ai-assisted-delivery-quality-framework.md`
+**Related:** `docs/monolith-modularization/analysis-instructions.md`, `docs/monolith-modularization/ai-assisted-delivery-quality-framework.md`, `docs/monolith-modularization/platform-actor-standard.md`
 
 ---
 
@@ -68,7 +68,7 @@ app.UsePlatformCorrelationPipeline();
 app.UsePlatformRequestLogging();
 ```
 
-**Actor boundaries:** wrap commands with `AskCorrelated` / `TellCorrelated` and `ReceiveCorrelated` (see [platform-correlation-standard.md](./platform-correlation-standard.md)).
+**Actor boundaries:** wrap commands with `AskCorrelated` / `TellCorrelated` and `ReceiveCorrelated` (see [platform-correlation-standard.md](./platform-correlation-standard.md)). Workflow design: [platform-actor-standard.md](./platform-actor-standard.md).
 
 ### 3. Test logging — Serilog xUnit sink (mandatory)
 
@@ -167,3 +167,4 @@ builder.AddSerilog(logger, dispose: true);
 | 1.0 | 2026-06-20 | Initial SandBox POC roadmap; Serilog + xUnit sink requirement |
 | 1.2 | 2026-06-20 | Platform.Serilog.Logging NuGet + `build/` MSBuild adoption standard |
 | 1.3 | 2026-06-21 | `@floorganise/css` + `@floorganise/ui` required for all V2 frontend modules |
+| 1.4 | 2026-06-23 | `platform-actor-standard.md` — workflow orchestration for packs and legacy |

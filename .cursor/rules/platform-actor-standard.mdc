@@ -1,0 +1,22 @@
+---
+description: Akka.NET workflow orchestration for integrations, tenant packs, and legacy strangler bridges
+globs:
+  - "**/*Actor*.cs"
+  - "**/Akka*.cs"
+  - "docs/monolith-modularization/platform-actor-standard.md"
+alwaysApply: false
+---
+
+# Platform actor standard
+
+When designing or implementing workflow orchestration (Platform 2.0 / F2P strangler):
+
+1. **Actors compose workflows at boundaries** — domain rules stay in plain Application/Domain modules.
+2. **One persist actor per workflow** — sole `DbContext` boundary for that flow.
+3. **Client variance via packs** — integration/customization packs registered per tenant; no `if (tenant == …)` in core.
+4. **Legacy via `[StranglerAdapter]`** in Infrastructure — explicit delegation with removal ticket.
+5. **No SaveChanges orchestration** — replace handler chains with explicit message pipelines.
+6. **No `Ask` inside actors** — `Tell`/`Forward` internally; `AskCorrelated` at HTTP/facade only.
+7. **Messages/events in Contracts** — past-tense event names; correlation per `platform-correlation-standard.md`.
+
+Full standard: `docs/monolith-modularization/platform-actor-standard.md`
