@@ -4,14 +4,20 @@
 const fs = require('fs');
 const path = require('path');
 const { URL } = require('url');
+const { schemaForSample } = require('./utils');
 
-const DEFAULT_TARGET = 'https://2025-14-patch.floor2plan.com/Account/Login';
+const DEFAULT_TARGET = 'https://2025-14-patch.floor2plan.com/Account/Login'; // Keep in sync with cypress.config.js defaultTargetUrl
 const OUTPUT_DIR = path.join(__dirname, '..', 'artifacts', 'api-discovery');
 
 const targetUrl = process.env.TARGET_URL || process.env.TARGET_URLS?.split(',')[0]?.trim() || DEFAULT_TARGET;
 const baseUrl = new URL(targetUrl).origin;
-const username = process.env.SMOKE_SERVICE_USERNAME || 'testrd';
-const password = process.env.SMOKE_SERVICE_PASSWORD || 'test';
+const username = process.env.SMOKE_SERVICE_USERNAME;
+const password = process.env.SMOKE_SERVICE_PASSWORD;
+
+if (!username || !password) {
+  console.error('Error: SMOKE_SERVICE_USERNAME and SMOKE_SERVICE_PASSWORD must be set.');
+  process.exit(1);
+}
 
 const HTML_EXCLUDE_PATTERNS = [
   /viewtemplate/i,
@@ -209,43 +215,6 @@ function toOpenApiPath(endpointPath) {
   return endpointPath.replace(/\{param\}/g, '{id}');
 }
 
-function schemaForSample(sample) {
-  if (sample === null) {
-    return { nullable: true };
-  }
-
-  if (Array.isArray(sample)) {
-    return {
-      type: 'array',
-      items: sample.length > 0 ? schemaForSample(sample[0]) : {},
-    };
-  }
-
-  switch (typeof sample) {
-    case 'string':
-      return { type: 'string' };
-    case 'number':
-      return Number.isInteger(sample) ? { type: 'integer' } : { type: 'number' };
-    case 'boolean':
-      return { type: 'boolean' };
-    case 'object': {
-      const properties = {};
-      const required = [];
-      for (const [key, value] of Object.entries(sample)) {
-        properties[key] = schemaForSample(value);
-        required.push(key);
-      }
-      return {
-        type: 'object',
-        properties,
-        required,
-      };
-    }
-    default:
-      return {};
-  }
-}
-
 async function probeEndpoint(endpointPath, cookies) {
   const methods = inferMethods(endpointPath);
   const results = [];
@@ -395,7 +364,7 @@ async function main() {
   console.log(`Downloading ${bundlePaths.size} JavaScript bundles`);
   for (const bundlePath of bundlePaths) {
     const { text } = await fetchText(`${baseUrl}${bundlePath}`, cookies);
-  for (const endpoint of extractPathsFromText(text)) {
+    for (const endpoint of extractPathsFromText(text)) {
       discoveredPaths.add(endpoint);
     }
   }

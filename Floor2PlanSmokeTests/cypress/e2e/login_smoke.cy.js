@@ -1,13 +1,7 @@
-const defaultTargetUrl = 'https://2025-14-patch.floor2plan.com/Account/Login';
-
-const splitTargetUrls = () => {
-  const configuredUrls = Cypress.env('targetUrls') || Cypress.env('targetUrl') || defaultTargetUrl;
-
-  return configuredUrls
-    .split(',')
-    .map((url) => url.trim())
-    .filter(Boolean);
-};
+const splitTargetUrls = () => Cypress.env('targetUrls')
+  .split(',')
+  .map((url) => url.trim())
+  .filter(Boolean);
 
 const tileSelectors = [
   '.f2ps-tile',
@@ -198,14 +192,16 @@ const captureConsole = (win, consoleEntries) => {
   });
 };
 
-let activeConsoleEntries;
+// Module-level reference required for Cypress.on('uncaught:exception'), which is registered
+// at module scope and cannot close over per-test state. Updated in beforeEach/afterEach.
+const uncaughtContext = { entries: null };
 
 Cypress.on('uncaught:exception', (error) => {
-  if (!activeConsoleEntries) {
+  if (!uncaughtContext.entries) {
     return undefined;
   }
 
-  recordConsoleEntry(activeConsoleEntries, {
+  recordConsoleEntry(uncaughtContext.entries, {
     level: 'error',
     source: 'uncaught exception',
     url: 'uncaught exception',
@@ -214,6 +210,14 @@ Cypress.on('uncaught:exception', (error) => {
 
   return false;
 });
+
+const ERROR_PAGE_PATTERNS = [
+  'An error occurred',
+  'Object reference not set',
+  'HTTP Error 500',
+  'Application Error',
+  '500 Internal Server Error',
+];
 
 const assertPageLoaded = (name) => {
   cy.location('href', { timeout: 30000 }).then((href) => {
@@ -225,9 +229,9 @@ const assertPageLoaded = (name) => {
       const text = $body.text().trim();
 
       expect(text, `${name} body text`).to.not.equal('');
-      expect(text, `${name} error page`).to.not.include('An error occurred');
-      expect(text, `${name} error page`).to.not.include('Object reference not set');
-      expect(text, `${name} error page`).to.not.include('HTTP Error 500');
+      ERROR_PAGE_PATTERNS.forEach((pattern) => {
+        expect(text, `${name} error page`).to.not.include(pattern);
+      });
     });
 };
 
@@ -245,16 +249,16 @@ const assertLoggedInHome = (targetUrl) => {
   assertHomeTiles();
 };
 
-const loginThroughLogo = (targetUrl) => {
+const loginThroughLogo = () => {
   cy.log('Click lower-right Floorganise logo');
   cy.get('#azure-login img[alt="Floorganise logo"]')
     .should('be.visible')
     .click({ force: true });
 
-  assertLoggedInHome(targetUrl);
+  cy.location('pathname', { timeout: 30000 }).should('not.include', '/Account/Login');
 };
 
-const loginThroughServiceForm = (targetUrl) => {
+const loginThroughServiceForm = () => {
   const username = Cypress.env('serviceUsername');
   const password = Cypress.env('servicePassword');
 
@@ -275,26 +279,36 @@ const loginThroughServiceForm = (targetUrl) => {
     .first()
     .click({ force: true });
 
-  assertLoggedInHome(targetUrl);
+  cy.location('pathname', { timeout: 30000 }).should('not.include', '/Account/Login');
 };
 
 const loginToHome = (targetUrl) => {
-  cy.visit(targetUrl);
+  // Cache the authenticated session across all tests in this spec run.
+  cy.session(
+    ['smoke-login', targetUrl, loginMode()],
+    () => {
+      cy.visit(targetUrl);
+      cy.location('href', { timeout: 30000 }).should('include', '/Account/Login');
+      cy.get('body').should('be.visible').and('not.be.empty');
 
-  cy.location('href', { timeout: 30000 }).should('include', '/Account/Login');
-  cy.get('body').should('be.visible').and('not.be.empty');
+      const mode = loginMode();
+      if (mode === 'logo') {
+        loginThroughLogo();
+      } else if (mode === 'service') {
+        loginThroughServiceForm();
+      } else {
+        throw new Error(`Unsupported SMOKE_LOGIN_MODE: ${Cypress.env('loginMode')}`);
+      }
+    },
+    {
+      validate() {
+        cy.location('pathname').should('not.include', '/Account/Login');
+      },
+    },
+  );
 
-  if (loginMode() === 'logo') {
-    loginThroughLogo(targetUrl);
-    return;
-  }
-
-  if (loginMode() === 'service') {
-    loginThroughServiceForm(targetUrl);
-    return;
-  }
-
-  throw new Error(`Unsupported SMOKE_LOGIN_MODE: ${Cypress.env('loginMode')}`);
+  cy.visit(new URL(targetUrl).origin + '/');
+  assertLoggedInHome(targetUrl);
 };
 
 const visitHome = (homeUrl) => {
@@ -394,7 +408,7 @@ splitTargetUrls().forEach((targetUrl) => {
     beforeEach(() => {
       consoleEntries = [];
       navigationEntries = [];
-      activeConsoleEntries = consoleEntries;
+      uncaughtContext.entries = consoleEntries;
 
       cy.on('window:before:load', (win) => {
         captureConsole(win, consoleEntries);
@@ -410,7 +424,7 @@ splitTargetUrls().forEach((targetUrl) => {
       cy.writeFile(navigationArtifact, navigationEntries, { log: true });
       cy.writeFile(consoleArtifact, consoleEntries, { log: true })
         .then(() => {
-          activeConsoleEntries = null;
+        uncaughtContext.entries = null;
 
           const consoleErrors = consoleEntries.filter((entry) => entry.level === 'error');
 
