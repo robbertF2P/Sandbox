@@ -152,7 +152,11 @@
   }
 
   .f2ps-home-module-tile {
-    @apply relative flex h-[180px] flex-col overflow-hidden rounded-f2p-sm border shadow-[var(--shadow-f2p-tile)] text-white transition-shadow duration-100;
+    @apply relative flex h-[180px] flex-col overflow-hidden rounded-f2p-sm border-0 shadow-[var(--shadow-f2p-tile)] text-white transition-shadow duration-100;
+  }
+
+  .f2ps-tile.f2ps-home-module-tile {
+    @apply border-0 bg-transparent p-0;
   }
 
   .f2ps-home-module-tile.f2ps-clickable:hover {

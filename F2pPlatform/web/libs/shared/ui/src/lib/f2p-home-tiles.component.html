@@ -1,7 +1,7 @@
 <div class="f2p-home-module-grid">
   @for (tile of tiles(); track tile.route) {
     <article
-      class="f2ps-tile f2ps-home-module-tile f2ps-clickable"
+      class="f2ps-home-module-tile f2ps-clickable f2ps-tile"
       [ngClass]="moduleClass(tile)"
       [attr.data-testid]="'home-tile-' + tile.label.toLowerCase()"
       [attr.aria-label]="tile.label + '. ' + tile.meta"
