@@ -29,6 +29,10 @@ public static class DependencyInjection
             options.UseSqlServer(connectionString, sql =>
                 sql.MigrationsAssembly(MigrationsAssemblyName)));
 
+        services.AddDbContextFactory<ControlPlaneDbContext>(options =>
+            options.UseSqlServer(connectionString, sql =>
+                sql.MigrationsAssembly(MigrationsAssemblyName)));
+
         services.Configure<PlatformConfigurationOptions>(
             configuration.GetSection(PlatformConfigurationOptions.SectionName));
 

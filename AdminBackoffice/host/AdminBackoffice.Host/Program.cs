@@ -11,6 +11,17 @@ try
 
     Log.Information("Starting admin backoffice host");
 
+    var corsOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>()
+        ?? ["http://localhost:5190"];
+
+    builder.Services.AddCors(options =>
+    {
+        options.AddDefaultPolicy(policy =>
+            policy.WithOrigins(corsOrigins)
+                .AllowAnyHeader()
+                .AllowAnyMethod());
+    });
+
     builder.Services.AddEndpointsApiExplorer();
     builder.Services.AddSwaggerGen(options =>
     {
@@ -32,6 +43,7 @@ try
         await dbContext.Database.MigrateAsync();
     }
 
+    app.UseCors();
     app.UseSwagger();
     app.UseSwaggerUI(options =>
     {

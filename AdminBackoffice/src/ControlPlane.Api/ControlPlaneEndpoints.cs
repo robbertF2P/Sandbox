@@ -1,4 +1,6 @@
 using ControlPlane.Application.Ports;
+using ControlPlane.Contracts.Interfaces;
+using ControlPlane.Contracts.Messages.Provisioning;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
@@ -36,45 +38,56 @@ internal static class ControlPlaneEndpoints
 
         group.MapPost("/tenants", async (
                 ProvisionTenantRequestBody body,
-                ITenantProvisioningService provisioningService,
+                IControlPlaneActorFacade actorFacade,
                 CancellationToken cancellationToken) =>
             {
-                try
+                ProvisionTenantResult result = await actorFacade.ProvisionTenantAsync(
+                    body.ToRequest(),
+                    cancellationToken);
+
+                if (result.Success && result.Tenant is not null)
                 {
-                    TenantRecord tenant = await provisioningService.ProvisionAsync(
-                        body.ToRequest(),
-                        cancellationToken);
-                    return Results.Created($"/admin/tenants/{tenant.TenantId}", tenant);
+                    return Results.Created($"/admin/tenants/{result.Tenant.TenantId}", result.Tenant);
                 }
-                catch (ArgumentException exception)
+
+                return result.ErrorKind switch
                 {
-                    return Results.BadRequest(new { error = exception.Message });
-                }
-                catch (InvalidOperationException exception)
-                {
-                    return Results.Conflict(new { error = exception.Message });
-                }
+                    ProvisionErrorKind.Validation => Results.BadRequest(new { error = result.ErrorMessage }),
+                    ProvisionErrorKind.Conflict => Results.Conflict(new { error = result.ErrorMessage }),
+                    ProvisionErrorKind.PlatformSync => Results.Problem(
+                        detail: result.ErrorMessage,
+                        statusCode: StatusCodes.Status502BadGateway,
+                        title: "Platform sync failed"),
+                    _ => Results.Problem(detail: result.ErrorMessage ?? "Provisioning failed.")
+                };
             })
             .WithName("ProvisionTenant")
-            .WithSummary("Provision a tenant, persist to control-plane DB, and push config to the v2 platform.");
+            .WithSummary("Provision a tenant via Akka actor pipeline, persist, and push config to the v2 platform.");
 
         group.MapPost("/tenants/{tenantId:guid}/sync", async (
                 Guid tenantId,
-                ITenantProvisioningService provisioningService,
+                IControlPlaneActorFacade actorFacade,
                 CancellationToken cancellationToken) =>
             {
-                try
+                SyncTenantResult result = await actorFacade.SyncTenantAsync(tenantId, cancellationToken);
+
+                if (result.Success && result.Tenant is not null)
                 {
-                    TenantRecord tenant = await provisioningService.SyncToPlatformAsync(tenantId, cancellationToken);
-                    return Results.Ok(tenant);
+                    return Results.Ok(result.Tenant);
                 }
-                catch (KeyNotFoundException)
+
+                if (result.ErrorMessage?.Contains("not found", StringComparison.OrdinalIgnoreCase) == true)
                 {
                     return Results.NotFound();
                 }
+
+                return Results.Problem(
+                    detail: result.ErrorMessage,
+                    statusCode: StatusCodes.Status502BadGateway,
+                    title: "Platform sync failed");
             })
             .WithName("SyncTenantToPlatform")
-            .WithSummary("Re-push tenant configuration to the v2 platform runtime.");
+            .WithSummary("Re-push tenant configuration to the v2 platform runtime via Akka actors.");
 
         return app;
     }
