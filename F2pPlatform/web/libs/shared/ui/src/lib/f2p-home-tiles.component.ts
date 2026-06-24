@@ -1,6 +1,6 @@
 import { Component, input, output } from '@angular/core';
 import { NgClass } from '@angular/common';
-import { HomeTile, HomeTileModuleColor, HomeTileStatus } from './home-tile.model';
+import { HomeTile, HomeTileIcon, HomeTileModuleColor } from './home-tile.model';
 
 @Component({
   selector: 'f2p-home-tiles',
@@ -11,17 +11,6 @@ export class F2pHomeTilesComponent {
   readonly tiles = input.required<HomeTile[]>();
   readonly tileSelect = output<HomeTile>();
 
-  statusClass(tile: HomeTile): Record<string, boolean> {
-    const status: HomeTileStatus = tile.status ?? 'primary';
-    return {
-      'f2ps-tile-status-primary': status === 'primary',
-      'f2ps-tile-status-success': status === 'success',
-      'f2ps-tile-status-warning': status === 'warning',
-      'f2ps-tile-status-inprogress': status === 'inprogress',
-      'f2ps-tile-status-planned': status === 'planned',
-    };
-  }
-
   moduleClass(tile: HomeTile): Record<string, boolean> {
     const color: HomeTileModuleColor = tile.moduleColor ?? 'generic';
     return {
@@ -30,6 +19,16 @@ export class F2pHomeTilesComponent {
       'module-tile-orange': color === 'orange',
       'module-tile-purple': color === 'purple',
       'module-tile-generic': color === 'generic',
+    };
+  }
+
+  iconClass(tile: HomeTile): Record<string, boolean> {
+    const icon: HomeTileIcon = tile.icon ?? 'grid';
+    return {
+      'f2ps-icon-module-grid': icon === 'grid',
+      'f2ps-icon-module-ship': icon === 'ship',
+      'f2ps-icon-module-clock': icon === 'clock',
+      'f2ps-icon-module-check': icon === 'check',
     };
   }
 

@@ -1,25 +1,19 @@
-<div class="f2p-tile-grid">
+<div class="f2p-home-module-grid">
   @for (tile of tiles(); track tile.route) {
     <article
-      class="f2ps-tile f2ps-clickable"
+      class="f2ps-tile f2ps-home-module-tile f2ps-clickable"
+      [ngClass]="moduleClass(tile)"
       [attr.data-testid]="'home-tile-' + tile.label.toLowerCase()"
+      [attr.aria-label]="tile.label + '. ' + tile.meta"
       (click)="onTileClick(tile)"
       (keyup.enter)="onTileClick(tile)"
       tabindex="0"
       role="button"
     >
-      <div class="f2ps-tile-status" [ngClass]="statusClass(tile)"></div>
       <div class="f2ps-tile-abbreviation">{{ tile.abbreviation }}</div>
-      <div class="f2ps-tile-title-border">
-        <span class="truncate">{{ tile.label }}</span>
-      </div>
-      <div class="f2ps-tile-content">
-        <span class="module-tile" [ngClass]="moduleClass(tile)">{{ tile.abbreviation }}</span>
-      </div>
-      <div class="f2ps-tile-footer">
-        <div class="f2ps-tile-footer-description">
-          <div><span>{{ tile.meta }}</span></div>
-        </div>
+      <div class="f2ps-module-title pl-10">{{ tile.label }}</div>
+      <div class="f2ps-module-icon">
+        <span class="f2ps-icon" [ngClass]="iconClass(tile)" aria-hidden="true"></span>
       </div>
     </article>
   }
