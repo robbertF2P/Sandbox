@@ -45,7 +45,8 @@ try
         Health = "/health",
         SignalRHub = "/hubs/platform-events",
     }));
-
+    app.Lifetime.ApplicationStarted.Register(() =>
+        Log.Information("Listening on: {Urls}", string.Join(", ", app.Urls)));
     app.MapHealthChecks("/health");
     app.MapReferenceModule();
     app.MapHub<PlatformEventsHub>("/hubs/platform-events");
