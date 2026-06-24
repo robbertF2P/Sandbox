@@ -141,64 +141,6 @@
     mask-position: center;
   }
 
-  .f2ps-icon-layout-module {
-    @apply size-[19px] min-h-[19px] min-w-[19px];
-    -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cg%3E%3Crect x='0.25' y='0.25' width='6.5' height='6.5' rx='1.5'/%3E%3Crect x='0.25' y='8.75' width='6.5' height='6.5' rx='1.5'/%3E%3Crect x='0.25' y='17.25' width='6.5' height='6.5' rx='1.5'/%3E%3Crect x='8.75' y='0.25' width='6.5' height='6.5' rx='1.5'/%3E%3Crect x='8.75' y='8.75' width='6.5' height='6.5' rx='1.5'/%3E%3Crect x='8.75' y='17.25' width='6.5' height='6.5' rx='1.5'/%3E%3Crect x='17.25' y='0.25' width='6.5' height='6.5' rx='1.5'/%3E%3Crect x='17.25' y='8.75' width='6.5' height='6.5' rx='1.5'/%3E%3Crect x='17.25' y='17.25' width='6.5' height='6.5' rx='1.5'/%3E%3C/g%3E%3C/svg%3E");
-    mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cg%3E%3Crect x='0.25' y='0.25' width='6.5' height='6.5' rx='1.5'/%3E%3Crect x='0.25' y='8.75' width='6.5' height='6.5' rx='1.5'/%3E%3Crect x='0.25' y='17.25' width='6.5' height='6.5' rx='1.5'/%3E%3Crect x='8.75' y='0.25' width='6.5' height='6.5' rx='1.5'/%3E%3Crect x='8.75' y='8.75' width='6.5' height='6.5' rx='1.5'/%3E%3Crect x='8.75' y='17.25' width='6.5' height='6.5' rx='1.5'/%3E%3Crect x='17.25' y='0.25' width='6.5' height='6.5' rx='1.5'/%3E%3Crect x='17.25' y='8.75' width='6.5' height='6.5' rx='1.5'/%3E%3Crect x='17.25' y='17.25' width='6.5' height='6.5' rx='1.5'/%3E%3C/g%3E%3C/svg%3E");
-  }
-
-  .f2p-home-module-grid {
-    @apply grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4;
-  }
-
-  .f2ps-home-module-tile {
-    @apply relative flex h-[180px] flex-col overflow-hidden rounded-f2p-sm border-0 shadow-[var(--shadow-f2p-tile)] text-white transition-shadow duration-100;
-  }
-
-  .f2ps-tile.f2ps-home-module-tile {
-    @apply border-0 bg-transparent p-0;
-  }
-
-  .f2ps-home-module-tile.f2ps-clickable:hover {
-    @apply shadow-[0_2px_7px_rgb(0_0_0/0.2)];
-  }
-
-  .f2ps-home-module-tile.module-tile-blue {
-    @apply border-f2p-module-blue bg-f2p-module-blue;
-  }
-
-  .f2ps-home-module-tile.module-tile-green {
-    @apply border-f2p-module-green bg-f2p-module-green;
-  }
-
-  .f2ps-home-module-tile.module-tile-orange {
-    @apply border-f2p-module-orange bg-f2p-module-orange;
-  }
-
-  .f2ps-home-module-tile.module-tile-purple {
-    @apply border-f2p-module-purple bg-f2p-module-purple;
-  }
-
-  .f2ps-home-module-tile.module-tile-generic {
-    @apply border-f2p-module-generic bg-f2p-module-generic;
-  }
-
-  .f2ps-home-module-tile .f2ps-tile-abbreviation {
-    @apply z-10;
-  }
-
-  .f2ps-home-module-tile .f2ps-module-title {
-    @apply flex h-[50px] shrink-0 items-center px-3 text-sm font-semibold uppercase;
-  }
-
-  .f2ps-home-module-tile .f2ps-module-icon {
-    @apply flex flex-1 items-center justify-center;
-  }
-
-  .f2ps-home-module-tile .f2ps-module-icon .f2ps-icon {
-    @apply size-16 bg-white;
-  }
-
   .module-tile {
     @apply flex size-[60px] items-center justify-center rounded-f2p-sm border border-f2p-border shadow-[var(--shadow-f2p-tile)];
   }
@@ -225,30 +167,6 @@
 
   .module-tile-generic {
     @apply bg-f2p-module-generic;
-  }
-
-  .f2ps-icon-module-grid {
-    @apply size-16 min-h-16 min-w-16;
-    -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='1.5'%3E%3Crect x='3' y='3' width='7' height='7' rx='1.5'/%3E%3Crect x='3' y='14' width='7' height='7' rx='1.5'/%3E%3Crect x='14' y='3' width='7' height='7' rx='1.5'/%3E%3Crect x='14' y='14' width='7' height='7' rx='1.5'/%3E%3C/svg%3E");
-    mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='1.5'%3E%3Crect x='3' y='3' width='7' height='7' rx='1.5'/%3E%3Crect x='3' y='14' width='7' height='7' rx='1.5'/%3E%3Crect x='14' y='3' width='7' height='7' rx='1.5'/%3E%3Crect x='14' y='14' width='7' height='7' rx='1.5'/%3E%3C/svg%3E");
-  }
-
-  .f2ps-icon-module-ship {
-    @apply size-16 min-h-16 min-w-16;
-    -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='1.5'%3E%3Cpath d='M3 18h18M5 14l2-6h10l2 6M8 8V5h8v3'/%3E%3C/svg%3E");
-    mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='1.5'%3E%3Cpath d='M3 18h18M5 14l2-6h10l2 6M8 8V5h8v3'/%3E%3C/svg%3E");
-  }
-
-  .f2ps-icon-module-clock {
-    @apply size-16 min-h-16 min-w-16;
-    -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='1.5'%3E%3Ccircle cx='12' cy='12' r='8'/%3E%3Cpath d='M12 8v4l3 2'/%3E%3C/svg%3E");
-    mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='1.5'%3E%3Ccircle cx='12' cy='12' r='8'/%3E%3Cpath d='M12 8v4l3 2'/%3E%3C/svg%3E");
-  }
-
-  .f2ps-icon-module-check {
-    @apply size-16 min-h-16 min-w-16;
-    -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='1.5'%3E%3Cpath d='M9 11l2 2 4-4M5 5h14v14H5z'/%3E%3C/svg%3E");
-    mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='1.5'%3E%3Cpath d='M9 11l2 2 4-4M5 5h14v14H5z'/%3E%3C/svg%3E");
   }
 
   #f2ps-layout-menu.navbar {
@@ -332,18 +250,5 @@
 
   form.login input[type='checkbox'] {
     @apply size-4 accent-f2p-brand;
-  }
-
-  .f2p-login-page {
-    @apply flex min-h-screen items-center justify-center p-6;
-    background:
-      linear-gradient(135deg, rgb(16 24 33 / 0.55), rgb(0 174 239 / 0.2)),
-      url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="800"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="%23101821"/><stop offset="100%" stop-color="%2300aeef"/></linearGradient></defs><rect width="1200" height="800" fill="url(%23g)"/></svg>');
-    background-size: cover;
-    background-position: center;
-  }
-
-  .f2p-login-panel {
-    @apply w-full max-w-2xl;
   }
 }

@@ -21,7 +21,6 @@ export class HomePageComponent {
       meta: 'Module status + SignalR events',
       route: '/reference',
       moduleColor: 'blue',
-      icon: 'grid',
     },
     {
       label: 'Planning',
@@ -29,7 +28,6 @@ export class HomePageComponent {
       meta: '12 open activities',
       route: '/modules/planning',
       moduleColor: 'blue',
-      icon: 'ship',
     },
     {
       label: 'Production',
@@ -37,7 +35,6 @@ export class HomePageComponent {
       meta: 'Hull 247 — Block 204',
       route: '/modules/production',
       moduleColor: 'green',
-      icon: 'ship',
     },
     {
       label: 'Quality',
@@ -45,7 +42,6 @@ export class HomePageComponent {
       meta: '3 inspections due',
       route: '/modules/quality',
       moduleColor: 'purple',
-      icon: 'check',
     },
   ];
 

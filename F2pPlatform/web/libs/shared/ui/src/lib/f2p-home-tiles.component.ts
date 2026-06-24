@@ -1,6 +1,6 @@
 import { Component, input, output } from '@angular/core';
 import { NgClass } from '@angular/common';
-import { HomeTile, HomeTileIcon, HomeTileModuleColor } from './home-tile.model';
+import { HomeTile, HomeTileModuleColor } from './home-tile.model';
 
 @Component({
   selector: 'f2p-home-tiles',
@@ -19,16 +19,6 @@ export class F2pHomeTilesComponent {
       'module-tile-orange': color === 'orange',
       'module-tile-purple': color === 'purple',
       'module-tile-generic': color === 'generic',
-    };
-  }
-
-  iconClass(tile: HomeTile): Record<string, boolean> {
-    const icon: HomeTileIcon = tile.icon ?? 'grid';
-    return {
-      'f2ps-icon-module-grid': icon === 'grid',
-      'f2ps-icon-module-ship': icon === 'ship',
-      'f2ps-icon-module-clock': icon === 'clock',
-      'f2ps-icon-module-check': icon === 'check',
     };
   }
 
