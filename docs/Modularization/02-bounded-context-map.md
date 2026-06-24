@@ -5,6 +5,7 @@
 
 **Generated:** 2026-06-24
 **Inputs:** 00-inventory.md, 01-entry-points.md
+**UI mapping:** 03-ui-to-context-map.md (home tiles and navigation pages)
 **Proposed context count:** 7
 
 ---

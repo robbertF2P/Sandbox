@@ -13,6 +13,7 @@
     "capture:api": "cypress run --spec cypress/e2e/api_capture.cy.js",
     "build:openapi": "node scripts/build-openapi-from-capture.js",
     "document:api": "npm run capture:api && npm run build:openapi",
+    "test:ui-context-map": "node scripts/test-ui-context-map.js",
     "test:xunit": "dotnet test Floor2PlanSmokeTests.csproj"
   },
   "keywords": [],

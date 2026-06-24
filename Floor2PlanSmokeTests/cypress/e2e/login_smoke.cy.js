@@ -3,6 +3,10 @@ const splitTargetUrls = () => Cypress.env('targetUrls')
   .map((url) => url.trim())
   .filter(Boolean);
 
+const {
+  buildUiContextMapArtifact,
+} = require('../../scripts/ui-context-map');
+
 const tileSelectors = [
   '.f2ps-tile',
   '[class*="tile"]',
@@ -57,6 +61,7 @@ const menuItemSelectors = [
 ].join(',');
 
 const homeTileSelector = () => Cypress.env('homeTileSelector') || tileSelectors;
+const logicalHomeTileSelector = () => Cypress.env('logicalHomeTileSelector') || '.f2ps-tile:has(.f2ps-tile-title)';
 const menuButtonSelector = () => Cypress.env('menuButtonSelector') || menuButtonSelectors;
 const menuItemSelector = () => Cypress.env('menuItemSelector') || menuItemSelectors;
 const loginMode = () => (Cypress.env('loginMode') || 'service').toString().toLowerCase();
@@ -89,6 +94,9 @@ const consoleArtifactName = (targetUrl, testTitle) =>
 
 const navigationArtifactName = (targetUrl, testTitle) =>
   `artifacts/navigation/${safeName(targetUrl)}-${safeName(testTitle)}.json`;
+
+const uiContextMapArtifactName = (targetUrl) =>
+  `artifacts/ui-context-map/${safeName(new URL(targetUrl).host)}.json`;
 
 const slotNumbers = (count) => Array.from({ length: count }, (_, index) => index);
 
@@ -335,6 +343,19 @@ const collectTiles = (limit) => cy.get('body').then(($body) => visibleElements($
     label: labelFor(element),
   })));
 
+const collectLogicalHomeTiles = () => cy.get('body').then(($body) => visibleElements($body, logicalHomeTileSelector())
+  .map((element, index) => {
+    const $tile = Cypress.$(element);
+    const abbreviation = $tile.find('.f2ps-tile-abbreviation').first().text().trim();
+    const label = $tile.find('.f2ps-tile-title').first().text().trim() || labelFor(element);
+
+    return {
+      index,
+      abbreviation,
+      label,
+    };
+  }));
+
 const openUpperLeftMenu = () => {
   cy.get('body').then(($body) => {
     const candidates = visibleElements($body, menuButtonSelector())
@@ -395,6 +416,57 @@ const clickMenuItem = (item, appOrigin) => {
     cy.wrap(match)
       .scrollIntoView()
       .click({ force: true });
+  });
+};
+
+const emitUiContextMapArtifact = (targetUrl, homeUrl, appOrigin, menuLimit) => {
+  const entries = [];
+
+  return collectLogicalHomeTiles().then((tiles) => {
+    let chain = cy.wrap(null, { log: false });
+
+    tiles.forEach((tile) => {
+      chain = chain.then(() => {
+        visitHome(homeUrl);
+        clickVisibleByIndex(logicalHomeTileSelector(), tile.index, tile.label);
+        assertPageLoaded(`home tile ${tile.label}`);
+
+        return cy.location('href').then((href) => {
+          entries.push({
+            label: tile.label,
+            abbreviation: tile.abbreviation,
+            url: href,
+            source: 'home-tile',
+            status: 'opened',
+          });
+        });
+      });
+    });
+
+    return chain.then(() => {
+      visitHome(homeUrl);
+      openUpperLeftMenu();
+
+      return collectMenuItems(menuLimit, appOrigin).then((items) => {
+        items.forEach((item) => {
+          entries.push({
+            label: item.label,
+            href: item.href,
+            url: new URL(item.href, appOrigin).href,
+            source: 'menu',
+            status: 'discovered',
+          });
+        });
+
+        const artifact = buildUiContextMapArtifact(entries, {
+          targetUrl,
+          loginMode: loginMode(),
+          serviceUsername: Cypress.env('serviceUsername') || null,
+        });
+
+        return cy.writeFile(uiContextMapArtifactName(targetUrl), artifact, { log: true });
+      });
+    });
   });
 };
 
@@ -529,5 +601,14 @@ splitTargetUrls().forEach((targetUrl) => {
         }
       });
     }
+
+    it('emits ui-to-context map artifact', () => {
+      loginToHome(targetUrl);
+
+      cy.location('href').then((homeUrl) => {
+        const appOrigin = new URL(homeUrl).origin;
+        emitUiContextMapArtifact(targetUrl, homeUrl, appOrigin, menuSlotLimit);
+      });
+    });
   });
 });
