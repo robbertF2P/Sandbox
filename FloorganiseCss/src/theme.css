@@ -29,6 +29,27 @@
   --color-f2p-danger: #d7263d;
   --color-f2p-danger-strong: #d32e40;
   --color-f2p-danger-dark: #b41920;
+  --color-f2p-danger-acc-stripe: #c51b23;
+
+  /* Production shell */
+  --color-f2p-navbar: #313035;
+  --color-f2p-status-neutral: #cdccce;
+  --color-f2p-status-primary: #00adee;
+  --color-f2p-status-inprogress: #70d6ff;
+  --color-f2p-status-planned: #8d99ae;
+  --color-f2p-module-blue: #45a8e9;
+  --color-f2p-module-green: #8dcc2a;
+  --color-f2p-module-orange: #ffb508;
+  --color-f2p-module-purple: #eb0089;
+  --color-f2p-module-generic: #4087d9;
+
+  --background-image-f2p-navbar-acc: repeating-linear-gradient(
+    135deg,
+    var(--color-f2p-danger-dark),
+    var(--color-f2p-danger-dark) 10px,
+    var(--color-f2p-danger-acc-stripe) 10px,
+    var(--color-f2p-danger-acc-stripe) 20px
+  );
 
   /* Dark POC theme (Vue clients) */
   --color-f2p-dark-bg: #0f172a;

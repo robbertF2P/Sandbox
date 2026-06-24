@@ -1,6 +1,6 @@
 import { Component, input, output } from '@angular/core';
 import { NgClass } from '@angular/common';
-import { HomeTile } from './home-tile.model';
+import { HomeTile, HomeTileModuleColor, HomeTileStatus } from './home-tile.model';
 
 @Component({
   selector: 'f2p-home-tiles',
@@ -11,11 +11,25 @@ export class F2pHomeTilesComponent {
   readonly tiles = input.required<HomeTile[]>();
   readonly tileSelect = output<HomeTile>();
 
-  accentClass(tile: HomeTile): Record<string, boolean> {
+  statusClass(tile: HomeTile): Record<string, boolean> {
+    const status: HomeTileStatus = tile.status ?? 'primary';
     return {
-      'border-t-4 border-t-f2p-brand': tile.accent === 'brand',
-      'border-t-4 border-t-f2p-success': tile.accent === 'success',
-      'border-t-4 border-t-f2p-warning': tile.accent === 'warning',
+      'f2ps-tile-status-primary': status === 'primary',
+      'f2ps-tile-status-success': status === 'success',
+      'f2ps-tile-status-warning': status === 'warning',
+      'f2ps-tile-status-inprogress': status === 'inprogress',
+      'f2ps-tile-status-planned': status === 'planned',
+    };
+  }
+
+  moduleClass(tile: HomeTile): Record<string, boolean> {
+    const color: HomeTileModuleColor = tile.moduleColor ?? 'generic';
+    return {
+      'module-tile-blue': color === 'blue',
+      'module-tile-green': color === 'green',
+      'module-tile-orange': color === 'orange',
+      'module-tile-purple': color === 'purple',
+      'module-tile-generic': color === 'generic',
     };
   }
 

@@ -1,16 +1,26 @@
 <div class="f2p-tile-grid">
   @for (tile of tiles(); track tile.route) {
     <article
-      class="f2ps-tile f2ps-clickable flex flex-col justify-end p-4"
-      [ngClass]="accentClass(tile)"
+      class="f2ps-tile f2ps-clickable"
       [attr.data-testid]="'home-tile-' + tile.label.toLowerCase()"
       (click)="onTileClick(tile)"
       (keyup.enter)="onTileClick(tile)"
       tabindex="0"
       role="button"
     >
-      <p class="f2ps-tile__label">{{ tile.label }}</p>
-      <p class="f2ps-tile__meta">{{ tile.meta }}</p>
+      <div class="f2ps-tile-status" [ngClass]="statusClass(tile)"></div>
+      <div class="f2ps-tile-abbreviation">{{ tile.abbreviation }}</div>
+      <div class="f2ps-tile-title-border">
+        <span class="truncate">{{ tile.label }}</span>
+      </div>
+      <div class="f2ps-tile-content">
+        <span class="module-tile" [ngClass]="moduleClass(tile)">{{ tile.abbreviation }}</span>
+      </div>
+      <div class="f2ps-tile-footer">
+        <div class="f2ps-tile-footer-description">
+          <div><span>{{ tile.meta }}</span></div>
+        </div>
+      </div>
     </article>
   }
 </div>

@@ -17,27 +17,35 @@ export class HomePageComponent {
   readonly tiles: HomeTile[] = [
     {
       label: 'Reference',
+      abbreviation: 'Re',
       meta: 'Module status + SignalR events',
       route: '/reference',
-      accent: 'brand',
+      status: 'primary',
+      moduleColor: 'blue',
     },
     {
       label: 'Planning',
+      abbreviation: 'Pl',
       meta: '12 open activities',
       route: '/modules/planning',
-      accent: 'brand',
+      status: 'inprogress',
+      moduleColor: 'blue',
     },
     {
       label: 'Production',
+      abbreviation: 'Pr',
       meta: 'Hull 247 — Block 204',
       route: '/modules/production',
-      accent: 'success',
+      status: 'success',
+      moduleColor: 'green',
     },
     {
       label: 'Quality',
+      abbreviation: 'Qu',
       meta: '3 inspections due',
       route: '/modules/quality',
-      accent: 'warning',
+      status: 'warning',
+      moduleColor: 'orange',
     },
   ];
 

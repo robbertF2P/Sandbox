@@ -1,8 +1,12 @@
-export type HomeTileAccent = 'brand' | 'success' | 'warning';
+export type HomeTileStatus = 'primary' | 'success' | 'warning' | 'inprogress' | 'planned' | 'neutral';
+
+export type HomeTileModuleColor = 'blue' | 'green' | 'orange' | 'purple' | 'generic';
 
 export interface HomeTile {
   label: string;
+  abbreviation: string;
   meta: string;
   route: string;
-  accent?: HomeTileAccent;
+  status?: HomeTileStatus;
+  moduleColor?: HomeTileModuleColor;
 }
