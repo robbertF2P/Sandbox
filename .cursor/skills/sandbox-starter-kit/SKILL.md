@@ -22,6 +22,7 @@ Use this skill first. It routes you to focused skills and repo standards — do 
 |------|------|---------|
 | Actor + SignalR POC | `AkkaSignalRVuePoc/` | Akka.NET, SignalR, catalog API patterns |
 | Import + progress POC | `ApiImportActorPoc/` | Import sessions, hours booking, multi-manager actors |
+| Planning approvals POC | `PlanningApprovalsPoc/` | Foreman approval of adjusted planning after assignment progress |
 | Platform logging | `Platform.Serilog.Logging/`, `build/Platform.Logging.*.props` | Serilog, Seq, App Insights, test sink |
 | Platform packages feed | `local-feed/` | Packed NuGet (`Platform.Serilog.Logging*`) |
 | Import domain | `ImportPipeline/` | `ImportPipeline.Domain` NuGet |
