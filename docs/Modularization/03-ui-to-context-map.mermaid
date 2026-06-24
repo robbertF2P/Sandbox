@@ -1,0 +1,50 @@
+flowchart TB
+  subgraph home["Home tiles (RC testrd)"]
+    Pr[Projects]
+    Ac[Activities]
+    Hp[Hours and Progress]
+    Fb[Floorboard]
+    Pm[Person management]
+    Hr[HR management]
+    Ts[Timesheets]
+    Ta[Timesheets admin]
+    Ti[Tickets]
+  end
+
+  subgraph menu["Menu-only pages"]
+    Bg[Budgets]
+    Pb[Planboard]
+    Fs[Floorspace]
+    Rp[Reports]
+    St[PBS Settings]
+  end
+
+  PBS["1. Planning & Resource Management"]
+  WF["2. Workforce & Organization"]
+  TK["3. Timekeeping & Work Hours"]
+  DV["4. Devices & Shop Floor"]
+  WT["5. Workflow & Ticketing"]
+  SY["7. System Administration"]
+  RP["Reporting (separate)"]
+
+  Pr --> PBS
+  Ac --> PBS
+  Hp --> TK
+  Hp -.-> PBS
+  Fb --> PBS
+  Fb -.-> DV
+  Fb -.-> TK
+  Pm --> WF
+  Pm -.-> SY
+  Hr --> DV
+  Hr -.-> WF
+  Ts --> TK
+  Ta --> TK
+  Ta -.-> RP
+  Ti --> WT
+  Bg --> PBS
+  Pb --> PBS
+  Fs --> PBS
+  Rp --> RP
+  St --> SY
+  St -.-> PBS

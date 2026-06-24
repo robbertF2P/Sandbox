@@ -181,6 +181,14 @@ Host Edge profile reuse in Docker can be limited by OS keychain encryption and p
 
 Console warnings, errors, uncaught exceptions, window errors, and unhandled rejections are written to `artifacts/console/*.json`. Opened and missing tile/menu targets are written to `artifacts/navigation/*.json`.
 
+After each run, a deduplicated **UI → bounded context map** is written to `artifacts/ui-context-map/<host>.json`. Route rules live in `scripts/ui-context-map.js` and are documented in `docs/Modularization/03-ui-to-context-map.md`. See `scripts/ui-context-map.example.json` for the artifact shape.
+
+Validate route mapping rules without a browser:
+
+```sh
+npm run test:ui-context-map
+```
+
 ## API documentation
 
 The smoke harness can discover Floor2Plan JSON API endpoints and generate an OpenAPI 3 document. HTML template routes, static assets, telemetry, and image endpoints are excluded.
