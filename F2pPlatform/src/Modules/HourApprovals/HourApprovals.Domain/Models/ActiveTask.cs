@@ -1,4 +1,5 @@
 using HourApprovals.Domain.ValueObjects;
+using Platform.Shared.Domain;
 
 namespace HourApprovals.Domain.Models;
 
@@ -7,7 +8,7 @@ public sealed class ActiveTask
     private ActiveTask(
         TaskId id,
         string title,
-        string activityCode,
+        ActivityCode activityCode,
         ApprovalValues currentValues,
         bool isActiveForCurrentUser)
     {
@@ -22,7 +23,7 @@ public sealed class ActiveTask
 
     public string Title { get; }
 
-    public string ActivityCode { get; }
+    public ActivityCode ActivityCode { get; }
 
     public ApprovalValues CurrentValues { get; private set; }
 
@@ -31,7 +32,7 @@ public sealed class ActiveTask
     public static ActiveTask Create(
         TaskId id,
         string title,
-        string activityCode,
+        ActivityCode activityCode,
         ApprovalValues currentValues,
         bool isActiveForCurrentUser) =>
         new(id, title, activityCode, currentValues, isActiveForCurrentUser);

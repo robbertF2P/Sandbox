@@ -249,7 +249,7 @@ internal static class HourApprovalsEndpoints
     {
         id = view.Task.Id.Value,
         title = view.Task.Title,
-        activityCode = view.Task.ActivityCode,
+        activityCode = view.Task.ActivityCode.Value,
         isActiveForCurrentUser = view.Task.IsActiveForCurrentUser,
         approvalState = view.State.ToString(),
         isApproved = view.State == TaskApprovalState.Approved,

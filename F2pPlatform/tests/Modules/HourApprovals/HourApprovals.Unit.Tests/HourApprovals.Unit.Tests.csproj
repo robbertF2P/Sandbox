@@ -20,6 +20,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\..\..\src\Shared\Platform.Shared.Domain\Platform.Shared.Domain.csproj" />
     <ProjectReference Include="..\..\..\..\src\Modules\HourApprovals\HourApprovals.Domain\HourApprovals.Domain.csproj" />
     <ProjectReference Include="..\..\..\..\src\Modules\HourApprovals\HourApprovals.Application\HourApprovals.Application.csproj" />
     <ProjectReference Include="..\..\..\..\host\F2pPlatform.Host.Core\F2pPlatform.Host.Core.csproj" />

@@ -2,6 +2,7 @@ using F2pPlatform.Host.Contracts.ApprovalQueue;
 using F2pPlatform.Host.Contracts.ApprovalQueue.Messages.Hours;
 using F2pPlatform.Host.Contracts.ApprovalQueue.Messages.Planning;
 using F2pPlatform.Host.Contracts.ApprovalQueue.Messages.Timekeeping;
+using Platform.Shared.Domain;
 
 namespace F2pPlatform.Host.Core.ApprovalQueue;
 
@@ -120,7 +121,7 @@ public static class ApprovalQueueComposer
         string term = search.Trim();
         AssignmentLabels labels = assignment.Labels;
         return labels.Title.Contains(term, StringComparison.OrdinalIgnoreCase)
-            || labels.ActivityCode.Contains(term, StringComparison.OrdinalIgnoreCase)
+            || labels.ActivityCode.Value.Contains(term, StringComparison.OrdinalIgnoreCase)
             || labels.ProjectLabel.Contains(term, StringComparison.OrdinalIgnoreCase);
     }
 }

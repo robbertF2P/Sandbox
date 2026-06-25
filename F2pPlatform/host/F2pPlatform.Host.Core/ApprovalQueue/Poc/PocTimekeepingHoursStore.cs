@@ -1,4 +1,5 @@
 using F2pPlatform.Host.Contracts.ApprovalQueue;
+using Platform.Shared.Domain;
 
 namespace F2pPlatform.Host.Core.ApprovalQueue.Poc;
 

@@ -2,6 +2,7 @@ using F2pPlatform.Host.Contracts.ApprovalQueue;
 using F2pPlatform.Host.Contracts.ApprovalQueue.Messages;
 using F2pPlatform.Host.Core.ApprovalQueue;
 using HourApprovals.Application.Ports;
+using Platform.Shared.Domain;
 
 namespace F2pPlatform.Host.ApprovalQueue;
 
@@ -93,7 +94,7 @@ internal static class ApprovalQueueEndpoints
         assignmentId = row.AssignmentId.Value,
         organisationId = row.OrganisationId.Value,
         title = row.Labels.Title,
-        activityCode = row.Labels.ActivityCode,
+        activityCode = row.Labels.ActivityCode.Value,
         organisationLabel = row.Labels.OrganisationLabel,
         projectLabel = row.Labels.ProjectLabel,
         hoursWorkedInWindow = row.HoursWorkedInWindow,

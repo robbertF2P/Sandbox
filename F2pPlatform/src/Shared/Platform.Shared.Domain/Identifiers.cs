@@ -1,4 +1,4 @@
-namespace F2pPlatform.Host.Contracts.ApprovalQueue;
+namespace Platform.Shared.Domain;
 
 public readonly record struct TaskId(Guid Value)
 {

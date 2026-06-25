@@ -18,7 +18,7 @@ internal static class HourSubmissionSnapshotMapper
             : new LastSubmission(view.LastApproval.ApprovedBy, view.LastApproval.ApprovedAtUtc);
 
         return new HourSubmissionSnapshot(
-            new TaskId(view.Task.Id.Value),
+            view.Task.Id,
             approvalState,
             ToProgressValues(view.Task.CurrentValues),
             lastSubmission);

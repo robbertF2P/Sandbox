@@ -2,6 +2,7 @@ using HourApprovals.Domain.Enums;
 using HourApprovals.Domain.Models;
 using HourApprovals.Domain.Rules;
 using HourApprovals.Domain.ValueObjects;
+using Platform.Shared.Domain;
 
 namespace HourApprovals.Unit.Tests;
 

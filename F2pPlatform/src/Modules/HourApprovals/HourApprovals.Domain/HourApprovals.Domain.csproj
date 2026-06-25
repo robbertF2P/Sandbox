@@ -5,6 +5,10 @@
     <RootNamespace>HourApprovals.Domain</RootNamespace>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\Shared\Platform.Shared.Domain\Platform.Shared.Domain.csproj" />
+  </ItemGroup>
+
   <Import Project="../../../../../build/Platform.Logging.Library.props" />
 
 </Project>

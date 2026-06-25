@@ -1,6 +1,7 @@
 using HourApprovals.Domain.Enums;
 using HourApprovals.Domain.Models;
 using HourApprovals.Domain.ValueObjects;
+using Platform.Shared.Domain;
 
 namespace HourApprovals.Application.Ports;
 

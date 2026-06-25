@@ -2,6 +2,7 @@ using F2pPlatform.Host.Contracts.ApprovalQueue;
 using F2pPlatform.Host.Contracts.ApprovalQueue.Messages.Hours;
 using F2pPlatform.Host.Contracts.ApprovalQueue.Messages.Planning;
 using F2pPlatform.Host.Core.ApprovalQueue;
+using Platform.Shared.Domain;
 
 namespace HourApprovals.Unit.Tests;
 
@@ -106,7 +107,7 @@ public sealed class ApprovalQueueComposerShould
             taskId,
             new AssignmentId(taskId.Value),
             new OrganisationId(21),
-            new AssignmentLabels(title, "ACT", "21: Metal Shop", "NSMV Demo"),
+            new AssignmentLabels(title, new ActivityCode("ACT"), "21: Metal Shop", "NSMV Demo"),
             IsActiveAssignment: true);
 
     private static HourSubmissionSnapshot CreateSnapshot(TaskId taskId, DateTimeOffset? lastSubmitted) =>

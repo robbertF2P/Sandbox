@@ -1,5 +1,4 @@
 using Akka.Actor;
-using F2pPlatform.Host.Contracts.ApprovalQueue;
 using F2pPlatform.Host.Contracts.ApprovalQueue.Messages.Hours;
 using HourApprovals.Application.Ports;
 using HourApprovals.Domain.Enums;
@@ -30,18 +29,17 @@ public sealed class HoursApprovalReadActor : ReceiveActor
             ApprovalFilterStatus.All,
             CancellationToken.None);
 
-        HashSet<TaskId> requestedTaskIds = message.TaskIds.ToHashSet();
-        Dictionary<TaskId, HourSubmissionSnapshot> snapshots = new();
+        HashSet<Platform.Shared.Domain.TaskId> requestedTaskIds = message.TaskIds.ToHashSet();
+        Dictionary<Platform.Shared.Domain.TaskId, HourSubmissionSnapshot> snapshots = new();
 
         foreach (TaskApprovalView view in views)
         {
-            var taskId = new TaskId(view.Task.Id.Value);
-            if (!requestedTaskIds.Contains(taskId))
+            if (!requestedTaskIds.Contains(view.Task.Id))
             {
                 continue;
             }
 
-            snapshots[taskId] = HourSubmissionSnapshotMapper.ToSnapshot(view);
+            snapshots[view.Task.Id] = HourSubmissionSnapshotMapper.ToSnapshot(view);
         }
 
         Sender.Tell(new GetHourSubmissionSnapshotsReply(snapshots));

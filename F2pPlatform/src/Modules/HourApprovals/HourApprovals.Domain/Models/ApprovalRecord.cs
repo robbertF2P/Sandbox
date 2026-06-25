@@ -1,5 +1,6 @@
 using HourApprovals.Domain.Audit;
 using HourApprovals.Domain.ValueObjects;
+using Platform.Shared.Domain;
 
 namespace HourApprovals.Domain.Models;
 

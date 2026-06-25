@@ -1,5 +1,6 @@
 using F2pPlatform.Host.Contracts.ApprovalQueue;
 using F2pPlatform.Host.Contracts.ApprovalQueue.Messages.Planning;
+using Platform.Shared.Domain;
 
 namespace F2pPlatform.Host.Core.ApprovalQueue.Poc;
 
@@ -49,7 +50,7 @@ internal static class PocPlanningAssignmentStore
             taskId,
             new AssignmentId(id),
             new OrganisationId(organisationId),
-            new AssignmentLabels(title, activityCode, organisationLabel, projectLabel),
+            new AssignmentLabels(title, new ActivityCode(activityCode), organisationLabel, projectLabel),
             IsActiveAssignment: true);
     }
 }

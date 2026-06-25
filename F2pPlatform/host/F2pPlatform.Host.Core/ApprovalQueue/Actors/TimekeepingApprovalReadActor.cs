@@ -1,6 +1,7 @@
 using Akka.Actor;
 using F2pPlatform.Host.Contracts.ApprovalQueue;
 using F2pPlatform.Host.Contracts.ApprovalQueue.Messages.Timekeeping;
+using Platform.Shared.Domain;
 using F2pPlatform.Host.Core.ApprovalQueue.Poc;
 
 namespace F2pPlatform.Host.Core.ApprovalQueue.Actors;

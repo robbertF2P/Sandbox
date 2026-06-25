@@ -1,6 +1,7 @@
-namespace F2pPlatform.Host.Contracts.ApprovalQueue.Messages.Planning;
-
 using F2pPlatform.Host.Contracts.ApprovalQueue;
+using Platform.Shared.Domain;
+
+namespace F2pPlatform.Host.Contracts.ApprovalQueue.Messages.Planning;
 
 public sealed record PlanningAssignmentRow(
     TaskId TaskId,
