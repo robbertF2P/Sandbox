@@ -51,13 +51,14 @@ export class TenantsPageComponent implements OnInit {
   }
 
   statusClass(status: string): string {
+    const base = 'inline-block rounded-f2p-pill px-2 py-0.5 text-xs font-semibold';
     switch (status) {
       case 'Active':
-        return 'admin-status admin-status--active';
+        return `${base} bg-f2p-success/15 text-f2p-success`;
       case 'Provisioning':
-        return 'admin-status admin-status--provisioning';
+        return `${base} bg-f2p-warning/15 text-f2p-warning`;
       default:
-        return 'admin-status';
+        return `${base} bg-f2p-surface-subtle text-f2p-ink-muted`;
     }
   }
 }

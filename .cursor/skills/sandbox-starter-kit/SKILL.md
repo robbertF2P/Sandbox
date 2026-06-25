@@ -25,6 +25,7 @@ Use this skill first. It routes you to focused skills and repo standards — do 
 | Planning approvals POC | `PlanningApprovalsPoc/` | Foreman approval of adjusted planning after assignment progress |
 | Platform logging | `Platform.Serilog.Logging/`, `build/Platform.Logging.*.props` | Serilog, Seq, App Insights, test sink |
 | Frontend design system | `FloorganiseCss/` | `@floorganise/css` — Tailwind v4 tokens + semantic aliases |
+| Admin backoffice UI (reference) | `AdminBackoffice/web/` | Exemplary Angular + `@floorganise/css` operator screens |
 | Platform packages feed | `local-feed/` | Packed NuGet (`Platform.Serilog.Logging*`) |
 | Import domain | `ImportPipeline/` | `ImportPipeline.Domain` NuGet |
 | Modularization program | `docs/monolith-modularization/` | Roadmap, logging/correlation/frontend/**actor** standards, quality framework |

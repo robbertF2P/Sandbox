@@ -12,7 +12,7 @@ src/ControlPlane.Core/               Akka actors (persist + platform sync)
 src/ControlPlane.Infrastructure/     EF Core + platform HTTP client
 src/ControlPlane.Api/                REST endpoints + Akka hosting
 src/ControlPlane.Data.Migrations/    EF migrations
-web/                                 Angular admin UI + Dockerfile
+web/                                 Angular admin UI + Dockerfile (`@floorganise/css` reference implementation)
 ```
 
 Shared contracts: `../Platform.ControlPlane.Contracts/`
@@ -42,6 +42,16 @@ cd web && npm install && npm start
 - Backoffice API: `http://localhost:5090`
 - Admin UI: `http://localhost:5190` (proxies `/admin` to API)
 - Control-plane SQL: `localhost:1403` (database `ControlPlane`)
+
+## Frontend styling
+
+The admin UI is the **reference Angular app** for `@floorganise/css` on operator/backoffice screens:
+
+- Global styles: `@import '@floorganise/css'` only — no parallel `admin-*` CSS
+- Light shell: `f2p-app-light` + `bg-f2p-navbar` chrome
+- Semantic chrome: `f2ps-btn-*`, `f2ps-group-box`, `login-notification-*`, `field`
+- Layout/spacing: Tailwind utilities (`space-y-6`, `grid`, `flex`, responsive `sm:` variants)
+- Skill: `.cursor/skills/tailwind-ui-styling/SKILL.md`
 
 Start **F2pPlatform** on `:5080` so provisioning can push tenant config:
 
