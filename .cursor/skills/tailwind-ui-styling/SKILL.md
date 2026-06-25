@@ -190,6 +190,7 @@ Full list: `FloorganiseCss/README.md`.
 | `FloorganiseCss/README.md` | Package usage, token table, alias list |
 | `FloorganiseCss/showcase/` | Vue gallery — all patterns |
 | `FloorganiseCss/showcase-angular/` | Angular Platform 2.0 home mock |
+| `AdminBackoffice/web/` | **Reference** operator UI — light shell, tables, forms |
 | `FloorganiseCss/src/index.css` | Package entry (`tailwindcss` + theme + components) |
 | `FloorganiseCss/src/theme.css` | `@theme` tokens |
 | `FloorganiseCss/src/components/f2ps.css` | Production `f2ps-*` aliases |
