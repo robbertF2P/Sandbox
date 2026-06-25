@@ -1,7 +1,7 @@
 <Project>
   <!-- Central package versions for Platform.Serilog.Logging adoption. Import from module Directory.Packages.props. -->
   <PropertyGroup>
-    <PlatformSerilogLoggingVersion>1.1.0</PlatformSerilogLoggingVersion>
+    <PlatformSerilogLoggingVersion>1.1.1</PlatformSerilogLoggingVersion>
   </PropertyGroup>
 
   <ItemGroup>

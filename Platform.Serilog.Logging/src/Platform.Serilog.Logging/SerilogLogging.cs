@@ -53,6 +53,8 @@ public static class SerilogLogging
         else if (IsEnvironment(environmentName, Environments.Production))
         {
             ConfigureApplicationInsightsSink(configuration, appConfiguration);
+            // Docker / platform stacks set Seq__ServerUrl while ASPNETCORE_ENVIRONMENT=Production.
+            ConfigureSeqSink(configuration, appConfiguration);
         }
         else
         {

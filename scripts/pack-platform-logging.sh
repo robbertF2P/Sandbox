@@ -40,7 +40,7 @@ pack \
   "${root}/Platform.Serilog.Logging/src/Platform.Serilog.Logging/Platform.Serilog.Logging.csproj" \
   "Platform.Serilog.Logging" \
   "Platform Serilog Logging" \
-  "Central Serilog configuration with Seq in Development and Application Insights in Production" \
+  "Central Serilog configuration with Seq and Application Insights sinks" \
   "serilog logging seq application-insights platform"
 
 pack \

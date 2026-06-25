@@ -91,7 +91,7 @@ Environment variables (optional `.env` at repo root):
 
 ```bash
 cd AdminBackoffice
-docker compose up -d          # SQL on :1403
+docker compose up -d          # SQL :1403, Seq :5343 (UI :8083)
 dotnet run --project host/AdminBackoffice.Host
 cd web && npm install && npm start   # :5190, proxies /admin → :5090
 ```

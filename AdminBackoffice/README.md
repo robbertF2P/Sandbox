@@ -42,6 +42,7 @@ cd web && npm install && npm start
 - Backoffice API: `http://localhost:5090`
 - Admin UI: `http://localhost:5190` (proxies `/admin` to API)
 - Control-plane SQL: `localhost:1403` (database `ControlPlane`)
+- Seq UI: `http://localhost:8083` (ingest `http://localhost:5343`)
 
 ## Frontend styling
 
@@ -81,3 +82,4 @@ Re-sync: **Sync** button in UI or `POST /admin/tenants/{tenantId}/sync`
 | `Platform:BaseUrl` | F2pPlatform host (default `http://localhost:5080`) |
 | `Platform:ConfigurationApiKey` | Shared secret — must match F2pPlatform `Platform:ConfigurationApiKey` |
 | `Cors:AllowedOrigins` | Admin Angular dev server (default `http://localhost:5190`) |
+| `Seq:ServerUrl` | Datalust Seq ingest (default `http://localhost:5343` — start via `docker compose up -d`) |
