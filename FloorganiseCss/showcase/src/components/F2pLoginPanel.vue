@@ -15,7 +15,7 @@ function cycleNotification() {
 
 <template>
   <!-- Production login pattern: f2ps-tile-fluid + form.login + f2ps-btn-* -->
-  <div class="f2ps-tile f2ps-tile-fluid max-w-2xl p-6">
+  <div class="f2ps-tile f2ps-tile-fluid mx-auto w-full max-w-2xl p-4 sm:p-6">
     <div class="mb-6 border-b border-f2p-border pb-6 text-center">
       <p class="text-lg font-bold tracking-wide text-f2p-ink">Floor2Plan</p>
       <p class="text-sm text-f2p-ink-muted">Service credentials</p>
@@ -39,7 +39,7 @@ function cycleNotification() {
         <span class="text-sm text-f2p-ink-muted">Password</span>
         <input id="password" v-model="password" type="password" placeholder="Password" />
       </label>
-      <div class="flex items-center justify-between gap-4">
+      <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <label class="flex items-center gap-2 text-sm text-f2p-ink-muted">
           <input v-model="rememberMe" type="checkbox" />
           Stay logged in?

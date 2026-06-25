@@ -181,6 +181,16 @@ Host Edge profile reuse in Docker can be limited by OS keychain encryption and p
 
 Console warnings, errors, uncaught exceptions, window errors, and unhandled rejections are written to `artifacts/console/*.json`. Opened and missing tile/menu targets are written to `artifacts/navigation/*.json`.
 
+## Mobile responsive audit
+
+Capture login + home screenshots and layout metrics at phone/tablet/desktop widths (Playwright; requires `npm install playwright` and `npx playwright install chromium`):
+
+```sh
+SMOKE_SERVICE_USERNAME=testrd SMOKE_SERVICE_PASSWORD=test npm run audit:mobile
+```
+
+Output: `artifacts/rc-mobile-audit/`. Committed reference screenshots and analysis: `docs/monolith-modularization/rc-mobile-responsive-audit.md`.
+
 After each run, a deduplicated **UI → bounded context map** is written to `artifacts/ui-context-map/<host>.json`. Route rules live in `scripts/ui-context-map.js` and are documented in `docs/Modularization/03-ui-to-context-map.md`. See `scripts/ui-context-map.example.json` for the artifact shape.
 
 Validate route mapping rules without a browser:

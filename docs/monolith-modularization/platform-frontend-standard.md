@@ -141,6 +141,7 @@ Copy into PR template for UI strangler slices.
 - [ ] Context-specific markup only in `libs/<context>/ui`
 - [ ] Tailwind utilities used for layout; semantic classes for brand/components
 - [ ] Visual parity spot-checked against `FloorganiseCss/showcase-angular` or SmokeTests DOM selectors
+- [ ] Responsive layout verified at 375px and 768px (see `rc-mobile-responsive-audit.md`; run `Floor2PlanSmokeTests` `npm run audit:mobile` for legacy baseline)
 - [ ] Nx boundary tags: `type:ui` has no `data-access` imports
 
 ---

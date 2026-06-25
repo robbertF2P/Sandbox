@@ -14,6 +14,7 @@
     "build:openapi": "node scripts/build-openapi-from-capture.js",
     "document:api": "npm run capture:api && npm run build:openapi",
     "test:ui-context-map": "node scripts/test-ui-context-map.js",
+    "audit:mobile": "node scripts/rc-mobile-audit.mjs",
     "test:xunit": "dotnet test Floor2PlanSmokeTests.csproj"
   },
   "keywords": [],
