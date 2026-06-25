@@ -1,5 +1,6 @@
 using System.Net;
 using System.Net.Http.Json;
+using Reference.Application;
 
 namespace Reference.Characterization.Tests;
 
@@ -16,18 +17,33 @@ public sealed class ReferenceStatusEndpointTests(F2pPlatformWebApplicationFactor
 
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
 
-        var payload = await response.Content.ReadFromJsonAsync<ReferenceStatusResponse>();
+        ReferenceStatusResponse? payload = await response.Content.ReadFromJsonAsync<ReferenceStatusResponse>();
         Assert.NotNull(payload);
         Assert.Equal("Reference", payload.ModuleName);
         Assert.Equal("Healthy", payload.Health);
         Assert.True(payload.ModuleRegistered);
         Assert.False(payload.StranglerAdapterPresent);
     }
+}
 
-    private sealed record ReferenceStatusResponse(
-        string ModuleName,
-        string Health,
-        bool ModuleRegistered,
-        bool StranglerAdapterPresent,
-        DateTimeOffset CheckedAtUtc);
+[Trait("Module", "Reference")]
+[Trait("Tier", "Characterization")]
+public sealed class LegacyReferenceStatusEndpointTests(LegacyAdapterWebApplicationFactory factory) : IClassFixture<LegacyAdapterWebApplicationFactory>
+{
+    private readonly HttpClient _client = factory.CreateClient();
+
+    [Fact]
+    public async Task GetReferenceStatus_WhenLegacyAdapterEnabled_ReturnsDegradedHealth()
+    {
+        using HttpResponseMessage response = await _client.GetAsync("/api/reference/status");
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
+        ReferenceStatusResponse? payload = await response.Content.ReadFromJsonAsync<ReferenceStatusResponse>();
+        Assert.NotNull(payload);
+        Assert.Equal("Reference", payload.ModuleName);
+        Assert.Equal("Degraded", payload.Health);
+        Assert.True(payload.ModuleRegistered);
+        Assert.True(payload.StranglerAdapterPresent);
+    }
 }

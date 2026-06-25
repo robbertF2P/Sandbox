@@ -25,4 +25,14 @@ public sealed class ReferenceStatusRulesTests
 
         Assert.Equal(ReferenceHealth.Degraded, health);
     }
+
+    [Fact]
+    public void ResolveHealth_WhenModuleNotRegistered_ReturnsUnknown()
+    {
+        ReferenceHealth health = ReferenceStatusRules.ResolveHealth(
+            moduleRegistered: false,
+            adapterPresent: false);
+
+        Assert.Equal(ReferenceHealth.Unknown, health);
+    }
 }

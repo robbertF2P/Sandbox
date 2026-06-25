@@ -6,6 +6,8 @@ public sealed class ReferenceStatusQuery : IReferenceStatusQuery
 {
     public Task<ReferenceStatusSnapshot> GetStatusAsync(CancellationToken cancellationToken = default)
     {
+        cancellationToken.ThrowIfCancellationRequested();
+
         return Task.FromResult(new ReferenceStatusSnapshot(
             ModuleName: "Reference",
             ModuleRegistered: true,

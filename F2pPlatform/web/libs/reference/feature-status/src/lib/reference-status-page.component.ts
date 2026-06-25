@@ -1,7 +1,6 @@
 import { Component, inject, OnInit, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { ReferenceStatusApi, ReferenceStatusDto } from '@f2p/reference/data-access';
-import { PlatformEventsService } from '@f2p/shared/platform-events';
 
 @Component({
   selector: 'f2p-reference-status-page',
@@ -10,21 +9,16 @@ import { PlatformEventsService } from '@f2p/shared/platform-events';
 })
 export class ReferenceStatusPageComponent implements OnInit {
   private readonly referenceApi = inject(ReferenceStatusApi);
-  private readonly platformEvents = inject(PlatformEventsService);
 
   readonly loading = signal(true);
   readonly error = signal<string | null>(null);
   readonly status = signal<ReferenceStatusDto | null>(null);
 
-  readonly connected = this.platformEvents.connected;
-  readonly recentEvents = this.platformEvents.recentEvents;
-
   ngOnInit(): void {
-    this.platformEvents.connect();
     this.loadStatus();
   }
 
-  loadStatus(): void {
+  protected loadStatus(): void {
     this.loading.set(true);
     this.error.set(null);
 
@@ -34,7 +28,7 @@ export class ReferenceStatusPageComponent implements OnInit {
         this.loading.set(false);
       },
       error: () => {
-        this.error.set('Could not load reference module status. Is F2pPlatform.Host running on :5080?');
+        this.error.set('Could not load reference module status. Check that the API host is running.');
         this.loading.set(false);
       },
     });

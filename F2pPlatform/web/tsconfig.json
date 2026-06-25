@@ -27,7 +27,8 @@
       "@f2p/reference/data-access": ["libs/reference/data-access/src/index.ts"],
       "@f2p/reference/feature-status": ["libs/reference/feature-status/src/index.ts"],
       "@f2p/hour-approvals/data-access": ["libs/hour-approvals/data-access/src/index.ts"],
-      "@f2p/hour-approvals/feature-tasks": ["libs/hour-approvals/feature-tasks/src/index.ts"]
+      "@f2p/hour-approvals/feature-tasks": ["libs/hour-approvals/feature-tasks/src/index.ts"],
+      "@f2p/platform-events/feature-live": ["libs/platform-events/feature-live/src/index.ts"]
     }
   }
 }

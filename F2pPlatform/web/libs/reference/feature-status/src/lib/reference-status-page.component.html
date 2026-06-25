@@ -24,47 +24,31 @@
         {{ error() }}
       </div>
       <button type="button" class="f2ps-btn-primary f2ps-btn-sm" (click)="loadStatus()">Retry</button>
-    } @else if (status()) {
+    } @else {
+      @if (status(); as currentStatus) {
       <div class="panel grid gap-3 p-6 md:grid-cols-2">
         <div>
           <p class="text-xs uppercase tracking-wide text-f2p-ink-muted">Module</p>
-          <p class="text-lg font-semibold text-f2p-ink">{{ status()!.moduleName }}</p>
+          <p class="text-lg font-semibold text-f2p-ink">{{ currentStatus.moduleName }}</p>
         </div>
         <div>
           <p class="text-xs uppercase tracking-wide text-f2p-ink-muted">Health</p>
-          <p class="text-lg font-semibold text-f2p-ink">{{ status()!.health }}</p>
+          <p class="text-lg font-semibold text-f2p-ink">{{ currentStatus.health }}</p>
         </div>
         <div>
           <p class="text-xs uppercase tracking-wide text-f2p-ink-muted">Registered</p>
-          <p class="text-f2p-ink">{{ status()!.moduleRegistered ? 'Yes' : 'No' }}</p>
+          <p class="text-f2p-ink">{{ currentStatus.moduleRegistered ? 'Yes' : 'No' }}</p>
         </div>
         <div>
           <p class="text-xs uppercase tracking-wide text-f2p-ink-muted">Strangler adapter</p>
-          <p class="text-f2p-ink">{{ status()!.stranglerAdapterPresent ? 'Present' : 'None' }}</p>
+          <p class="text-f2p-ink">{{ currentStatus.stranglerAdapterPresent ? 'Present' : 'None' }}</p>
+        </div>
+        <div class="md:col-span-2">
+          <p class="text-xs uppercase tracking-wide text-f2p-ink-muted">Checked at (UTC)</p>
+          <p class="text-f2p-ink">{{ currentStatus.checkedAtUtc }}</p>
         </div>
       </div>
-    }
-
-    <section class="panel p-6">
-      <div class="mb-4 flex items-center justify-between gap-4">
-        <h2 class="text-lg font-semibold text-f2p-ink">Platform events (SignalR)</h2>
-        <span class="text-sm text-f2p-ink-muted">
-          {{ connected() ? 'Connected' : 'Disconnected' }}
-        </span>
-      </div>
-
-      @if (recentEvents().length === 0) {
-        <p class="text-sm text-f2p-ink-muted">Waiting for events from /hubs/platform-events…</p>
-      } @else {
-        <ul class="space-y-2 text-sm">
-          @for (event of recentEvents(); track event.occurredAt + event.eventType) {
-            <li class="rounded border border-f2p-border bg-f2p-surface px-3 py-2">
-              <span class="font-medium text-f2p-ink">{{ event.eventType }}</span>
-              <span class="text-f2p-ink-muted"> · {{ event.occurredAt }}</span>
-            </li>
-          }
-        </ul>
       }
-    </section>
+    }
   </main>
 </div>
