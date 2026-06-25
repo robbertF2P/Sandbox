@@ -23,7 +23,7 @@
   }
 
   .floorboard-filters {
-    @apply border-r border-f2p-border bg-f2p-surface px-5 py-6;
+    @apply min-w-[18.5rem] border-r border-f2p-border bg-f2p-surface px-5 py-6;
   }
 
   .floorboard-filters__title {
@@ -43,15 +43,15 @@
   }
 
   .floorboard-filter-option {
-    @apply flex items-start gap-2.5 rounded-md py-1.5 text-sm leading-snug text-f2p-ink;
+    @apply grid grid-cols-[auto_minmax(0,1fr)] items-start gap-2.5 rounded-md py-1.5 text-sm leading-snug text-f2p-ink;
   }
 
   .floorboard-filter-option input[type='checkbox'] {
-    @apply mt-0.5 shrink-0;
+    @apply mt-0.5;
   }
 
   .floorboard-filter-option__label {
-    @apply min-w-0 flex-1 break-words;
+    @apply block min-w-0 whitespace-normal;
   }
 
   .floorboard-main {
