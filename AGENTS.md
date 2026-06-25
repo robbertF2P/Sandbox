@@ -48,7 +48,9 @@ After editing skills in `.cursor/skills/`, run:
 
 ### .NET
 
-- `dotnet-core-csharp-development` — C# / ASP.NET Core conventions
+- `dotnet-core-csharp-development` — C# / ASP.NET Core conventions (`docs/coding-standards/csharp-coding-standards.md`)
+- `angular-frontend-development` — Angular / Nx frontend conventions (`docs/coding-standards/angular-coding-standards.md`)
+- `tailwind-ui-styling` — Tailwind v4 utility-first styling with `@floorganise/css`
 - `dotnet-ef-core` — Entity Framework Core
 - `immutable-domain-ef-core` — immutable aggregates with EF Core (With* helpers, graph reconciliation)
 - `akka-net` — Akka.NET (repo patterns)
