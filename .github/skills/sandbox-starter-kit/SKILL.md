@@ -51,6 +51,7 @@ Use this skill first. It routes you to focused skills and repo standards — do 
 | CorrelationId, use-case tracing, Akka envelopes | `platform-correlation` |
 | Vue/Angular UI, Tailwind, `@floorganise/css` | `tailwind-ui-styling`, `angular-frontend-development` |
 | Functional style in C# | `functional-programming-csharp` |
+| Enum design, status outcomes, promoting enums to classes | `csharp-enum-best-practices` |
 
 When multiple apply, read **all** relevant skills before editing.
 
