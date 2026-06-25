@@ -19,6 +19,12 @@ export const routes: Routes = [
       import('@f2p/reference/feature-status').then(m => m.referenceRoutes),
   },
   {
+    path: 'platform-events',
+    canActivate: [authGuard],
+    loadChildren: () =>
+      import('@f2p/platform-events/feature-live').then(m => m.platformEventsRoutes),
+  },
+  {
     path: 'hour-approvals',
     canActivate: [authGuard],
     loadChildren: () =>

@@ -25,9 +25,16 @@ export class HomePageComponent {
     {
       label: 'Reference',
       abbreviation: 'Re',
-      meta: 'Module status + SignalR events',
+      meta: 'Module status smoke endpoint',
       route: '/reference',
       moduleColor: 'blue',
+    },
+    {
+      label: 'Platform events',
+      abbreviation: 'Pe',
+      meta: 'SignalR hub live feed',
+      route: '/platform-events',
+      moduleColor: 'purple',
     },
     {
       label: 'Planning',

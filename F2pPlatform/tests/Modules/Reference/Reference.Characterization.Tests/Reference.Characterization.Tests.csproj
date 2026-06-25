@@ -21,6 +21,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\..\..\src\Modules\Reference\Reference.Application\Reference.Application.csproj" />
     <ProjectReference Include="..\..\..\..\host\F2pPlatform.Host\F2pPlatform.Host.csproj" />
   </ItemGroup>
 
