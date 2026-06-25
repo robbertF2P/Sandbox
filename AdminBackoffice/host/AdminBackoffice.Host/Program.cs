@@ -3,6 +3,7 @@ using ControlPlane.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Platform.Serilog.Logging;
 using Serilog;
+using System.Text.Json.Serialization;
 
 try
 {
@@ -33,6 +34,10 @@ try
         });
     });
     builder.Services.AddHealthChecks();
+    builder.Services.ConfigureHttpJsonOptions(options =>
+    {
+        options.SerializerOptions.Converters.Add(new JsonStringEnumConverter());
+    });
     builder.Services.AddControlPlaneModule(builder.Configuration);
 
     var app = builder.Build();

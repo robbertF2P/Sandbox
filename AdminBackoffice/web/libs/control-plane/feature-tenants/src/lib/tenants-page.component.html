@@ -9,10 +9,14 @@
     <a routerLink="/tenants/new" class="f2ps-btn f2ps-btn-primary f2ps-btn-md">New tenant</a>
   </header>
 
+  @if (success()) {
+    <div class="login-notification login-notification-success whitespace-pre-line">{{ success() }}</div>
+  }
+
   @if (loading()) {
     <p class="text-sm text-f2p-ink-muted">Loading tenants…</p>
   } @else if (error()) {
-    <div class="login-notification login-notification-danger">{{ error() }}</div>
+    <div class="login-notification login-notification-danger whitespace-pre-line">{{ error() }}</div>
   } @else if (tenants().length === 0) {
     <div class="f2ps-group-box space-y-3 p-8 text-center">
       <p class="text-f2p-ink">No tenants yet.</p>
@@ -40,9 +44,11 @@
               <td class="px-4 py-3 align-top text-f2p-ink">{{ tenant.displayName }}</td>
               <td class="px-4 py-3 align-top text-f2p-ink">{{ tenant.deploymentProfile.mode }}</td>
               <td class="px-4 py-3 align-top">
-                <span [class]="statusClass(tenant.status)">{{ tenant.status }}</span>
+                <span [class]="statusClass(tenant.status)">{{ formatTenantStatus(tenant.status) }}</span>
                 @if (tenant.lastPlatformSyncError) {
-                  <div class="mt-1 text-xs text-f2p-danger" title="{{ tenant.lastPlatformSyncError }}">Sync error</div>
+                  <p class="mt-1 max-w-xs text-xs text-f2p-danger" [title]="tenant.lastPlatformSyncError">
+                    {{ tenant.lastPlatformSyncError }}
+                  </p>
                 }
               </td>
               <td class="px-4 py-3 align-top text-f2p-ink">
