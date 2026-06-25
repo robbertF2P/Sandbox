@@ -1,7 +1,7 @@
-import { DatePipe } from '@angular/common';
+import { DatePipe, NgClass, UpperCasePipe } from '@angular/common';
 import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { F2pPageHeaderComponent } from '@floorganise/ui';
+import { F2pAppNavbarComponent } from '@floorganise/ui';
 import { forkJoin, of } from 'rxjs';
 import { catchError, switchMap } from 'rxjs/operators';
 import { IdentityAuthService } from '@f2p/identity/data-access';
@@ -14,21 +14,27 @@ import {
   OrganisationId,
   SubmissionCategory,
   TaskId,
+  TimeWindow,
 } from '@f2p/hour-approvals/data-access';
 
-interface OrganisationOption {
-  id: OrganisationId;
+interface FilterOption<T> {
+  value: T;
   label: string;
 }
 
-interface QueueGroup {
-  category: SubmissionCategory;
-  title: string;
+interface ProjectGroup {
+  projectLabel: string;
   rows: ApprovalQueueRowDto[];
 }
 
-const SUBMISSION_CATEGORY_OPTIONS: { value: SubmissionCategory; label: string }[] = [
-  { value: 'worked_on', label: 'Task worked on' },
+interface CategorySection {
+  category: SubmissionCategory;
+  title: string;
+  projectGroups: ProjectGroup[];
+}
+
+const SUBMISSION_CATEGORY_OPTIONS: FilterOption<SubmissionCategory>[] = [
+  { value: 'worked_on', label: 'Tasks worked on' },
   { value: 'other_active', label: 'Other active task' },
   { value: 'never_submitted', label: 'Never submitted' },
 ];
@@ -41,9 +47,16 @@ const GROUP_TITLES: Record<SubmissionCategory, string> = {
 
 const GROUP_ORDER: SubmissionCategory[] = ['worked_on', 'other_active', 'never_submitted'];
 
+const TIME_WINDOW_OPTIONS: { value: TimeWindow; label: string }[] = [
+  { value: 'since_last_submission', label: 'Since last submission' },
+  { value: 'last_week', label: 'Last week' },
+  { value: 'current_week', label: 'Current week' },
+  { value: 'custom', label: 'Custom' },
+];
+
 @Component({
   selector: 'f2p-hour-approvals-page',
-  imports: [F2pPageHeaderComponent, FormsModule, DatePipe],
+  imports: [F2pAppNavbarComponent, FormsModule, DatePipe, NgClass, UpperCasePipe],
   templateUrl: './hour-approvals-page.component.html',
 })
 export class HourApprovalsPageComponent implements OnInit {
@@ -55,41 +68,94 @@ export class HourApprovalsPageComponent implements OnInit {
   readonly error = signal<string | null>(null);
   readonly capabilities = signal<HourApprovalsCapabilitiesDto | null>(null);
   readonly rows = signal<ApprovalQueueRowDto[]>([]);
-  readonly organisationOptions = signal<OrganisationOption[]>([]);
+  readonly organisationOptions = signal<FilterOption<OrganisationId>[]>([]);
+  readonly disciplineOptions = signal<FilterOption<string>[]>([]);
+  readonly projectOptions = signal<FilterOption<string>[]>([]);
+  readonly locationOptions = signal<FilterOption<string>[]>([]);
   readonly selectedOrganisationIds = signal<OrganisationId[]>([]);
+  readonly selectedDisciplines = signal<string[]>([]);
+  readonly selectedProjects = signal<string[]>([]);
+  readonly selectedLocations = signal<string[]>([]);
   readonly selectedCategories = signal<SubmissionCategory[]>([]);
   readonly searchTerm = signal('');
+  readonly timeWindow = signal<TimeWindow>('current_week');
   readonly selectedTaskIds = signal<Set<TaskId>>(new Set());
   readonly drafts = signal<Partial<Record<TaskId, ApprovalValuesDto>>>({});
+  readonly at100Percent = signal<Partial<Record<TaskId, boolean>>>({});
 
   readonly displayName = this.auth.getDisplayName();
-  readonly canApprove = computed(() => this.capabilities()?.canApprove ?? false);
   readonly categoryOptions = SUBMISSION_CATEGORY_OPTIONS;
+  readonly timeWindowOptions = TIME_WINDOW_OPTIONS;
+  readonly canApprove = computed(() => this.capabilities()?.canApprove ?? false);
+  readonly showPlannedStart = computed(() => this.capabilities()?.displaySettings.showPlannedStart ?? false);
+  readonly showPlannedFinish = computed(() => this.capabilities()?.displaySettings.showPlannedFinish ?? false);
+
+  readonly primaryOrganisation = computed(() => {
+    const options = this.organisationOptions();
+    return options.length === 1 ? options[0].label : options[0]?.label ?? 'Organisation';
+  });
 
   readonly queueFilter = computed<ApprovalQueueFilter>(() => ({
     organisationIds: this.selectedOrganisationIds(),
     submissionCategories: this.selectedCategories(),
-    search: this.searchTerm(),
+    search: this.searchTerm().trim(),
   }));
 
-  readonly groupedRows = computed<QueueGroup[]>(() => {
-    const byCategory = new Map<SubmissionCategory, ApprovalQueueRowDto[]>();
+  readonly visibleRows = computed(() => {
+    const disciplines = new Set(this.selectedDisciplines());
+    const projects = new Set(this.selectedProjects());
+    const locations = new Set(this.selectedLocations());
 
-    for (const row of this.rows()) {
-      const group = byCategory.get(row.submissionCategory) ?? [];
+    return this.rows().filter(row => {
+      if (disciplines.size > 0 && !disciplines.has(row.disciplineLabel)) {
+        return false;
+      }
+
+      if (projects.size > 0 && !projects.has(row.projectLabel)) {
+        return false;
+      }
+
+      if (locations.size > 0 && !locations.has(row.locationPath)) {
+        return false;
+      }
+
+      return this.matchesTimeWindow(row);
+    });
+  });
+
+  readonly groupedSections = computed<CategorySection[]>(() => {
+    const byCategory = new Map<SubmissionCategory, Map<string, ApprovalQueueRowDto[]>>();
+
+    for (const row of this.visibleRows()) {
+      const projects = byCategory.get(row.submissionCategory) ?? new Map<string, ApprovalQueueRowDto[]>();
+      const group = projects.get(row.projectLabel) ?? [];
       group.push(row);
-      byCategory.set(row.submissionCategory, group);
+      projects.set(row.projectLabel, group);
+      byCategory.set(row.submissionCategory, projects);
     }
 
     return GROUP_ORDER
-      .filter(category => (byCategory.get(category)?.length ?? 0) > 0)
-      .map(category => ({
-        category,
-        title: GROUP_TITLES[category],
-        rows: byCategory.get(category) ?? [],
-      }));
+      .filter(category => byCategory.has(category))
+      .map(category => {
+        const projects = byCategory.get(category) ?? new Map<string, ApprovalQueueRowDto[]>();
+        return {
+          category,
+          title: GROUP_TITLES[category],
+          projectGroups: [...projects.entries()]
+            .sort(([left], [right]) => left.localeCompare(right))
+            .map(([projectLabel, rows]) => ({
+              projectLabel,
+              rows: rows.sort((left, right) => left.taskNumber - right.taskNumber),
+            })),
+        };
+      });
   });
 
+  readonly allVisibleTaskIds = computed(() => this.visibleRows().map(row => row.taskId));
+  readonly allVisibleSelected = computed(() => {
+    const visible = this.allVisibleTaskIds();
+    return visible.length > 0 && visible.every(taskId => this.selectedTaskIds().has(taskId));
+  });
   readonly hasSelection = computed(() => this.selectedTaskIds().size > 0);
   readonly submitEnabled = computed(() => this.canApprove() && this.hasSelection() && !this.submitting());
 
@@ -117,9 +183,12 @@ export class HourApprovalsPageComponent implements OnInit {
     this.api.getQueue(this.queueFilter()).subscribe({
       next: rows => {
         this.rows.set(rows);
-        this.syncOrganisationOptions(rows);
+        this.syncFilterOptions(rows);
         this.selectedTaskIds.set(new Set());
         this.drafts.set(Object.fromEntries(rows.map(row => [row.taskId, { ...row.currentValues }])));
+        this.at100Percent.set(Object.fromEntries(
+          rows.map(row => [row.taskId, row.currentValues.progress >= 100]),
+        ));
         this.loading.set(false);
       },
       error: () => {
@@ -130,32 +199,60 @@ export class HourApprovalsPageComponent implements OnInit {
   }
 
   onOrganisationToggle(orgId: OrganisationId, checked: boolean): void {
-    const current = new Set(this.selectedOrganisationIds());
-    if (checked) {
-      current.add(orgId);
-    } else {
-      current.delete(orgId);
-    }
-
-    this.selectedOrganisationIds.set([...current]);
+    this.toggleFilterValue(this.selectedOrganisationIds, orgId, checked);
     this.refetchQueue();
   }
 
-  onCategoryToggle(category: SubmissionCategory, checked: boolean): void {
-    const current = new Set(this.selectedCategories());
-    if (checked) {
-      current.add(category);
-    } else {
-      current.delete(category);
-    }
+  onDisciplineToggle(label: string, checked: boolean): void {
+    this.toggleFilterValue(this.selectedDisciplines, label, checked);
+  }
 
-    this.selectedCategories.set([...current]);
+  onProjectToggle(label: string, checked: boolean): void {
+    this.toggleFilterValue(this.selectedProjects, label, checked);
+  }
+
+  onLocationToggle(label: string, checked: boolean): void {
+    this.toggleFilterValue(this.selectedLocations, label, checked);
+  }
+
+  onCategoryToggle(category: SubmissionCategory, checked: boolean): void {
+    this.toggleFilterValue(this.selectedCategories, category, checked);
     this.refetchQueue();
   }
 
   onSearchChange(value: string): void {
     this.searchTerm.set(value);
     this.refetchQueue();
+  }
+
+  onTimeWindowChange(value: TimeWindow): void {
+    this.timeWindow.set(value);
+  }
+
+  toggleSelectAll(checked: boolean): void {
+    if (!checked) {
+      this.selectedTaskIds.set(new Set());
+      return;
+    }
+
+    this.selectedTaskIds.set(new Set(this.allVisibleTaskIds()));
+  }
+
+  toggleGroupSelection(rows: ApprovalQueueRowDto[], checked: boolean): void {
+    const next = new Set(this.selectedTaskIds());
+    for (const row of rows) {
+      if (checked) {
+        next.add(row.taskId);
+      } else {
+        next.delete(row.taskId);
+      }
+    }
+
+    this.selectedTaskIds.set(next);
+  }
+
+  isGroupSelected(rows: ApprovalQueueRowDto[]): boolean {
+    return rows.length > 0 && rows.every(row => this.selectedTaskIds().has(row.taskId));
   }
 
   toggleRowSelection(taskId: TaskId, checked: boolean): void {
@@ -183,15 +280,36 @@ export class HourApprovalsPageComponent implements OnInit {
       return;
     }
 
-    const parsed = typeof value === 'number' ? value : value;
     this.drafts.set({
       ...this.drafts(),
-      [taskId]: { ...current, [field]: parsed },
+      [taskId]: { ...current, [field]: value },
     });
+
+    if (field === 'progress') {
+      this.at100Percent.set({
+        ...this.at100Percent(),
+        [taskId]: Number(value) >= 100,
+      });
+    }
 
     const next = new Set(this.selectedTaskIds());
     next.add(taskId);
     this.selectedTaskIds.set(next);
+  }
+
+  onAt100Toggle(taskId: TaskId, checked: boolean): void {
+    this.at100Percent.set({ ...this.at100Percent(), [taskId]: checked });
+    if (checked) {
+      this.onDraftChange(taskId, 'progress', 100);
+    }
+  }
+
+  isAt100(taskId: TaskId): boolean {
+    return this.at100Percent()[taskId] ?? false;
+  }
+
+  fieldClass(row: ApprovalQueueRowDto, field: keyof ApprovalValuesDto): string {
+    return this.isFieldApproved(row, field) ? 'floorboard-field--approved' : 'floorboard-field--pending';
   }
 
   isFieldApproved(row: ApprovalQueueRowDto, field: keyof ApprovalValuesDto): boolean {
@@ -203,8 +321,10 @@ export class HourApprovalsPageComponent implements OnInit {
     return draft[field] === row.currentValues[field];
   }
 
-  fieldClass(row: ApprovalQueueRowDto, field: keyof ApprovalValuesDto): string {
-    return this.isFieldApproved(row, field) ? 'f2p-approved-field' : 'f2p-pending-field';
+  hoursWindowLabel(row: ApprovalQueueRowDto): string {
+    const baseline = Math.max(0, Math.round(row.lookbackValues.workedHours));
+    const current = Math.round(row.hoursWorkedInWindow);
+    return `${current} / ${baseline}`;
   }
 
   submitSelected(): void {
@@ -248,28 +368,66 @@ export class HourApprovalsPageComponent implements OnInit {
       });
   }
 
+  private matchesTimeWindow(row: ApprovalQueueRowDto): boolean {
+    switch (this.timeWindow()) {
+      case 'since_last_submission':
+        return row.hoursWorkedInWindow > 0 || row.lastApproval === null;
+      case 'last_week':
+        return row.hoursWorkedInWindow >= 0;
+      case 'current_week':
+        return true;
+      case 'custom':
+        return true;
+      default:
+        return true;
+    }
+  }
+
   private refetchQueue(): void {
     this.loading.set(true);
     this.loadQueue();
   }
 
-  private syncOrganisationOptions(rows: ApprovalQueueRowDto[]): void {
-    const map = new Map<OrganisationId, string>();
-    for (const row of rows) {
-      map.set(row.organisationId, row.organisationLabel);
+  private syncFilterOptions(rows: ApprovalQueueRowDto[]): void {
+    this.organisationOptions.set(this.toOptions(
+      rows.map(row => ({ value: row.organisationId, label: row.organisationLabel })),
+      option => option.value,
+    ));
+    this.disciplineOptions.set(this.toOptions(
+      rows.map(row => ({ value: row.disciplineLabel, label: row.disciplineLabel })),
+      option => option.value,
+    ));
+    this.projectOptions.set(this.toOptions(
+      rows.map(row => ({ value: row.projectLabel, label: row.projectLabel })),
+      option => option.value,
+    ));
+    this.locationOptions.set(this.toOptions(
+      rows.map(row => ({ value: row.locationPath, label: row.locationPath })),
+      option => option.value,
+    ));
+  }
+
+  private toOptions<T>(
+    items: FilterOption<T>[],
+    keySelector: (item: FilterOption<T>) => T,
+  ): FilterOption<T>[] {
+    const map = new Map<string, FilterOption<T>>();
+    for (const item of items) {
+      map.set(String(keySelector(item)), item);
     }
 
-    for (const option of this.organisationOptions()) {
-      if (!map.has(option.id)) {
-        map.set(option.id, option.label);
-      }
+    return [...map.values()].sort((left, right) => left.label.localeCompare(right.label));
+  }
+
+  private toggleFilterValue<T>(signalRef: { (): T[]; set(value: T[]): void }, value: T, checked: boolean): void {
+    const current = new Set(signalRef());
+    if (checked) {
+      current.add(value);
+    } else {
+      current.delete(value);
     }
 
-    this.organisationOptions.set(
-      [...map.entries()]
-        .map(([id, label]) => ({ id, label }))
-        .sort((a, b) => a.label.localeCompare(b.label)),
-    );
+    signalRef.set([...current]);
   }
 
   private valuesEqual(left: ApprovalValuesDto, right: ApprovalValuesDto): boolean {

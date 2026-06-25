@@ -8,3 +8,181 @@
 .f2p-pending-field {
   background-color: #ffffff;
 }
+
+@layer components {
+  .floorboard-page {
+    @apply min-h-screen bg-f2p-surface-muted text-f2p-ink;
+  }
+
+  .floorboard-page .navbar > div {
+    @apply max-w-none px-6;
+  }
+
+  .floorboard-layout {
+    @apply mx-auto grid max-w-[90rem] gap-0 lg:grid-cols-[15rem_1fr];
+  }
+
+  .floorboard-filters {
+    @apply border-r border-f2p-border bg-f2p-surface px-4 py-5;
+  }
+
+  .floorboard-filters__title {
+    @apply mb-4 text-xs font-semibold tracking-widest text-f2p-ink-muted;
+  }
+
+  .floorboard-filter-section {
+    @apply mb-5 border-b border-f2p-border pb-4 last:border-b-0;
+  }
+
+  .floorboard-filter-section h3 {
+    @apply mb-2 text-sm font-semibold text-f2p-ink;
+  }
+
+  .floorboard-filter-option {
+    @apply flex items-start gap-2 py-0.5 text-sm text-f2p-ink;
+  }
+
+  .floorboard-filter-option input[type='checkbox'] {
+    @apply mt-0.5 shrink-0;
+  }
+
+  .floorboard-main {
+    @apply bg-white px-5 py-5;
+  }
+
+  .floorboard-toolbar {
+    @apply mb-5 flex flex-wrap items-center justify-between gap-4 border-b border-f2p-border pb-4;
+  }
+
+  .floorboard-toolbar__title {
+    @apply text-xl font-bold tracking-wide text-f2p-ink;
+  }
+
+  .floorboard-time-window {
+    @apply flex flex-wrap items-center gap-4 text-sm text-f2p-ink;
+  }
+
+  .floorboard-time-window label {
+    @apply flex items-center gap-1.5;
+  }
+
+  .floorboard-toolbar-actions {
+    @apply flex flex-wrap items-center gap-3;
+  }
+
+  .floorboard-search {
+    @apply w-full max-w-xs rounded border border-f2p-border bg-white px-3 py-1.5 text-sm;
+  }
+
+  .floorboard-section {
+    @apply mb-6;
+  }
+
+  .floorboard-section__title {
+    @apply mb-3 border-b border-f2p-border pb-2 text-xs font-semibold tracking-widest text-f2p-ink-muted;
+  }
+
+  .floorboard-project-group {
+    @apply mb-4 overflow-hidden rounded border border-f2p-border;
+  }
+
+  .floorboard-project-group__header {
+    @apply flex items-center justify-between bg-f2p-surface-muted px-3 py-2 text-sm font-semibold text-f2p-ink;
+  }
+
+  .floorboard-row {
+    @apply grid gap-3 border-t border-f2p-border px-3 py-3 text-sm;
+    grid-template-columns: minmax(12rem, 1.3fr) minmax(5rem, 0.6fr) minmax(6.5rem, 0.7fr) minmax(6.5rem, 0.7fr) minmax(4.5rem, 0.45fr) minmax(2.5rem, 0.25fr) minmax(24rem, 2fr);
+  }
+
+  .floorboard-row:hover {
+    @apply bg-f2p-surface-muted/40;
+  }
+
+  .floorboard-row__task {
+    @apply flex min-w-0 items-start gap-2;
+  }
+
+  .floorboard-row__task-icon {
+    @apply mt-0.5 flex size-7 shrink-0 items-center justify-center rounded bg-f2p-ink text-xs font-bold text-white;
+  }
+
+  .floorboard-row__task-title {
+    @apply font-semibold text-f2p-ink;
+  }
+
+  .floorboard-row__task-meta {
+    @apply text-xs text-f2p-ink-muted;
+  }
+
+  .floorboard-row__last-submitted {
+    @apply mt-1 text-xs text-f2p-ink-muted;
+  }
+
+  .floorboard-progress {
+    @apply flex flex-col justify-center gap-1;
+  }
+
+  .floorboard-progress .progress-bar {
+    @apply h-2;
+  }
+
+  .floorboard-dates {
+    @apply flex flex-col gap-1 text-xs text-f2p-ink-muted;
+  }
+
+  .floorboard-dates span {
+    @apply inline-flex items-center gap-1;
+  }
+
+  .floorboard-metrics {
+    @apply flex flex-col justify-center gap-1 text-xs text-f2p-ink-muted;
+  }
+
+  .floorboard-team {
+    @apply flex items-center justify-center gap-1 text-sm text-f2p-ink-muted;
+  }
+
+  .floorboard-approval-fields {
+    @apply grid grid-cols-2 gap-2 xl:grid-cols-5;
+  }
+
+  .floorboard-field {
+    @apply grid gap-0.5 text-xs;
+  }
+
+  .floorboard-field span {
+    @apply text-f2p-ink-muted;
+  }
+
+  .floorboard-field input[type='number'],
+  .floorboard-field input[type='date'] {
+    @apply w-full rounded border border-f2p-border bg-white px-2 py-1 text-sm text-f2p-ink;
+  }
+
+  .floorboard-field--approved input {
+    @apply border-emerald-300 bg-emerald-50;
+  }
+
+  .floorboard-field--pending input {
+    @apply border-amber-300 bg-amber-50;
+  }
+
+  .floorboard-field--select {
+    @apply flex items-end justify-center pb-1;
+  }
+
+  .floorboard-100 {
+    @apply flex items-center gap-1;
+  }
+
+  @media (max-width: 1200px) {
+    .floorboard-row {
+      grid-template-columns: 1fr;
+    }
+
+    .floorboard-approval-fields {
+      @apply grid-cols-2;
+    }
+  }
+}

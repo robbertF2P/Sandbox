@@ -6,4 +6,9 @@ public sealed record AssignmentLabels(
     string Title,
     ActivityCode ActivityCode,
     string OrganisationLabel,
-    string ProjectLabel);
+    string ProjectLabel,
+    int TaskNumber = 0,
+    string LocationPath = "",
+    string DisciplineLabel = "",
+    int TeamCount = 0,
+    decimal TotalHoursBooked = 0m);

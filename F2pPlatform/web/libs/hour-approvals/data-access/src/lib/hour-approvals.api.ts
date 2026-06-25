@@ -97,6 +97,12 @@ export class HourApprovalsApi {
       assignmentId: asAssignmentId(row.assignmentId as unknown as string),
       organisationId: asOrganisationId(row.organisationId as unknown as number),
       activityCode: asActivityCode(row.activityCode as unknown as string),
+      taskNumber: row.taskNumber ?? 0,
+      locationPath: row.locationPath ?? '',
+      disciplineLabel: row.disciplineLabel ?? '',
+      teamCount: row.teamCount ?? 0,
+      totalHoursBooked: row.totalHoursBooked ?? 0,
+      lookbackValues: row.lookbackValues ?? row.currentValues,
     };
   }
 }
