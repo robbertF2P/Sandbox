@@ -163,6 +163,43 @@ internal static class HourApprovalsEndpoints
             .WithName("ApproveHourApprovalTask")
             .WithSummary("Explicitly approve current task values.");
 
+        group.MapPost("/submit", async (
+                HttpContext httpContext,
+                SubmitTasksBody body,
+                IHourApprovalsService service,
+                CancellationToken cancellationToken) =>
+            {
+                if (!await TryEnsureFeatureEnabled(httpContext))
+                {
+                    return Results.NotFound();
+                }
+
+                try
+                {
+                    SubmitTasksResult result = await service.SubmitTasksAsync(
+                        body.TaskIds,
+                        ResolveUserName(httpContext),
+                        ResolvePermissions(httpContext),
+                        cancellationToken);
+
+                    return Results.Ok(new
+                    {
+                        approved = result.Approved.Select(MapTask),
+                        failures = result.Failures.Select(failure => new
+                        {
+                            taskId = failure.TaskId,
+                            error = failure.Error,
+                        }),
+                    });
+                }
+                catch (UnauthorizedAccessException exception)
+                {
+                    return Results.Json(new { error = exception.Message }, statusCode: StatusCodes.Status403Forbidden);
+                }
+            })
+            .WithName("SubmitHourApprovalTasks")
+            .WithSummary("Batch-approve selected tasks (submission).");
+
         return app;
     }
 
@@ -243,4 +280,6 @@ internal static class HourApprovalsEndpoints
         decimal WorkedHours,
         DateOnly? PlannedStart,
         DateOnly? PlannedFinish);
+
+    private sealed record SubmitTasksBody(IReadOnlyList<Guid> TaskIds);
 }

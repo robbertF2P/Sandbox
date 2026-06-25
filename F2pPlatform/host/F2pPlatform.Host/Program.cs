@@ -1,3 +1,4 @@
+using F2pPlatform.Host.ApprovalQueue;
 using F2pPlatform.Host.Hubs;
 using F2pPlatform.Host.Services;
 using Platform.Serilog.Logging;
@@ -65,6 +66,7 @@ try
     app.MapPlatformConfigModule();
     app.MapReferenceModule();
     app.MapHourApprovalsModule();
+    app.MapApprovalQueueEndpoints();
     app.MapControlPlaneModule();
     app.MapHub<PlatformEventsHub>("/hubs/platform-events");
 

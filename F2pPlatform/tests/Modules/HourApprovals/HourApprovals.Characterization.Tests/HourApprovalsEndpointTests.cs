@@ -1,5 +1,6 @@
 using System.Net;
 using System.Net.Http.Json;
+using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 
@@ -114,6 +115,72 @@ public sealed class HourApprovalsEndpointTests : IClassFixture<HourApprovalsWebA
         Assert.All(tasks, task => Assert.Equal("Approved", task.ApprovalState));
     }
 
+    [Fact]
+    public async Task SubmitTasks_ApprovesSelectedTasks()
+    {
+        Guid taskId = Guid.Parse("11111111-1111-1111-1111-111111111101");
+
+        using HttpRequestMessage submitRequest = CreateSupervisorRequest(
+            HttpMethod.Post,
+            "/api/hour-approvals/submit",
+            new { taskIds = new[] { taskId } });
+
+        using HttpResponseMessage submitResponse = await _client.SendAsync(submitRequest);
+        Assert.Equal(HttpStatusCode.OK, submitResponse.StatusCode);
+
+        var payload = await submitResponse.Content.ReadFromJsonAsync<SubmitTasksResponse>();
+        Assert.NotNull(payload);
+        Assert.Single(payload.Approved);
+        Assert.Empty(payload.Failures);
+        Assert.Equal(taskId, payload.Approved[0].Id);
+        Assert.Equal("Approved", payload.Approved[0].ApprovalState);
+    }
+
+    [Fact]
+    public async Task SubmitTasks_ReturnsForbidden_ForForemanWithoutPermission()
+    {
+        Guid taskId = Guid.Parse("11111111-1111-1111-1111-111111111102");
+
+        using HttpRequestMessage submitRequest = CreateForemanRequest(
+            HttpMethod.Post,
+            "/api/hour-approvals/submit",
+            new { taskIds = new[] { taskId } });
+
+        using HttpResponseMessage submitResponse = await _client.SendAsync(submitRequest);
+        Assert.Equal(HttpStatusCode.Forbidden, submitResponse.StatusCode);
+    }
+
+    [Fact]
+    public async Task GetApprovalQueue_ComposesPlanningTimekeepingAndHours()
+    {
+        using HttpRequestMessage request = CreateSupervisorRequest(
+            HttpMethod.Get,
+            "/api/hour-approvals/queue?submissionCategories=worked_on");
+
+        using HttpResponseMessage response = await _client.SendAsync(request);
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
+        var rows = await response.Content.ReadFromJsonAsync<List<QueueRowResponse>>();
+        Assert.NotNull(rows);
+        Assert.Equal(2, rows.Count);
+        Assert.All(rows, row => Assert.Equal("worked_on", row.SubmissionCategory));
+        Assert.Contains(rows, row => row.ActivityCode == "ACT-204-WIR");
+        Assert.Contains(rows, row => row.ActivityCode == "ACT-DCK-COT");
+    }
+
+    [Fact]
+    public async Task GetApprovalQueue_ReturnsNotFound_WhenFeatureDisabled()
+    {
+        await using var factory = new HourApprovalsDisabledWebApplicationFactory();
+        using HttpClient client = factory.CreateClient();
+
+        using HttpRequestMessage request = new(HttpMethod.Get, "/api/hour-approvals/queue");
+        request.Headers.Add("X-User-Name", "supervisor.demo");
+        using HttpResponseMessage response = await client.SendAsync(request);
+
+        Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+    }
+
     private static HttpRequestMessage CreateSupervisorRequest(
         HttpMethod method,
         string url,
@@ -160,6 +227,20 @@ public sealed class HourApprovalsEndpointTests : IClassFixture<HourApprovalsWebA
         LastApprovalResponse? LastApproval);
 
     private sealed record LastApprovalResponse(string ApprovedBy, DateTimeOffset ApprovedAtUtc);
+
+    private sealed record QueueRowResponse(
+        [property: JsonPropertyName("taskId")] Guid TaskId,
+        [property: JsonPropertyName("activityCode")] string ActivityCode,
+        [property: JsonPropertyName("submissionCategory")] string SubmissionCategory,
+        [property: JsonPropertyName("approvalState")] string ApprovalState);
+
+    private sealed record SubmitTasksResponse(
+        [property: JsonPropertyName("approved")] List<TaskResponse> Approved,
+        [property: JsonPropertyName("failures")] List<SubmitFailureResponse> Failures);
+
+    private sealed record SubmitFailureResponse(
+        [property: JsonPropertyName("taskId")] Guid TaskId,
+        [property: JsonPropertyName("error")] string Error);
 }
 
 [Trait("Module", "HourApprovals")]
