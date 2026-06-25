@@ -15,7 +15,7 @@ paths:
   - "**/vite.config.ts"
   - "**/.postcssrc.json"
 metadata:
-  version: 1.0.0
+  version: 1.1.0
 ---
 
 # Tailwind UI styling
@@ -24,7 +24,8 @@ Apply this skill for all frontend styling in SandBox and when advising on V2 mon
 
 **Platform standard:** `docs/monolith-modularization/platform-frontend-standard.md`  
 **Package source:** `FloorganiseCss/` (`@floorganise/css`)  
-**Official Tailwind docs:** [utility classes](https://tailwindcss.com/docs/styling-with-utility-classes) · [framework guides](https://tailwindcss.com/docs/installation/framework-guides)
+**Official Tailwind docs:** [utility classes](https://tailwindcss.com/docs/styling-with-utility-classes) · [responsive design](https://tailwindcss.com/docs/responsive-design) · [framework guides](https://tailwindcss.com/docs/installation/framework-guides)  
+**RC mobile audit (legacy vs V2):** `docs/monolith-modularization/rc-mobile-responsive-audit.md`
 
 ## Non-negotiable rules
 
@@ -118,14 +119,49 @@ Defined in `FloorganiseCss/src/theme.css` via `@theme`. Use as utilities:
 | Semantic | `bg-f2p-success`, `bg-f2p-warning`, `text-f2p-danger` |
 | Dark POC | `bg-f2p-dark-surface`, `text-f2p-dark-ink`, `border-f2p-dark-border` |
 
+## Responsive design
+
+Tailwind is **mobile-first**: unprefixed utilities apply at all sizes; prefixed utilities apply at that breakpoint **and up**.
+
+| Prefix | Min width |
+|--------|-----------|
+| `sm` | 640px (40rem) |
+| `md` | 768px (48rem) |
+| `lg` | 1024px (64rem) |
+| `xl` | 1280px (80rem) |
+| `2xl` | 1536px (96rem) |
+
+### Rules
+
+1. **Unprefixed = mobile** — do not use `sm:` to target phones; `sm:` means “from 640px up”.
+2. **Layout in templates** — pair semantic chrome with responsive utilities: `class="f2ps-tile-fluid w-full max-w-2xl flex flex-col gap-4 lg:flex-row"`.
+3. **Stack then spread** — `flex-col sm:flex-row`, `grid-cols-1 sm:grid-cols-2 lg:grid-cols-3`, `w-full lg:w-72`.
+4. **Breakpoint ranges** — `md:max-xl:flex` targets only md–xl; `max-md:hidden` hides below md.
+5. **Container queries** — for `@floorganise/ui` widgets in sidebars/modals: `@container` on parent, `@md:flex-row` on children (sizes by parent, not viewport).
+6. **Custom breakpoints** — add `--breakpoint-*` in `FloorganiseCss/src/theme.css` `@theme` (use `rem`); no `tailwind.config.js`.
+
+### Login and home (V2)
+
+| Screen | Semantic chrome | Responsive utilities |
+|--------|-----------------|-------------------|
+| Login | `f2ps-tile-fluid`, `form.login`, `f2ps-btn-primary` | `w-full max-w-2xl mx-auto px-4`; action row `flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between` |
+| Home grid | `f2ps-tile`, `f2p-tile-grid` | `grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3` |
+
+**Reference:** `FloorganiseCss/showcase/src/components/F2pLoginPanel.vue`, `F2pHybridPanel.vue`.
+
+### Legacy gap (why V2 matters)
+
+RC audit (`2025-14-patch.floor2plan.com`, 375px): login form shrinks to **150px** wide; Login button overlaps “Stay logged in?”; home shows **14** stacked 152px tiles (~3.6 screens of scroll); module menu is **20×20px**. Legacy bundles (`login-style.bundle.css`) are desktop-first with fixed widths. Details: `docs/monolith-modularization/rc-mobile-responsive-audit.md`.
+
 ## Variants (common patterns)
 
 | Pattern | Example |
 |---------|---------|
 | Hover / focus | `hover:bg-f2p-brand-hover`, `focus:ring-2` |
-| Responsive | `flex-col sm:flex-row`, `w-full lg:w-72` |
+| Responsive | `flex-col sm:flex-row`, `w-full lg:w-72`, `md:max-xl:block` |
+| Container | `@container` + `@md:flex-row` on children |
 | Dark (theme class) | Prefer `f2p-app-dark` shell; use `dark:` only when matching `prefers-color-scheme` |
-| Arbitrary value | `w-[72px]`, `grid-cols-[1fr_2fr]` — sparingly, for one-offs |
+| Arbitrary value | `w-[72px]`, `min-[320px]:text-center` — sparingly |
 | Dynamic width | `:style="{ width: `${pct}%` }"` on progress fills; static chrome stays in classes |
 
 Stack variants left-to-right: `lg:hover:bg-f2p-brand-hover`.
