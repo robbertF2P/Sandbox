@@ -5,7 +5,7 @@ namespace HourApprovals.Domain.Models;
 public sealed class ActiveTask
 {
     private ActiveTask(
-        Guid id,
+        TaskId id,
         string title,
         string activityCode,
         ApprovalValues currentValues,
@@ -18,7 +18,7 @@ public sealed class ActiveTask
         IsActiveForCurrentUser = isActiveForCurrentUser;
     }
 
-    public Guid Id { get; }
+    public TaskId Id { get; }
 
     public string Title { get; }
 
@@ -29,7 +29,7 @@ public sealed class ActiveTask
     public bool IsActiveForCurrentUser { get; private set; }
 
     public static ActiveTask Create(
-        Guid id,
+        TaskId id,
         string title,
         string activityCode,
         ApprovalValues currentValues,

@@ -1,4 +1,5 @@
 using Akka.Actor;
+using F2pPlatform.Host.Contracts.ApprovalQueue;
 using F2pPlatform.Host.Contracts.ApprovalQueue.Messages.Timekeeping;
 using F2pPlatform.Host.Core.ApprovalQueue.Poc;
 
@@ -13,7 +14,7 @@ public sealed class TimekeepingApprovalReadActor : ReceiveActor
     {
         Receive<GetHoursInWindow>(message =>
         {
-            IReadOnlyDictionary<Guid, decimal> hours =
+            IReadOnlyDictionary<AssignmentId, decimal> hours =
                 PocTimekeepingHoursStore.GetHours(message.AssignmentIds);
 
             Sender.Tell(new GetHoursInWindowReply(hours));

@@ -9,10 +9,10 @@ namespace HourApprovals.Unit.Tests;
 [Trait("Tier", "Unit")]
 public sealed class ApprovalQueueComposerShould
 {
-    private static readonly Guid TaskA = Guid.Parse("11111111-1111-1111-1111-111111111101");
-    private static readonly Guid TaskB = Guid.Parse("11111111-1111-1111-1111-111111111102");
+    private static readonly TaskId TaskA = new(Guid.Parse("11111111-1111-1111-1111-111111111101"));
+    private static readonly TaskId TaskB = new(Guid.Parse("11111111-1111-1111-1111-111111111102"));
 
-  [Fact]
+    [Fact]
     public void ResolveCategory_WorkedOn_WhenHoursInWindow()
     {
         SubmissionCategory category = ApprovalQueueComposer.ResolveCategory(
@@ -43,13 +43,13 @@ public sealed class ApprovalQueueComposerShould
             CreateAssignment(TaskB, "Ventilation"),
         };
 
-        var hours = new Dictionary<Guid, decimal>
+        var hours = new Dictionary<AssignmentId, decimal>
         {
-            [TaskA] = 4.5m,
-            [TaskB] = 0m,
+            [new AssignmentId(TaskA.Value)] = 4.5m,
+            [new AssignmentId(TaskB.Value)] = 0m,
         };
 
-        var snapshots = new Dictionary<Guid, HourSubmissionSnapshot>
+        var snapshots = new Dictionary<TaskId, HourSubmissionSnapshot>
         {
             [TaskA] = CreateSnapshot(TaskA, lastSubmitted: null),
             [TaskB] = CreateSnapshot(TaskB, lastSubmitted: null),
@@ -64,7 +64,7 @@ public sealed class ApprovalQueueComposerShould
             filter);
 
         Assert.Equal(2, rows.Count);
-        Assert.All(rows, row => Assert.Null(row.LastSubmittedAtUtc));
+        Assert.All(rows, row => Assert.Null(row.LastSubmission));
     }
 
     [Fact]
@@ -76,13 +76,13 @@ public sealed class ApprovalQueueComposerShould
             CreateAssignment(TaskB, "Ventilation"),
         };
 
-        var hours = new Dictionary<Guid, decimal>
+        var hours = new Dictionary<AssignmentId, decimal>
         {
-            [TaskA] = 4.5m,
-            [TaskB] = 0m,
+            [new AssignmentId(TaskA.Value)] = 4.5m,
+            [new AssignmentId(TaskB.Value)] = 0m,
         };
 
-        var snapshots = new Dictionary<Guid, HourSubmissionSnapshot>
+        var snapshots = new Dictionary<TaskId, HourSubmissionSnapshot>
         {
             [TaskA] = CreateSnapshot(TaskA, lastSubmitted: null),
             [TaskB] = CreateSnapshot(TaskB, lastSubmitted: null),
@@ -101,27 +101,20 @@ public sealed class ApprovalQueueComposerShould
         Assert.Equal(SubmissionCategory.WorkedOn, rows[0].SubmissionCategory);
     }
 
-    private static PlanningAssignmentRow CreateAssignment(Guid taskId, string title) =>
+    private static PlanningAssignmentRow CreateAssignment(TaskId taskId, string title) =>
         new(
             taskId,
-            taskId,
-            21,
-            "21: Metal Shop",
-            "NSMV Demo",
-            title,
-            "ACT",
+            new AssignmentId(taskId.Value),
+            new OrganisationId(21),
+            new AssignmentLabels(title, "ACT", "21: Metal Shop", "NSMV Demo"),
             IsActiveAssignment: true);
 
-    private static HourSubmissionSnapshot CreateSnapshot(Guid taskId, DateTimeOffset? lastSubmitted) =>
+    private static HourSubmissionSnapshot CreateSnapshot(TaskId taskId, DateTimeOffset? lastSubmitted) =>
         new(
             taskId,
-            "NotApproved",
-            false,
-            10m,
-            20m,
-            30m,
-            null,
-            null,
-            lastSubmitted.HasValue ? "supervisor.demo" : null,
-            lastSubmitted);
+            ApprovalState.NotApproved,
+            new ApprovalProgressValues(10m, 20m, 30m, null, null),
+            lastSubmitted.HasValue
+                ? new LastSubmission("supervisor.demo", lastSubmitted.Value)
+                : null);
 }

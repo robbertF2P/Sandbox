@@ -1,4 +1,5 @@
 using Akka.Actor;
+using F2pPlatform.Host.Contracts.ApprovalQueue;
 using F2pPlatform.Host.Contracts.ApprovalQueue.Messages;
 using F2pPlatform.Host.Contracts.ApprovalQueue.Messages.Hours;
 using F2pPlatform.Host.Contracts.ApprovalQueue.Messages.Planning;
@@ -41,10 +42,10 @@ public sealed class ApprovalQueueFacade : IApprovalQueueFacade
             AskTimeout,
             cancellationToken);
 
-        IReadOnlyList<Guid> assignmentIds = assignments.Rows
+        IReadOnlyList<AssignmentId> assignmentIds = assignments.Rows
             .Select(row => row.AssignmentId)
             .ToList();
-        IReadOnlyList<Guid> taskIds = assignments.Rows
+        IReadOnlyList<TaskId> taskIds = assignments.Rows
             .Select(row => row.TaskId)
             .ToList();
 

@@ -14,7 +14,7 @@ public sealed class HourApprovalRulesShould
     public void ResolveState_ReturnsApproved_WhenCurrentMatchesLastApproval()
     {
         ApprovalRecord approval = ApprovalRecord.Create(
-            Guid.NewGuid(),
+            new TaskId(Guid.NewGuid()),
             "supervisor.demo",
             DateTimeOffset.UtcNow,
             Baseline);
@@ -28,7 +28,7 @@ public sealed class HourApprovalRulesShould
     public void ResolveState_ReturnsNotApproved_WhenValuesChanged()
     {
         ApprovalRecord approval = ApprovalRecord.Create(
-            Guid.NewGuid(),
+            new TaskId(Guid.NewGuid()),
             "supervisor.demo",
             DateTimeOffset.UtcNow,
             Baseline);

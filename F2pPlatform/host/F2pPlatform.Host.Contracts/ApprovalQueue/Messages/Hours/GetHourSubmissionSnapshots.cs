@@ -1,18 +1,14 @@
+using F2pPlatform.Host.Contracts.ApprovalQueue;
+
 namespace F2pPlatform.Host.Contracts.ApprovalQueue.Messages.Hours;
 
 public sealed record HourSubmissionSnapshot(
-    Guid TaskId,
-    string ApprovalState,
-    bool IsApproved,
-    decimal HoursToGo,
-    decimal Progress,
-    decimal WorkedHours,
-    string? PlannedStart,
-    string? PlannedFinish,
-    string? LastSubmittedBy,
-    DateTimeOffset? LastSubmittedAtUtc);
+    TaskId TaskId,
+    ApprovalState ApprovalState,
+    ApprovalProgressValues CurrentValues,
+    LastSubmission? LastSubmission);
 
-public sealed record GetHourSubmissionSnapshots(IReadOnlyList<Guid> TaskIds);
+public sealed record GetHourSubmissionSnapshots(IReadOnlyList<TaskId> TaskIds);
 
 public sealed record GetHourSubmissionSnapshotsReply(
-    IReadOnlyDictionary<Guid, HourSubmissionSnapshot> SnapshotsByTaskId);
+    IReadOnlyDictionary<TaskId, HourSubmissionSnapshot> SnapshotsByTaskId);

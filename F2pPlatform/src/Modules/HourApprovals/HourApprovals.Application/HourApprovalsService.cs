@@ -63,7 +63,7 @@ public sealed class HourApprovalsService : IHourApprovalsService
     {
         EnsureFeatureEnabled();
 
-        ActiveTask? task = await _repository.GetTaskAsync(taskId, cancellationToken);
+        ActiveTask? task = await _repository.GetTaskAsync(ToTaskId(taskId), cancellationToken);
         if (task is null)
         {
             return null;
@@ -87,8 +87,9 @@ public sealed class HourApprovalsService : IHourApprovalsService
                 $"User '{actingUser}' lacks permission {HourApprovalRules.ApproveHoursProgressPermission}.");
         }
 
-        ActiveTask task = await RequireTaskAsync(taskId, cancellationToken);
-        ApprovalRecord? previousApproval = await _repository.GetLatestApprovalAsync(taskId, cancellationToken);
+        TaskId typedTaskId = ToTaskId(taskId);
+        ActiveTask task = await RequireTaskAsync(typedTaskId, cancellationToken);
+        ApprovalRecord? previousApproval = await _repository.GetLatestApprovalAsync(typedTaskId, cancellationToken);
         bool wasApproved = HourApprovalRules.ResolveState(task.CurrentValues, previousApproval)
             == TaskApprovalState.Approved;
 
@@ -96,7 +97,7 @@ public sealed class HourApprovalsService : IHourApprovalsService
         await _repository.SaveTaskAsync(task, cancellationToken);
 
         ApprovalRecord record = ApprovalRecord.Create(
-            taskId,
+            typedTaskId,
             actingUser,
             DateTimeOffset.UtcNow,
             values);
@@ -125,10 +126,11 @@ public sealed class HourApprovalsService : IHourApprovalsService
                 $"User '{actingUser}' lacks permission {HourApprovalRules.ApproveHoursProgressPermission}.");
         }
 
-        ActiveTask task = await RequireTaskAsync(taskId, cancellationToken);
+        TaskId typedTaskId = ToTaskId(taskId);
+        ActiveTask task = await RequireTaskAsync(typedTaskId, cancellationToken);
 
         ApprovalRecord record = ApprovalRecord.Create(
-            taskId,
+            typedTaskId,
             actingUser,
             DateTimeOffset.UtcNow,
             task.CurrentValues);
@@ -168,17 +170,19 @@ public sealed class HourApprovalsService : IHourApprovalsService
             }
             catch (KeyNotFoundException)
             {
-                failures.Add(new SubmitTaskFailure(taskId, $"Task '{taskId}' was not found."));
+                failures.Add(new SubmitTaskFailure(ToTaskId(taskId), $"Task '{taskId}' was not found."));
             }
         }
 
         return new SubmitTasksResult(approved, failures);
     }
 
-    private async Task<ActiveTask> RequireTaskAsync(Guid taskId, CancellationToken cancellationToken)
+    private static TaskId ToTaskId(Guid taskId) => new(taskId);
+
+    private async Task<ActiveTask> RequireTaskAsync(TaskId taskId, CancellationToken cancellationToken)
     {
         ActiveTask? task = await _repository.GetTaskAsync(taskId, cancellationToken);
-        return task ?? throw new KeyNotFoundException($"Task '{taskId}' was not found.");
+        return task ?? throw new KeyNotFoundException($"Task '{taskId.Value}' was not found.");
     }
 
     private async Task<TaskApprovalView> BuildViewAsync(ActiveTask task, CancellationToken cancellationToken)

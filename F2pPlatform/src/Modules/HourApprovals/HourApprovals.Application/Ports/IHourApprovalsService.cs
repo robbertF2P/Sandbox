@@ -8,13 +8,13 @@ public interface IHourApprovalsRepository
 {
     Task<IReadOnlyList<ActiveTask>> ListTasksAsync(CancellationToken cancellationToken);
 
-    Task<ActiveTask?> GetTaskAsync(Guid taskId, CancellationToken cancellationToken);
+    Task<ActiveTask?> GetTaskAsync(TaskId taskId, CancellationToken cancellationToken);
 
     Task SaveTaskAsync(ActiveTask task, CancellationToken cancellationToken);
 
     Task AppendApprovalRecordAsync(ApprovalRecord record, CancellationToken cancellationToken);
 
-    Task<ApprovalRecord?> GetLatestApprovalAsync(Guid taskId, CancellationToken cancellationToken);
+    Task<ApprovalRecord?> GetLatestApprovalAsync(TaskId taskId, CancellationToken cancellationToken);
 }
 
 public sealed record TaskApprovalView(
@@ -54,7 +54,7 @@ public interface IHourApprovalsService
         CancellationToken cancellationToken);
 }
 
-public sealed record SubmitTaskFailure(Guid TaskId, string Error);
+public sealed record SubmitTaskFailure(TaskId TaskId, string Error);
 
 public sealed record SubmitTasksResult(
     IReadOnlyList<TaskApprovalView> Approved,
