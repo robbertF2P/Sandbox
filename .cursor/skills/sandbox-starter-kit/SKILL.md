@@ -29,6 +29,7 @@ Use this skill first. It routes you to focused skills and repo standards — do 
 | Platform packages feed | `local-feed/` | Packed NuGet (`Platform.Serilog.Logging*`) |
 | Import domain | `ImportPipeline/` | `ImportPipeline.Domain` NuGet |
 | Modularization program | `docs/monolith-modularization/` | Roadmap, logging/correlation/frontend/**actor** standards, quality framework |
+| Coding standards | `docs/coding-standards/` | C# (ReSharper) + Angular team guidelines |
 | Agent skills (source) | `.cursor/skills/` | Author skills here; sync with `./scripts/sync-agent-skills.sh` |
 | Agent entry | `AGENTS.md` | Skill index for all tools |
 
@@ -41,13 +42,14 @@ Use this skill first. It routes you to focused skills and repo standards — do 
 | Modeling domains, aggregates, bounded contexts | `domain-driven-design`, `implementing-domain-driven-design` |
 | Repositories, specifications, query rules | `specification-pattern` |
 | C# / ASP.NET Core hosts, DI, tests | `dotnet-core-csharp-development` |
+| Angular / Nx frontend, components, routes | `angular-frontend-development` |
 | EF Core, migrations, DbContext | `dotnet-ef-core` |
 | Immutable aggregates + EF Core persistence | `immutable-domain-ef-core` |
 | Actors, messages, SignalR integration | `akka-net`, `reactive-applications-akka-net` |
 | DSLs, fluent APIs, parsers | `domain-specific-languages` |
 | Serilog, MSBuild logging props, test sink | `platform-logging` |
 | CorrelationId, use-case tracing, Akka envelopes | `platform-correlation` |
-| Vue/Angular UI, Tailwind, `@floorganise/css` | `tailwind-ui-styling` |
+| Vue/Angular UI, Tailwind, `@floorganise/css` | `tailwind-ui-styling`, `angular-frontend-development` |
 | Functional style in C# | `functional-programming-csharp` |
 
 When multiple apply, read **all** relevant skills before editing.

@@ -16,18 +16,21 @@ paths:
   - "**/Directory.Build.props"
   - "**/global.json"
 metadata:
-  version: 1.0.0
+  version: 1.1.0
 ---
 
 # .NET Core C# Development
 
 Apply this skill for C# and ASP.NET Core work in this repository. Prefer existing project conventions over generic templates.
 
+**Team standards:** `docs/coding-standards/csharp-coding-standards.md` (ReSharper baseline + `.editorconfig`).
+
 ## Before changing code
 
 1. Identify the solution and project (e.g. `AkkaSignalRVuePoc/AkkaSignalRVuePoc.slnx`).
 2. Read nearby types and `.csproj` references before adding dependencies.
-3. Match style from `AkkaSignalRVuePoc/.cursor/rules/csharp-resharper-style.mdc` when editing files under that solution.
+3. Match style from root `.editorconfig` and `docs/coding-standards/csharp-coding-standards.md`.
+4. For AkkaSignalRVuePoc, also read `AkkaSignalRVuePoc/.cursor/rules/csharp-resharper-style.mdc`.
 
 ## Project and solution layout
 

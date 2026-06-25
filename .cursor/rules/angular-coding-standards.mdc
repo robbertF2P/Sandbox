@@ -1,0 +1,18 @@
+---
+description: Angular frontend standards — 2025 style guide + Platform 2.0 Nx layout
+globs: "**/*.{component.ts,component.html,routes.ts}"
+alwaysApply: false
+---
+
+# Angular coding standards
+
+Follow `docs/coding-standards/angular-coding-standards.md`. Styling: `tailwind-ui-styling` skill.
+
+## Quick rules
+
+- Standalone components; `inject()` for DI; signals for UI state
+- `@if` / `@for` / `@switch` — not structural directives
+- Feature-based Nx libs: `feature-*`, `data-access`, `ui`
+- kebab-case file names; `readonly` on `input()` / `output()`
+- `@floorganise/css` for styling; responsive utilities for layout
+- `protected` for template-only members; thin lifecycle hooks
