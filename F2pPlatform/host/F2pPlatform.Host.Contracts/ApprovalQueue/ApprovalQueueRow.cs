@@ -3,6 +3,7 @@ namespace F2pPlatform.Host.Contracts.ApprovalQueue;
 public sealed record ApprovalQueueRow(
     Guid TaskId,
     Guid AssignmentId,
+    int OrganisationId,
     string Title,
     string ActivityCode,
     string OrganisationLabel,

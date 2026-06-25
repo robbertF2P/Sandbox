@@ -49,6 +49,7 @@ public static class ApprovalQueueComposer
             rows.Add(new ApprovalQueueRow(
                 assignment.TaskId,
                 assignment.AssignmentId,
+                assignment.OrganisationId,
                 assignment.Title,
                 assignment.ActivityCode,
                 assignment.OrganisationLabel,

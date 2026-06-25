@@ -91,6 +91,7 @@ internal static class ApprovalQueueEndpoints
     {
         taskId = row.TaskId,
         assignmentId = row.AssignmentId,
+        organisationId = row.OrganisationId,
         title = row.Title,
         activityCode = row.ActivityCode,
         organisationLabel = row.OrganisationLabel,

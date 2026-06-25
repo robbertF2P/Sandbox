@@ -137,6 +137,44 @@ public sealed class HourApprovalsService : IHourApprovalsService
         return await BuildViewAsync(task, cancellationToken);
     }
 
+    public async Task<SubmitTasksResult> SubmitTasksAsync(
+        IReadOnlyList<Guid> taskIds,
+        string actingUser,
+        IReadOnlyCollection<string> permissions,
+        CancellationToken cancellationToken)
+    {
+        EnsureFeatureEnabled();
+
+        if (!HourApprovalRules.CanApprove(permissions))
+        {
+            throw new UnauthorizedAccessException(
+                $"User '{actingUser}' lacks permission {HourApprovalRules.ApproveHoursProgressPermission}.");
+        }
+
+        List<TaskApprovalView> approved = [];
+        List<SubmitTaskFailure> failures = [];
+
+        foreach (Guid taskId in taskIds.Distinct())
+        {
+            try
+            {
+                TaskApprovalView view = await ApproveTaskAsync(
+                    taskId,
+                    actingUser,
+                    permissions,
+                    cancellationToken);
+
+                approved.Add(view);
+            }
+            catch (KeyNotFoundException)
+            {
+                failures.Add(new SubmitTaskFailure(taskId, $"Task '{taskId}' was not found."));
+            }
+        }
+
+        return new SubmitTasksResult(approved, failures);
+    }
+
     private async Task<ActiveTask> RequireTaskAsync(Guid taskId, CancellationToken cancellationToken)
     {
         ActiveTask? task = await _repository.GetTaskAsync(taskId, cancellationToken);

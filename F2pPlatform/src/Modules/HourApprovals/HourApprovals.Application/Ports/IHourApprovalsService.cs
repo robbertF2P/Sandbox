@@ -46,7 +46,19 @@ public interface IHourApprovalsService
         string actingUser,
         IReadOnlyCollection<string> permissions,
         CancellationToken cancellationToken);
+
+    Task<SubmitTasksResult> SubmitTasksAsync(
+        IReadOnlyList<Guid> taskIds,
+        string actingUser,
+        IReadOnlyCollection<string> permissions,
+        CancellationToken cancellationToken);
 }
+
+public sealed record SubmitTaskFailure(Guid TaskId, string Error);
+
+public sealed record SubmitTasksResult(
+    IReadOnlyList<TaskApprovalView> Approved,
+    IReadOnlyList<SubmitTaskFailure> Failures);
 
 public sealed record HourApprovalsCapabilities(
     bool FeatureEnabled,
