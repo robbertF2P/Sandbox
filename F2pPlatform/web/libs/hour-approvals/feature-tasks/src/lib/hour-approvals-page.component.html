@@ -13,72 +13,82 @@
 
       <section class="floorboard-filter-section">
         <h3>Departments</h3>
-        @for (org of organisationOptions(); track org.value) {
-          <label class="floorboard-filter-option">
-            <input
-              type="checkbox"
-              [checked]="selectedOrganisationIds().includes(org.value)"
-              (change)="onOrganisationToggle(org.value, $any($event.target).checked)"
-            />
-            {{ org.label }}
-          </label>
-        }
+        <div class="floorboard-filter-options">
+          @for (org of organisationOptions(); track org.value) {
+            <label class="floorboard-filter-option">
+              <input
+                type="checkbox"
+                [checked]="selectedOrganisationIds().includes(org.value)"
+                (change)="onOrganisationToggle(org.value, $any($event.target).checked)"
+              />
+              <span class="floorboard-filter-option__label">{{ org.label }}</span>
+            </label>
+          }
+        </div>
       </section>
 
       <section class="floorboard-filter-section">
         <h3>Discipline</h3>
-        @for (option of disciplineOptions(); track option.value) {
-          <label class="floorboard-filter-option">
-            <input
-              type="checkbox"
-              [checked]="selectedDisciplines().includes(option.value)"
-              (change)="onDisciplineToggle(option.value, $any($event.target).checked)"
-            />
-            {{ option.label }}
-          </label>
-        }
+        <div class="floorboard-filter-options">
+          @for (option of disciplineOptions(); track option.value) {
+            <label class="floorboard-filter-option">
+              <input
+                type="checkbox"
+                [checked]="selectedDisciplines().includes(option.value)"
+                (change)="onDisciplineToggle(option.value, $any($event.target).checked)"
+              />
+              <span class="floorboard-filter-option__label">{{ option.label }}</span>
+            </label>
+          }
+        </div>
       </section>
 
       <section class="floorboard-filter-section">
         <h3>Project</h3>
-        @for (option of projectOptions(); track option.value) {
-          <label class="floorboard-filter-option">
-            <input
-              type="checkbox"
-              [checked]="selectedProjects().includes(option.value)"
-              (change)="onProjectToggle(option.value, $any($event.target).checked)"
-            />
-            {{ option.label }}
-          </label>
-        }
+        <div class="floorboard-filter-options">
+          @for (option of projectOptions(); track option.value) {
+            <label class="floorboard-filter-option">
+              <input
+                type="checkbox"
+                [checked]="selectedProjects().includes(option.value)"
+                (change)="onProjectToggle(option.value, $any($event.target).checked)"
+              />
+              <span class="floorboard-filter-option__label">{{ option.label }}</span>
+            </label>
+          }
+        </div>
       </section>
 
       <section class="floorboard-filter-section">
         <h3>Submission status</h3>
-        @for (option of categoryOptions; track option.value) {
-          <label class="floorboard-filter-option">
-            <input
-              type="checkbox"
-              [checked]="selectedCategories().includes(option.value)"
-              (change)="onCategoryToggle(option.value, $any($event.target).checked)"
-            />
-            {{ option.label }}
-          </label>
-        }
+        <div class="floorboard-filter-options">
+          @for (option of categoryOptions; track option.value) {
+            <label class="floorboard-filter-option">
+              <input
+                type="checkbox"
+                [checked]="selectedCategories().includes(option.value)"
+                (change)="onCategoryToggle(option.value, $any($event.target).checked)"
+              />
+              <span class="floorboard-filter-option__label">{{ option.label }}</span>
+            </label>
+          }
+        </div>
       </section>
 
       <section class="floorboard-filter-section">
         <h3>Location</h3>
-        @for (option of locationOptions(); track option.value) {
-          <label class="floorboard-filter-option">
-            <input
-              type="checkbox"
-              [checked]="selectedLocations().includes(option.value)"
-              (change)="onLocationToggle(option.value, $any($event.target).checked)"
-            />
-            {{ option.label }}
-          </label>
-        }
+        <div class="floorboard-filter-options">
+          @for (option of locationOptions(); track option.value) {
+            <label class="floorboard-filter-option">
+              <input
+                type="checkbox"
+                [checked]="selectedLocations().includes(option.value)"
+                (change)="onLocationToggle(option.value, $any($event.target).checked)"
+              />
+              <span class="floorboard-filter-option__label">{{ option.label }}</span>
+            </label>
+          }
+        </div>
       </section>
     </aside>
 
