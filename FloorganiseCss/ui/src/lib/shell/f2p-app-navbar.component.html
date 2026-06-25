@@ -1,0 +1,34 @@
+<nav id="f2ps-layout-menu" class="navbar acc bg-dark">
+  <div class="mx-auto flex w-full max-w-6xl items-center justify-between gap-4 px-4">
+    <div class="flex items-center gap-3">
+      @if (moduleMenuEnabled()) {
+        <div class="module-dropdown">
+          <button
+            id="module-dropdown-button"
+            type="button"
+            class="nav-link"
+            [attr.aria-label]="moduleMenuLabel()"
+            (click)="moduleMenuClick.emit()"
+          >
+            <svg class="size-[19px] text-white" viewBox="0 0 24 24" aria-hidden="true">
+              <rect x="1" y="1" width="6.5" height="6.5" rx="1.5" fill="currentColor" />
+              <rect x="1" y="8.75" width="6.5" height="6.5" rx="1.5" fill="currentColor" />
+              <rect x="1" y="16.5" width="6.5" height="6.5" rx="1.5" fill="currentColor" />
+              <rect x="8.75" y="1" width="6.5" height="6.5" rx="1.5" fill="currentColor" />
+              <rect x="8.75" y="8.75" width="6.5" height="6.5" rx="1.5" fill="currentColor" />
+              <rect x="8.75" y="16.5" width="6.5" height="6.5" rx="1.5" fill="currentColor" />
+              <rect x="16.5" y="1" width="6.5" height="6.5" rx="1.5" fill="currentColor" />
+              <rect x="16.5" y="8.75" width="6.5" height="6.5" rx="1.5" fill="currentColor" />
+              <rect x="16.5" y="16.5" width="6.5" height="6.5" rx="1.5" fill="currentColor" />
+            </svg>
+          </button>
+        </div>
+      }
+      <span class="f2ps-navbar-title navbar-brand">{{ title() }}</span>
+    </div>
+
+    <div class="flex items-center gap-3">
+      <ng-content select="[navbarActions]" />
+    </div>
+  </div>
+</nav>

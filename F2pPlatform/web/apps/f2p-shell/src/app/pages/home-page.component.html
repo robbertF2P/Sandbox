@@ -1,38 +1,12 @@
 <div class="f2p-app-light min-h-screen">
-  <nav id="f2ps-layout-menu" class="navbar acc bg-dark">
-    <div class="mx-auto flex w-full max-w-6xl items-center justify-between gap-4 px-4">
-      <div class="flex items-center gap-3">
-        <div class="module-dropdown">
-          <button
-            id="module-dropdown-button"
-            type="button"
-            class="nav-link"
-            aria-label="Open module menu"
-          >
-            <svg class="size-[19px] text-white" viewBox="0 0 24 24" aria-hidden="true">
-              <rect x="1" y="1" width="6.5" height="6.5" rx="1.5" fill="currentColor" />
-              <rect x="1" y="8.75" width="6.5" height="6.5" rx="1.5" fill="currentColor" />
-              <rect x="1" y="16.5" width="6.5" height="6.5" rx="1.5" fill="currentColor" />
-              <rect x="8.75" y="1" width="6.5" height="6.5" rx="1.5" fill="currentColor" />
-              <rect x="8.75" y="8.75" width="6.5" height="6.5" rx="1.5" fill="currentColor" />
-              <rect x="8.75" y="16.5" width="6.5" height="6.5" rx="1.5" fill="currentColor" />
-              <rect x="16.5" y="1" width="6.5" height="6.5" rx="1.5" fill="currentColor" />
-              <rect x="16.5" y="8.75" width="6.5" height="6.5" rx="1.5" fill="currentColor" />
-              <rect x="16.5" y="16.5" width="6.5" height="6.5" rx="1.5" fill="currentColor" />
-            </svg>
-          </button>
-        </div>
-        <span class="f2ps-navbar-title navbar-brand">Floor2Plan</span>
-      </div>
-
-      <div class="flex items-center gap-3">
-        @if (displayName) {
-          <span class="nav-link text-sm">{{ displayName }}</span>
-        }
-        <button type="button" class="nav-link text-sm" (click)="logout()">Log out</button>
-      </div>
-    </div>
-  </nav>
+  <f2p-app-navbar>
+    <ng-container navbarActions>
+      @if (displayName) {
+        <span class="nav-link text-sm">{{ displayName }}</span>
+      }
+      <button type="button" class="nav-link text-sm" (click)="logout()">Log out</button>
+    </ng-container>
+  </f2p-app-navbar>
 
   <main class="mx-auto max-w-6xl px-4 py-4">
     <f2p-home-tiles [tiles]="tiles" (tileSelect)="onTileSelect($event)" />

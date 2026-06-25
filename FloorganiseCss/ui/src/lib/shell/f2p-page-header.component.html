@@ -1,0 +1,13 @@
+<header class="border-b border-f2p-border bg-f2p-surface px-6 py-4">
+  <div class="mx-auto flex items-center justify-between gap-4" [class]="maxWidthClass()">
+    <div class="flex items-center gap-4">
+      @if (homeLink(); as link) {
+        <a [routerLink]="link" class="f2ps-btn-secondary f2ps-btn-sm">Home</a>
+      }
+      <span class="text-lg font-bold text-f2p-ink">{{ title() }}</span>
+    </div>
+    <div class="text-sm text-f2p-ink-muted">
+      <ng-content select="[headerAside]" />
+    </div>
+  </div>
+</header>

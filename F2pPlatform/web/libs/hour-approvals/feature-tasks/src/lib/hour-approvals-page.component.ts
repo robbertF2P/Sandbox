@@ -1,7 +1,7 @@
 import { DatePipe } from '@angular/common';
 import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { RouterLink } from '@angular/router';
+import { F2pPageHeaderComponent } from '@floorganise/ui';
 import { forkJoin, of } from 'rxjs';
 import { catchError, switchMap } from 'rxjs/operators';
 import { IdentityAuthService } from '@f2p/identity/data-access';
@@ -41,7 +41,7 @@ const GROUP_ORDER: SubmissionCategory[] = ['worked_on', 'other_active', 'never_s
 
 @Component({
   selector: 'f2p-hour-approvals-page',
-  imports: [RouterLink, FormsModule, DatePipe],
+  imports: [F2pPageHeaderComponent, FormsModule, DatePipe],
   templateUrl: './hour-approvals-page.component.html',
 })
 export class HourApprovalsPageComponent implements OnInit {

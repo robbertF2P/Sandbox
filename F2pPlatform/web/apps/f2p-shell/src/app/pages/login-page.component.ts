@@ -1,11 +1,12 @@
 import { Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
+import { F2pButtonComponent } from '@floorganise/ui';
 import { IdentityAuthService } from '@f2p/identity/data-access';
 
 @Component({
   selector: 'f2p-login-page',
-  imports: [FormsModule],
+  imports: [FormsModule, F2pButtonComponent],
   templateUrl: './login-page.component.html',
 })
 export class LoginPageComponent {

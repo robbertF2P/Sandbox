@@ -1,11 +1,11 @@
 import { Component, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { IdentityAuthService } from '@f2p/identity/data-access';
-import { F2pHomeTilesComponent, HomeTile } from '@f2p/shared/ui';
+import { F2pAppNavbarComponent, F2pHomeTilesComponent, HomeTile } from '@floorganise/ui';
 
 @Component({
   selector: 'f2p-home-page',
-  imports: [F2pHomeTilesComponent],
+  imports: [F2pAppNavbarComponent, F2pHomeTilesComponent],
   templateUrl: './home-page.component.html',
 })
 export class HomePageComponent {

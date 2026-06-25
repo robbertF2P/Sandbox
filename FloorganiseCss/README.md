@@ -120,4 +120,4 @@ Add tokens in `src/theme.css` (`@theme` block). Add aliases in `src/components/`
 
 ## Shared UI library (`@floorganise/ui`)
 
-V2 monolith Nx modules require a shared Angular component library built on this package. See `docs/monolith-modularization/platform-frontend-standard.md`. Seed components from `showcase-angular/`; package scaffold: `FloorganiseCss/ui/` (planned).
+V2 monolith Nx modules require a shared Angular component library built on this package. See `docs/monolith-modularization/platform-frontend-standard.md`. Package: `FloorganiseCss/ui/` (v0.1 — tiles, buttons, shell).
