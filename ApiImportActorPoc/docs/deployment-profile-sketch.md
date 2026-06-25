@@ -2,7 +2,7 @@
 
 v2 is a **control plane**. A tenant's **deployment profile** decides whether users hit the **full legacy product** or the **native v2 runtime**. Legacy mode is intentional technical debt in a box — not a failed migration.
 
-**Authentication (design):** SSO binding, OIDC flows, cloud multi-tenant vs on-prem install config — see `docs/monolith-modularization/platform-authentication-standard.md`. **PDF:** `docs/monolith-modularization/platform-v2-authentication-flow.pdf`.
+**Authentication (design):** SSO binding, OIDC flows, cloud multi-tenant vs on-prem install config — see `docs/monolith-modularization/platform-authentication-standard.md`. **PDF:** `docs/monolith-modularization/platform-v2-authentication-flow.pdf`. **Implementation gaps:** [`diagrams/platform-v2-infrastructure-gaps.md`](../../docs/monolith-modularization/diagrams/platform-v2-infrastructure-gaps.md) · [`platform-v2-infrastructure-gaps.svg`](../../docs/monolith-modularization/diagrams/platform-v2-infrastructure-gaps.svg)
 
 ## Responsibilities
 

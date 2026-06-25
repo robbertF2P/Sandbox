@@ -1,0 +1,151 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 980 720" font-family="Segoe UI, system-ui, sans-serif">
+  <defs>
+    <marker id="arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+      <path d="M0,0 L8,4 L0,8 Z" fill="#334155"/>
+    </marker>
+    <style>
+      .title { font-size: 18px; font-weight: 700; fill: #0f172a; }
+      .subtitle { font-size: 11px; fill: #475569; }
+      .lane-title { font-size: 12px; font-weight: 700; fill: #334155; }
+      .label { font-size: 11px; font-weight: 600; fill: #0f172a; }
+      .detail { font-size: 9.5px; fill: #475569; }
+      .line { stroke: #64748b; stroke-width: 1.2; fill: none; marker-end: url(#arrow); }
+      .lane { fill: #f8fafc; stroke: #cbd5e1; stroke-width: 1; rx: 10; }
+      .impl { fill: #dcfce7; stroke: #16a34a; stroke-width: 1.5; rx: 6; }
+      .stub { fill: #fef9c3; stroke: #ca8a04; stroke-width: 1.5; rx: 6; }
+      .miss { fill: #fee2e2; stroke: #dc2626; stroke-width: 1.5; rx: 6; }
+      .poc { fill: #f3e8ff; stroke: #9333ea; stroke-width: 1.5; rx: 6; }
+      .legend-impl { fill: #22c55e; }
+      .legend-stub { fill: #eab308; }
+      .legend-miss { fill: #ef4444; }
+      .legend-poc { fill: #a855f7; }
+    </style>
+  </defs>
+
+  <text x="20" y="26" class="title">Platform 2.0  infrastructure implementation gaps</text>
+  <text x="20" y="44" class="subtitle">Verified 2026-06-24 · SandBox repo · green = implemented · yellow = stub · red = missing · purple = POC not wired to host</text>
+
+  <!-- Legend -->
+  <rect x="20" y="58" width="12" height="12" class="legend-impl" rx="2"/>
+  <text x="38" y="68" class="detail">Implemented</text>
+  <rect x="120" y="58" width="12" height="12" class="legend-stub" rx="2"/>
+  <text x="138" y="68" class="detail">Stub / partial</text>
+  <rect x="240" y="58" width="12" height="12" class="legend-miss" rx="2"/>
+  <text x="258" y="68" class="detail">Missing</text>
+  <rect x="330" y="58" width="12" height="12" class="legend-poc" rx="2"/>
+  <text x="348" y="68" class="detail">POC only (separate folder)</text>
+
+  <!-- Cloud -->
+  <rect x="20" y="88" width="940" height="62" class="lane"/>
+  <text x="32" y="106" class="lane-title">Cloud infrastructure</text>
+  <rect x="40" y="114" width="200" height="28" class="miss"/>
+  <text x="140" y="132" text-anchor="middle" class="label">DNS · TLS · load balancer</text>
+  <rect x="260" y="114" width="180" height="28" class="miss"/>
+  <text x="350" y="132" text-anchor="middle" class="label">Static SPA CDN</text>
+
+  <!-- Edge -->
+  <rect x="20" y="162" width="940" height="62" class="lane"/>
+  <text x="32" y="180" class="lane-title">Edge layer</text>
+  <rect x="40" y="188" width="420" height="28" class="miss"/>
+  <text x="250" y="206" text-anchor="middle" class="label">Edge / API gateway  slug resolve · JWT validate · legacy proxy</text>
+
+  <!-- Operations plane -->
+  <rect x="20" y="236" width="460" height="150" class="lane"/>
+  <text x="32" y="254" class="lane-title">Operations plane · AdminBackoffice :5090</text>
+  <rect x="40" y="266" width="200" height="36" class="impl"/>
+  <text x="140" y="282" text-anchor="middle" class="label">Admin API</text>
+  <text x="140" y="294" text-anchor="middle" class="detail">POST /admin/tenants · sync</text>
+  <rect x="260" y="266" width="200" height="36" class="impl"/>
+  <text x="360" y="282" text-anchor="middle" class="label">Control-plane DB</text>
+  <text x="360" y="294" text-anchor="middle" class="detail">EF Core · SQL :1403</text>
+  <rect x="40" y="312" width="130" height="28" class="miss"/>
+  <text x="105" y="330" text-anchor="middle" class="label">Backoffice UI</text>
+  <rect x="185" y="312" width="130" height="28" class="miss"/>
+  <text x="250" y="330" text-anchor="middle" class="label">Operator auth</text>
+  <rect x="330" y="312" width="130" height="28" class="miss"/>
+  <text x="395" y="330" text-anchor="middle" class="label">Provisioning jobs</text>
+  <rect x="40" y="348" width="200" height="28" class="miss"/>
+  <text x="140" y="366" text-anchor="middle" class="label">SSO bindings per tenant</text>
+  <rect x="260" y="348" width="200" height="28" class="miss"/>
+  <text x="360" y="366" text-anchor="middle" class="label">Billing · seat enforcement</text>
+
+  <!-- V2 runtime -->
+  <rect x="500" y="236" width="460" height="220" class="lane"/>
+  <text x="512" y="254" class="lane-title">V2 runtime · F2pPlatform.Host :5080</text>
+  <rect x="520" y="266" width="200" height="36" class="impl"/>
+  <text x="620" y="282" text-anchor="middle" class="label">PlatformConfig API</text>
+  <text x="620" y="294" text-anchor="middle" class="detail">PUT /api/v1/platform/tenant-config</text>
+  <rect x="740" y="266" width="200" height="36" class="stub"/>
+  <text x="840" y="282" text-anchor="middle" class="label">In-memory tenant store</text>
+  <text x="840" y="294" text-anchor="middle" class="detail">restart loses state</text>
+  <rect x="520" y="312" width="130" height="36" class="stub"/>
+  <text x="585" y="328" text-anchor="middle" class="label">f2p-shell</text>
+  <text x="585" y="340" text-anchor="middle" class="detail">:5180 template</text>
+  <rect x="665" y="312" width="130" height="36" class="stub"/>
+  <text x="730" y="328" text-anchor="middle" class="label">Identity</text>
+  <text x="730" y="340" text-anchor="middle" class="detail">dummy login</text>
+  <rect x="810" y="312" width="130" height="36" class="stub"/>
+  <text x="875" y="328" text-anchor="middle" class="label">Domain POCs</text>
+  <text x="875" y="340" text-anchor="middle" class="detail">Ref · HourApprovals</text>
+  <rect x="520" y="358" width="130" height="28" class="stub"/>
+  <text x="585" y="376" text-anchor="middle" class="label">Akka shell</text>
+  <rect x="665" y="358" width="130" height="28" class="impl"/>
+  <text x="730" y="376" text-anchor="middle" class="label">Correlation</text>
+  <rect x="810" y="358" width="130" height="28" class="stub"/>
+  <text x="875" y="376" text-anchor="middle" class="label">SignalR hub</text>
+  <rect x="520" y="396" width="200" height="28" class="miss"/>
+  <text x="620" y="414" text-anchor="middle" class="label">OIDC · PKCE · platform JWT</text>
+  <rect x="740" y="396" width="200" height="28" class="miss"/>
+  <text x="840" y="414" text-anchor="middle" class="label">Per-tenant product DB routing</text>
+  <rect x="520" y="430" width="200" height="28" class="miss"/>
+  <text x="620" y="448" text-anchor="middle" class="label">Pack runtime enforcement</text>
+  <rect x="740" y="430" width="200" height="28" class="miss"/>
+  <text x="840" y="448" text-anchor="middle" class="label">@f2p/identity admin UI</text>
+
+  <!-- Separate POCs -->
+  <rect x="20" y="400" width="460" height="86" class="lane"/>
+  <text x="32" y="418" class="lane-title">Separate POCs  not registered in F2pPlatform.Host</text>
+  <rect x="40" y="430" width="130" height="44" class="poc"/>
+  <text x="105" y="448" text-anchor="middle" class="label">ApiImportActorPoc</text>
+  <text x="105" y="462" text-anchor="middle" class="detail">import pipeline</text>
+  <rect x="185" y="430" width="140" height="44" class="poc"/>
+  <text x="255" y="448" text-anchor="middle" class="label">PlanningApprovalsPoc</text>
+  <rect x="340" y="430" width="120" height="44" class="poc"/>
+  <text x="400" y="448" text-anchor="middle" class="label">AkkaSignalRVuePoc</text>
+
+  <!-- Legacy + migration + on-prem -->
+  <rect x="20" y="498" width="300" height="86" class="lane"/>
+  <text x="32" y="516" class="lane-title">Legacy-hosted path</text>
+  <rect x="40" y="528" width="250" height="24" class="miss"/>
+  <text x="165" y="544" text-anchor="middle" class="label">Reverse proxy ’ runtimeUrl</text>
+  <rect x="40" y="558" width="120" height="24" class="miss"/>
+  <text x="100" y="574" text-anchor="middle" class="label">Legacy runtime</text>
+  <rect x="170" y="558" width="120" height="24" class="miss"/>
+  <text x="230" y="574" text-anchor="middle" class="label">Auth bridge</text>
+
+  <rect x="340" y="498" width="300" height="86" class="lane"/>
+  <text x="352" y="516" class="lane-title">Migration</text>
+  <rect x="360" y="538" width="260" height="32" class="miss"/>
+  <text x="490" y="558" text-anchor="middle" class="label">Cutover orchestration · export · import · flip mode</text>
+
+  <rect x="660" y="498" width="300" height="86" class="lane"/>
+  <text x="672" y="516" class="lane-title">On-prem</text>
+  <rect x="680" y="538" width="260" height="32" class="miss"/>
+  <text x="810" y="558" text-anchor="middle" class="label">Install wizard · fixed tenant config</text>
+
+  <!-- Flow arrows -->
+  <line x1="240" y1="302" x2="520" y2="284" class="line"/>
+  <text x="370" y="292" class="detail">PUT tenant-config</text>
+  <line x1="460" y1="204" x2="585" y2="236" class="line"/>
+  <text x="500" y="218" class="detail">needs edge</text>
+  <line x1="250" y1="150" x2="250" y2="162" class="line"/>
+  <line x1="620" y1="150" x2="620" y2="162" class="line"/>
+
+  <!-- Sprint + critical path -->
+  <rect x="20" y="600" width="940" height="100" class="lane"/>
+  <text x="32" y="618" class="lane-title">Sprint status (deployment-profile-sketch.md)</text>
+  <text x="40" y="638" class="detail">1 Tenant schema  done · 2 POST /admin/tenants  done · 3 Edge resolver  missing · 4 Legacy provision job  missing · 5 Native import  POC only (ApiImportActorPoc)</text>
+  <text x="40" y="658" class="label">Critical path to first real tenant:</text>
+  <text x="40" y="674" class="detail">Provisioning jobs ’ Edge middleware ’ OIDC + JWT (tid) ’ per-tenant DbContext routing ’ operator auth on /admin/*</text>
+  <text x="40" y="692" class="detail">Source: docs/monolith-modularization/diagrams/platform-v2-infrastructure-gaps.md</text>
+</svg>
