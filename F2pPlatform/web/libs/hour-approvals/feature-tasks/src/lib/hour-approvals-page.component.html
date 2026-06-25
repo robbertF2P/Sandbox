@@ -48,9 +48,9 @@
               <li>
                 <button
                   type="button"
-                  class="w-full rounded border px-3 py-2 text-left text-sm"
-                  [class.border-f2p-primary]="task.id === selectedTaskId()"
-                  [class.bg-f2p-primary/5]="task.id === selectedTaskId()"
+                  [class]="task.id === selectedTaskId()
+                    ? 'w-full rounded border border-f2p-primary bg-f2p-primary/5 px-3 py-2 text-left text-sm'
+                    : 'w-full rounded border px-3 py-2 text-left text-sm'"
                   (click)="selectTask(task.id)"
                 >
                   <div class="font-medium text-f2p-ink">{{ task.title }}</div>

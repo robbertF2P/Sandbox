@@ -104,7 +104,7 @@ async function createMilestone() {
           <span>Project start</span>
           <div class="list-row">
             <input v-model="startDateInput" type="date" />
-            <button type="button" @click="updateStartDate">Recalculate</button>
+            <button type="button" class="btn btn--primary" @click="updateStartDate">Recalculate</button>
           </div>
         </label>
 
@@ -113,7 +113,7 @@ async function createMilestone() {
           <div class="list-row">
             <input v-model="milestoneName" placeholder="Milestone name" />
             <input v-model="milestoneDate" type="date" />
-            <button type="button" class="btn-secondary" @click="createMilestone">Add</button>
+            <button type="button" class="btn btn--ghost" @click="createMilestone">Add</button>
           </div>
         </div>
       </div>
@@ -141,7 +141,7 @@ async function createMilestone() {
               min="0.5"
               step="0.5"
             />
-            <button type="button" class="btn-secondary" @click="updateDuration(assignment.assignmentId)">
+            <button type="button" class="btn btn--ghost" @click="updateDuration(assignment.assignmentId)">
               Update
             </button>
           </div>

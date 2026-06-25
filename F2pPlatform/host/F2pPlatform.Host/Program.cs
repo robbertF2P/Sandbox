@@ -5,6 +5,7 @@ using ControlPlane.Api;
 using HourApprovals.Api;
 using HourApprovals.Packs.Acme;
 using Identity.Api;
+using PlatformConfig.Api;
 using Reference.Api;
 using Serilog;
 
@@ -29,6 +30,7 @@ try
     builder.Services.AddSignalR();
     builder.Services.AddF2pPlatformActors();
     builder.Services.AddIdentityModule(builder.Configuration);
+    builder.Services.AddPlatformConfigModule(builder.Configuration);
     builder.Services.AddReferenceModule(builder.Configuration);
     builder.Services.AddAcmeHourApprovalsPack();
     builder.Services.AddHourApprovalsModule(builder.Configuration);
@@ -52,6 +54,7 @@ try
         IdentityLogin = "/api/identity/login",
         ReferenceStatus = "/api/reference/status",
         AdminTenants = "/admin/tenants",
+        PlatformTenants = "/api/v1/platform/tenants",
         Health = "/health",
         SignalRHub = "/hubs/platform-events",
     }));
@@ -59,6 +62,7 @@ try
         Log.Information("Listening on: {Urls}", string.Join(", ", app.Urls)));
     app.MapHealthChecks("/health");
     app.MapIdentityModule();
+    app.MapPlatformConfigModule();
     app.MapReferenceModule();
     app.MapHourApprovalsModule();
     app.MapControlPlaneModule();

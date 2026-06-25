@@ -1,0 +1,20 @@
+---
+description: C# coding standards — ReSharper baseline enforced via .editorconfig
+globs: "**/*.cs"
+alwaysApply: false
+---
+
+# C# coding standards
+
+Follow `docs/coding-standards/csharp-coding-standards.md` and root `.editorconfig`.
+
+## Quick rules
+
+- File-scoped namespaces; one public type per file
+- `_camelCase` private fields; `PascalCase` types; `Async` suffix on async methods
+- Always braces; `var` when type is apparent
+- Sort usings: System* first; remove unused
+- `sealed` unless designed for inheritance
+- Platform 2.0: no ABP in new modules; use `Add<Context>Module` / `Map<Context>Endpoints`
+
+Akka-specific rules: `AkkaSignalRVuePoc/.cursor/rules/csharp-resharper-style.mdc`.

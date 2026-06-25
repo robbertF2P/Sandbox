@@ -1,0 +1,25 @@
+---
+description: Tailwind v4 utility-first styling with @floorganise/css — semantic aliases + utilities hybrid
+globs:
+  - "**/*.{vue,html,css,scss}"
+  - "**/FloorganiseCss/**"
+  - "**/angular.json"
+  - "**/vite.config.ts"
+  - "**/.postcssrc.json"
+alwaysApply: false
+---
+
+# Tailwind UI styling
+
+When editing frontend markup or styles:
+
+1. **Import `@floorganise/css`** in global styles — do not fork Floorganise tokens or `f2ps-*` patterns in app CSS.
+2. **Utility-first for layout** — `flex`, `gap-*`, `grid`, `mt-*`, responsive prefixes (`sm:`, `lg:`) directly in templates.
+3. **Semantic aliases for chrome** — `f2ps-btn-primary`, `f2ps-tile`, `panel`, `form.login` from `@floorganise/css`; not 10+ utility classes for standard controls.
+4. **Hybrid default** — `class="panel flex flex-col gap-4 lg:flex-row"` (semantic surface + utilities for layout).
+5. **No parallel design systems** — no Bootstrap, Material, or ad-hoc brand colours (`#00aeef` → `bg-f2p-brand`).
+6. **Extend tokens in `FloorganiseCss/src/theme.css`** only; release new `@floorganise/css` version for monolith.
+7. **Dynamic values** — `style` or `:style` for API-driven colours/widths; static UI stays in classes.
+
+Skill: `.cursor/skills/tailwind-ui-styling/SKILL.md`  
+Standard: `docs/monolith-modularization/platform-frontend-standard.md`

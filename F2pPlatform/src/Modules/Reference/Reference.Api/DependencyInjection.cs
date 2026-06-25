@@ -5,7 +5,6 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Reference.Application;
 using Reference.Application.Ports;
-using Reference.Domain;
 using Reference.Infrastructure;
 
 namespace Reference.Api;
@@ -45,18 +44,7 @@ internal static class ReferenceEndpoints
                 CancellationToken cancellationToken) =>
             {
                 ReferenceStatusSnapshot snapshot = await query.GetStatusAsync(cancellationToken);
-                ReferenceHealth health = ReferenceStatusRules.ResolveHealth(
-                    snapshot.ModuleRegistered,
-                    snapshot.StranglerAdapterPresent);
-
-                return Results.Ok(new
-                {
-                    snapshot.ModuleName,
-                    Health = health.ToString(),
-                    snapshot.ModuleRegistered,
-                    snapshot.StranglerAdapterPresent,
-                    snapshot.CheckedAtUtc,
-                });
+                return Results.Ok(ReferenceStatusResponse.FromSnapshot(snapshot));
             })
             .WithName("GetReferenceStatus")
             .WithSummary("Smoke endpoint proving module registration and DI wiring.");

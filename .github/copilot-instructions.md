@@ -9,6 +9,7 @@ This repo uses **Agent Skills** for domain-specific guidance. Copilot loads them
 - **`sandbox-starter-kit`** — entry point: where code lives, which skill to use, quality gates, new-module checklist.
 - **`platform-logging`** — `Platform.Serilog.Logging` via `build/Platform.Logging.*.props`; Seq / App Insights / xUnit sink.
 - **`platform-correlation`** — `CorrelationId` + `UseCase` across HTTP, Akka (`AskCorrelated`), events, SignalR.
+- **`tailwind-ui-styling`** — Tailwind v4 utility-first UI with `@floorganise/css`; semantic aliases + utilities hybrid.
 
 ## Domain-driven design
 

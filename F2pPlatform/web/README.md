@@ -13,6 +13,7 @@ libs/control-plane/data-access/ Admin API client for control plane
 libs/control-plane/feature-tenants/ Tenant list + create UI
 libs/reference/data-access/     API client for Reference backend
 libs/reference/feature-status/  lazy-loaded feature route (template)
+libs/platform-events/feature-live/  SignalR hub live feed page
 ```
 
 Matches `docs/monolith-modularization/platform-frontend-standard.md`: `@floorganise/css`, semantic `f2ps-*` classes, context `data-access` + `feature-*` split.
@@ -28,7 +29,7 @@ npm install
 npm start
 ```
 
-Open http://localhost:5180 → **Reference** tile → status + live platform events.
+Open http://localhost:5180 → **Reference** tile (module status) or **Platform events** (SignalR feed).
 
 ### Admin console
 

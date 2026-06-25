@@ -31,7 +31,7 @@
 ```yaml
 program:
   name: "<e.g. Platform 2.0 Modularization>"
-  monolith_repo: "<url or local path>"
+  monolith_repo: "C:\Users\RobbertDraaisma\Git-projects\Floor2Plan.Core"
   target_topology: "composed-api-gateway + nx-angular-shell"
   bounded_context_count_target: 7   # adjust if unknown
 

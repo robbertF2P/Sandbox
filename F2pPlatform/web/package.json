@@ -4,6 +4,7 @@
   "private": true,
   "description": "V2 frontend template — f2p-shell + context libs (Reference starter)",
   "scripts": {
+    "postinstall": "npm ci --prefix ../../FloorganiseCss",
     "start": "NG_CLI_ANALYTICS=false ng serve f2p-shell",
     "start:admin": "NG_CLI_ANALYTICS=false ng serve f2p-admin-shell",
     "build": "ng build f2p-shell",
