@@ -1,3 +1,10 @@
+import {
+  ActivityCode,
+  AssignmentId,
+  OrganisationId,
+  TaskId,
+} from './hour-approvals.ids';
+
 export interface ApprovalValuesDto {
   hoursToGo: number;
   progress: number;
@@ -14,9 +21,9 @@ export interface LastApprovalDto {
 }
 
 export interface HourApprovalTaskDto {
-  id: string;
+  id: TaskId;
   title: string;
-  activityCode: string;
+  activityCode: ActivityCode;
   isActiveForCurrentUser: boolean;
   approvalState: 'Approved' | 'NotApproved';
   isApproved: boolean;
@@ -40,17 +47,17 @@ export type ApprovalStatusFilter = 'all' | 'approved' | 'not_approved';
 export type SubmissionCategory = 'worked_on' | 'other_active' | 'never_submitted';
 
 export interface ApprovalQueueFilter {
-  organisationIds: number[];
+  organisationIds: OrganisationId[];
   submissionCategories: SubmissionCategory[];
   search: string;
 }
 
 export interface ApprovalQueueRowDto {
-  taskId: string;
-  assignmentId: string;
-  organisationId: number;
+  taskId: TaskId;
+  assignmentId: AssignmentId;
+  organisationId: OrganisationId;
   title: string;
-  activityCode: string;
+  activityCode: ActivityCode;
   organisationLabel: string;
   projectLabel: string;
   hoursWorkedInWindow: number;
@@ -63,5 +70,5 @@ export interface ApprovalQueueRowDto {
 
 export interface SubmitTasksResultDto {
   approved: HourApprovalTaskDto[];
-  failures: { taskId: string; error: string }[];
+  failures: { taskId: TaskId; error: string }[];
 }

@@ -1,15 +1,13 @@
 using F2pPlatform.Host.Contracts.ApprovalQueue;
+using Platform.Shared.Domain;
 
 namespace F2pPlatform.Host.Contracts.ApprovalQueue.Messages.Planning;
 
 public sealed record PlanningAssignmentRow(
-    Guid TaskId,
-    Guid AssignmentId,
-    int OrganisationId,
-    string OrganisationLabel,
-    string ProjectLabel,
-    string Title,
-    string ActivityCode,
+    TaskId TaskId,
+    AssignmentId AssignmentId,
+    OrganisationId OrganisationId,
+    AssignmentLabels Labels,
     bool IsActiveAssignment);
 
 public sealed record GetPlanningAssignments(ApprovalQueueFilter Filter);

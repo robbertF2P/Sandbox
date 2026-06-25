@@ -2,6 +2,7 @@ using F2pPlatform.Host.Contracts.ApprovalQueue;
 using F2pPlatform.Host.Contracts.ApprovalQueue.Messages;
 using F2pPlatform.Host.Core.ApprovalQueue;
 using HourApprovals.Application.Ports;
+using Platform.Shared.Domain;
 
 namespace F2pPlatform.Host.ApprovalQueue;
 
@@ -48,16 +49,16 @@ internal static class ApprovalQueueEndpoints
         string? submissionCategories,
         string? search)
     {
-        IReadOnlyList<int> orgIds = ParseIntList(organisationIds);
+        IReadOnlyList<OrganisationId> orgIds = ParseOrganisationIds(organisationIds);
         IReadOnlyList<SubmissionCategory> categories = ParseCategories(submissionCategories);
         return new ApprovalQueueFilter(orgIds, categories, search);
     }
 
-    private static IReadOnlyList<int> ParseIntList(string? csv) =>
+    private static IReadOnlyList<OrganisationId> ParseOrganisationIds(string? csv) =>
         string.IsNullOrWhiteSpace(csv)
             ? []
             : csv.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
-                .Select(int.Parse)
+                .Select(part => new OrganisationId(int.Parse(part)))
                 .ToList();
 
     private static IReadOnlyList<SubmissionCategory> ParseCategories(string? csv)
@@ -89,32 +90,34 @@ internal static class ApprovalQueueEndpoints
 
     private static object MapRow(ApprovalQueueRow row) => new
     {
-        taskId = row.TaskId,
-        assignmentId = row.AssignmentId,
-        organisationId = row.OrganisationId,
-        title = row.Title,
-        activityCode = row.ActivityCode,
-        organisationLabel = row.OrganisationLabel,
-        projectLabel = row.ProjectLabel,
+        taskId = row.TaskId.Value,
+        assignmentId = row.AssignmentId.Value,
+        organisationId = row.OrganisationId.Value,
+        title = row.Labels.Title,
+        activityCode = row.Labels.ActivityCode.Value,
+        organisationLabel = row.Labels.OrganisationLabel,
+        projectLabel = row.Labels.ProjectLabel,
         hoursWorkedInWindow = row.HoursWorkedInWindow,
         submissionCategory = ToApiName(row.SubmissionCategory),
-        approvalState = row.ApprovalState,
-        isApproved = row.IsApproved,
-        currentValues = new
-        {
-            hoursToGo = row.HoursToGo,
-            progress = row.Progress,
-            workedHours = row.WorkedHours,
-            plannedStart = row.PlannedStart,
-            plannedFinish = row.PlannedFinish,
-        },
-        lastApproval = row.LastSubmittedAtUtc is null
+        approvalState = row.ApprovalState.ToString(),
+        isApproved = row.ApprovalState == ApprovalState.Approved,
+        currentValues = MapValues(row.CurrentValues),
+        lastApproval = row.LastSubmission is null
             ? null
             : new
             {
-                approvedBy = row.LastSubmittedBy,
-                approvedAtUtc = row.LastSubmittedAtUtc,
+                approvedBy = row.LastSubmission.SubmittedBy,
+                approvedAtUtc = row.LastSubmission.SubmittedAtUtc,
             },
+    };
+
+    private static object MapValues(ApprovalProgressValues values) => new
+    {
+        hoursToGo = values.HoursToGo,
+        progress = values.Progress,
+        workedHours = values.WorkedHours,
+        plannedStart = values.PlannedStart?.ToString("yyyy-MM-dd"),
+        plannedFinish = values.PlannedFinish?.ToString("yyyy-MM-dd"),
     };
 
     private static string ToApiName(SubmissionCategory category) =>

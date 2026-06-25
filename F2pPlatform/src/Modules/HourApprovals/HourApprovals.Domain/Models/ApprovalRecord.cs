@@ -1,5 +1,6 @@
 using HourApprovals.Domain.Audit;
 using HourApprovals.Domain.ValueObjects;
+using Platform.Shared.Domain;
 
 namespace HourApprovals.Domain.Models;
 
@@ -7,7 +8,7 @@ public sealed class ApprovalRecord : IRecordAudit
 {
     private ApprovalRecord(
         Guid id,
-        Guid taskId,
+        TaskId taskId,
         string approvedBy,
         DateTimeOffset approvedAtUtc,
         ApprovalValues approvedValues)
@@ -21,7 +22,7 @@ public sealed class ApprovalRecord : IRecordAudit
 
     public Guid Id { get; }
 
-    public Guid TaskId { get; }
+    public TaskId TaskId { get; }
 
     public string ApprovedBy { get; }
 
@@ -34,7 +35,7 @@ public sealed class ApprovalRecord : IRecordAudit
     DateTimeOffset IRecordAudit.CreatedAtUtc => ApprovedAtUtc;
 
     public static ApprovalRecord Create(
-        Guid taskId,
+        TaskId taskId,
         string approvedBy,
         DateTimeOffset approvedAtUtc,
         ApprovalValues approvedValues) =>

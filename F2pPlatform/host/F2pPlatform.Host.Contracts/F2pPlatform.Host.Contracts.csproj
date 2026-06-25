@@ -5,6 +5,10 @@
     <RootNamespace>F2pPlatform.Host.Contracts</RootNamespace>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Shared\Platform.Shared.Domain\Platform.Shared.Domain.csproj" />
+  </ItemGroup>
+
   <Import Project="../../../build/Platform.Logging.Library.props" />
 
 </Project>

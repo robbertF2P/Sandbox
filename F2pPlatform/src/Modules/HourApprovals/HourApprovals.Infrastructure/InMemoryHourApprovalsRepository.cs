@@ -2,13 +2,14 @@ using System.Collections.Concurrent;
 using HourApprovals.Application.Ports;
 using HourApprovals.Domain.Models;
 using HourApprovals.Domain.ValueObjects;
+using Platform.Shared.Domain;
 
 namespace HourApprovals.Infrastructure;
 
 internal sealed class InMemoryHourApprovalsRepository : IHourApprovalsRepository
 {
-    private readonly ConcurrentDictionary<Guid, ActiveTask> _tasks = new();
-    private readonly ConcurrentDictionary<Guid, List<ApprovalRecord>> _approvals = new();
+    private readonly ConcurrentDictionary<TaskId, ActiveTask> _tasks = new();
+    private readonly ConcurrentDictionary<TaskId, List<ApprovalRecord>> _approvals = new();
 
     public InMemoryHourApprovalsRepository()
     {
@@ -18,7 +19,7 @@ internal sealed class InMemoryHourApprovalsRepository : IHourApprovalsRepository
     public Task<IReadOnlyList<ActiveTask>> ListTasksAsync(CancellationToken cancellationToken) =>
         Task.FromResult<IReadOnlyList<ActiveTask>>(_tasks.Values.OrderBy(task => task.Title).ToList());
 
-    public Task<ActiveTask?> GetTaskAsync(Guid taskId, CancellationToken cancellationToken) =>
+    public Task<ActiveTask?> GetTaskAsync(TaskId taskId, CancellationToken cancellationToken) =>
         Task.FromResult(_tasks.TryGetValue(taskId, out ActiveTask? task) ? task : null);
 
     public Task SaveTaskAsync(ActiveTask task, CancellationToken cancellationToken)
@@ -38,7 +39,7 @@ internal sealed class InMemoryHourApprovalsRepository : IHourApprovalsRepository
         return Task.CompletedTask;
     }
 
-    public Task<ApprovalRecord?> GetLatestApprovalAsync(Guid taskId, CancellationToken cancellationToken)
+    public Task<ApprovalRecord?> GetLatestApprovalAsync(TaskId taskId, CancellationToken cancellationToken)
     {
         if (!_approvals.TryGetValue(taskId, out List<ApprovalRecord>? records))
         {
@@ -54,23 +55,23 @@ internal sealed class InMemoryHourApprovalsRepository : IHourApprovalsRepository
     private void Seed()
     {
         var taskA = ActiveTask.Create(
-            Guid.Parse("11111111-1111-1111-1111-111111111101"),
+            new TaskId(Guid.Parse("11111111-1111-1111-1111-111111111101")),
             "Hull 247 — Block 204 wiring",
-            "ACT-204-WIR",
+            new ActivityCode("ACT-204-WIR"),
             new ApprovalValues(12.5m, 35m, 48m, new DateOnly(2026, 6, 10), new DateOnly(2026, 6, 24)),
             isActiveForCurrentUser: true);
 
         var taskB = ActiveTask.Create(
-            Guid.Parse("11111111-1111-1111-1111-111111111102"),
+            new TaskId(Guid.Parse("11111111-1111-1111-1111-111111111102")),
             "Engine room ventilation",
-            "ACT-ENG-VNT",
+            new ActivityCode("ACT-ENG-VNT"),
             new ApprovalValues(20m, 10m, 8m, new DateOnly(2026, 6, 12), new DateOnly(2026, 7, 1)),
             isActiveForCurrentUser: false);
 
         var taskC = ActiveTask.Create(
-            Guid.Parse("11111111-1111-1111-1111-111111111103"),
+            new TaskId(Guid.Parse("11111111-1111-1111-1111-111111111103")),
             "Deck coating inspection",
-            "ACT-DCK-COT",
+            new ActivityCode("ACT-DCK-COT"),
             new ApprovalValues(6m, 72m, 54m, new DateOnly(2026, 5, 28), new DateOnly(2026, 6, 18)),
             isActiveForCurrentUser: true);
 

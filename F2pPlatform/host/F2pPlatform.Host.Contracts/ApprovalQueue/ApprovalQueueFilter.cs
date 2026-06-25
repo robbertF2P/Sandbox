@@ -1,6 +1,9 @@
+using F2pPlatform.Host.Contracts.ApprovalQueue;
+using Platform.Shared.Domain;
+
 namespace F2pPlatform.Host.Contracts.ApprovalQueue;
 
 public sealed record ApprovalQueueFilter(
-    IReadOnlyList<int> OrganisationIds,
+    IReadOnlyList<OrganisationId> OrganisationIds,
     IReadOnlyList<SubmissionCategory> SubmissionCategories,
     string? Search);

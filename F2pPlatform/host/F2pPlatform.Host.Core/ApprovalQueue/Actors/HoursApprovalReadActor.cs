@@ -29,25 +29,17 @@ public sealed class HoursApprovalReadActor : ReceiveActor
             ApprovalFilterStatus.All,
             CancellationToken.None);
 
-        Dictionary<Guid, HourSubmissionSnapshot> snapshots = new();
+        HashSet<Platform.Shared.Domain.TaskId> requestedTaskIds = message.TaskIds.ToHashSet();
+        Dictionary<Platform.Shared.Domain.TaskId, HourSubmissionSnapshot> snapshots = new();
+
         foreach (TaskApprovalView view in views)
         {
-            if (!message.TaskIds.Contains(view.Task.Id))
+            if (!requestedTaskIds.Contains(view.Task.Id))
             {
                 continue;
             }
 
-            snapshots[view.Task.Id] = new HourSubmissionSnapshot(
-                view.Task.Id,
-                view.State.ToString(),
-                view.State == TaskApprovalState.Approved,
-                view.Task.CurrentValues.HoursToGo,
-                view.Task.CurrentValues.Progress,
-                view.Task.CurrentValues.WorkedHours,
-                view.Task.CurrentValues.PlannedStart?.ToString("yyyy-MM-dd"),
-                view.Task.CurrentValues.PlannedFinish?.ToString("yyyy-MM-dd"),
-                view.LastApproval?.ApprovedBy,
-                view.LastApproval?.ApprovedAtUtc);
+            snapshots[view.Task.Id] = HourSubmissionSnapshotMapper.ToSnapshot(view);
         }
 
         Sender.Tell(new GetHourSubmissionSnapshotsReply(snapshots));

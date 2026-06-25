@@ -1,21 +1,15 @@
+using F2pPlatform.Host.Contracts.ApprovalQueue;
+using Platform.Shared.Domain;
+
 namespace F2pPlatform.Host.Contracts.ApprovalQueue;
 
 public sealed record ApprovalQueueRow(
-    Guid TaskId,
-    Guid AssignmentId,
-    int OrganisationId,
-    string Title,
-    string ActivityCode,
-    string OrganisationLabel,
-    string ProjectLabel,
+    TaskId TaskId,
+    AssignmentId AssignmentId,
+    OrganisationId OrganisationId,
+    AssignmentLabels Labels,
     decimal HoursWorkedInWindow,
     SubmissionCategory SubmissionCategory,
-    string ApprovalState,
-    bool IsApproved,
-    decimal HoursToGo,
-    decimal Progress,
-    decimal WorkedHours,
-    string? PlannedStart,
-    string? PlannedFinish,
-    string? LastSubmittedBy,
-    DateTimeOffset? LastSubmittedAtUtc);
+    ApprovalState ApprovalState,
+    ApprovalProgressValues CurrentValues,
+    LastSubmission? LastSubmission);

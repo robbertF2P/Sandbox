@@ -2,6 +2,7 @@ using F2pPlatform.Host.Contracts.ApprovalQueue;
 using F2pPlatform.Host.Contracts.ApprovalQueue.Messages.Hours;
 using F2pPlatform.Host.Contracts.ApprovalQueue.Messages.Planning;
 using F2pPlatform.Host.Contracts.ApprovalQueue.Messages.Timekeeping;
+using Platform.Shared.Domain;
 
 namespace F2pPlatform.Host.Core.ApprovalQueue;
 
@@ -12,8 +13,8 @@ public static class ApprovalQueueComposer
 {
     public static IReadOnlyList<ApprovalQueueRow> Compose(
         IReadOnlyList<PlanningAssignmentRow> assignments,
-        IReadOnlyDictionary<Guid, decimal> hoursByAssignmentId,
-        IReadOnlyDictionary<Guid, HourSubmissionSnapshot> snapshotsByTaskId,
+        IReadOnlyDictionary<AssignmentId, decimal> hoursByAssignmentId,
+        IReadOnlyDictionary<TaskId, HourSubmissionSnapshot> snapshotsByTaskId,
         ApprovalQueueFilter filter)
     {
         List<ApprovalQueueRow> rows = [];
@@ -34,14 +35,14 @@ public static class ApprovalQueueComposer
             SubmissionCategory category = ResolveCategory(
                 hoursInWindow,
                 assignment.IsActiveAssignment,
-                snapshot.LastSubmittedAtUtc);
+                snapshot.LastSubmission?.SubmittedAtUtc);
 
             if (!MatchesSubmissionCategoryFilter(category, snapshot, filter))
             {
                 continue;
             }
 
-            if (!MatchesSearchFilter(assignment, snapshot, filter.Search))
+            if (!MatchesSearchFilter(assignment, filter.Search))
             {
                 continue;
             }
@@ -50,27 +51,18 @@ public static class ApprovalQueueComposer
                 assignment.TaskId,
                 assignment.AssignmentId,
                 assignment.OrganisationId,
-                assignment.Title,
-                assignment.ActivityCode,
-                assignment.OrganisationLabel,
-                assignment.ProjectLabel,
+                assignment.Labels,
                 hoursInWindow,
                 category,
                 snapshot.ApprovalState,
-                snapshot.IsApproved,
-                snapshot.HoursToGo,
-                snapshot.Progress,
-                snapshot.WorkedHours,
-                snapshot.PlannedStart,
-                snapshot.PlannedFinish,
-                snapshot.LastSubmittedBy,
-                snapshot.LastSubmittedAtUtc));
+                snapshot.CurrentValues,
+                snapshot.LastSubmission));
         }
 
         return rows;
     }
 
-    internal static SubmissionCategory ResolveCategory(
+    public static SubmissionCategory ResolveCategory(
         decimal hoursInWindow,
         bool isActiveAssignment,
         DateTimeOffset? lastSubmittedAtUtc)
@@ -110,7 +102,7 @@ public static class ApprovalQueueComposer
                 return true;
             }
 
-            if (selected == SubmissionCategory.NeverSubmitted && snapshot.LastSubmittedAtUtc is null)
+            if (selected == SubmissionCategory.NeverSubmitted && snapshot.LastSubmission is null)
             {
                 return true;
             }
@@ -119,10 +111,7 @@ public static class ApprovalQueueComposer
         return false;
     }
 
-    private static bool MatchesSearchFilter(
-        PlanningAssignmentRow assignment,
-        HourSubmissionSnapshot snapshot,
-        string? search)
+    private static bool MatchesSearchFilter(PlanningAssignmentRow assignment, string? search)
     {
         if (string.IsNullOrWhiteSpace(search))
         {
@@ -130,8 +119,9 @@ public static class ApprovalQueueComposer
         }
 
         string term = search.Trim();
-        return assignment.Title.Contains(term, StringComparison.OrdinalIgnoreCase)
-            || assignment.ActivityCode.Contains(term, StringComparison.OrdinalIgnoreCase)
-            || assignment.ProjectLabel.Contains(term, StringComparison.OrdinalIgnoreCase);
+        AssignmentLabels labels = assignment.Labels;
+        return labels.Title.Contains(term, StringComparison.OrdinalIgnoreCase)
+            || labels.ActivityCode.Value.Contains(term, StringComparison.OrdinalIgnoreCase)
+            || labels.ProjectLabel.Contains(term, StringComparison.OrdinalIgnoreCase);
     }
 }

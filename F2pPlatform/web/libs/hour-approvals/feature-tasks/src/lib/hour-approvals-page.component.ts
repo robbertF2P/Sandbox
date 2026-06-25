@@ -11,11 +11,13 @@ import {
   ApprovalValuesDto,
   HourApprovalsApi,
   HourApprovalsCapabilitiesDto,
+  OrganisationId,
   SubmissionCategory,
+  TaskId,
 } from '@f2p/hour-approvals/data-access';
 
 interface OrganisationOption {
-  id: number;
+  id: OrganisationId;
   label: string;
 }
 
@@ -54,11 +56,11 @@ export class HourApprovalsPageComponent implements OnInit {
   readonly capabilities = signal<HourApprovalsCapabilitiesDto | null>(null);
   readonly rows = signal<ApprovalQueueRowDto[]>([]);
   readonly organisationOptions = signal<OrganisationOption[]>([]);
-  readonly selectedOrganisationIds = signal<number[]>([]);
+  readonly selectedOrganisationIds = signal<OrganisationId[]>([]);
   readonly selectedCategories = signal<SubmissionCategory[]>([]);
   readonly searchTerm = signal('');
-  readonly selectedTaskIds = signal<Set<string>>(new Set());
-  readonly drafts = signal<Record<string, ApprovalValuesDto>>({});
+  readonly selectedTaskIds = signal<Set<TaskId>>(new Set());
+  readonly drafts = signal<Partial<Record<TaskId, ApprovalValuesDto>>>({});
 
   readonly displayName = this.auth.getDisplayName();
   readonly canApprove = computed(() => this.capabilities()?.canApprove ?? false);
@@ -127,7 +129,7 @@ export class HourApprovalsPageComponent implements OnInit {
     });
   }
 
-  onOrganisationToggle(orgId: number, checked: boolean): void {
+  onOrganisationToggle(orgId: OrganisationId, checked: boolean): void {
     const current = new Set(this.selectedOrganisationIds());
     if (checked) {
       current.add(orgId);
@@ -156,7 +158,7 @@ export class HourApprovalsPageComponent implements OnInit {
     this.refetchQueue();
   }
 
-  toggleRowSelection(taskId: string, checked: boolean): void {
+  toggleRowSelection(taskId: TaskId, checked: boolean): void {
     const next = new Set(this.selectedTaskIds());
     if (checked) {
       next.add(taskId);
@@ -167,15 +169,15 @@ export class HourApprovalsPageComponent implements OnInit {
     this.selectedTaskIds.set(next);
   }
 
-  isSelected(taskId: string): boolean {
+  isSelected(taskId: TaskId): boolean {
     return this.selectedTaskIds().has(taskId);
   }
 
-  draftFor(taskId: string): ApprovalValuesDto | undefined {
+  draftFor(taskId: TaskId): ApprovalValuesDto | undefined {
     return this.drafts()[taskId];
   }
 
-  onDraftChange(taskId: string, field: keyof ApprovalValuesDto, value: string | number): void {
+  onDraftChange(taskId: TaskId, field: keyof ApprovalValuesDto, value: string | number): void {
     const current = this.drafts()[taskId];
     if (!current) {
       return;
@@ -252,7 +254,7 @@ export class HourApprovalsPageComponent implements OnInit {
   }
 
   private syncOrganisationOptions(rows: ApprovalQueueRowDto[]): void {
-    const map = new Map<number, string>();
+    const map = new Map<OrganisationId, string>();
     for (const row of rows) {
       map.set(row.organisationId, row.organisationLabel);
     }

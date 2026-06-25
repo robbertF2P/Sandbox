@@ -187,7 +187,7 @@ internal static class HourApprovalsEndpoints
                         approved = result.Approved.Select(MapTask),
                         failures = result.Failures.Select(failure => new
                         {
-                            taskId = failure.TaskId,
+                            taskId = failure.TaskId.Value,
                             error = failure.Error,
                         }),
                     });
@@ -247,9 +247,9 @@ internal static class HourApprovalsEndpoints
 
     private static object MapTask(TaskApprovalView view) => new
     {
-        id = view.Task.Id,
+        id = view.Task.Id.Value,
         title = view.Task.Title,
-        activityCode = view.Task.ActivityCode,
+        activityCode = view.Task.ActivityCode.Value,
         isActiveForCurrentUser = view.Task.IsActiveForCurrentUser,
         approvalState = view.State.ToString(),
         isApproved = view.State == TaskApprovalState.Approved,

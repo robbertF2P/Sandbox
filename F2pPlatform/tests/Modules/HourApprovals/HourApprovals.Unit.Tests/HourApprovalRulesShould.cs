@@ -2,6 +2,7 @@ using HourApprovals.Domain.Enums;
 using HourApprovals.Domain.Models;
 using HourApprovals.Domain.Rules;
 using HourApprovals.Domain.ValueObjects;
+using Platform.Shared.Domain;
 
 namespace HourApprovals.Unit.Tests;
 
@@ -14,7 +15,7 @@ public sealed class HourApprovalRulesShould
     public void ResolveState_ReturnsApproved_WhenCurrentMatchesLastApproval()
     {
         ApprovalRecord approval = ApprovalRecord.Create(
-            Guid.NewGuid(),
+            new TaskId(Guid.NewGuid()),
             "supervisor.demo",
             DateTimeOffset.UtcNow,
             Baseline);
@@ -28,7 +29,7 @@ public sealed class HourApprovalRulesShould
     public void ResolveState_ReturnsNotApproved_WhenValuesChanged()
     {
         ApprovalRecord approval = ApprovalRecord.Create(
-            Guid.NewGuid(),
+            new TaskId(Guid.NewGuid()),
             "supervisor.demo",
             DateTimeOffset.UtcNow,
             Baseline);

@@ -1,8 +1,11 @@
+using F2pPlatform.Host.Contracts.ApprovalQueue;
+using Platform.Shared.Domain;
+
 namespace F2pPlatform.Host.Contracts.ApprovalQueue.Messages.Timekeeping;
 
 public sealed record GetHoursInWindow(
-    IReadOnlyList<Guid> AssignmentIds,
-    string TimeRangePreset);
+    IReadOnlyList<AssignmentId> AssignmentIds,
+    TimeRangePreset TimeRangePreset);
 
 public sealed record GetHoursInWindowReply(
-    IReadOnlyDictionary<Guid, decimal> HoursByAssignmentId);
+    IReadOnlyDictionary<AssignmentId, decimal> HoursByAssignmentId);

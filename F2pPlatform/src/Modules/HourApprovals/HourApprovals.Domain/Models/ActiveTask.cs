@@ -1,13 +1,14 @@
 using HourApprovals.Domain.ValueObjects;
+using Platform.Shared.Domain;
 
 namespace HourApprovals.Domain.Models;
 
 public sealed class ActiveTask
 {
     private ActiveTask(
-        Guid id,
+        TaskId id,
         string title,
-        string activityCode,
+        ActivityCode activityCode,
         ApprovalValues currentValues,
         bool isActiveForCurrentUser)
     {
@@ -18,20 +19,20 @@ public sealed class ActiveTask
         IsActiveForCurrentUser = isActiveForCurrentUser;
     }
 
-    public Guid Id { get; }
+    public TaskId Id { get; }
 
     public string Title { get; }
 
-    public string ActivityCode { get; }
+    public ActivityCode ActivityCode { get; }
 
     public ApprovalValues CurrentValues { get; private set; }
 
     public bool IsActiveForCurrentUser { get; private set; }
 
     public static ActiveTask Create(
-        Guid id,
+        TaskId id,
         string title,
-        string activityCode,
+        ActivityCode activityCode,
         ApprovalValues currentValues,
         bool isActiveForCurrentUser) =>
         new(id, title, activityCode, currentValues, isActiveForCurrentUser);
