@@ -26,6 +26,7 @@ After editing skills in `.cursor/skills/`:
 | `sandbox-starter-kit` | Any task — repo map, workflow, skill router |
 | `platform-logging` | Serilog, MSBuild props, Seq / App Insights |
 | `platform-correlation` | Tracing use cases HTTP → actors → events → SignalR |
+| `tailwind-ui-styling` | Tailwind v4 + `@floorganise/css` for Vue/Angular UI |
 
 ### Domain & architecture
 

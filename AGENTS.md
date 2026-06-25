@@ -37,6 +37,7 @@ After editing skills in `.cursor/skills/`, run:
 - `sandbox-starter-kit` — entry point for AI-assisted work in this monorepo
 - `platform-logging` — central Serilog (Seq, App Insights, xUnit sink)
 - `platform-correlation` — end-to-end use-case tracing
+- `tailwind-ui-styling` — Tailwind v4 utility-first styling with `@floorganise/css`
 
 ### Domain & architecture
 
