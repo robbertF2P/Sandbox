@@ -66,9 +66,9 @@ function goToImport() {
         <p class="muted">Edit components, activities, and assignments. Mark components as templates to spawn new ones with open assignments and budgeted hours.</p>
       </div>
       <div class="button-row">
-        <button type="button" @click="exportProject">Export JSON</button>
-        <button type="button" class="btn-secondary" @click="copyExport">Copy for import</button>
-        <button type="button" class="btn-secondary" @click="goToImport">Open in Import</button>
+        <button type="button" class="btn btn--primary" @click="exportProject">Export JSON</button>
+        <button type="button" class="btn btn--ghost" @click="copyExport">Copy for import</button>
+        <button type="button" class="btn btn--ghost" @click="goToImport">Open in Import</button>
       </div>
     </div>
 

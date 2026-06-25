@@ -88,7 +88,7 @@ async function createFromTemplate(
   <div class="component-tree" :style="{ marginLeft }">
     <div v-if="(depth ?? 0) === 0" class="sub-list__header">
       <h3>Components</h3>
-      <button type="button" class="btn-secondary" @click="addComponent(components)">Add component</button>
+      <button type="button" class="btn btn--ghost" @click="addComponent(components)">Add component</button>
     </div>
 
     <p v-if="templateMessage" class="success">{{ templateMessage }}</p>
@@ -113,7 +113,7 @@ async function createFromTemplate(
         />
         <button
           type="button"
-          class="btn-secondary"
+          class="btn btn--ghost"
           @click="createFromTemplate(
             components,
             template.id,
@@ -146,7 +146,7 @@ async function createFromTemplate(
           Template
         </label>
         <span class="id-chip">#{{ component.id }}</span>
-        <button type="button" class="btn-danger" @click="removeComponent(components, index)">Remove</button>
+        <button type="button" class="btn btn--danger" @click="removeComponent(components, index)">Remove</button>
       </div>
 
       <ActivityListEditor
@@ -158,7 +158,7 @@ async function createFromTemplate(
         <h4>Child components</h4>
         <button
           type="button"
-          class="btn-secondary"
+          class="btn btn--ghost"
           @click="patchComponent(components, index, { childComponents: [...component.childComponents, createEmptyComponent('Child module')] })"
         >
           Add child

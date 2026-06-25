@@ -24,6 +24,8 @@ Use this skill first. It routes you to focused skills and repo standards — do 
 | Import + progress POC | `ApiImportActorPoc/` | Import sessions, hours booking, multi-manager actors |
 | Planning approvals POC | `PlanningApprovalsPoc/` | Foreman approval of adjusted planning after assignment progress |
 | Platform logging | `Platform.Serilog.Logging/`, `build/Platform.Logging.*.props` | Serilog, Seq, App Insights, test sink |
+| Frontend design system | `FloorganiseCss/` | `@floorganise/css` — Tailwind v4 tokens + semantic aliases |
+| Admin backoffice UI (reference) | `AdminBackoffice/web/` | Exemplary Angular + `@floorganise/css` operator screens |
 | Platform packages feed | `local-feed/` | Packed NuGet (`Platform.Serilog.Logging*`) |
 | Import domain | `ImportPipeline/` | `ImportPipeline.Domain` NuGet |
 | Modularization program | `docs/monolith-modularization/` | Roadmap, logging/correlation/frontend/**actor** standards, quality framework |
@@ -45,6 +47,7 @@ Use this skill first. It routes you to focused skills and repo standards — do 
 | DSLs, fluent APIs, parsers | `domain-specific-languages` |
 | Serilog, MSBuild logging props, test sink | `platform-logging` |
 | CorrelationId, use-case tracing, Akka envelopes | `platform-correlation` |
+| Vue/Angular UI, Tailwind, `@floorganise/css` | `tailwind-ui-styling` |
 | Functional style in C# | `functional-programming-csharp` |
 
 When multiple apply, read **all** relevant skills before editing.

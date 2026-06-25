@@ -1,107 +1,179 @@
-<div class="admin-page admin-page--narrow">
-  <header class="admin-header">
-    <div>
-      <a routerLink="/tenants" class="admin-back-link">← Tenants</a>
-      <h1 class="admin-title">New tenant</h1>
-      <p class="admin-subtitle">Provision a tenant in the control plane and push configuration to the v2 platform.</p>
-    </div>
+<div class="mx-auto max-w-2xl space-y-6">
+  <header>
+    <a routerLink="/tenants" class="text-sm text-f2p-brand hover:underline">← Tenants</a>
+    <h1 class="mt-2 text-2xl font-bold text-f2p-ink">New tenant</h1>
+    <p class="mt-1 text-sm text-f2p-ink-muted">
+      Provision a tenant in the control plane and push configuration to the v2 platform.
+    </p>
   </header>
 
   @if (error()) {
-    <div class="admin-alert admin-alert--error">{{ error() }}</div>
+    <div class="login-notification login-notification-danger">{{ error() }}</div>
   }
 
-  <form class="admin-card admin-form" (ngSubmit)="submit()">
-    <section class="admin-form-section">
-      <h2>Identity</h2>
-      <label class="admin-field">
-        <span>Slug</span>
-        <input name="slug" [(ngModel)]="slug" required pattern="[a-z0-9-]+" placeholder="acme-shipyard" />
-        <small>Lowercase letters, numbers, and hyphens only.</small>
+  <form class="f2ps-group-box grid gap-6 p-6" (ngSubmit)="submit()">
+    <section class="space-y-4">
+      <h2 class="text-base font-semibold text-f2p-ink">Identity</h2>
+      <label class="field grid gap-1.5">
+        <span class="text-sm font-semibold text-f2p-ink-muted">Slug</span>
+        <input
+          class="w-full rounded-f2p-sm border border-f2p-border bg-f2p-surface px-3 py-2 text-f2p-ink"
+          name="slug"
+          [(ngModel)]="slug"
+          required
+          pattern="[a-z0-9-]+"
+          placeholder="acme-shipyard"
+        />
+        <small class="text-xs text-f2p-ink-muted">Lowercase letters, numbers, and hyphens only.</small>
       </label>
-      <label class="admin-field">
-        <span>Display name</span>
-        <input name="displayName" [(ngModel)]="displayName" required placeholder="Acme Shipyard" />
+      <label class="field grid gap-1.5">
+        <span class="text-sm font-semibold text-f2p-ink-muted">Display name</span>
+        <input
+          class="w-full rounded-f2p-sm border border-f2p-border bg-f2p-surface px-3 py-2 text-f2p-ink"
+          name="displayName"
+          [(ngModel)]="displayName"
+          required
+          placeholder="Acme Shipyard"
+        />
       </label>
     </section>
 
-    <section class="admin-form-section">
-      <h2>Deployment</h2>
-      <label class="admin-field">
-        <span>Mode</span>
-        <select name="mode" [(ngModel)]="mode">
+    <section class="space-y-4">
+      <h2 class="text-base font-semibold text-f2p-ink">Deployment</h2>
+      <label class="field grid gap-1.5">
+        <span class="text-sm font-semibold text-f2p-ink-muted">Mode</span>
+        <select
+          class="w-full rounded-f2p-sm border border-f2p-border bg-f2p-surface px-3 py-2 text-f2p-ink"
+          name="mode"
+          [(ngModel)]="mode"
+        >
           <option value="Native">Native (v2 platform)</option>
           <option value="LegacyHosted">Legacy hosted</option>
         </select>
       </label>
-      <label class="admin-field">
-        <span>Data tier</span>
-        <select name="dataTier" [(ngModel)]="dataTier">
+      <label class="field grid gap-1.5">
+        <span class="text-sm font-semibold text-f2p-ink-muted">Data tier</span>
+        <select
+          class="w-full rounded-f2p-sm border border-f2p-border bg-f2p-surface px-3 py-2 text-f2p-ink"
+          name="dataTier"
+          [(ngModel)]="dataTier"
+        >
           <option value="SharedSqlServer">Shared SQL Server</option>
           <option value="DedicatedSqlServer">Dedicated SQL Server</option>
         </select>
       </label>
-      <label class="admin-field">
-        <span>Region</span>
-        <input name="region" [(ngModel)]="region" required placeholder="eu-west" />
+      <label class="field grid gap-1.5">
+        <span class="text-sm font-semibold text-f2p-ink-muted">Region</span>
+        <input
+          class="w-full rounded-f2p-sm border border-f2p-border bg-f2p-surface px-3 py-2 text-f2p-ink"
+          name="region"
+          [(ngModel)]="region"
+          required
+          placeholder="eu-west"
+        />
       </label>
     </section>
 
     @if (isLegacy()) {
-      <section class="admin-form-section">
-        <h2>Legacy runtime</h2>
-        <label class="admin-field">
-          <span>Build profile ID</span>
-          <input name="legacyBuildProfileId" [(ngModel)]="legacyBuildProfileId" required />
+      <section class="space-y-4">
+        <h2 class="text-base font-semibold text-f2p-ink">Legacy runtime</h2>
+        <label class="field grid gap-1.5">
+          <span class="text-sm font-semibold text-f2p-ink-muted">Build profile ID</span>
+          <input
+            class="w-full rounded-f2p-sm border border-f2p-border bg-f2p-surface px-3 py-2 text-f2p-ink"
+            name="legacyBuildProfileId"
+            [(ngModel)]="legacyBuildProfileId"
+            required
+          />
         </label>
-        <label class="admin-field">
-          <span>Runtime URL</span>
-          <input name="legacyRuntimeUrl" [(ngModel)]="legacyRuntimeUrl" required />
+        <label class="field grid gap-1.5">
+          <span class="text-sm font-semibold text-f2p-ink-muted">Runtime URL</span>
+          <input
+            class="w-full rounded-f2p-sm border border-f2p-border bg-f2p-surface px-3 py-2 text-f2p-ink"
+            name="legacyRuntimeUrl"
+            [(ngModel)]="legacyRuntimeUrl"
+            required
+          />
         </label>
-        <label class="admin-field">
-          <span>Database connection ref</span>
-          <input name="legacyDatabaseConnectionRef" [(ngModel)]="legacyDatabaseConnectionRef" required />
+        <label class="field grid gap-1.5">
+          <span class="text-sm font-semibold text-f2p-ink-muted">Database connection ref</span>
+          <input
+            class="w-full rounded-f2p-sm border border-f2p-border bg-f2p-surface px-3 py-2 text-f2p-ink"
+            name="legacyDatabaseConnectionRef"
+            [(ngModel)]="legacyDatabaseConnectionRef"
+            required
+          />
         </label>
       </section>
     } @else {
-      <section class="admin-form-section">
-        <h2>Native runtime</h2>
-        <label class="admin-field">
-          <span>Database connection ref</span>
-          <input name="nativeDatabaseConnectionRef" [(ngModel)]="nativeDatabaseConnectionRef" required />
+      <section class="space-y-4">
+        <h2 class="text-base font-semibold text-f2p-ink">Native runtime</h2>
+        <label class="field grid gap-1.5">
+          <span class="text-sm font-semibold text-f2p-ink-muted">Database connection ref</span>
+          <input
+            class="w-full rounded-f2p-sm border border-f2p-border bg-f2p-surface px-3 py-2 text-f2p-ink"
+            name="nativeDatabaseConnectionRef"
+            [(ngModel)]="nativeDatabaseConnectionRef"
+            required
+          />
         </label>
-        <label class="admin-field">
-          <span>API base URL</span>
-          <input name="nativeApiBaseUrl" [(ngModel)]="nativeApiBaseUrl" required />
+        <label class="field grid gap-1.5">
+          <span class="text-sm font-semibold text-f2p-ink-muted">API base URL</span>
+          <input
+            class="w-full rounded-f2p-sm border border-f2p-border bg-f2p-surface px-3 py-2 text-f2p-ink"
+            name="nativeApiBaseUrl"
+            [(ngModel)]="nativeApiBaseUrl"
+            required
+          />
         </label>
       </section>
     }
 
-    <section class="admin-form-section">
-      <h2>Packs &amp; billing</h2>
-      <label class="admin-field">
-        <span>Integration packs</span>
-        <input name="integrationPacks" [(ngModel)]="integrationPacks" placeholder="comma-separated" />
+    <section class="space-y-4">
+      <h2 class="text-base font-semibold text-f2p-ink">Packs &amp; billing</h2>
+      <label class="field grid gap-1.5">
+        <span class="text-sm font-semibold text-f2p-ink-muted">Integration packs</span>
+        <input
+          class="w-full rounded-f2p-sm border border-f2p-border bg-f2p-surface px-3 py-2 text-f2p-ink"
+          name="integrationPacks"
+          [(ngModel)]="integrationPacks"
+          placeholder="comma-separated"
+        />
       </label>
-      <label class="admin-field">
-        <span>Customization packs</span>
-        <input name="customizationPacks" [(ngModel)]="customizationPacks" placeholder="acme-hour-approvals-v1" />
+      <label class="field grid gap-1.5">
+        <span class="text-sm font-semibold text-f2p-ink-muted">Customization packs</span>
+        <input
+          class="w-full rounded-f2p-sm border border-f2p-border bg-f2p-surface px-3 py-2 text-f2p-ink"
+          name="customizationPacks"
+          [(ngModel)]="customizationPacks"
+          placeholder="acme-hour-approvals-v1"
+        />
       </label>
-      <div class="admin-field-row">
-        <label class="admin-field">
-          <span>Billing tier</span>
-          <input name="billingTier" [(ngModel)]="billingTier" />
+      <div class="grid gap-4 sm:grid-cols-2">
+        <label class="field grid gap-1.5">
+          <span class="text-sm font-semibold text-f2p-ink-muted">Billing tier</span>
+          <input
+            class="w-full rounded-f2p-sm border border-f2p-border bg-f2p-surface px-3 py-2 text-f2p-ink"
+            name="billingTier"
+            [(ngModel)]="billingTier"
+          />
         </label>
-        <label class="admin-field">
-          <span>Seat limit</span>
-          <input name="seatLimit" type="number" min="1" [(ngModel)]="seatLimit" />
+        <label class="field grid gap-1.5">
+          <span class="text-sm font-semibold text-f2p-ink-muted">Seat limit</span>
+          <input
+            class="w-full rounded-f2p-sm border border-f2p-border bg-f2p-surface px-3 py-2 text-f2p-ink"
+            name="seatLimit"
+            type="number"
+            min="1"
+            [(ngModel)]="seatLimit"
+          />
         </label>
       </div>
     </section>
 
-    <footer class="admin-form-actions">
-      <a routerLink="/tenants" class="admin-button admin-button--ghost">Cancel</a>
-      <button type="submit" class="admin-button admin-button--primary" [disabled]="saving()">
+    <footer class="flex flex-wrap justify-end gap-3 border-t border-f2p-border pt-4">
+      <a routerLink="/tenants" class="f2ps-btn f2ps-btn-tertiary f2ps-btn-md">Cancel</a>
+      <button type="submit" class="f2ps-btn f2ps-btn-primary f2ps-btn-md" [disabled]="saving()">
         {{ saving() ? 'Provisioning…' : 'Create tenant' }}
       </button>
     </footer>

@@ -95,8 +95,8 @@ async function submit() {
       No assignments yet. Import a project with budgeted hours first.
     </p>
     <form v-else class="book-hours-form" @submit.prevent="submit">
-      <label>
-        Assignment
+      <label class="field">
+        <span>Assignment</span>
         <select v-model.number="selectedId">
           <option
             v-for="assignment in visibleAssignments"
@@ -120,17 +120,19 @@ async function submit() {
         label="Current assignment progress"
       />
 
-      <label>
-        Hours worked
+      <label class="field">
+        <span>Hours worked</span>
         <input v-model="hours" type="number" min="0.25" step="0.25" required />
       </label>
 
-      <label>
-        Notes
+      <label class="field">
+        <span>Notes</span>
         <input v-model="notes" type="text" placeholder="Optional shift note" />
       </label>
 
-      <button type="submit" :disabled="busy">{{ busy ? 'Saving…' : 'Book hours' }}</button>
+      <button type="submit" class="btn btn--primary" :disabled="busy">
+        {{ busy ? 'Saving…' : 'Book hours' }}
+      </button>
       <p v-if="statusMessage" :class="isError ? 'error' : 'success'">{{ statusMessage }}</p>
     </form>
   </section>

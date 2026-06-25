@@ -135,6 +135,7 @@ function formatDate(value: string) {
 </script>
 
 <template>
+  <div class="space-y-6">
   <section class="hero">
     <p class="eyebrow">Catalog</p>
     <h1>Projects</h1>
@@ -208,4 +209,5 @@ function formatDate(value: string) {
     </ul>
     <p v-else class="empty">No projects found.</p>
   </section>
+  </div>
 </template>

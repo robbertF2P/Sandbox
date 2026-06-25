@@ -51,7 +51,7 @@ Generic template: `docs/floor2plan-v2-connector-migration-prompt.md`
 8. **Module dashboards** — per-context ADO test results per `azure-devops-module-test-dashboards.md`.
 9. **Serilog** — `Platform.Serilog.Logging` (Seq dev / App Insights prod); tests → `Platform.Serilog.Logging.Testing`.
 10. **Module composition** — `Add<Context>Module` / `Map<Context>Endpoints`; **no ABP** in new modules.
-11. **Frontend styling** — **`@floorganise/css`** (Tailwind v4 + Floorganise tokens) on **every** V2 frontend module; no parallel design systems.
+11. **Frontend styling** — **`@floorganise/css`** (Tailwind v4 + Floorganise tokens) on **every** V2 frontend module; **utility-first** for layout (`flex`, `gap-*`, responsive variants); **semantic aliases** for chrome (`f2ps-btn-primary`, `f2ps-tile`, `panel`); hybrid `class="panel flex gap-4"`; no parallel design systems. SandBox skill: `tailwind-ui-styling`.
 12. **Shared UI** — shell, tiles, buttons, forms, and cross-context widgets from **`@floorganise/ui`**; context `ui` libs only for context-specific presentational components.
 13. **OOP in the large, FP in detail** — structure with modules, ports, and actors at boundaries; implement rules as pure, testable functions on immutable data inside; side effects only in Infrastructure and at the host/actor shell.
 14. **Actor orchestration** — long-running workflows (import, integration, legacy handoff) use explicit actor pipelines per `platform-actor-standard.md`; client variance via packs, not core branches; `[StranglerAdapter]` for unavoidable legacy.
@@ -74,7 +74,7 @@ Write analysis artifacts to `docs/modularization/` using schemas in `templates/`
 - Register modules with `IServiceCollection.Add<Context>Module` and `WebApplication.Map<Context>Module` — no `AbpModule`.
 - Adapters may delegate to legacy; legacy must not depend on new modules.
 - Tag temporary code `[StranglerAdapter]` with removal ticket.
-- **V2 UI:** import `@floorganise/css` in global styles; use `@floorganise/ui` for shared components — do not duplicate `f2ps-*` markup or brand tokens in context libs.
+- **V2 UI:** import `@floorganise/css` in global styles; use `@floorganise/ui` for shared components — do not duplicate `f2ps-*` markup or brand tokens in context libs. Style layout with Tailwind utilities; use `f2ps-*` / `panel` for brand chrome; reserve inline `style` for dynamic values only.
 
 ## When uncertain
 

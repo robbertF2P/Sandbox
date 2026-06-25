@@ -64,7 +64,7 @@ function removeRelation(current: EditableActivity[], activityIndex: number, rela
   <div class="sub-list">
     <div class="sub-list__header">
       <h4>Activities</h4>
-      <button type="button" class="btn-secondary" @click="addActivity(activities)">Add</button>
+      <button type="button" class="btn btn--ghost" @click="addActivity(activities)">Add</button>
     </div>
     <p v-if="activities.length === 0" class="muted">No activities yet.</p>
     <article v-for="(activity, index) in activities" :key="activity.id" class="nested-card">
@@ -75,7 +75,7 @@ function removeRelation(current: EditableActivity[], activityIndex: number, rela
           @input="patchActivity(activities, index, { name: ($event.target as HTMLInputElement).value })"
         />
         <span class="id-chip">#{{ activity.id }}</span>
-        <button type="button" class="btn-danger" @click="removeActivity(activities, index)">Remove</button>
+        <button type="button" class="btn btn--danger" @click="removeActivity(activities, index)">Remove</button>
       </div>
 
       <AssignmentListEditor
@@ -86,7 +86,7 @@ function removeRelation(current: EditableActivity[], activityIndex: number, rela
       <div class="sub-list">
         <div class="sub-list__header">
           <h4>Relations</h4>
-          <button type="button" class="btn-secondary" @click="addRelation(activities, index)">Add</button>
+          <button type="button" class="btn btn--ghost" @click="addRelation(activities, index)">Add</button>
         </div>
         <div
           v-for="(relation, relationIndex) in activity.relations"
@@ -119,7 +119,7 @@ function removeRelation(current: EditableActivity[], activityIndex: number, rela
             placeholder="Lag"
             @input="updateRelation(activities, index, relationIndex, 'lagDays', ($event.target as HTMLInputElement).value)"
           />
-          <button type="button" class="btn-danger" @click="removeRelation(activities, index, relationIndex)">
+          <button type="button" class="btn btn--danger" @click="removeRelation(activities, index, relationIndex)">
             Remove
           </button>
         </div>

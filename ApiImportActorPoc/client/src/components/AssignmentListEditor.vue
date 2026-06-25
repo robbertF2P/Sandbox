@@ -34,7 +34,7 @@ function patchAssignment(
   <div class="sub-list">
     <div class="sub-list__header">
       <h4>Assignments</h4>
-      <button type="button" class="btn-secondary" @click="addAssignment(assignments)">Add</button>
+      <button type="button" class="btn btn--ghost" @click="addAssignment(assignments)">Add</button>
     </div>
     <p v-if="assignments.length === 0" class="muted">No assignments yet.</p>
     <div v-for="(assignment, index) in assignments" :key="assignment.id" class="list-row">
@@ -56,7 +56,7 @@ function patchAssignment(
         placeholder="Budgeted h"
         @input="patchAssignment(assignments, index, { budgetedHours: Number(($event.target as HTMLInputElement).value) })"
       />
-      <button type="button" class="btn-danger" @click="removeAssignment(assignments, index)">Remove</button>
+      <button type="button" class="btn btn--danger" @click="removeAssignment(assignments, index)">Remove</button>
     </div>
   </div>
 </template>
