@@ -1,5 +1,5 @@
-import { Component, input, output } from '@angular/core';
 import { NgClass } from '@angular/common';
+import { Component, input, output } from '@angular/core';
 import { HomeTile, HomeTileModuleColor } from './home-tile.model';
 
 @Component({

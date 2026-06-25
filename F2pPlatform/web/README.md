@@ -52,4 +52,4 @@ Then add a lazy route in `apps/f2p-shell/src/app/app.routes.ts` and a home tile.
 
 Copy `web/` into `floor2plan-web/` or convert path aliases to Nx `project.json` libs per `docs/floor2plan-v2-read-model-playbook.md`.
 
-When `@floorganise/ui` ships, replace inline shell markup with shared components — do not fork tokens.
+`@floorganise/ui` is wired via `file:../../FloorganiseCss/ui`. `libs/shared/ui` re-exports the package for monolith-style path aliases.

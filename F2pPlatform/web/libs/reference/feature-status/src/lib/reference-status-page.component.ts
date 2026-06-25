@@ -1,10 +1,10 @@
 import { Component, inject, OnInit, signal } from '@angular/core';
-import { RouterLink } from '@angular/router';
+import { F2pPageHeaderComponent } from '@floorganise/ui';
 import { ReferenceStatusApi, ReferenceStatusDto } from '@f2p/reference/data-access';
 
 @Component({
   selector: 'f2p-reference-status-page',
-  imports: [RouterLink],
+  imports: [F2pPageHeaderComponent],
   templateUrl: './reference-status-page.component.html',
 })
 export class ReferenceStatusPageComponent implements OnInit {
