@@ -1,6 +1,11 @@
 export type TenantDeploymentMode = 'LegacyHosted' | 'Native';
 export type TenantDataTier = 'SharedSqlServer' | 'DedicatedSqlServer';
-export type TenantLifecycleStatus = 'Provisioning' | 'Active' | 'Suspended' | 'Decommissioned';
+export type TenantLifecycleStatus =
+  | 'Provisioning'
+  | 'Active'
+  | 'Suspended'
+  | 'Migrating'
+  | 'Retired';
 
 export interface TenantRecordDto {
   tenantId: string;

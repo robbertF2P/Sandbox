@@ -7,11 +7,23 @@
     </p>
   </header>
 
+  <div class="login-notification login-notification-warning text-sm">
+    <p class="font-semibold">Before you submit</p>
+    <ul class="mt-2 list-disc space-y-1 pl-5">
+      <li>Control-plane SQL is running (<code>docker compose up -d</code> in AdminBackoffice).</li>
+      <li>
+        F2pPlatform API is running on
+        <code>http://localhost:5080</code>
+        — provisioning fails if the platform push cannot connect.
+      </li>
+    </ul>
+  </div>
+
   @if (error()) {
-    <div class="login-notification login-notification-danger">{{ error() }}</div>
+    <div class="login-notification login-notification-danger whitespace-pre-line">{{ error() }}</div>
   }
 
-  <form class="f2ps-group-box grid gap-6 p-6" (ngSubmit)="submit()">
+  <form class="f2ps-group-box grid gap-6 p-6" (ngSubmit)="submit()" novalidate>
     <section class="space-y-4">
       <h2 class="text-base font-semibold text-f2p-ink">Identity</h2>
       <label class="field grid gap-1.5">
@@ -20,11 +32,11 @@
           class="w-full rounded-f2p-sm border border-f2p-border bg-f2p-surface px-3 py-2 text-f2p-ink"
           name="slug"
           [(ngModel)]="slug"
+          (blur)="normalizeSlug()"
           required
-          pattern="[a-z0-9-]+"
           placeholder="acme-shipyard"
         />
-        <small class="text-xs text-f2p-ink-muted">Lowercase letters, numbers, and hyphens only.</small>
+        <small class="text-xs text-f2p-ink-muted">Lowercase letters, numbers, and hyphens only. We normalize on blur.</small>
       </label>
       <label class="field grid gap-1.5">
         <span class="text-sm font-semibold text-f2p-ink-muted">Display name</span>
@@ -125,6 +137,10 @@
             [(ngModel)]="nativeApiBaseUrl"
             required
           />
+          <small class="text-xs text-f2p-ink-muted">
+            Local dev: <code>http://localhost:5080</code> · Docker stack:
+            <code>http://f2p-platform-api:5080</code>
+          </small>
         </label>
       </section>
     }

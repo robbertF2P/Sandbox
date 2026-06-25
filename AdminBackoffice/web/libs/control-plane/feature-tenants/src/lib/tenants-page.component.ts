@@ -1,7 +1,13 @@
 import { DatePipe } from '@angular/common';
 import { Component, inject, OnInit, signal } from '@angular/core';
-import { RouterLink } from '@angular/router';
-import { ControlPlaneApi, TenantRecordDto } from '@admin/control-plane/data-access';
+import { ActivatedRoute, RouterLink } from '@angular/router';
+import {
+  ControlPlaneApi,
+  formatControlPlaneApiError,
+  formatTenantStatus,
+  TenantRecordDto,
+  tenantStatusTone,
+} from '@admin/control-plane/data-access';
 
 @Component({
   selector: 'admin-tenants-page',
@@ -10,13 +16,23 @@ import { ControlPlaneApi, TenantRecordDto } from '@admin/control-plane/data-acce
 })
 export class TenantsPageComponent implements OnInit {
   private readonly api = inject(ControlPlaneApi);
+  private readonly route = inject(ActivatedRoute);
 
   readonly loading = signal(true);
   readonly error = signal<string | null>(null);
+  readonly success = signal<string | null>(null);
   readonly tenants = signal<TenantRecordDto[]>([]);
   readonly syncingId = signal<string | null>(null);
 
+  readonly formatTenantStatus = formatTenantStatus;
+  readonly tenantStatusTone = tenantStatusTone;
+
   ngOnInit(): void {
+    const created = this.route.snapshot.queryParamMap.get('created');
+    if (created) {
+      this.success.set(`Tenant "${created}" is active on the v2 platform.`);
+    }
+
     this.load();
   }
 
@@ -29,33 +45,45 @@ export class TenantsPageComponent implements OnInit {
         this.tenants.set(tenants);
         this.loading.set(false);
       },
-      error: () => {
-        this.error.set('Could not load tenants from the control plane API.');
+      error: err => {
+        this.error.set(
+          formatControlPlaneApiError(err, {
+            fallback: 'Could not load tenants from the control plane API.',
+            action: 'list',
+          }),
+        );
         this.loading.set(false);
       },
     });
   }
 
   syncTenant(tenant: TenantRecordDto): void {
+    this.success.set(null);
     this.syncingId.set(tenant.tenantId);
     this.api.syncTenant(tenant.tenantId).subscribe({
       next: () => {
         this.syncingId.set(null);
+        this.success.set(`Tenant "${tenant.slug}" synced to the v2 platform.`);
         this.load();
       },
-      error: () => {
+      error: err => {
         this.syncingId.set(null);
-        this.error.set(`Sync failed for tenant "${tenant.slug}".`);
+        this.error.set(
+          formatControlPlaneApiError(err, {
+            fallback: `Sync failed for tenant "${tenant.slug}".`,
+            action: 'sync',
+          }),
+        );
       },
     });
   }
 
-  statusClass(status: string): string {
+  statusClass(status: TenantRecordDto['status']): string {
     const base = 'inline-block rounded-f2p-pill px-2 py-0.5 text-xs font-semibold';
-    switch (status) {
-      case 'Active':
+    switch (tenantStatusTone(status)) {
+      case 'active':
         return `${base} bg-f2p-success/15 text-f2p-success`;
-      case 'Provisioning':
+      case 'provisioning':
         return `${base} bg-f2p-warning/15 text-f2p-warning`;
       default:
         return `${base} bg-f2p-surface-subtle text-f2p-ink-muted`;

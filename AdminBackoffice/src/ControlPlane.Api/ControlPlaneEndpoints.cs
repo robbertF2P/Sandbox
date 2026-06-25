@@ -54,10 +54,7 @@ internal static class ControlPlaneEndpoints
                 {
                     ProvisionErrorKind.Validation => Results.BadRequest(new { error = result.ErrorMessage }),
                     ProvisionErrorKind.Conflict => Results.Conflict(new { error = result.ErrorMessage }),
-                    ProvisionErrorKind.PlatformSync => Results.Problem(
-                        detail: result.ErrorMessage,
-                        statusCode: StatusCodes.Status502BadGateway,
-                        title: "Platform sync failed"),
+                    ProvisionErrorKind.PlatformSync => PlatformSyncProblem(result),
                     _ => Results.Problem(detail: result.ErrorMessage ?? "Provisioning failed.")
                 };
             })
@@ -81,15 +78,37 @@ internal static class ControlPlaneEndpoints
                     return Results.NotFound();
                 }
 
-                return Results.Problem(
-                    detail: result.ErrorMessage,
-                    statusCode: StatusCodes.Status502BadGateway,
-                    title: "Platform sync failed");
+                return PlatformSyncProblem(result.ErrorMessage, result.Tenant?.Slug);
             })
             .WithName("SyncTenantToPlatform")
             .WithSummary("Re-push tenant configuration to the v2 platform runtime via Akka actors.");
 
         return app;
+    }
+
+    private static IResult PlatformSyncProblem(ProvisionTenantResult result) =>
+        PlatformSyncProblem(result.ErrorMessage, result.Tenant?.Slug);
+
+    private static IResult PlatformSyncProblem(string? errorMessage, string? tenantSlug = null)
+    {
+        var detail = BuildPlatformSyncDetail(errorMessage, tenantSlug);
+        return Results.Problem(
+            detail: detail,
+            statusCode: StatusCodes.Status502BadGateway,
+            title: "Platform sync failed",
+            extensions: new Dictionary<string, object?> { ["error"] = detail });
+    }
+
+    private static string BuildPlatformSyncDetail(string? errorMessage, string? tenantSlug)
+    {
+        var root = string.IsNullOrWhiteSpace(errorMessage) ? "Platform sync failed." : errorMessage.Trim();
+
+        if (string.IsNullOrWhiteSpace(tenantSlug))
+        {
+            return root;
+        }
+
+        return $"{root} Tenant '{tenantSlug}' is saved in the control plane — start F2pPlatform on :5080 and use Sync.";
     }
 
     private sealed record ProvisionTenantRequestBody(

@@ -3,6 +3,7 @@ import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import {
   ControlPlaneApi,
+  formatControlPlaneApiError,
   ProvisionTenantRequestDto,
   TenantDataTier,
   TenantDeploymentMode,
@@ -29,7 +30,8 @@ export class CreateTenantPageComponent {
   legacyRuntimeUrl = '';
   legacyDatabaseConnectionRef = '';
   nativeDatabaseConnectionRef = 'control-plane/native-db';
-  nativeApiBaseUrl = 'http://f2p-platform-api:5080';
+  /** Local dev default — Docker stack uses http://f2p-platform-api:5080 */
+  nativeApiBaseUrl = 'http://localhost:5080';
   integrationPacks = '';
   customizationPacks = 'acme-hour-approvals-v1';
   billingTier = 'standard';
@@ -37,12 +39,28 @@ export class CreateTenantPageComponent {
 
   readonly isLegacy = computed(() => this.mode === 'LegacyHosted');
 
+  normalizeSlug(): void {
+    this.slug = this.slug.trim().toLowerCase();
+  }
+
   submit(): void {
+    this.normalizeSlug();
+
+    if (!this.slug || !this.displayName.trim()) {
+      this.error.set('Slug and display name are required.');
+      return;
+    }
+
+    if (!/^[a-z0-9-]+$/.test(this.slug)) {
+      this.error.set('Slug must use lowercase letters, numbers, and hyphens only.');
+      return;
+    }
+
     this.saving.set(true);
     this.error.set(null);
 
     const request: ProvisionTenantRequestDto = {
-      slug: this.slug.trim(),
+      slug: this.slug,
       displayName: this.displayName.trim(),
       mode: this.mode,
       dataTier: this.dataTier,
@@ -67,8 +85,12 @@ export class CreateTenantPageComponent {
       },
       error: err => {
         this.saving.set(false);
-        const message = err?.error?.error ?? err?.error?.title ?? 'Provisioning failed.';
-        this.error.set(typeof message === 'string' ? message : 'Provisioning failed.');
+        this.error.set(
+          formatControlPlaneApiError(err, {
+            fallback: 'Provisioning failed.',
+            action: 'provision',
+          }),
+        );
       },
     });
   }
