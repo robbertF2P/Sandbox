@@ -56,6 +56,7 @@ After editing skills in `.cursor/skills/`, run:
 - `akka-net` — Akka.NET (repo patterns)
 - `reactive-applications-akka-net` — Anthony Brown reactive systems / Akka.NET book
 - `functional-programming-csharp` — functional patterns in C#
+- `csharp-enum-best-practices` — enum design, status outcomes, smart-class evolution (Horvat / Coding Helmet)
 
 Copilot-specific always-on notes: `.github/copilot-instructions.md`
 
