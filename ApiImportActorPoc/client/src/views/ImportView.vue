@@ -154,10 +154,18 @@ async function runPersist() {
         Activities may relate as child, predecessor, or successor on the build schedule.
       </p>
       <textarea v-model="jsonInput" spellcheck="false" />
-      <button :disabled="busy" @click="runImport">Start import</button>
-      <button v-if="sessionId && modelJson" :disabled="busy" @click="runPersist">
-        Persist to database
-      </button>
+      <div class="button-row">
+        <button type="button" class="btn btn--primary" :disabled="busy" @click="runImport">Start import</button>
+        <button
+          v-if="sessionId && modelJson"
+          type="button"
+          class="btn btn--ghost"
+          :disabled="busy"
+          @click="runPersist"
+        >
+          Persist to database
+        </button>
+      </div>
       <p v-if="statusMessage" :class="isError ? 'error' : 'success'">{{ statusMessage }}</p>
     </section>
 

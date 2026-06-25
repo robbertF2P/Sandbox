@@ -1,7 +1,7 @@
-<div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+<div class="f2p-tile-grid">
   @for (tile of tiles(); track tile.route) {
     <article
-      class="f2ps-clickable relative flex h-[180px] w-full flex-col overflow-hidden rounded-f2p-sm text-white shadow-[var(--shadow-f2p-tile)]"
+      class="f2ps-tile f2ps-clickable border-0 text-white"
       [ngClass]="moduleClass(tile)"
       [attr.data-testid]="'home-tile-' + tile.label.toLowerCase()"
       [attr.aria-label]="tile.label + '. ' + tile.meta"
@@ -11,16 +11,17 @@
       role="button"
     >
       <div class="f2ps-tile-abbreviation">{{ tile.abbreviation }}</div>
-      <div class="flex h-[50px] items-center pl-10 text-sm font-semibold uppercase">
-        {{ tile.label }}
-      </div>
-      <div class="flex flex-1 items-center justify-center text-white">
+      <div class="f2ps-tile-title uppercase text-white">{{ tile.label }}</div>
+      <div class="f2ps-tile-content">
         <svg class="size-16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
           <rect x="3" y="3" width="7" height="7" rx="1.5" />
           <rect x="3" y="14" width="7" height="7" rx="1.5" />
           <rect x="14" y="3" width="7" height="7" rx="1.5" />
           <rect x="14" y="14" width="7" height="7" rx="1.5" />
         </svg>
+      </div>
+      <div class="f2ps-tile-footer">
+        <p class="f2ps-tile-footer-description text-white/80">{{ tile.meta }}</p>
       </div>
     </article>
   }

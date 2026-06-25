@@ -57,6 +57,7 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
+  <div class="space-y-6">
   <section class="hero">
     <p class="eyebrow">Akka.NET + SignalR + Vue</p>
     <h1>Actor-driven live messages</h1>
@@ -96,4 +97,5 @@ onBeforeUnmount(() => {
     </ul>
     <p v-else class="empty">Waiting for the first SignalR event...</p>
   </section>
+  </div>
 </template>
