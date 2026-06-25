@@ -9,7 +9,7 @@ Central Serilog configuration for every SandBox module and future bounded-contex
 | `Platform.Serilog.Logging` | Shared enrichers + environment sinks (Seq / Application Insights) |
 | `Platform.Serilog.Logging.Testing` | Same pipeline + `Serilog.Sinks.XUnit3` for tests |
 
-Both ship as NuGet to `local-feed/` (version `1.1.0`). See also [platform-correlation-standard.md](./platform-correlation-standard.md) for end-to-end tracing.
+Both ship as NuGet to `local-feed/` (version `1.1.1`). See also [platform-correlation-standard.md](./platform-correlation-standard.md) for end-to-end tracing.
 
 ```bash
 ./scripts/pack-platform-logging.sh [version]
@@ -73,7 +73,7 @@ builder.AddPlatformSerilog(logger);
 | Environment | Sinks | Config keys |
 |-------------|-------|-------------|
 | Development | Console + Seq | `Seq:ServerUrl` |
-| Production | Console + Application Insights | `ApplicationInsights:ConnectionString` or `APPLICATIONINSIGHTS_CONNECTION_STRING` |
+| Production | Console + Application Insights; + Seq when `Seq:ServerUrl` is set | `ApplicationInsights:ConnectionString` or `APPLICATIONINSIGHTS_CONNECTION_STRING`; `Seq:ServerUrl` (Docker) |
 | Tests | xUnit test output only | (none — via Testing package) |
 
 ## New module checklist

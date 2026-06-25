@@ -1,11 +1,25 @@
-# Control-plane SQL for admin backoffice (port 1403 — avoids F2pPlatform 1402 and POCs).
+# Control-plane SQL + Seq for admin backoffice (port 1403 SQL — avoids F2pPlatform 1402 and POCs).
 #
 #   docker compose up -d
 #   dotnet ef database update --project src/ControlPlane.Data.Migrations
+#
+# Seq UI      -> http://localhost:8083
+# Seq ingest  -> http://localhost:5343  (Seq:ServerUrl in appsettings.Development.json)
 
 name: admin-backoffice-dev
 
 services:
+  seq:
+    image: datalust/seq:latest
+    environment:
+      ACCEPT_EULA: "Y"
+      SEQ_FIRSTRUN_NOAUTHENTICATION: "true"
+    ports:
+      - "5343:5341"
+      - "8083:80"
+    volumes:
+      - control-plane-seq-data:/data
+
   sqlserver:
     image: mcr.microsoft.com/mssql/server:2022-latest
     environment:
@@ -28,4 +42,5 @@ services:
       start_period: 60s
 
 volumes:
+  control-plane-seq-data:
   control-plane-sql-data:

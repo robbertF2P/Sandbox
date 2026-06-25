@@ -3,6 +3,7 @@
 Shared Serilog pipeline for SandBox modules.
 
 - **Development:** Console + Datalust Seq (`Seq:ServerUrl`)
+- **Production:** Console + Application Insights; Seq when `Seq:ServerUrl` is set (Docker stacks)
 - **Production:** Console + Azure Application Insights
 - **Tests:** `Platform.Serilog.Logging.Testing` → xUnit3 sink
 
