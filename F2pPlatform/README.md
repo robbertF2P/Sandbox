@@ -18,8 +18,29 @@ web/                             Angular f2p-shell + Reference UI libs
 
 ## Quick start
 
+### Podman / Docker (recommended — full UI + API)
+
+Brings up Seq, the API host, and the tenant SPA with a fresh image build (includes the Floorboard hour-approvals UI):
+
 ```bash
 cd F2pPlatform
+./scripts/podman-up.sh
+```
+
+- Tenant UI: `http://localhost:5180`
+- Hour approvals: `http://localhost:5180/hour-approvals` (login `supervisor.demo`, any password)
+- API / Swagger: `http://localhost:5080/swagger`
+- Seq: `http://localhost:8083`
+
+Stop: `./scripts/podman-down.sh`
+
+The script packs `Platform.Serilog.Logging` into `local-feed/` at the version pinned in `build/Platform.Logging.Versions.props`, then runs `podman compose` (falls back to Docker Compose).
+
+### Local development (host)
+
+```bash
+cd F2pPlatform
+../scripts/pack-local-platform-packages.sh   # once, or when logging package version changes
 dotnet build
 dotnet test
 dotnet run --project host/F2pPlatform.Host

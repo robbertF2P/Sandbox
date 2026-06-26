@@ -30,6 +30,11 @@ COPY F2pPlatform/src/Modules/HourApprovals/HourApprovals.Application/HourApprova
 COPY F2pPlatform/src/Modules/HourApprovals/HourApprovals.Domain/HourApprovals.Domain.csproj F2pPlatform/src/Modules/HourApprovals/HourApprovals.Domain/
 COPY F2pPlatform/src/Modules/HourApprovals/HourApprovals.Infrastructure/HourApprovals.Infrastructure.csproj F2pPlatform/src/Modules/HourApprovals/HourApprovals.Infrastructure/
 COPY F2pPlatform/src/Packs/HourApprovals.Packs.Acme/HourApprovals.Packs.Acme.csproj F2pPlatform/src/Packs/HourApprovals.Packs.Acme/
+COPY F2pPlatform/src/Shared/Platform.Shared.Domain/Platform.Shared.Domain.csproj F2pPlatform/src/Shared/Platform.Shared.Domain/
+COPY F2pPlatform/src/Modules/ControlPlane/ControlPlane.Api/ControlPlane.Api.csproj F2pPlatform/src/Modules/ControlPlane/ControlPlane.Api/
+COPY F2pPlatform/src/Modules/ControlPlane/ControlPlane.Application/ControlPlane.Application.csproj F2pPlatform/src/Modules/ControlPlane/ControlPlane.Application/
+COPY F2pPlatform/src/Modules/ControlPlane/ControlPlane.Domain/ControlPlane.Domain.csproj F2pPlatform/src/Modules/ControlPlane/ControlPlane.Domain/
+COPY F2pPlatform/src/Modules/ControlPlane/ControlPlane.Infrastructure/ControlPlane.Infrastructure.csproj F2pPlatform/src/Modules/ControlPlane/ControlPlane.Infrastructure/
 
 WORKDIR /src/F2pPlatform
 RUN dotnet restore host/F2pPlatform.Host/F2pPlatform.Host.csproj

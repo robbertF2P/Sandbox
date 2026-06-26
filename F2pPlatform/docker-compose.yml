@@ -1,6 +1,8 @@
 # F2pPlatform local development infrastructure.
 #
-# Run the API and SPA on your host — this file only starts SQL Server and Seq.
+# SQL + Seq only. For the full tenant UI + API stack, use:
+#   ./scripts/podman-up.sh
+# (see docker-compose.stack.yml)
 #
 #   docker compose up -d
 #
