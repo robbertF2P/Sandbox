@@ -18,6 +18,7 @@
 | `platform-frontend-standard.md` | **Frontend standard** — `@floorganise/css` + `@floorganise/ui` for all V2 modules |
 | `platform-authentication-standard.md` | **Auth design** — OIDC, cloud multi-tenant vs on-prem install config |
 | `platform-actor-standard.md` | **Actor orchestration** — integrations, tenant packs, legacy strangler workflows |
+| `change-handler-migration.md` | **Handler migration** — replace SaveChanges handler chains with domain events + actors |
 | `../floor2plan-v2-connector-architecture.md` | Integration pack dependency rules |
 
 ---
@@ -455,7 +456,7 @@ Keep these visible in every implementation session with an AI assistant:
 |------------|-------------|
 | ABP in **legacy** monolith (inventory) | New modules: **no** `Volo.Abp.*`; strangler adapters call legacy ABP services |
 | `DisableTransitiveProjectReferences=true` | Explicit project refs at every layer; module `.csproj` must list all deps |
-| 55+ EF change handlers on `Floor2PlanDbContext` | Do not extract entities still wired to handlers until handler strategy defined |
+| 55+ EF change handlers on `Floor2PlanDbContext` | Migrate per entity family during context extraction — see `change-handler-migration.md` |
 | Hangfire `default` + `sync` queues | Import pilot uses `sync`; don't merge queue semantics early |
 | Multiple DbContexts already | Reporting, Files, Auth, etc. — align module cuts with existing DB boundaries where possible |
 | Hybrid UI (Razor + Vue + API) | Backend-first; UI strangler per screen family later; **V2 Nx screens** → `@floorganise/css` + `@floorganise/ui` only |
