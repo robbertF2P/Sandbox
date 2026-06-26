@@ -1,3 +1,4 @@
+using PlanningApprovals.Domain.Enums;
 using PlanningApprovals.Domain.ValueObjects;
 
 namespace PlanningApprovals.Domain.Models;
@@ -83,8 +84,3 @@ public sealed class ForemanApprovalBatch
     }
 }
 
-public enum ForemanApprovalBatchStatus
-{
-    Open = 0,
-    Submitted = 1,
-}
