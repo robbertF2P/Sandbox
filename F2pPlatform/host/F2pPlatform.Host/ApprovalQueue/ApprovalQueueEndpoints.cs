@@ -97,17 +97,26 @@ internal static class ApprovalQueueEndpoints
         activityCode = row.Labels.ActivityCode.Value,
         organisationLabel = row.Labels.OrganisationLabel,
         projectLabel = row.Labels.ProjectLabel,
+        taskNumber = row.Labels.TaskNumber,
+        locationPath = row.Labels.LocationPath,
+        disciplineLabel = row.Labels.DisciplineLabel,
+        teamCount = row.Labels.TeamCount,
+        totalHoursBooked = row.Labels.TotalHoursBooked,
         hoursWorkedInWindow = row.HoursWorkedInWindow,
         submissionCategory = ToApiName(row.SubmissionCategory),
         approvalState = row.ApprovalState.ToString(),
         isApproved = row.ApprovalState == ApprovalState.Approved,
         currentValues = MapValues(row.CurrentValues),
+        lookbackValues = MapValues(row.LookbackBaseline),
         lastApproval = row.LastSubmission is null
             ? null
             : new
             {
                 approvedBy = row.LastSubmission.SubmittedBy,
                 approvedAtUtc = row.LastSubmission.SubmittedAtUtc,
+                approvedValues = row.LastSubmission.ApprovedValues is null
+                    ? null
+                    : MapValues(row.LastSubmission.ApprovedValues),
             },
     };
 

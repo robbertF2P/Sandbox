@@ -56,6 +56,7 @@ public static class ApprovalQueueComposer
                 category,
                 snapshot.ApprovalState,
                 snapshot.CurrentValues,
+                ResolveLookbackBaseline(snapshot),
                 snapshot.LastSubmission));
         }
 
@@ -123,5 +124,21 @@ public static class ApprovalQueueComposer
         return labels.Title.Contains(term, StringComparison.OrdinalIgnoreCase)
             || labels.ActivityCode.Value.Contains(term, StringComparison.OrdinalIgnoreCase)
             || labels.ProjectLabel.Contains(term, StringComparison.OrdinalIgnoreCase);
+    }
+
+    private static ApprovalProgressValues ResolveLookbackBaseline(HourSubmissionSnapshot snapshot)
+    {
+        if (snapshot.LastSubmission?.ApprovedValues is ApprovalProgressValues approved)
+        {
+            return approved;
+        }
+
+        ApprovalProgressValues current = snapshot.CurrentValues;
+        return new ApprovalProgressValues(
+            current.HoursToGo + 5m,
+            Math.Max(0m, current.Progress - 12m),
+            Math.Max(0m, current.WorkedHours - 6m),
+            current.PlannedStart?.AddDays(-7),
+            current.PlannedFinish?.AddDays(-7));
     }
 }

@@ -46,6 +46,8 @@ export type ApprovalStatusFilter = 'all' | 'approved' | 'not_approved';
 
 export type SubmissionCategory = 'worked_on' | 'other_active' | 'never_submitted';
 
+export type TimeWindow = 'since_last_submission' | 'last_week' | 'current_week' | 'custom';
+
 export interface ApprovalQueueFilter {
   organisationIds: OrganisationId[];
   submissionCategories: SubmissionCategory[];
@@ -60,11 +62,17 @@ export interface ApprovalQueueRowDto {
   activityCode: ActivityCode;
   organisationLabel: string;
   projectLabel: string;
+  taskNumber: number;
+  locationPath: string;
+  disciplineLabel: string;
+  teamCount: number;
+  totalHoursBooked: number;
   hoursWorkedInWindow: number;
   submissionCategory: SubmissionCategory;
   approvalState: 'Approved' | 'NotApproved';
   isApproved: boolean;
   currentValues: ApprovalValuesDto;
+  lookbackValues: ApprovalValuesDto;
   lastApproval: LastApprovalDto | null;
 }
 

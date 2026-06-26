@@ -12,4 +12,5 @@ public sealed record ApprovalQueueRow(
     SubmissionCategory SubmissionCategory,
     ApprovalState ApprovalState,
     ApprovalProgressValues CurrentValues,
+    ApprovalProgressValues LookbackBaseline,
     LastSubmission? LastSubmission);
