@@ -1,25 +1,22 @@
+using PlanningApprovals.Domain.ValueObjects;
+
 namespace PlanningApprovals.Domain.Models;
 
 public sealed class ForemanApprovalBatch
 {
-    private List<Guid> _requestPublicIds = [];
+    private List<ApprovalPublicId> _requestPublicIds = [];
 
     private ForemanApprovalBatch()
     {
     }
 
     public ForemanApprovalBatch(
-        Guid publicId,
-        long projectId,
-        long foremanPersonId,
-        string scopeDescription,
+        ApprovalPublicId publicId,
+        ProjectId projectId,
+        PersonId foremanPersonId,
+        ScopeDescription scopeDescription,
         DateTimeOffset openedAt)
     {
-        if (string.IsNullOrWhiteSpace(scopeDescription))
-        {
-            throw new ArgumentException("Scope description is required.", nameof(scopeDescription));
-        }
-
         PublicId = publicId;
         ProjectId = projectId;
         ForemanPersonId = foremanPersonId;
@@ -30,13 +27,13 @@ public sealed class ForemanApprovalBatch
 
     public int Id { get; private set; }
 
-    public Guid PublicId { get; private init; }
+    public ApprovalPublicId PublicId { get; private init; }
 
-    public long ProjectId { get; private init; }
+    public ProjectId ProjectId { get; private init; }
 
-    public long ForemanPersonId { get; private init; }
+    public PersonId ForemanPersonId { get; private init; }
 
-    public string ScopeDescription { get; private init; } = string.Empty;
+    public ScopeDescription ScopeDescription { get; private init; }
 
     public ForemanApprovalBatchStatus Status { get; private set; }
 
@@ -44,23 +41,23 @@ public sealed class ForemanApprovalBatch
 
     public DateTimeOffset? SubmittedAt { get; private set; }
 
-    public IReadOnlyList<Guid> RequestPublicIds => _requestPublicIds;
+    public IReadOnlyList<ApprovalPublicId> RequestPublicIds => _requestPublicIds;
 
     public static ForemanApprovalBatch Open(
-        long projectId,
-        long foremanPersonId,
-        string scopeDescription,
+        ProjectId projectId,
+        PersonId foremanPersonId,
+        ScopeDescription scopeDescription,
         DateTimeOffset openedAt) =>
-        new(Guid.NewGuid(), projectId, foremanPersonId, scopeDescription, openedAt);
+        new(new ApprovalPublicId(Guid.NewGuid()), projectId, foremanPersonId, scopeDescription, openedAt);
 
-    public void AddRequests(IEnumerable<Guid> requestPublicIds)
+    public void AddRequests(IEnumerable<ApprovalPublicId> requestPublicIds)
     {
         if (Status != ForemanApprovalBatchStatus.Open)
         {
             throw new InvalidOperationException("Cannot add requests to a closed batch.");
         }
 
-        foreach (Guid requestPublicId in requestPublicIds)
+        foreach (ApprovalPublicId requestPublicId in requestPublicIds)
         {
             if (!_requestPublicIds.Contains(requestPublicId))
             {

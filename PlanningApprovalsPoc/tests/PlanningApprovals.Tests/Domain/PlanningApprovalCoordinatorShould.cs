@@ -14,7 +14,7 @@ public sealed class PlanningApprovalCoordinatorShould
     [Fact]
     public void Opens_request_when_progress_and_plan_change_since_week_ago_baseline()
     {
-        long assignmentId = Floor2PlanApprovalScenario.AssignmentWelding;
+        AssignmentId assignmentId = Floor2PlanApprovalScenario.AssignmentWelding;
 
         ProgressRevisionRef firstProgress = Floor2PlanApprovalScenario.Progress(
             assignmentId,
@@ -82,7 +82,7 @@ public sealed class PlanningApprovalCoordinatorShould
     [Fact]
     public void Skips_approval_when_current_matches_week_ago_baseline()
     {
-        long assignmentId = Floor2PlanApprovalScenario.AssignmentFitting;
+        AssignmentId assignmentId = Floor2PlanApprovalScenario.AssignmentFitting;
         DateTimeOffset occurredAt = Day1;
 
         IReadOnlyList<AssignmentPlanningCheckpoint> history = Floor2PlanApprovalScenario.DefaultWeekAgoHistory(
@@ -111,7 +111,7 @@ public sealed class PlanningApprovalCoordinatorShould
     [Fact]
     public void Supersedes_open_pending_request_when_new_progress_arrives()
     {
-        long assignmentId = Floor2PlanApprovalScenario.AssignmentFitting;
+        AssignmentId assignmentId = Floor2PlanApprovalScenario.AssignmentFitting;
 
         ProgressRevisionRef progressV1 = Floor2PlanApprovalScenario.Progress(
             assignmentId,
@@ -181,16 +181,17 @@ public sealed class PlanningApprovalCoordinatorShould
         ForemanApprovalBatch batch = ForemanApprovalBatch.Open(
             Floor2PlanApprovalScenario.ProjectId,
             Floor2PlanApprovalScenario.ForemanPersonId,
-            scopeDescription: "Block A12 — week 26",
+            new ScopeDescription("Block A12 — week 26"),
             openedAt);
 
-        List<Guid> requestIds = [];
+        List<ApprovalPublicId> requestIds = [];
 
-        for (long assignmentId = 1; assignmentId <= 250; assignmentId++)
+        for (int assignmentNumber = 1; assignmentNumber <= 250; assignmentNumber++)
         {
+            AssignmentId assignmentId = new(assignmentNumber);
             ProgressRevisionRef progress = Floor2PlanApprovalScenario.Progress(
                 assignmentId,
-                revisionId: assignmentId,
+                revisionId: assignmentNumber,
                 percentComplete: 40m,
                 bookedHours: 16m,
                 openedAt);
@@ -199,8 +200,8 @@ public sealed class PlanningApprovalCoordinatorShould
                 new DateOnly(2026, 6, 1),
                 new DateOnly(2026, 6, 30),
                 40m,
-                $"profile-{assignmentId}",
-                $"run-{assignmentId}");
+                $"profile-{assignmentNumber}",
+                $"run-{assignmentNumber}");
 
             ApprovalSyncResult sync = Floor2PlanApprovalScenario.ApplyPlanningChange(
                 assignmentId,
@@ -210,7 +211,7 @@ public sealed class PlanningApprovalCoordinatorShould
                 lastApproved: null,
                 openedAt);
 
-            Guid requestId = sync.Actions
+            ApprovalPublicId requestId = sync.Actions
                 .Single(action => action.Kind == ApprovalSyncActionKind.OpenRequest)
                 .OpenedRequest!.PublicId;
 

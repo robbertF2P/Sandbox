@@ -107,7 +107,11 @@ public sealed class ApprovalQueueComposerShould
             taskId,
             new AssignmentId(taskId.Value),
             new OrganisationId(21),
-            new AssignmentLabels(title, new ActivityCode("ACT"), "21: Metal Shop", "NSMV Demo"),
+            new AssignmentLabels(
+                new TaskTitle(title),
+                new ActivityCode("ACT"),
+                new OrganisationLabel("21: Metal Shop"),
+                new ProjectLabel("NSMV Demo")),
             IsActiveAssignment: true);
 
     private static HourSubmissionSnapshot CreateSnapshot(TaskId taskId, DateTimeOffset? lastSubmitted) =>
@@ -116,6 +120,6 @@ public sealed class ApprovalQueueComposerShould
             ApprovalState.NotApproved,
             new ApprovalProgressValues(10m, 20m, 30m, null, null),
             lastSubmitted.HasValue
-                ? new LastSubmission("supervisor.demo", lastSubmitted.Value)
+                ? new LastSubmission(new UserName("supervisor.demo"), lastSubmitted.Value)
                 : null);
 }

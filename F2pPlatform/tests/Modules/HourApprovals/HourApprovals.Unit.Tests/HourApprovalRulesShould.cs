@@ -16,7 +16,7 @@ public sealed class HourApprovalRulesShould
     {
         ApprovalRecord approval = ApprovalRecord.Create(
             new TaskId(Guid.NewGuid()),
-            "supervisor.demo",
+            new UserName("supervisor.demo"),
             DateTimeOffset.UtcNow,
             Baseline);
 
@@ -30,7 +30,7 @@ public sealed class HourApprovalRulesShould
     {
         ApprovalRecord approval = ApprovalRecord.Create(
             new TaskId(Guid.NewGuid()),
-            "supervisor.demo",
+            new UserName("supervisor.demo"),
             DateTimeOffset.UtcNow,
             Baseline);
 

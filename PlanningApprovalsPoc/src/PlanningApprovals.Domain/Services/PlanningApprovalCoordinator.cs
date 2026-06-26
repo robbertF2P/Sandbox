@@ -40,15 +40,15 @@ public sealed record ForemanDecisionResult(
 public static class PlanningApprovalCoordinator
 {
     public static ApprovalSyncResult SynchronizeAfterPlanningChange(
-        long projectId,
-        long assignmentId,
+        ProjectId projectId,
+        AssignmentId assignmentId,
         ProgressRevisionRef currentProgress,
         PlanSnapshot proposedPlan,
         IEnumerable<AssignmentPlanningCheckpoint> checkpointHistory,
         AssignmentApprovalRequest? openPendingRequest,
         ApprovedPlanSnapshot? lastApproved,
         DateTimeOffset occurredAt,
-        string openedByProcess,
+        ProcessName openedByProcess,
         ApprovalLookbackWindow? lookbackWindow = null)
     {
         ApprovalLookbackWindow window = lookbackWindow ?? ApprovalLookbackWindow.OneWeek;
@@ -106,11 +106,11 @@ public static class PlanningApprovalCoordinator
     public static ForemanDecisionResult RecordForemanDecision(
         AssignmentApprovalRequest request,
         ApprovalDecisionType decision,
-        long foremanPersonId,
+        PersonId foremanPersonId,
         DateTimeOffset decidedAt,
-        string? comment,
-        string correlationId,
-        Guid? batchPublicId)
+        DecisionComment? comment,
+        CorrelationId correlationId,
+        ApprovalPublicId? batchPublicId)
     {
         ApprovalDecision recorded = ApprovalDecision.Record(
             request,

@@ -10,22 +10,17 @@ public sealed class AssignmentApprovalRequest
     }
 
     public AssignmentApprovalRequest(
-        Guid publicId,
-        long projectId,
-        long assignmentId,
+        ApprovalPublicId publicId,
+        ProjectId projectId,
+        AssignmentId assignmentId,
         ApprovalRequiredBecause requiredBecause,
         ProgressRevisionRef progressRevision,
         PlanSnapshot proposedPlan,
         PlanningStateSnapshot lookbackBaseline,
-        Guid? lastApprovedSnapshotId,
+        ApprovalPublicId? lastApprovedSnapshotId,
         DateTimeOffset openedAt,
-        string openedByProcess)
+        ProcessName openedByProcess)
     {
-        if (string.IsNullOrWhiteSpace(openedByProcess))
-        {
-            throw new ArgumentException("Opened-by process is required.", nameof(openedByProcess));
-        }
-
         ArgumentNullException.ThrowIfNull(lookbackBaseline);
 
         PublicId = publicId;
@@ -45,11 +40,11 @@ public sealed class AssignmentApprovalRequest
 
     public int Id { get; private set; }
 
-    public Guid PublicId { get; private init; }
+    public ApprovalPublicId PublicId { get; private init; }
 
-    public long ProjectId { get; private init; }
+    public ProjectId ProjectId { get; private init; }
 
-    public long AssignmentId { get; private init; }
+    public AssignmentId AssignmentId { get; private init; }
 
     public ApprovalRequestStatus Status { get; private set; }
 
@@ -68,26 +63,26 @@ public sealed class AssignmentApprovalRequest
     public PlanningStateSnapshot LookbackBaseline =>
         new(LookbackCapturedAt, LookbackProgress, LookbackPlan);
 
-    public Guid? LastApprovedSnapshotId { get; private init; }
+    public ApprovalPublicId? LastApprovedSnapshotId { get; private init; }
 
     public DateTimeOffset OpenedAt { get; private init; }
 
-    public string OpenedByProcess { get; private init; } = string.Empty;
+    public ProcessName OpenedByProcess { get; private init; }
 
     public DateTimeOffset? ClosedAt { get; private set; }
 
     public static AssignmentApprovalRequest Open(
-        long projectId,
-        long assignmentId,
+        ProjectId projectId,
+        AssignmentId assignmentId,
         ApprovalRequiredBecause requiredBecause,
         ProgressRevisionRef progressRevision,
         PlanSnapshot proposedPlan,
         PlanningStateSnapshot lookbackBaseline,
         ApprovedPlanSnapshot? lastApproved,
         DateTimeOffset openedAt,
-        string openedByProcess) =>
+        ProcessName openedByProcess) =>
         new(
-            Guid.NewGuid(),
+            new ApprovalPublicId(Guid.NewGuid()),
             projectId,
             assignmentId,
             requiredBecause,

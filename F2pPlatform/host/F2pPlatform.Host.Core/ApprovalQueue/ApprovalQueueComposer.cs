@@ -121,9 +121,9 @@ public static class ApprovalQueueComposer
 
         string term = search.Trim();
         AssignmentLabels labels = assignment.Labels;
-        return labels.Title.Contains(term, StringComparison.OrdinalIgnoreCase)
+        return labels.Title.Value.Contains(term, StringComparison.OrdinalIgnoreCase)
             || labels.ActivityCode.Value.Contains(term, StringComparison.OrdinalIgnoreCase)
-            || labels.ProjectLabel.Contains(term, StringComparison.OrdinalIgnoreCase);
+            || labels.ProjectLabel.Value.Contains(term, StringComparison.OrdinalIgnoreCase);
     }
 
     private static ApprovalProgressValues ResolveLookbackBaseline(HourSubmissionSnapshot snapshot)

@@ -93,11 +93,11 @@ internal static class ApprovalQueueEndpoints
         taskId = row.TaskId.Value,
         assignmentId = row.AssignmentId.Value,
         organisationId = row.OrganisationId.Value,
-        title = row.Labels.Title,
+        title = row.Labels.Title.Value,
         activityCode = row.Labels.ActivityCode.Value,
-        organisationLabel = row.Labels.OrganisationLabel,
-        projectLabel = row.Labels.ProjectLabel,
-        taskNumber = row.Labels.TaskNumber,
+        organisationLabel = row.Labels.OrganisationLabel.Value,
+        projectLabel = row.Labels.ProjectLabel.Value,
+        taskNumber = row.Labels.TaskNumber.Value,
         locationPath = row.Labels.LocationPath,
         disciplineLabel = row.Labels.DisciplineLabel,
         teamCount = row.Labels.TeamCount,
@@ -112,7 +112,7 @@ internal static class ApprovalQueueEndpoints
             ? null
             : new
             {
-                approvedBy = row.LastSubmission.SubmittedBy,
+                approvedBy = row.LastSubmission.SubmittedBy.Value,
                 approvedAtUtc = row.LastSubmission.SubmittedAtUtc,
                 approvedValues = row.LastSubmission.ApprovedValues is null
                     ? null

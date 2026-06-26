@@ -13,18 +13,13 @@ public sealed class AssignmentPlanningCheckpoint
     }
 
     public AssignmentPlanningCheckpoint(
-        Guid publicId,
-        long assignmentId,
+        ApprovalPublicId publicId,
+        AssignmentId assignmentId,
         DateTimeOffset capturedAt,
         ProgressRevisionRef progressRevision,
         PlanSnapshot planSnapshot,
-        string captureSource)
+        CaptureSource captureSource)
     {
-        if (string.IsNullOrWhiteSpace(captureSource))
-        {
-            throw new ArgumentException("Capture source is required.", nameof(captureSource));
-        }
-
         PublicId = publicId;
         AssignmentId = assignmentId;
         CapturedAt = capturedAt;
@@ -35,9 +30,9 @@ public sealed class AssignmentPlanningCheckpoint
 
     public int Id { get; private set; }
 
-    public Guid PublicId { get; private init; }
+    public ApprovalPublicId PublicId { get; private init; }
 
-    public long AssignmentId { get; private init; }
+    public AssignmentId AssignmentId { get; private init; }
 
     public DateTimeOffset CapturedAt { get; private init; }
 
@@ -45,16 +40,16 @@ public sealed class AssignmentPlanningCheckpoint
 
     public PlanSnapshot PlanSnapshot { get; private init; } = null!;
 
-    public string CaptureSource { get; private init; } = string.Empty;
+    public CaptureSource CaptureSource { get; private init; }
 
     public PlanningStateSnapshot ToStateSnapshot() =>
         new(CapturedAt, ProgressRevision, PlanSnapshot);
 
     public static AssignmentPlanningCheckpoint Capture(
-        long assignmentId,
+        AssignmentId assignmentId,
         DateTimeOffset capturedAt,
         ProgressRevisionRef progressRevision,
         PlanSnapshot planSnapshot,
-        string captureSource) =>
-        new(Guid.NewGuid(), assignmentId, capturedAt, progressRevision, planSnapshot, captureSource);
+        CaptureSource captureSource) =>
+        new(new ApprovalPublicId(Guid.NewGuid()), assignmentId, capturedAt, progressRevision, planSnapshot, captureSource);
 }

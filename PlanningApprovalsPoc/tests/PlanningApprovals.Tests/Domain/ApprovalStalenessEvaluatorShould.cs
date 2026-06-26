@@ -70,8 +70,8 @@ public sealed class ApprovalStalenessEvaluatorShould
             "run-2");
 
         ApprovedPlanSnapshot lastApproved = new(
-            Guid.NewGuid(),
-            decisionPublicId: Guid.NewGuid(),
+            new ApprovalPublicId(Guid.NewGuid()),
+            new ApprovalPublicId(Guid.NewGuid()),
             Floor2PlanApprovalScenario.AssignmentWelding,
             Floor2PlanApprovalScenario.ForemanPersonId,
             Now.AddDays(-1),

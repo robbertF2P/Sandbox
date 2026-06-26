@@ -178,7 +178,7 @@ public sealed class PlanningApprovalsPersistenceShould
 
         try
         {
-            long assignmentId = Floor2PlanApprovalScenario.AssignmentWelding;
+            AssignmentId assignmentId = Floor2PlanApprovalScenario.AssignmentWelding;
             AssignmentPlanningCheckpoint checkpoint = Floor2PlanApprovalScenario.Checkpoint(
                 assignmentId,
                 Now.AddDays(-8),

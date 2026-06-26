@@ -1,6 +1,8 @@
+using Platform.Shared.Domain;
+
 namespace F2pPlatform.Host.Contracts.ApprovalQueue;
 
 public sealed record LastSubmission(
-    string SubmittedBy,
+    UserName SubmittedBy,
     DateTimeOffset SubmittedAtUtc,
     ApprovalProgressValues? ApprovedValues = null);

@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Platform.Shared.Domain;
 
 namespace HourApprovals.Api;
 
@@ -89,7 +90,7 @@ internal static class HourApprovalsEndpoints
                     return Results.NotFound();
                 }
 
-                TaskApprovalView? task = await service.GetTaskAsync(taskId, cancellationToken);
+                TaskApprovalView? task = await service.GetTaskAsync(new TaskId(taskId), cancellationToken);
                 return task is null ? Results.NotFound() : Results.Ok(MapTask(task));
             })
             .WithName("GetHourApprovalTask")
@@ -110,7 +111,7 @@ internal static class HourApprovalsEndpoints
                 try
                 {
                     TaskApprovalView saved = await service.SaveTaskAsync(
-                        taskId,
+                        new TaskId(taskId),
                         MapValues(body),
                         ResolveUserName(httpContext),
                         ResolvePermissions(httpContext),
@@ -144,7 +145,7 @@ internal static class HourApprovalsEndpoints
                 try
                 {
                     TaskApprovalView approved = await service.ApproveTaskAsync(
-                        taskId,
+                        new TaskId(taskId),
                         ResolveUserName(httpContext),
                         ResolvePermissions(httpContext),
                         cancellationToken);
@@ -177,7 +178,7 @@ internal static class HourApprovalsEndpoints
                 try
                 {
                     SubmitTasksResult result = await service.SubmitTasksAsync(
-                        body.TaskIds,
+                        body.TaskIds.Select(id => new TaskId(id)).ToList(),
                         ResolveUserName(httpContext),
                         ResolvePermissions(httpContext),
                         cancellationToken);
@@ -211,10 +212,16 @@ internal static class HourApprovalsEndpoints
         return featureGate.IsEnabled;
     }
 
-    private static string ResolveUserName(HttpContext httpContext) =>
-        httpContext.Request.Headers.TryGetValue("X-User-Name", out var header) && !string.IsNullOrWhiteSpace(header)
-            ? header.ToString()
-            : "anonymous";
+    private static UserName ResolveUserName(HttpContext httpContext)
+    {
+        if (httpContext.Request.Headers.TryGetValue("X-User-Name", out var header)
+            && !string.IsNullOrWhiteSpace(header))
+        {
+            return new UserName(header.ToString());
+        }
+
+        return new UserName("anonymous");
+    }
 
     private static IReadOnlyList<string> ResolvePermissions(HttpContext httpContext)
     {
@@ -248,7 +255,7 @@ internal static class HourApprovalsEndpoints
     private static object MapTask(TaskApprovalView view) => new
     {
         id = view.Task.Id.Value,
-        title = view.Task.Title,
+        title = view.Task.Title.Value,
         activityCode = view.Task.ActivityCode.Value,
         isActiveForCurrentUser = view.Task.IsActiveForCurrentUser,
         approvalState = view.State.ToString(),
@@ -259,7 +266,7 @@ internal static class HourApprovalsEndpoints
             : new
             {
                 id = view.LastApproval.Id,
-                approvedBy = view.LastApproval.ApprovedBy,
+                approvedBy = view.LastApproval.ApprovedBy.Value,
                 approvedAtUtc = view.LastApproval.ApprovedAtUtc,
                 approvedValues = MapValues(view.LastApproval.ApprovedValues),
             },
