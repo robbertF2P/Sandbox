@@ -33,24 +33,24 @@ public interface IHourApprovalsService
         ApprovalFilterStatus filter,
         CancellationToken cancellationToken);
 
-    Task<TaskApprovalView?> GetTaskAsync(Guid taskId, CancellationToken cancellationToken);
+    Task<TaskApprovalView?> GetTaskAsync(TaskId taskId, CancellationToken cancellationToken);
 
     Task<TaskApprovalView> SaveTaskAsync(
-        Guid taskId,
+        TaskId taskId,
         ApprovalValues values,
-        string actingUser,
+        UserName actingUser,
         IReadOnlyCollection<string> permissions,
         CancellationToken cancellationToken);
 
     Task<TaskApprovalView> ApproveTaskAsync(
-        Guid taskId,
-        string actingUser,
+        TaskId taskId,
+        UserName actingUser,
         IReadOnlyCollection<string> permissions,
         CancellationToken cancellationToken);
 
     Task<SubmitTasksResult> SubmitTasksAsync(
-        IReadOnlyList<Guid> taskIds,
-        string actingUser,
+        IReadOnlyList<TaskId> taskIds,
+        UserName actingUser,
         IReadOnlyCollection<string> permissions,
         CancellationToken cancellationToken);
 }

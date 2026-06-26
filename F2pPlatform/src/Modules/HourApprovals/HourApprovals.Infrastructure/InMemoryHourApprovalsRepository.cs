@@ -17,7 +17,7 @@ internal sealed class InMemoryHourApprovalsRepository : IHourApprovalsRepository
     }
 
     public Task<IReadOnlyList<ActiveTask>> ListTasksAsync(CancellationToken cancellationToken) =>
-        Task.FromResult<IReadOnlyList<ActiveTask>>(_tasks.Values.OrderBy(task => task.Title).ToList());
+        Task.FromResult<IReadOnlyList<ActiveTask>>(_tasks.Values.OrderBy(task => task.Title.Value).ToList());
 
     public Task<ActiveTask?> GetTaskAsync(TaskId taskId, CancellationToken cancellationToken) =>
         Task.FromResult(_tasks.TryGetValue(taskId, out ActiveTask? task) ? task : null);
@@ -56,21 +56,21 @@ internal sealed class InMemoryHourApprovalsRepository : IHourApprovalsRepository
     {
         var taskA = ActiveTask.Create(
             new TaskId(Guid.Parse("11111111-1111-1111-1111-111111111101")),
-            "Hull 247 — Block 204 wiring",
+            new TaskTitle("Hull 247 — Block 204 wiring"),
             new ActivityCode("ACT-204-WIR"),
             new ApprovalValues(12.5m, 35m, 48m, new DateOnly(2026, 6, 10), new DateOnly(2026, 6, 24)),
             isActiveForCurrentUser: true);
 
         var taskB = ActiveTask.Create(
             new TaskId(Guid.Parse("11111111-1111-1111-1111-111111111102")),
-            "Engine room ventilation",
+            new TaskTitle("Engine room ventilation"),
             new ActivityCode("ACT-ENG-VNT"),
             new ApprovalValues(20m, 10m, 8m, new DateOnly(2026, 6, 12), new DateOnly(2026, 7, 1)),
             isActiveForCurrentUser: false);
 
         var taskC = ActiveTask.Create(
             new TaskId(Guid.Parse("11111111-1111-1111-1111-111111111103")),
-            "Deck coating inspection",
+            new TaskTitle("Deck coating inspection"),
             new ActivityCode("ACT-DCK-COT"),
             new ApprovalValues(6m, 72m, 54m, new DateOnly(2026, 5, 28), new DateOnly(2026, 6, 18)),
             isActiveForCurrentUser: true);
@@ -81,7 +81,7 @@ internal sealed class InMemoryHourApprovalsRepository : IHourApprovalsRepository
 
         ApprovalRecord seededApproval = ApprovalRecord.Create(
             taskC.Id,
-            "supervisor.demo",
+            new UserName("supervisor.demo"),
             DateTimeOffset.UtcNow.AddDays(-1),
             taskC.CurrentValues);
 

@@ -60,11 +60,11 @@ public sealed class HourApprovalsService : IHourApprovalsService
         return views;
     }
 
-    public async Task<TaskApprovalView?> GetTaskAsync(Guid taskId, CancellationToken cancellationToken)
+    public async Task<TaskApprovalView?> GetTaskAsync(TaskId taskId, CancellationToken cancellationToken)
     {
         EnsureFeatureEnabled();
 
-        ActiveTask? task = await _repository.GetTaskAsync(ToTaskId(taskId), cancellationToken);
+        ActiveTask? task = await _repository.GetTaskAsync(taskId, cancellationToken);
         if (task is null)
         {
             return null;
@@ -74,9 +74,9 @@ public sealed class HourApprovalsService : IHourApprovalsService
     }
 
     public async Task<TaskApprovalView> SaveTaskAsync(
-        Guid taskId,
+        TaskId taskId,
         ApprovalValues values,
-        string actingUser,
+        UserName actingUser,
         IReadOnlyCollection<string> permissions,
         CancellationToken cancellationToken)
     {
@@ -88,9 +88,8 @@ public sealed class HourApprovalsService : IHourApprovalsService
                 $"User '{actingUser}' lacks permission {HourApprovalRules.ApproveHoursProgressPermission}.");
         }
 
-        TaskId typedTaskId = ToTaskId(taskId);
-        ActiveTask task = await RequireTaskAsync(typedTaskId, cancellationToken);
-        ApprovalRecord? previousApproval = await _repository.GetLatestApprovalAsync(typedTaskId, cancellationToken);
+        ActiveTask task = await RequireTaskAsync(taskId, cancellationToken);
+        ApprovalRecord? previousApproval = await _repository.GetLatestApprovalAsync(taskId, cancellationToken);
         bool wasApproved = HourApprovalRules.ResolveState(task.CurrentValues, previousApproval)
             == TaskApprovalState.Approved;
 
@@ -98,7 +97,7 @@ public sealed class HourApprovalsService : IHourApprovalsService
         await _repository.SaveTaskAsync(task, cancellationToken);
 
         ApprovalRecord record = ApprovalRecord.Create(
-            typedTaskId,
+            taskId,
             actingUser,
             DateTimeOffset.UtcNow,
             values);
@@ -114,8 +113,8 @@ public sealed class HourApprovalsService : IHourApprovalsService
     }
 
     public async Task<TaskApprovalView> ApproveTaskAsync(
-        Guid taskId,
-        string actingUser,
+        TaskId taskId,
+        UserName actingUser,
         IReadOnlyCollection<string> permissions,
         CancellationToken cancellationToken)
     {
@@ -127,11 +126,10 @@ public sealed class HourApprovalsService : IHourApprovalsService
                 $"User '{actingUser}' lacks permission {HourApprovalRules.ApproveHoursProgressPermission}.");
         }
 
-        TaskId typedTaskId = ToTaskId(taskId);
-        ActiveTask task = await RequireTaskAsync(typedTaskId, cancellationToken);
+        ActiveTask task = await RequireTaskAsync(taskId, cancellationToken);
 
         ApprovalRecord record = ApprovalRecord.Create(
-            typedTaskId,
+            taskId,
             actingUser,
             DateTimeOffset.UtcNow,
             task.CurrentValues);
@@ -141,8 +139,8 @@ public sealed class HourApprovalsService : IHourApprovalsService
     }
 
     public async Task<SubmitTasksResult> SubmitTasksAsync(
-        IReadOnlyList<Guid> taskIds,
-        string actingUser,
+        IReadOnlyList<TaskId> taskIds,
+        UserName actingUser,
         IReadOnlyCollection<string> permissions,
         CancellationToken cancellationToken)
     {
@@ -157,7 +155,7 @@ public sealed class HourApprovalsService : IHourApprovalsService
         List<TaskApprovalView> approved = [];
         List<SubmitTaskFailure> failures = [];
 
-        foreach (Guid taskId in taskIds.Distinct())
+        foreach (TaskId taskId in taskIds.Distinct())
         {
             try
             {
@@ -171,14 +169,12 @@ public sealed class HourApprovalsService : IHourApprovalsService
             }
             catch (KeyNotFoundException)
             {
-                failures.Add(new SubmitTaskFailure(ToTaskId(taskId), $"Task '{taskId}' was not found."));
+                failures.Add(new SubmitTaskFailure(taskId, $"Task '{taskId.Value}' was not found."));
             }
         }
 
         return new SubmitTasksResult(approved, failures);
     }
-
-    private static TaskId ToTaskId(Guid taskId) => new(taskId);
 
     private async Task<ActiveTask> RequireTaskAsync(TaskId taskId, CancellationToken cancellationToken)
     {

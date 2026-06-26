@@ -9,7 +9,7 @@ public sealed class ApprovalRecord : IRecordAudit
     private ApprovalRecord(
         Guid id,
         TaskId taskId,
-        string approvedBy,
+        UserName approvedBy,
         DateTimeOffset approvedAtUtc,
         ApprovalValues approvedValues)
     {
@@ -24,19 +24,19 @@ public sealed class ApprovalRecord : IRecordAudit
 
     public TaskId TaskId { get; }
 
-    public string ApprovedBy { get; }
+    public UserName ApprovedBy { get; }
 
     public DateTimeOffset ApprovedAtUtc { get; }
 
     public ApprovalValues ApprovedValues { get; }
 
-    string IRecordAudit.CreatedBy => ApprovedBy;
+    string IRecordAudit.CreatedBy => ApprovedBy.Value;
 
     DateTimeOffset IRecordAudit.CreatedAtUtc => ApprovedAtUtc;
 
     public static ApprovalRecord Create(
         TaskId taskId,
-        string approvedBy,
+        UserName approvedBy,
         DateTimeOffset approvedAtUtc,
         ApprovalValues approvedValues) =>
         new(

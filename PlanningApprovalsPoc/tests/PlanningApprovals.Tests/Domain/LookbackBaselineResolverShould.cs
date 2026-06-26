@@ -12,7 +12,7 @@ public sealed class LookbackBaselineResolverShould
     public void Resolves_checkpoint_at_or_before_one_week_cutoff()
     {
         DateTimeOffset asOf = Floor2PlanApprovalScenario.Today;
-        long assignmentId = Floor2PlanApprovalScenario.AssignmentWelding;
+        AssignmentId assignmentId = Floor2PlanApprovalScenario.AssignmentWelding;
 
         AssignmentPlanningCheckpoint tooRecent = Floor2PlanApprovalScenario.Checkpoint(
             assignmentId,

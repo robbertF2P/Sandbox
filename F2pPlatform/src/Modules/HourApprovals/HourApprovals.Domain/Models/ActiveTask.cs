@@ -7,7 +7,7 @@ public sealed class ActiveTask
 {
     private ActiveTask(
         TaskId id,
-        string title,
+        TaskTitle title,
         ActivityCode activityCode,
         ApprovalValues currentValues,
         bool isActiveForCurrentUser)
@@ -21,7 +21,7 @@ public sealed class ActiveTask
 
     public TaskId Id { get; }
 
-    public string Title { get; }
+    public TaskTitle Title { get; }
 
     public ActivityCode ActivityCode { get; }
 
@@ -31,7 +31,7 @@ public sealed class ActiveTask
 
     public static ActiveTask Create(
         TaskId id,
-        string title,
+        TaskTitle title,
         ActivityCode activityCode,
         ApprovalValues currentValues,
         bool isActiveForCurrentUser) =>

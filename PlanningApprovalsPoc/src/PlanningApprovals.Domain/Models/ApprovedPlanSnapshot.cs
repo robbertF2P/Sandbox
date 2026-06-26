@@ -9,10 +9,10 @@ public sealed class ApprovedPlanSnapshot
     }
 
     public ApprovedPlanSnapshot(
-        Guid publicId,
-        Guid decisionPublicId,
-        long assignmentId,
-        long approvedByPersonId,
+        ApprovalPublicId publicId,
+        ApprovalPublicId decisionPublicId,
+        AssignmentId assignmentId,
+        PersonId approvedByPersonId,
         DateTimeOffset approvedAt,
         ProgressRevisionRef progressRevision,
         PlanSnapshot planSnapshot)
@@ -28,13 +28,13 @@ public sealed class ApprovedPlanSnapshot
 
     public int Id { get; private set; }
 
-    public Guid PublicId { get; private init; }
+    public ApprovalPublicId PublicId { get; private init; }
 
-    public Guid DecisionPublicId { get; private init; }
+    public ApprovalPublicId DecisionPublicId { get; private init; }
 
-    public long AssignmentId { get; private init; }
+    public AssignmentId AssignmentId { get; private init; }
 
-    public long ApprovedByPersonId { get; private init; }
+    public PersonId ApprovedByPersonId { get; private init; }
 
     public DateTimeOffset ApprovedAt { get; private init; }
 
@@ -46,7 +46,7 @@ public sealed class ApprovedPlanSnapshot
         ApprovalDecision decision,
         AssignmentApprovalRequest request) =>
         new(
-            Guid.NewGuid(),
+            new ApprovalPublicId(Guid.NewGuid()),
             decision.PublicId,
             request.AssignmentId,
             decision.DecidedByPersonId,

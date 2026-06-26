@@ -7,23 +7,29 @@ namespace PlanningApprovals.Tests.Support;
 
 public static class Floor2PlanApprovalScenario
 {
-    public const long ProjectId = 4721;
-    public const long ForemanPersonId = 9001;
-    public const long AssignmentWelding = 101;
-    public const long AssignmentFitting = 102;
+    public static readonly ProjectId ProjectId = new(4721);
+    public static readonly PersonId ForemanPersonId = new(9001);
+    public static readonly AssignmentId AssignmentWelding = new(101);
+    public static readonly AssignmentId AssignmentFitting = new(102);
 
     public static readonly DateTimeOffset WeekAgo = new(2026, 6, 17, 8, 0, 0, TimeSpan.Zero);
 
     public static readonly DateTimeOffset Today = new(2026, 6, 24, 8, 0, 0, TimeSpan.Zero);
 
     public static ProgressRevisionRef Progress(
-        long assignmentId,
+        AssignmentId assignmentId,
         long revisionId,
         decimal percentComplete,
         decimal bookedHours,
         DateTimeOffset recordedAt,
-        string source = "Timesheet") =>
-        new(assignmentId, revisionId, recordedAt, percentComplete, bookedHours, source);
+        ProgressSource? source = null) =>
+        new(
+            assignmentId,
+            new ProgressRevisionId(revisionId),
+            recordedAt,
+            percentComplete,
+            bookedHours,
+            source ?? ProgressSource.Timesheet);
 
     public static PlanSnapshot Plan(
         DateOnly start,
@@ -31,15 +37,15 @@ public static class Floor2PlanApprovalScenario
         decimal hours,
         string profileFingerprint,
         string calculationRunId) =>
-        new(start, finish, hours, profileFingerprint, calculationRunId);
+        new(start, finish, hours, new ProfileFingerprint(profileFingerprint), new CalculationRunId(calculationRunId));
 
     public static AssignmentPlanningCheckpoint Checkpoint(
-        long assignmentId,
+        AssignmentId assignmentId,
         DateTimeOffset capturedAt,
         ProgressRevisionRef progress,
         PlanSnapshot plan,
         string captureSource = "nightly-capture") =>
-        AssignmentPlanningCheckpoint.Capture(assignmentId, capturedAt, progress, plan, captureSource);
+        AssignmentPlanningCheckpoint.Capture(assignmentId, capturedAt, progress, plan, new CaptureSource(captureSource));
 
     public static PlanningStateSnapshot State(
         DateTimeOffset capturedAt,
@@ -51,7 +57,7 @@ public static class Floor2PlanApprovalScenario
     /// Default ~1 week lookback: checkpoint captured 8 days before <paramref name="occurredAt"/>.
     /// </summary>
     public static IReadOnlyList<AssignmentPlanningCheckpoint> DefaultWeekAgoHistory(
-        long assignmentId,
+        AssignmentId assignmentId,
         DateTimeOffset occurredAt,
         decimal baselinePercent = 30m,
         decimal baselineHours = 90m,
@@ -71,7 +77,7 @@ public static class Floor2PlanApprovalScenario
     ];
 
     public static ApprovalSyncResult ApplyPlanningChange(
-        long assignmentId,
+        AssignmentId assignmentId,
         ProgressRevisionRef progress,
         PlanSnapshot proposedPlan,
         IReadOnlyList<AssignmentPlanningCheckpoint> checkpointHistory,
@@ -87,10 +93,10 @@ public static class Floor2PlanApprovalScenario
             openPending,
             lastApproved,
             occurredAt,
-            "planning-recalculation");
+            new ProcessName("planning-recalculation"));
 
     public static ApprovalSyncResult ApplyPlanningChange(
-        long assignmentId,
+        AssignmentId assignmentId,
         ProgressRevisionRef progress,
         PlanSnapshot proposedPlan,
         AssignmentApprovalRequest? openPending,
@@ -115,6 +121,6 @@ public static class Floor2PlanApprovalScenario
             ForemanPersonId,
             decidedAt,
             comment: null,
-            correlationId,
+            new CorrelationId(correlationId),
             batchPublicId: null);
 }

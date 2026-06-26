@@ -10,23 +10,18 @@ public sealed class ApprovalDecision
     }
 
     public ApprovalDecision(
-        Guid publicId,
-        Guid requestPublicId,
-        long assignmentId,
+        ApprovalPublicId publicId,
+        ApprovalPublicId requestPublicId,
+        AssignmentId assignmentId,
         ApprovalDecisionType decision,
-        long decidedByPersonId,
+        PersonId decidedByPersonId,
         DateTimeOffset decidedAt,
         ProgressRevisionRef progressRevisionAtDecision,
         PlanSnapshot proposedPlanAtDecision,
-        string? comment,
-        string correlationId,
-        Guid? batchPublicId)
+        DecisionComment? comment,
+        CorrelationId correlationId,
+        ApprovalPublicId? batchPublicId)
     {
-        if (string.IsNullOrWhiteSpace(correlationId))
-        {
-            throw new ArgumentException("Correlation id is required.", nameof(correlationId));
-        }
-
         PublicId = publicId;
         RequestPublicId = requestPublicId;
         AssignmentId = assignmentId;
@@ -42,15 +37,15 @@ public sealed class ApprovalDecision
 
     public int Id { get; private set; }
 
-    public Guid PublicId { get; private init; }
+    public ApprovalPublicId PublicId { get; private init; }
 
-    public Guid RequestPublicId { get; private init; }
+    public ApprovalPublicId RequestPublicId { get; private init; }
 
-    public long AssignmentId { get; private init; }
+    public AssignmentId AssignmentId { get; private init; }
 
     public ApprovalDecisionType Decision { get; private init; }
 
-    public long DecidedByPersonId { get; private init; }
+    public PersonId DecidedByPersonId { get; private init; }
 
     public DateTimeOffset DecidedAt { get; private init; }
 
@@ -58,22 +53,22 @@ public sealed class ApprovalDecision
 
     public PlanSnapshot ProposedPlanAtDecision { get; private init; } = null!;
 
-    public string? Comment { get; private init; }
+    public DecisionComment? Comment { get; private init; }
 
-    public string CorrelationId { get; private init; } = string.Empty;
+    public CorrelationId CorrelationId { get; private init; }
 
-    public Guid? BatchPublicId { get; private init; }
+    public ApprovalPublicId? BatchPublicId { get; private init; }
 
     public static ApprovalDecision Record(
         AssignmentApprovalRequest request,
         ApprovalDecisionType decision,
-        long decidedByPersonId,
+        PersonId decidedByPersonId,
         DateTimeOffset decidedAt,
-        string? comment,
-        string correlationId,
-        Guid? batchPublicId) =>
+        DecisionComment? comment,
+        CorrelationId correlationId,
+        ApprovalPublicId? batchPublicId) =>
         new(
-            Guid.NewGuid(),
+            new ApprovalPublicId(Guid.NewGuid()),
             request.PublicId,
             request.AssignmentId,
             decision,
