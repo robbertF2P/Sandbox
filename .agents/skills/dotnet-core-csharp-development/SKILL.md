@@ -36,7 +36,7 @@ Apply this skill for C# and ASP.NET Core work in this repository. Prefer existin
 
 - Use SDK-style projects (`<Project Sdk="Microsoft.NET.Sdk">` or Web SDK).
 - Shared MSBuild settings belong in `Directory.Build.props` at the solution root.
-- One public type per file; file name matches the type name.
+- One type per file; file name matches the type name. No barrel files (`Identifiers.cs`, `Types.cs`, etc.).
 - Use file-scoped namespaces.
 - Prefer `sealed` on classes not designed for inheritance.
 

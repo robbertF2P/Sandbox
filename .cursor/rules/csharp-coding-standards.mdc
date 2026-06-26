@@ -10,7 +10,8 @@ Follow `docs/coding-standards/csharp-coding-standards.md` and root `.editorconfi
 
 ## Quick rules
 
-- File-scoped namespaces; one public type per file
+- File-scoped namespaces; **one type per file** (no `Identifiers.cs` / barrel files)
+- File name must match the sole public type in the file
 - `_camelCase` private fields; `PascalCase` types; `Async` suffix on async methods
 - Always braces; `var` when type is apparent
 - Sort usings: System* first; remove unused

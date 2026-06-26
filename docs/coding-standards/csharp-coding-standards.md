@@ -56,12 +56,24 @@ Start with `suggestion`/`warning` severities in `.editorconfig`; tighten to `err
 
 | Rule | Detail |
 |------|--------|
-| One public type per file | File name matches type name (`OrderService.cs` → `OrderService`) |
+| **One type per file** | Every `class`, `record`, `struct`, `enum`, and `interface` gets its own file. File name **must** match the type name (`OrderService.cs` → `OrderService`). |
+| No type barrels | Do **not** group related types in `Identifiers.cs`, `Types.cs`, `Models.cs`, or similar catch-all files — even for small value objects or enums. |
+| Exceptions (rare) | Nested private types used only by the parent type; generated code. Never stack multiple public types in one file. |
 | File-scoped namespaces | `namespace Floorganise.Planning.Application;` |
 | Member order | Constants → fields → constructors → public → protected → private |
 | `sealed` by default | Unless the type is designed for inheritance |
 | `readonly` fields | When assigned only in declaration or constructor |
 | Primary constructors | Use when they simplify records/DTOs; avoid hiding validation logic |
+
+### Anti-patterns
+
+```csharp
+// ❌ Bad — multiple public types in Identifiers.cs
+public readonly record struct TaskId(Guid Value) { }
+public readonly record struct AssignmentId(Guid Value) { }
+
+// ✅ Good — TaskId.cs and AssignmentId.cs
+```
 
 ## Naming (ReSharper-aligned)
 
