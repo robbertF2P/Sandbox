@@ -13,24 +13,34 @@ public sealed class HourApprovalsCustomizationPackShould
     {
         var pack = new DefaultHourApprovalsPack();
         ViewDefinition view = pack.GetView(HourApprovalsScreens.Queue);
+        var taskId = Guid.NewGuid();
 
         Assert.False(view.IsVisible("plannedStart"));
         Assert.False(view.IsVisible("plannedFinish"));
-        Assert.Empty(pack.GetRowExtensions(Guid.NewGuid()));
+        Assert.Empty(pack.GetRowExtensions([taskId]));
     }
 
     [Fact]
-    public void AcmePack_ShowsPlannedDates_AndSapExtensionColumn()
+    public void AcmePack_UsesLabelKeys_AndBatchExtensions()
     {
         var pack = new AcmeHourApprovalsPack();
         ViewDefinition view = pack.GetView(HourApprovalsScreens.Queue);
         var taskId = Guid.Parse("11111111-1111-1111-1111-111111111101");
 
-        Assert.True(view.IsVisible("plannedStart"));
-        Assert.True(view.IsVisible("plannedFinish"));
-        Assert.True(view.IsVisible("sapCostElement"));
+        ColumnDef? plannedStart = view.FindColumn("plannedStart");
+        Assert.NotNull(plannedStart);
+        Assert.Equal("hourApprovals.columns.plannedStart", plannedStart.LabelKey);
 
-        IReadOnlyDictionary<string, object?> extensions = pack.GetRowExtensions(taskId);
-        Assert.Equal("CE-1111", extensions["sapCostElement"]);
+        ColumnDef? sapColumn = view.FindColumn("sapCostElement");
+        Assert.NotNull(sapColumn);
+        Assert.Equal("packs.acme-hour-approvals-v1.columns.sapCostElement", sapColumn.LabelKey);
+
+        Assert.True(view.IsVisible("daysSinceLastSubmission"));
+
+        IReadOnlyDictionary<Guid, IReadOnlyDictionary<string, object?>> extensions =
+            pack.GetRowExtensions([taskId, Guid.NewGuid()]);
+
+        Assert.Equal("CE-1111", extensions[taskId]["sapCostElement"]);
+        Assert.Equal(2, extensions.Count);
     }
 }

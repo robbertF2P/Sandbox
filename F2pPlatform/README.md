@@ -105,7 +105,7 @@ End-to-end reference for **schema-driven UI customization**:
 
 - `HourApprovals` module — approval records (`IRecordAudit`), permissions, in-memory tasks
 - **Feature flag** — `Tenant:FeatureFlags:hours-progress-approval` (route/API hidden when off)
-- **Acme customization pack** — `ViewDefinition` columns + `extensions.sapCostElement` via `HourApprovals.Packs.Acme`
+- **Acme customization pack** — `labelKey` view schema, batch `extensions`, `computed` columns via `HourApprovals.Packs.Acme`
 - Angular route — `/hour-approvals` (login as `supervisor.demo` or `foreman.demo`)
 
 ```bash

@@ -2,7 +2,7 @@ namespace Platform.Shared.View;
 
 public sealed record ColumnDef(
     string Id,
-    string Label,
+    string LabelKey,
     ColumnSource Source,
     bool Visible,
     int Order,

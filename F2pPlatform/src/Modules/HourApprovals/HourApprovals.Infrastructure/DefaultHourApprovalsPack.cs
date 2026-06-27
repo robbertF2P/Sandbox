@@ -13,14 +13,16 @@ public sealed class DefaultHourApprovalsPack : IHourApprovalsCustomizationPack
             HourApprovalsScreens.Queue => new ViewDefinition(
                 HourApprovalsScreens.Queue,
                 [
-                    new ColumnDef("hoursToGo", "Hours to go", ColumnSource.Core, Visible: true, Order: 10),
-                    new ColumnDef("progress", "Progress", ColumnSource.Core, Visible: true, Order: 20, Format: "percent"),
-                    new ColumnDef("plannedStart", "Planned start", ColumnSource.Core, Visible: false, Order: 30, Format: "date"),
-                    new ColumnDef("plannedFinish", "Planned finish", ColumnSource.Core, Visible: false, Order: 40, Format: "date"),
+                    new ColumnDef("hoursToGo", "hourApprovals.columns.hoursToGo", ColumnSource.Core, Visible: true, Order: 10, Format: "decimal"),
+                    new ColumnDef("progress", "hourApprovals.columns.progress", ColumnSource.Core, Visible: true, Order: 20, Format: "percent"),
+                    new ColumnDef("plannedStart", "hourApprovals.columns.plannedStart", ColumnSource.Core, Visible: false, Order: 30, Format: "date"),
+                    new ColumnDef("plannedFinish", "hourApprovals.columns.plannedFinish", ColumnSource.Core, Visible: false, Order: 40, Format: "date"),
+                    new ColumnDef("daysSinceLastSubmission", "hourApprovals.columns.daysSinceLastSubmission", ColumnSource.Computed, Visible: false, Order: 60, Format: "integer"),
                 ]),
             _ => ViewDefinition.Empty(screenId),
         };
 
-    public IReadOnlyDictionary<string, object?> GetRowExtensions(Guid taskId) =>
-        new Dictionary<string, object?>();
+    public IReadOnlyDictionary<Guid, IReadOnlyDictionary<string, object?>> GetRowExtensions(
+        IReadOnlyList<Guid> taskIds) =>
+        new Dictionary<Guid, IReadOnlyDictionary<string, object?>>();
 }

@@ -52,6 +52,9 @@ public sealed class HourApprovalsEndpointTests : IClassFixture<HourApprovalsWebA
         Assert.True(payload.QueueView.Columns.First(column => column.Id == "plannedStart").Visible);
         Assert.True(payload.QueueView.Columns.First(column => column.Id == "plannedFinish").Visible);
         Assert.True(payload.QueueView.Columns.First(column => column.Id == "sapCostElement").Visible);
+        Assert.Equal(
+            "packs.acme-hour-approvals-v1.columns.sapCostElement",
+            payload.QueueView.Columns.First(column => column.Id == "sapCostElement").LabelKey);
         Assert.True(payload.CanApprove);
     }
 
@@ -228,7 +231,7 @@ public sealed class HourApprovalsEndpointTests : IClassFixture<HourApprovalsWebA
 
     private sealed record ColumnDefResponse(
         string Id,
-        string Label,
+        string LabelKey,
         string Source,
         bool Visible,
         int Order,

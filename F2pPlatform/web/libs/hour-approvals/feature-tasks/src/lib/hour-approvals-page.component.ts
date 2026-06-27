@@ -10,13 +10,17 @@ import {
   ApprovalQueueRowDto,
   ApprovalValuesDto,
   ColumnDefDto,
+  formatHourApprovalsValue,
   HOUR_APPROVALS_EDITABLE_FIELDS,
   HourApprovalsApi,
   HourApprovalsCapabilitiesDto,
+  HourApprovalsLocale,
   OrganisationId,
+  resolveHourApprovalsLocale,
   SubmissionCategory,
   TaskId,
   TimeWindow,
+  translateHourApprovalsLabel,
   visibleColumns,
 } from '@f2p/hour-approvals/data-access';
 
@@ -87,6 +91,7 @@ export class HourApprovalsPageComponent implements OnInit {
   readonly at100Percent = signal<Partial<Record<TaskId, boolean>>>({});
 
   readonly displayName = this.auth.getDisplayName();
+  readonly locale = signal<HourApprovalsLocale>(resolveHourApprovalsLocale());
   readonly categoryOptions = SUBMISSION_CATEGORY_OPTIONS;
   readonly timeWindowOptions = TIME_WINDOW_OPTIONS;
   readonly canApprove = computed(() => this.capabilities()?.canApprove ?? false);
@@ -96,6 +101,7 @@ export class HourApprovalsPageComponent implements OnInit {
       .filter(column => HOUR_APPROVALS_EDITABLE_FIELDS.has(column.id as keyof ApprovalValuesDto)),
   );
   readonly extensionColumns = computed(() => visibleColumns(this.queueView(), 'Extension'));
+  readonly computedColumns = computed(() => visibleColumns(this.queueView(), 'Computed'));
 
   readonly primaryOrganisation = computed(() => {
     const options = this.organisationOptions();
@@ -321,7 +327,16 @@ export class HourApprovalsPageComponent implements OnInit {
 
   extensionValue(row: ApprovalQueueRowDto, column: ColumnDefDto): string {
     const value = row.extensions[column.id];
-    return value === null || value === undefined || value === '' ? '—' : String(value);
+    return formatHourApprovalsValue(value, column.format, this.locale());
+  }
+
+  computedValue(row: ApprovalQueueRowDto, column: ColumnDefDto): string {
+    const value = row.computed[column.id as keyof ApprovalQueueRowDto['computed']];
+    return formatHourApprovalsValue(value, column.format, this.locale());
+  }
+
+  columnLabel(column: ColumnDefDto): string {
+    return translateHourApprovalsLabel(column.labelKey, this.locale());
   }
 
   isEditableField(columnId: string): columnId is keyof ApprovalValuesDto {

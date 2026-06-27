@@ -27,7 +27,13 @@ internal static class ApprovalQueueEndpoints
                 ApprovalQueueFilter filter = ParseFilter(organisationIds, submissionCategories, search);
                 GetApprovalQueueReply reply = await facade.QueryAsync(new GetApprovalQueue(filter), cancellationToken);
 
-                return Results.Ok(reply.Rows.Select(row => MapRow(row, customizationPack)));
+                IReadOnlyList<Guid> taskIds = reply.Rows.Select(row => row.TaskId.Value).ToList();
+                IReadOnlyDictionary<Guid, IReadOnlyDictionary<string, object?>> extensionsByTaskId =
+                    customizationPack.GetRowExtensions(taskIds);
+
+                return Results.Ok(reply.Rows.Select(row => MapRow(
+                    row,
+                    extensionsByTaskId.GetValueOrDefault(row.TaskId.Value) ?? new Dictionary<string, object?>())));
             })
             .WithName("GetHourApprovalsQueue")
             .WithTags("HourApprovals")
@@ -89,7 +95,9 @@ internal static class ApprovalQueueEndpoints
         return categories;
     }
 
-    private static object MapRow(ApprovalQueueRow row, IHourApprovalsCustomizationPack customizationPack) => new
+    private static object MapRow(
+        ApprovalQueueRow row,
+        IReadOnlyDictionary<string, object?> extensions) => new
     {
         taskId = row.TaskId.Value,
         assignmentId = row.AssignmentId.Value,
@@ -109,7 +117,8 @@ internal static class ApprovalQueueEndpoints
         isApproved = row.ApprovalState == ApprovalState.Approved,
         currentValues = MapValues(row.CurrentValues),
         lookbackValues = MapValues(row.LookbackBaseline),
-        extensions = customizationPack.GetRowExtensions(row.TaskId.Value),
+        extensions,
+        computed = MapComputed(row),
         lastApproval = row.LastSubmission is null
             ? null
             : new
@@ -121,6 +130,21 @@ internal static class ApprovalQueueEndpoints
                     : MapValues(row.LastSubmission.ApprovedValues),
             },
     };
+
+    private static object MapComputed(ApprovalQueueRow row) => new
+    {
+        daysSinceLastSubmission = ComputeDaysSinceLastSubmission(row.LastSubmission?.SubmittedAtUtc),
+    };
+
+    private static int? ComputeDaysSinceLastSubmission(DateTimeOffset? submittedAtUtc)
+    {
+        if (submittedAtUtc is null)
+        {
+            return null;
+        }
+
+        return Math.Max(0, (int)(DateTimeOffset.UtcNow - submittedAtUtc.Value).TotalDays);
+    }
 
     private static object MapValues(ApprovalProgressValues values) => new
     {

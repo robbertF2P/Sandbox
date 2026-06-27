@@ -9,7 +9,7 @@ export type ColumnSourceDto = 'Core' | 'Extension' | 'Computed';
 
 export interface ColumnDefDto {
   id: string;
-  label: string;
+  labelKey: string;
   source: ColumnSourceDto;
   visible: boolean;
   order: number;
@@ -67,6 +67,10 @@ export interface ApprovalQueueFilter {
   search: string;
 }
 
+export interface ApprovalQueueComputedDto {
+  daysSinceLastSubmission: number | null;
+}
+
 export interface ApprovalQueueRowDto {
   taskId: TaskId;
   assignmentId: AssignmentId;
@@ -87,6 +91,7 @@ export interface ApprovalQueueRowDto {
   currentValues: ApprovalValuesDto;
   lookbackValues: ApprovalValuesDto;
   extensions: Record<string, string | number | boolean | null>;
+  computed: ApprovalQueueComputedDto;
   lastApproval: LastApprovalDto | null;
 }
 

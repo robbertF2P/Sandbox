@@ -104,6 +104,7 @@ export class HourApprovalsApi {
       totalHoursBooked: row.totalHoursBooked ?? 0,
       lookbackValues: row.lookbackValues ?? row.currentValues,
       extensions: row.extensions ?? {},
+      computed: row.computed ?? { daysSinceLastSubmission: null },
     };
   }
 }
