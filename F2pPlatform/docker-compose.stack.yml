@@ -32,6 +32,7 @@ services:
       Tenant__FeatureFlags__hours-progress-approval: "true"
       Tenant__PackEntitlements__customizationPacks__0: acme-hour-approvals-v1
       HourApprovals__CustomizationPack: acme-hour-approvals-v1
+      HourApprovals__UseSqlite: "true"
     depends_on:
       seq:
         condition: service_started

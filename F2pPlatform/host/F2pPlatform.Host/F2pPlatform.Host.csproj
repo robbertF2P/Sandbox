@@ -19,6 +19,7 @@
     <ProjectReference Include="..\..\src\Modules\Reference\Reference.Api\Reference.Api.csproj" />
     <ProjectReference Include="..\..\src\Modules\ControlPlane\ControlPlane.Api\ControlPlane.Api.csproj" />
     <ProjectReference Include="..\..\src\Modules\HourApprovals\HourApprovals.Api\HourApprovals.Api.csproj" />
+    <ProjectReference Include="..\..\src\Modules\HourApprovals\HourApprovals.Data.Migrations\HourApprovals.Data.Migrations.csproj" />
     <ProjectReference Include="..\..\src\Packs\HourApprovals.Packs.Acme\HourApprovals.Packs.Acme.csproj" />
   </ItemGroup>
 

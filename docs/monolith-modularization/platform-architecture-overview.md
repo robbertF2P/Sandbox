@@ -107,6 +107,32 @@ Host  ──registers both──►  AddHourApprovalsModule() + AddAcmeHourAppro
 
 **Rule:** Compile-time arrows point **from pack to module abstractions**, never into module Domain.
 
+### Module application boundaries (Ports vs Persistence)
+
+Not every interface in Application is a **pack** port. Split abstractions by role:
+
+```text
+<Context>.Application/
+  Ports/                    ← inbound API + tenant extension points
+  Persistence/              ← outbound storage (Infrastructure implements)
+```
+
+| Interface | Folder | Implemented by | Per-tenant? |
+|-----------|--------|----------------|-------------|
+| `IHourApprovalsService` | `Ports/` | Application | No |
+| `IHourApprovalsCustomizationPack` | `Ports/` | Pack or default | Yes |
+| `IHourApprovalsRepository` | `Persistence/` | `EfHourApprovalsRepository` | No |
+
+**Who calls the repository?** Only `HourApprovalsService` — not HTTP endpoints or packs.
+
+```text
+HTTP  →  IHourApprovalsService  →  IHourApprovalsRepository  →  EF
+              ↑
+              └── IHourApprovalsCustomizationPack (view schema only)
+```
+
+Reference: `F2pPlatform/src/Modules/HourApprovals/`.
+
 ### Cardinality
 
 ```text
@@ -281,6 +307,7 @@ Scaffold:
 | **Default pack** | Baseline implementation inside module Infrastructure |
 | **Entitlement** | Control-plane list of enabled pack ids for a tenant |
 | **Composition root** | Host `Program.cs` — only place that wires modules + packs |
+| **Persistence port** | `I<Context>Repository` in `Application/Persistence/` — EF adapter in Infrastructure |
 | **Promotion** | Move field from pack `extensions` into module when universal |
 | **Strangler** | Adapter that delegates to legacy until native parity |
 

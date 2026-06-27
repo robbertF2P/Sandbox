@@ -45,4 +45,12 @@ public sealed class ApprovalRecord : IRecordAudit
             approvedBy,
             approvedAtUtc,
             approvedValues);
+
+    public static ApprovalRecord Rehydrate(
+        Guid id,
+        TaskId taskId,
+        UserName approvedBy,
+        DateTimeOffset approvedAtUtc,
+        ApprovalValues approvedValues) =>
+        new(id, taskId, approvedBy, approvedAtUtc, approvedValues);
 }

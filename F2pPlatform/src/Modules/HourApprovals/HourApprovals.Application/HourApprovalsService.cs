@@ -1,3 +1,4 @@
+using HourApprovals.Application.Persistence;
 using HourApprovals.Application.Ports;
 using HourApprovals.Domain.Enums;
 using HourApprovals.Domain.Models;

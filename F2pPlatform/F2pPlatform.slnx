@@ -34,6 +34,7 @@
     <Project Path="src/Modules/HourApprovals/HourApprovals.Domain/HourApprovals.Domain.csproj" />
     <Project Path="src/Modules/HourApprovals/HourApprovals.Application/HourApprovals.Application.csproj" />
     <Project Path="src/Modules/HourApprovals/HourApprovals.Infrastructure/HourApprovals.Infrastructure.csproj" />
+    <Project Path="src/Modules/HourApprovals/HourApprovals.Data.Migrations/HourApprovals.Data.Migrations.csproj" />
     <Project Path="src/Modules/HourApprovals/HourApprovals.Api/HourApprovals.Api.csproj" />
   </Folder>
   <Folder Name="/src/Packs/">

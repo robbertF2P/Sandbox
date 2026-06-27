@@ -9,6 +9,7 @@ Supervisor/foreman hour approval workflow (V2 slice).
 | Domain | `HourApprovals.Domain/` |
 | Application | `HourApprovals.Application/` |
 | Infrastructure | `HourApprovals.Infrastructure/` |
+| Migrations | `HourApprovals.Data.Migrations/` |
 | API | `HourApprovals.Api/` |
 | Tests | `tests/Modules/HourApprovals/` |
 
@@ -22,6 +23,17 @@ Supervisor/foreman hour approval workflow (V2 slice).
 | Route | `/hour-approvals` |
 | API prefix | `/api/hour-approvals` |
 | Feature flag | `Tenant:FeatureFlags:hours-progress-approval` |
+
+## Application boundaries
+
+| Folder | Port | Implemented by |
+|--------|------|----------------|
+| `Application/Ports/` | `IHourApprovalsService`, `IHourApprovalsCustomizationPack`, `IHourApprovalsFeatureGate` | Application / pack / Infrastructure |
+| `Application/Persistence/` | `IHourApprovalsRepository` | `EfHourApprovalsRepository` (Infrastructure) |
+
+**Persistence:** SQL Server + `HourApprovals.Data.Migrations` for dev; SQLite when `HourApprovals:UseSqlite` is true (docker stack, tests).
+
+Connection string: `ConnectionStrings:HourApprovals`. Host runs migrate/seed on startup.
 
 ## Customization
 
