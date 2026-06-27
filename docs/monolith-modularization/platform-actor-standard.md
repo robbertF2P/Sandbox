@@ -106,7 +106,7 @@ Integration and customization variance **never** branches in core code.
 | Pack | Responsibility | References |
 |------|----------------|------------|
 | **Integration pack** | Vendor fetch, file read, map to canonical DTO/JSON | `F2P.Integration.Abstractions` + vendor SDKs only |
-| **Customization pack** | Tenant-specific validation, mapping tweaks, extra pipeline stages | Abstractions + own rules; no core Domain |
+| **Customization pack** | Tenant-specific validation, mapping tweaks, extra pipeline stages, **view schemas** | Abstractions + own rules; no core Domain |
 | **Strangler adapter** | Delegate to legacy service/API/DB when native path not ready | Infrastructure; `[StranglerAdapter]` + removal ticket |
 
 ### Host registration (composition root only)

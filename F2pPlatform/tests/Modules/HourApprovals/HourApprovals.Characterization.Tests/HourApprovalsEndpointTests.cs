@@ -47,8 +47,14 @@ public sealed class HourApprovalsEndpointTests : IClassFixture<HourApprovalsWebA
         Assert.NotNull(payload);
         Assert.True(payload.FeatureEnabled);
         Assert.Equal("acme-hour-approvals-v1", payload.CustomizationPackId);
-        Assert.True(payload.DisplaySettings.ShowPlannedStart);
-        Assert.True(payload.DisplaySettings.ShowPlannedFinish);
+        Assert.NotNull(payload.QueueView);
+        Assert.Equal("hour-approvals-queue", payload.QueueView.ScreenId);
+        Assert.True(payload.QueueView.Columns.First(column => column.Id == "plannedStart").Visible);
+        Assert.True(payload.QueueView.Columns.First(column => column.Id == "plannedFinish").Visible);
+        Assert.True(payload.QueueView.Columns.First(column => column.Id == "sapCostElement").Visible);
+        Assert.Equal(
+            "packs.acme-hour-approvals-v1.columns.sapCostElement",
+            payload.QueueView.Columns.First(column => column.Id == "sapCostElement").LabelKey);
         Assert.True(payload.CanApprove);
     }
 
@@ -215,11 +221,21 @@ public sealed class HourApprovalsEndpointTests : IClassFixture<HourApprovalsWebA
     private sealed record CapabilitiesResponse(
         bool FeatureEnabled,
         string CustomizationPackId,
-        DisplaySettingsResponse DisplaySettings,
+        QueueViewResponse QueueView,
         bool CanApprove,
         List<string> Permissions);
 
-    private sealed record DisplaySettingsResponse(bool ShowPlannedStart, bool ShowPlannedFinish);
+    private sealed record QueueViewResponse(
+        string ScreenId,
+        List<ColumnDefResponse> Columns);
+
+    private sealed record ColumnDefResponse(
+        string Id,
+        string LabelKey,
+        string Source,
+        bool Visible,
+        int Order,
+        string? Format);
 
     private sealed record TaskResponse(
         Guid Id,

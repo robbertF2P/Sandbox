@@ -18,6 +18,8 @@ libs/platform-events/feature-live/  SignalR hub live feed page
 
 Matches `docs/monolith-modularization/platform-frontend-standard.md`: `@floorganise/css`, semantic `f2ps-*` classes, context `data-access` + `feature-*` split.
 
+**Module index:** `../README.md` — backend ↔ frontend pairing. **UI customization:** `docs/monolith-modularization/platform-ui-customization-standard.md`.
+
 ## Run (two terminals)
 
 ```bash

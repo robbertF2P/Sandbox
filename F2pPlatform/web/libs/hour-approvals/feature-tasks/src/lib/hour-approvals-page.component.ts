@@ -9,12 +9,19 @@ import {
   ApprovalQueueFilter,
   ApprovalQueueRowDto,
   ApprovalValuesDto,
+  ColumnDefDto,
+  formatHourApprovalsValue,
+  HOUR_APPROVALS_EDITABLE_FIELDS,
   HourApprovalsApi,
   HourApprovalsCapabilitiesDto,
+  HourApprovalsLocale,
   OrganisationId,
+  resolveHourApprovalsLocale,
   SubmissionCategory,
   TaskId,
   TimeWindow,
+  translateHourApprovalsLabel,
+  visibleColumns,
 } from '@f2p/hour-approvals/data-access';
 
 interface FilterOption<T> {
@@ -84,11 +91,17 @@ export class HourApprovalsPageComponent implements OnInit {
   readonly at100Percent = signal<Partial<Record<TaskId, boolean>>>({});
 
   readonly displayName = this.auth.getDisplayName();
+  readonly locale = signal<HourApprovalsLocale>(resolveHourApprovalsLocale());
   readonly categoryOptions = SUBMISSION_CATEGORY_OPTIONS;
   readonly timeWindowOptions = TIME_WINDOW_OPTIONS;
   readonly canApprove = computed(() => this.capabilities()?.canApprove ?? false);
-  readonly showPlannedStart = computed(() => this.capabilities()?.displaySettings.showPlannedStart ?? false);
-  readonly showPlannedFinish = computed(() => this.capabilities()?.displaySettings.showPlannedFinish ?? false);
+  readonly queueView = computed(() => this.capabilities()?.queueView);
+  readonly editableColumns = computed(() =>
+    visibleColumns(this.queueView(), 'Core')
+      .filter(column => HOUR_APPROVALS_EDITABLE_FIELDS.has(column.id as keyof ApprovalValuesDto)),
+  );
+  readonly extensionColumns = computed(() => visibleColumns(this.queueView(), 'Extension'));
+  readonly computedColumns = computed(() => visibleColumns(this.queueView(), 'Computed'));
 
   readonly primaryOrganisation = computed(() => {
     const options = this.organisationOptions();
@@ -310,6 +323,24 @@ export class HourApprovalsPageComponent implements OnInit {
 
   fieldClass(row: ApprovalQueueRowDto, field: keyof ApprovalValuesDto): string {
     return this.isFieldApproved(row, field) ? 'floorboard-field--approved' : 'floorboard-field--pending';
+  }
+
+  extensionValue(row: ApprovalQueueRowDto, column: ColumnDefDto): string {
+    const value = row.extensions[column.id];
+    return formatHourApprovalsValue(value, column.format, this.locale());
+  }
+
+  computedValue(row: ApprovalQueueRowDto, column: ColumnDefDto): string {
+    const value = row.computed[column.id as keyof ApprovalQueueRowDto['computed']];
+    return formatHourApprovalsValue(value, column.format, this.locale());
+  }
+
+  columnLabel(column: ColumnDefDto): string {
+    return translateHourApprovalsLabel(column.labelKey, this.locale());
+  }
+
+  isEditableField(columnId: string): columnId is keyof ApprovalValuesDto {
+    return HOUR_APPROVALS_EDITABLE_FIELDS.has(columnId as keyof ApprovalValuesDto);
   }
 
   isFieldApproved(row: ApprovalQueueRowDto, field: keyof ApprovalValuesDto): boolean {

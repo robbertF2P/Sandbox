@@ -32,7 +32,7 @@ public sealed class HourApprovalsService : IHourApprovalsService
         var capabilities = new HourApprovalsCapabilities(
             _featureGate.IsEnabled,
             _customizationPack.PackId,
-            _customizationPack.DisplaySettings,
+            _customizationPack.GetView(HourApprovalsScreens.Queue),
             HourApprovalRules.CanApprove(permissions),
             permissions.ToList());
 

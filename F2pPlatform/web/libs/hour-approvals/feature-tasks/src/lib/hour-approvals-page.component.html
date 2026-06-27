@@ -219,16 +219,34 @@
                       </div>
 
                       <div class="floorboard-approval-fields">
-                        <label class="floorboard-field" [ngClass]="fieldClass(row, 'hoursToGo')">
-                          <span>Hours to go</span>
-                          <input
-                            type="number"
-                            step="0.1"
-                            [ngModel]="draft.hoursToGo"
-                            (ngModelChange)="onDraftChange(row.taskId, 'hoursToGo', $event)"
-                            [disabled]="!canApprove()"
-                          />
-                        </label>
+                        @for (column of editableColumns(); track column.id) {
+                          @if (isEditableField(column.id)) {
+                            <label class="floorboard-field" [ngClass]="fieldClass(row, column.id)">
+                              <span>{{ columnLabel(column) }}</span>
+                              <input
+                                [type]="column.format === 'date' ? 'date' : 'number'"
+                                [step]="column.format === 'date' ? undefined : '0.1'"
+                                [ngModel]="draft[column.id]"
+                                (ngModelChange)="onDraftChange(row.taskId, column.id, $event)"
+                                [disabled]="!canApprove()"
+                              />
+                            </label>
+                          }
+                        }
+
+                        @for (column of extensionColumns(); track column.id) {
+                          <div class="floorboard-field floorboard-field--readonly">
+                            <span>{{ columnLabel(column) }}</span>
+                            <span class="text-sm text-f2p-ink">{{ extensionValue(row, column) }}</span>
+                          </div>
+                        }
+
+                        @for (column of computedColumns(); track column.id) {
+                          <div class="floorboard-field floorboard-field--readonly">
+                            <span>{{ columnLabel(column) }}</span>
+                            <span class="text-sm text-f2p-ink">{{ computedValue(row, column) }}</span>
+                          </div>
+                        }
 
                         <label class="floorboard-field floorboard-100">
                           <span>100%</span>
@@ -239,30 +257,6 @@
                             (change)="onAt100Toggle(row.taskId, $any($event.target).checked)"
                           />
                         </label>
-
-                        @if (showPlannedStart()) {
-                          <label class="floorboard-field" [ngClass]="fieldClass(row, 'plannedStart')">
-                            <span>Planned start</span>
-                            <input
-                              type="date"
-                              [ngModel]="draft.plannedStart"
-                              (ngModelChange)="onDraftChange(row.taskId, 'plannedStart', $event)"
-                              [disabled]="!canApprove()"
-                            />
-                          </label>
-                        }
-
-                        @if (showPlannedFinish()) {
-                          <label class="floorboard-field" [ngClass]="fieldClass(row, 'plannedFinish')">
-                            <span>Planned finish</span>
-                            <input
-                              type="date"
-                              [ngModel]="draft.plannedFinish"
-                              (ngModelChange)="onDraftChange(row.taskId, 'plannedFinish', $event)"
-                              [disabled]="!canApprove()"
-                            />
-                          </label>
-                        }
 
                         <label class="floorboard-field floorboard-field--select">
                           <span>Select</span>

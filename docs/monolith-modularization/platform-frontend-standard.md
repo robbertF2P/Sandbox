@@ -9,7 +9,7 @@ Design system and shared UI requirements for **all V2 frontend modules** in the 
 | `@floorganise/css` | Tailwind v4 theme tokens + semantic component aliases (`f2ps-*`, shell, panels) |
 | `@floorganise/ui` | Reusable Angular presentational components built on `@floorganise/css` |
 
-**Related:** `FloorganiseCss/README.md`, `docs/floor2plan-v2-read-model-playbook.md`, `foundation-and-pilot-plan.md` (Phase A8).
+**Related:** `FloorganiseCss/README.md`, `docs/floor2plan-v2-read-model-playbook.md`, `platform-ui-customization-standard.md`, `foundation-and-pilot-plan.md` (Phase A8).
 
 ---
 
