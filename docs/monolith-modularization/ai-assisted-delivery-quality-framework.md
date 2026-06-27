@@ -286,6 +286,7 @@ AI has **no** approval role.
 |----------|------|
 | `analysis-instructions.md` | Phased analysis; characterization-first |
 | `external-integrations-deepdive-instructions.md` | Integration story maps; Phase C expert validation |
+| `tenant-workflow-fields-deepdive-instructions.md` | Legacy Text*/Bool* tenant fields; filter/UI/workflow trace; V2 pack judgment |
 | `agent-instructions-snippet.md` | Short rules for AI agents in monolith repo |
 | `03-modularization-roadmap.md` | SandBox POC cross-cutting standards (Serilog, NuGet import package, extraction order) |
 | `azure-devops-module-test-dashboards.md` | Per-module test dashboards in Azure DevOps |

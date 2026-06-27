@@ -30,6 +30,8 @@ Follow phased analysis in `docs/modularization/analysis-instructions.md`.
 
 For **third-party integrations** (SAP, Kronos, PLM, lead vs follow, integration packs), use `docs/modularization/external-integrations-deepdive-instructions.md` after Phase 0. Run against the **external F2P monolith repo**, not SandBox.
 
+For **tenant workflow extension fields** (`Text1`, `Text2`, …, `Bool1`, `Bool2`, … — per-tenant labels, filters, screens, workflow rules), use `docs/modularization/tenant-workflow-fields-deepdive-instructions.md` after Phase 0. Run against the **external F2P monolith repo**, not SandBox. Target V2: `platform-ui-customization-standard.md` + `docs/floor2plan-v2-read-model-playbook.md`.
+
 For **team education** on legacy connector submodules vs integration packs: `docs/floor2plan-legacy-connector-submodule-antipattern.md`.
 
 For a **concrete legacy → V2 pack proposal** on one connector:

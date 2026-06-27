@@ -413,6 +413,8 @@ Each slice delivers **both** API specs and matching Nx feature lib — avoid “
 | `domain-driven-design` skill | Naming, bounded contexts |
 | `dotnet-ef-core` skill | DbContext per context, lifetimes |
 | `docs/monolith-modularization/agent-instructions-snippet.md` | Target topology summary |
+| `docs/monolith-modularization/tenant-workflow-fields-deepdive-instructions.md` | Legacy Text*/Bool* → V2 customization pack analysis |
+| `docs/monolith-modularization/platform-ui-customization-standard.md` | V2 view schema + extensions target |
 | `ApiImportActorPoc/docs/platform-rebuild-proposal-summary.md` | SPA strangler, performance SLOs |
 | `FloorganiseCss/showcase-angular/` | Shell/tile DOM contract for smoke tests |
 | `Floor2PlanSmokeTests/` | Cypress smoke harness |
