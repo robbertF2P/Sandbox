@@ -6,19 +6,6 @@ using Platform.Shared.View;
 
 namespace HourApprovals.Application.Ports;
 
-public interface IHourApprovalsRepository
-{
-    Task<IReadOnlyList<ActiveTask>> ListTasksAsync(CancellationToken cancellationToken);
-
-    Task<ActiveTask?> GetTaskAsync(TaskId taskId, CancellationToken cancellationToken);
-
-    Task SaveTaskAsync(ActiveTask task, CancellationToken cancellationToken);
-
-    Task AppendApprovalRecordAsync(ApprovalRecord record, CancellationToken cancellationToken);
-
-    Task<ApprovalRecord?> GetLatestApprovalAsync(TaskId taskId, CancellationToken cancellationToken);
-}
-
 public sealed record TaskApprovalView(
     ActiveTask Task,
     ApprovalRecord? LastApproval,

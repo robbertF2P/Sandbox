@@ -8,19 +8,49 @@ namespace HourApprovals.Characterization.Tests;
 
 public sealed class HourApprovalsWebApplicationFactory : WebApplicationFactory<Program>
 {
+    private readonly string _sqlitePath = Path.Combine(
+        Path.GetTempPath(),
+        $"hour-approvals-{Guid.NewGuid():N}.db");
+
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
         builder.UseEnvironment("Testing");
         builder.UseSetting("Tenant:FeatureFlags:hours-progress-approval", "true");
+        builder.UseSetting("HourApprovals:SqlitePath", _sqlitePath);
+    }
+
+    protected override void Dispose(bool disposing)
+    {
+        if (disposing && File.Exists(_sqlitePath))
+        {
+            File.Delete(_sqlitePath);
+        }
+
+        base.Dispose(disposing);
     }
 }
 
 public sealed class HourApprovalsDisabledWebApplicationFactory : WebApplicationFactory<Program>
 {
+    private readonly string _sqlitePath = Path.Combine(
+        Path.GetTempPath(),
+        $"hour-approvals-{Guid.NewGuid():N}.db");
+
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
         builder.UseEnvironment("Testing");
         builder.UseSetting("Tenant:FeatureFlags:hours-progress-approval", "false");
+        builder.UseSetting("HourApprovals:SqlitePath", _sqlitePath);
+    }
+
+    protected override void Dispose(bool disposing)
+    {
+        if (disposing && File.Exists(_sqlitePath))
+        {
+            File.Delete(_sqlitePath);
+        }
+
+        base.Dispose(disposing);
     }
 }
 
