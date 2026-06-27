@@ -4,6 +4,9 @@
     <Project Path="host/F2pPlatform.Host.Contracts/F2pPlatform.Host.Contracts.csproj" />
     <Project Path="host/F2pPlatform.Host.Core/F2pPlatform.Host.Core.csproj" />
   </Folder>
+  <Folder Name="/src/Shared/">
+    <Project Path="src/Shared/Platform.Shared.View/Platform.Shared.View.csproj" />
+  </Folder>
   <Folder Name="/src/Modules/PlatformConfig/">
     <Project Path="src/Modules/PlatformConfig/PlatformConfig.Application/PlatformConfig.Application.csproj" />
     <Project Path="src/Modules/PlatformConfig/PlatformConfig.Infrastructure/PlatformConfig.Infrastructure.csproj" />

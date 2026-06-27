@@ -103,6 +103,7 @@ export class HourApprovalsApi {
       teamCount: row.teamCount ?? 0,
       totalHoursBooked: row.totalHoursBooked ?? 0,
       lookbackValues: row.lookbackValues ?? row.currentValues,
+      extensions: row.extensions ?? {},
     };
   }
 }

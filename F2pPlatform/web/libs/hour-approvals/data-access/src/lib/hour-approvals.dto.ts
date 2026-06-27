@@ -5,6 +5,22 @@ import {
   TaskId,
 } from './hour-approvals.ids';
 
+export type ColumnSourceDto = 'Core' | 'Extension' | 'Computed';
+
+export interface ColumnDefDto {
+  id: string;
+  label: string;
+  source: ColumnSourceDto;
+  visible: boolean;
+  order: number;
+  format?: string | null;
+}
+
+export interface ViewDefinitionDto {
+  screenId: string;
+  columns: ColumnDefDto[];
+}
+
 export interface ApprovalValuesDto {
   hoursToGo: number;
   progress: number;
@@ -34,10 +50,7 @@ export interface HourApprovalTaskDto {
 export interface HourApprovalsCapabilitiesDto {
   featureEnabled: boolean;
   customizationPackId: string;
-  displaySettings: {
-    showPlannedStart: boolean;
-    showPlannedFinish: boolean;
-  };
+  queueView: ViewDefinitionDto;
   canApprove: boolean;
   permissions: string[];
 }
@@ -73,10 +86,34 @@ export interface ApprovalQueueRowDto {
   isApproved: boolean;
   currentValues: ApprovalValuesDto;
   lookbackValues: ApprovalValuesDto;
+  extensions: Record<string, string | number | boolean | null>;
   lastApproval: LastApprovalDto | null;
 }
 
 export interface SubmitTasksResultDto {
   approved: HourApprovalTaskDto[];
   failures: { taskId: TaskId; error: string }[];
+}
+
+export const HOUR_APPROVALS_EDITABLE_FIELDS = new Set<keyof ApprovalValuesDto>([
+  'hoursToGo',
+  'plannedStart',
+  'plannedFinish',
+]);
+
+export function visibleColumns(
+  view: ViewDefinitionDto | undefined,
+  source?: ColumnSourceDto,
+): ColumnDefDto[] {
+  if (!view) {
+    return [];
+  }
+
+  return view.columns
+    .filter(column => column.visible && (source === undefined || column.source === source))
+    .sort((left, right) => left.order - right.order);
+}
+
+export function isColumnVisible(view: ViewDefinitionDto | undefined, columnId: string): boolean {
+  return view?.columns.some(column => column.id === columnId && column.visible) ?? false;
 }

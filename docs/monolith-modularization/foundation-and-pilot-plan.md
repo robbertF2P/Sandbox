@@ -16,6 +16,7 @@
 | `starter-kit/README.md` | **Module refactor starter kit** — copy into monolith (see below) |
 | `module-composition-di.md` | **DI standard** — `IServiceCollection` extensions; no ABP in new modules |
 | `platform-frontend-standard.md` | **Frontend standard** — `@floorganise/css` + `@floorganise/ui` for all V2 modules |
+| `platform-ui-customization-standard.md` | **UI customization** — view schemas, extension projections, tenant packs |
 | `platform-authentication-standard.md` | **Auth design** — OIDC, cloud multi-tenant vs on-prem install config |
 | `platform-actor-standard.md` | **Actor orchestration** — integrations, tenant packs, legacy strangler workflows |
 | `change-handler-migration.md` | **Handler migration** — replace SaveChanges handler chains with domain events + actors |

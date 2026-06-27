@@ -121,10 +121,50 @@ if f"/Modules/{context}/" not in text:
 PY
 fi
 
+MODULE_DOC="${DEST_MODULE}/MODULE.md"
+if [[ ! -f "$MODULE_DOC" ]]; then
+  LOWER_CONTEXT="$(echo "${CONTEXT}" | tr '[:upper:]' '[:lower:]')"
+  cat > "$MODULE_DOC" <<DOC
+# ${CONTEXT} module
+
+## Backend
+
+| Layer | Path |
+|-------|------|
+| Domain | \`${CONTEXT}.Domain/\` |
+| Application | \`${CONTEXT}.Application/\` |
+| Infrastructure | \`${CONTEXT}.Infrastructure/\` |
+| API | \`${CONTEXT}.Api/\` |
+| Tests | \`tests/Modules/${CONTEXT}/\` |
+
+## Frontend
+
+| Lib | Path |
+|-----|------|
+| data-access | \`web/libs/${LOWER_CONTEXT}/data-access/\` |
+| feature | \`web/libs/${LOWER_CONTEXT}/feature-status/\` |
+
+| Route | \`/${LOWER_CONTEXT}\` *(register in f2p-shell)* |
+| API prefix | \`/api/${LOWER_CONTEXT}\` *(set in ${CONTEXT}.Api)* |
+
+## Scaffold sibling UI
+
+\`\`\`bash
+./scripts/scaffold-frontend-module.sh ${CONTEXT}
+\`\`\`
+
+See \`F2pPlatform/README.md\` for the module ↔ frontend index.
+DOC
+  echo "Created ${MODULE_DOC}"
+fi
+
 echo ""
 echo "Next steps:"
 echo "  1. Register in host Program.cs:"
 echo "       builder.Services.Add${CONTEXT}Module(builder.Configuration);"
 echo "       app.Map${CONTEXT}Module();"
-echo "  2. dotnet build ${TARGET_ROOT}"
-echo "  3. dotnet test ${TARGET_ROOT}"
+echo "  2. Scaffold frontend libs:"
+echo "       ./scripts/scaffold-frontend-module.sh ${CONTEXT}"
+echo "  3. Read src/Modules/${CONTEXT}/MODULE.md — update frontend paths and routes"
+echo "  4. dotnet build ${TARGET_ROOT}"
+echo "  5. dotnet test ${TARGET_ROOT}"

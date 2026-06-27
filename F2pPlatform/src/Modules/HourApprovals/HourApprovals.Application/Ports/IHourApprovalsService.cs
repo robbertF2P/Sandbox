@@ -2,6 +2,7 @@ using HourApprovals.Domain.Enums;
 using HourApprovals.Domain.Models;
 using HourApprovals.Domain.ValueObjects;
 using Platform.Shared.Domain;
+using Platform.Shared.View;
 
 namespace HourApprovals.Application.Ports;
 
@@ -64,6 +65,6 @@ public sealed record SubmitTasksResult(
 public sealed record HourApprovalsCapabilities(
     bool FeatureEnabled,
     string CustomizationPackId,
-    HourApprovalsDisplaySettings DisplaySettings,
+    ViewDefinition QueueView,
     bool CanApprove,
     IReadOnlyList<string> Permissions);

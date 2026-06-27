@@ -16,6 +16,7 @@ internal static class ApprovalQueueEndpoints
                 string? submissionCategories,
                 string? search,
                 IApprovalQueueFacade facade,
+                IHourApprovalsCustomizationPack customizationPack,
                 CancellationToken cancellationToken) =>
             {
                 if (!await IsFeatureEnabled(httpContext))
@@ -26,7 +27,7 @@ internal static class ApprovalQueueEndpoints
                 ApprovalQueueFilter filter = ParseFilter(organisationIds, submissionCategories, search);
                 GetApprovalQueueReply reply = await facade.QueryAsync(new GetApprovalQueue(filter), cancellationToken);
 
-                return Results.Ok(reply.Rows.Select(MapRow));
+                return Results.Ok(reply.Rows.Select(row => MapRow(row, customizationPack)));
             })
             .WithName("GetHourApprovalsQueue")
             .WithTags("HourApprovals")
@@ -88,7 +89,7 @@ internal static class ApprovalQueueEndpoints
         return categories;
     }
 
-    private static object MapRow(ApprovalQueueRow row) => new
+    private static object MapRow(ApprovalQueueRow row, IHourApprovalsCustomizationPack customizationPack) => new
     {
         taskId = row.TaskId.Value,
         assignmentId = row.AssignmentId.Value,
@@ -108,6 +109,7 @@ internal static class ApprovalQueueEndpoints
         isApproved = row.ApprovalState == ApprovalState.Approved,
         currentValues = MapValues(row.CurrentValues),
         lookbackValues = MapValues(row.LookbackBaseline),
+        extensions = customizationPack.GetRowExtensions(row.TaskId.Value),
         lastApproval = row.LastSubmission is null
             ? null
             : new
