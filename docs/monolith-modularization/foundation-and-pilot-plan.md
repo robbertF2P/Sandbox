@@ -8,6 +8,7 @@
 
 | Document | Role |
 |----------|------|
+| **`platform-architecture-overview.md`** | **Architecture & presentations** — layers, module vs pack, diagrams, glossary |
 | `analysis-instructions.md` | Phased analysis (inventory → slice plan) |
 | `ai-assisted-delivery-quality-framework.md` | Gates, anti-slop, DoD |
 | `agent-instructions-snippet.md` | Short rules — copy to Copilot + Claude config in monolith |

@@ -57,6 +57,9 @@ After editing skills in `.cursor/skills/`:
 
 ## Platform standards (docs)
 
+- [platform-architecture-overview.md](monolith-modularization/platform-architecture-overview.md) — **V2 layers, module vs pack, presentation outline**
+- [foundation-and-pilot-plan.md](monolith-modularization/foundation-and-pilot-plan.md) — modularization phases & pilots
+- [platform-pack-blueprint.md](monolith-modularization/platform-pack-blueprint.md) — pack artifact catalog & scaffold
 - [platform-logging-standard.md](monolith-modularization/platform-logging-standard.md)
 - [platform-correlation-standard.md](monolith-modularization/platform-correlation-standard.md)
 - [platform-actor-standard.md](monolith-modularization/platform-actor-standard.md)

@@ -2,6 +2,8 @@
 
 **Purpose:** Decision guide and scaffold for V2 **packs** — what can go in them, why, and where each artifact belongs.
 
+**Terminology (module vs pack, presentation deck):** `platform-architecture-overview.md`.
+
 **Related:** `platform-ui-customization-standard.md`, `platform-actor-standard.md`, `floor2plan-v2-connector-architecture.md`, `tenant-workflow-fields-deepdive-instructions.md`, `starter-kit/templates/customization-pack/`.
 
 **Reference implementation:** `F2pPlatform/src/Packs/HourApprovals.Packs.Acme/` (`acme-hour-approvals-v1`).
@@ -18,6 +20,16 @@
 | **Strangler adapter** *(not a pack)* | Legacy delegation behind a port | `legacy_hosted` tenants during cutover | `[StranglerAdapter]` in Infrastructure |
 
 **Rule:** Do not mix integration vendor SDKs into a UI customization pack. Do not put domain invariants in any pack — promote to core when semantics are universal.
+
+### Modules vs packs (summary)
+
+| | Module | Pack |
+|---|--------|------|
+| **Role** | Tenant-agnostic capability | Tenant/vendor variance plugin |
+| **Required?** | Yes, for each bounded context | No — 0..n per module |
+| **Depends on** | Own layers + shared libs | Module Application port (or integration abstractions) |
+
+Full definitions, FAQ, and presentation slides: **`platform-architecture-overview.md`**.
 
 ---
 

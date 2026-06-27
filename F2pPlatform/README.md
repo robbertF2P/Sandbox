@@ -2,6 +2,8 @@
 
 Runnable **Platform 2.0 foundation** for SandBox: composed ASP.NET host, Akka orchestration shell, SignalR progress channel, and bounded-context modules with paired Angular libs.
 
+**Architecture overview (presentations):** `docs/monolith-modularization/platform-architecture-overview.md`.
+
 Copy or scaffold from here into the monolith per `docs/monolith-modularization/foundation-and-pilot-plan.md` (Phase A).
 
 ## Layout
