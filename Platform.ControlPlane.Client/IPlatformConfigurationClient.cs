@@ -1,6 +1,6 @@
 using Platform.ControlPlane.Contracts;
 
-namespace ControlPlane.Application.Ports;
+namespace Platform.ControlPlane.Client;
 
 public interface IPlatformConfigurationClient
 {

@@ -10,6 +10,7 @@ if [[ -z "${version}" ]]; then
 fi
 
 "${root}/scripts/pack-import-pipeline-domain.sh" "${version}"
+"${root}/scripts/pack-platform-control-plane-client.sh" "${version}"
 "${root}/scripts/pack-platform-logging.sh" "${version}"
 
 echo "All local platform packages packed to ${root}/local-feed (version ${version})"

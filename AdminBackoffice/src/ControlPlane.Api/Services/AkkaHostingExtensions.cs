@@ -9,6 +9,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Platform.ControlPlane.Client;
 using Platform.ControlPlane.Contracts;
 using Platform.Serilog.Logging.Akka;
 

@@ -11,19 +11,32 @@ public sealed class HourApprovalsWebApplicationFactory : WebApplicationFactory<P
     private readonly string _sqlitePath = Path.Combine(
         Path.GetTempPath(),
         $"hour-approvals-{Guid.NewGuid():N}.db");
+    private readonly string _platformConfigSqlitePath = Path.Combine(
+        Path.GetTempPath(),
+        $"platform-config-{Guid.NewGuid():N}.db");
 
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
         builder.UseEnvironment("Testing");
         builder.UseSetting("Tenant:FeatureFlags:hours-progress-approval", "true");
+        builder.UseSetting("Tenant:PackEntitlements:customizationPacks:0", "acme-hour-approvals-v1");
         builder.UseSetting("HourApprovals:SqlitePath", _sqlitePath);
+        builder.UseSetting("PlatformConfig:SqlitePath", _platformConfigSqlitePath);
     }
 
     protected override void Dispose(bool disposing)
     {
-        if (disposing && File.Exists(_sqlitePath))
+        if (disposing)
         {
-            File.Delete(_sqlitePath);
+            if (File.Exists(_sqlitePath))
+            {
+                File.Delete(_sqlitePath);
+            }
+
+            if (File.Exists(_platformConfigSqlitePath))
+            {
+                File.Delete(_platformConfigSqlitePath);
+            }
         }
 
         base.Dispose(disposing);
@@ -35,19 +48,31 @@ public sealed class HourApprovalsDisabledWebApplicationFactory : WebApplicationF
     private readonly string _sqlitePath = Path.Combine(
         Path.GetTempPath(),
         $"hour-approvals-{Guid.NewGuid():N}.db");
+    private readonly string _platformConfigSqlitePath = Path.Combine(
+        Path.GetTempPath(),
+        $"platform-config-{Guid.NewGuid():N}.db");
 
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
         builder.UseEnvironment("Testing");
         builder.UseSetting("Tenant:FeatureFlags:hours-progress-approval", "false");
         builder.UseSetting("HourApprovals:SqlitePath", _sqlitePath);
+        builder.UseSetting("PlatformConfig:SqlitePath", _platformConfigSqlitePath);
     }
 
     protected override void Dispose(bool disposing)
     {
-        if (disposing && File.Exists(_sqlitePath))
+        if (disposing)
         {
-            File.Delete(_sqlitePath);
+            if (File.Exists(_sqlitePath))
+            {
+                File.Delete(_sqlitePath);
+            }
+
+            if (File.Exists(_platformConfigSqlitePath))
+            {
+                File.Delete(_platformConfigSqlitePath);
+            }
         }
 
         base.Dispose(disposing);
@@ -205,16 +230,48 @@ public sealed class HourApprovalsEndpointTests : IClassFixture<HourApprovalsWebA
     }
 
     [Fact]
-    public async Task GetApprovalQueue_ReturnsNotFound_WhenFeatureDisabled()
+    public async Task GetApprovalQueue_ReturnsDifferentHours_ForTimeWindow()
     {
-        await using var factory = new HourApprovalsDisabledWebApplicationFactory();
-        using HttpClient client = factory.CreateClient();
+        using HttpRequestMessage currentWeekRequest = CreateSupervisorRequest(
+            HttpMethod.Get,
+            "/api/hour-approvals/queue?timeWindow=current_week");
+        using HttpRequestMessage lastWeekRequest = CreateSupervisorRequest(
+            HttpMethod.Get,
+            "/api/hour-approvals/queue?timeWindow=last_week");
 
-        using HttpRequestMessage request = new(HttpMethod.Get, "/api/hour-approvals/queue");
-        request.Headers.Add("X-User-Name", "supervisor.demo");
-        using HttpResponseMessage response = await client.SendAsync(request);
+        using HttpResponseMessage currentWeekResponse = await _client.SendAsync(currentWeekRequest);
+        using HttpResponseMessage lastWeekResponse = await _client.SendAsync(lastWeekRequest);
 
-        Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+        Assert.Equal(HttpStatusCode.OK, currentWeekResponse.StatusCode);
+        Assert.Equal(HttpStatusCode.OK, lastWeekResponse.StatusCode);
+
+        var currentWeekRows = await currentWeekResponse.Content.ReadFromJsonAsync<List<QueueRowWithHoursResponse>>();
+        var lastWeekRows = await lastWeekResponse.Content.ReadFromJsonAsync<List<QueueRowWithHoursResponse>>();
+
+        Assert.NotNull(currentWeekRows);
+        Assert.NotNull(lastWeekRows);
+
+        QueueRowWithHoursResponse wiringRow = Assert.Single(
+            currentWeekRows,
+            row => row.ActivityCode == "ACT-204-WIR");
+        QueueRowWithHoursResponse wiringLastWeek = Assert.Single(
+            lastWeekRows,
+            row => row.ActivityCode == "ACT-204-WIR");
+
+        Assert.Equal(2m, wiringRow.HoursWorkedInWindow);
+        Assert.Equal(6m, wiringLastWeek.HoursWorkedInWindow);
+    }
+
+    [Fact]
+    public async Task GetApprovalQueue_ReturnsBadRequest_ForInvalidOrganisationIds()
+    {
+        using HttpRequestMessage request = CreateSupervisorRequest(
+            HttpMethod.Get,
+            "/api/hour-approvals/queue?organisationIds=abc");
+
+        using HttpResponseMessage response = await _client.SendAsync(request);
+
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
     }
 
     private static HttpRequestMessage CreateSupervisorRequest(
@@ -280,6 +337,10 @@ public sealed class HourApprovalsEndpointTests : IClassFixture<HourApprovalsWebA
         [property: JsonPropertyName("submissionCategory")] string SubmissionCategory,
         [property: JsonPropertyName("approvalState")] string ApprovalState);
 
+    private sealed record QueueRowWithHoursResponse(
+        [property: JsonPropertyName("activityCode")] string ActivityCode,
+        [property: JsonPropertyName("hoursWorkedInWindow")] decimal HoursWorkedInWindow);
+
     private sealed record SubmitTasksResponse(
         [property: JsonPropertyName("approved")] List<TaskResponse> Approved,
         [property: JsonPropertyName("failures")] List<SubmitFailureResponse> Failures);
@@ -291,17 +352,31 @@ public sealed class HourApprovalsEndpointTests : IClassFixture<HourApprovalsWebA
 
 [Trait("Module", "HourApprovals")]
 [Trait("Tier", "Characterization")]
-public sealed class HourApprovalsFeatureFlagTests
+public sealed class HourApprovalsFeatureFlagTests : IClassFixture<HourApprovalsDisabledWebApplicationFactory>
 {
+    private readonly HttpClient _client;
+
+    public HourApprovalsFeatureFlagTests(HourApprovalsDisabledWebApplicationFactory factory)
+    {
+        _client = factory.CreateClient();
+    }
+
     [Fact]
     public async Task GetCapabilities_ReturnsNotFound_WhenFeatureDisabled()
     {
-        await using var factory = new HourApprovalsDisabledWebApplicationFactory();
-        using HttpClient client = factory.CreateClient();
-
         using HttpRequestMessage request = new(HttpMethod.Get, "/api/hour-approvals/capabilities");
         request.Headers.Add("X-User-Name", "supervisor.demo");
-        using HttpResponseMessage response = await client.SendAsync(request);
+        using HttpResponseMessage response = await _client.SendAsync(request);
+
+        Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task GetApprovalQueue_ReturnsNotFound_WhenFeatureDisabled()
+    {
+        using HttpRequestMessage request = new(HttpMethod.Get, "/api/hour-approvals/queue");
+        request.Headers.Add("X-User-Name", "supervisor.demo");
+        using HttpResponseMessage response = await _client.SendAsync(request);
 
         Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
     }

@@ -22,7 +22,7 @@ public static class DependencyInjection
         services.Configure<PlatformConfigurationApiOptions>(
             configuration.GetSection(PlatformConfigurationApiOptions.SectionName));
         services.AddPlatformConfigApplication();
-        services.AddPlatformConfigInfrastructure();
+        services.AddPlatformConfigInfrastructure(configuration);
         return services;
     }
 
@@ -118,5 +118,5 @@ public sealed class PlatformConfigurationApiOptions
 {
     public const string SectionName = "Platform";
 
-    public string ConfigurationApiKey { get; set; } = "dev-platform-config-key";
+    public string ConfigurationApiKey { get; set; } = string.Empty;
 }

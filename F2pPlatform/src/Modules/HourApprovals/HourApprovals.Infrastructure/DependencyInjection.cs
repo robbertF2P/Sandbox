@@ -1,5 +1,6 @@
 using HourApprovals.Application.Persistence;
 using HourApprovals.Application.Ports;
+using HourApprovals.Infrastructure.Packs;
 using HourApprovals.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -60,10 +61,22 @@ public static class DependencyInjection
         services.AddScoped<HourApprovalsDatabaseInitializer>();
         services.AddHostedService<HourApprovalsDatabaseInitializerHostedService>();
 
-        if (!services.Any(descriptor => descriptor.ServiceType == typeof(IHourApprovalsCustomizationPack)))
-        {
-            services.AddSingleton<IHourApprovalsCustomizationPack, DefaultHourApprovalsPack>();
-        }
+        return services;
+    }
+
+    public static IServiceCollection AddHourApprovalsCustomizationPacks(
+        this IServiceCollection services,
+        Action<ICustomizationPackRegistryBuilder> configure)
+    {
+        ArgumentNullException.ThrowIfNull(services);
+        ArgumentNullException.ThrowIfNull(configure);
+
+        var builder = new CustomizationPackRegistryBuilder();
+        configure(builder);
+
+        HourApprovalsCustomizationPackRegistry registry = builder.Build();
+        services.AddSingleton<IHourApprovalsCustomizationPackRegistry>(registry);
+        services.AddSingleton<IHourApprovalsCustomizationPack, TenantCustomizationPackResolver>();
 
         return services;
     }

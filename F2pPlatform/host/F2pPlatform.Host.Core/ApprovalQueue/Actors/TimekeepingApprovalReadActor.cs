@@ -16,7 +16,7 @@ public sealed class TimekeepingApprovalReadActor : ReceiveActor
         Receive<GetHoursInWindow>(message =>
         {
             IReadOnlyDictionary<AssignmentId, decimal> hours =
-                PocTimekeepingHoursStore.GetHours(message.AssignmentIds);
+                PocTimekeepingHoursStore.GetHours(message.AssignmentIds, message.TimeRangePreset);
 
             Sender.Tell(new GetHoursInWindowReply(hours));
         });

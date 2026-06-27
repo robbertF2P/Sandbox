@@ -4,7 +4,6 @@ using F2pPlatform.Host.Contracts.ApprovalQueue.Messages.Hours;
 using F2pPlatform.Host.Contracts.ApprovalQueue.Messages.Planning;
 using F2pPlatform.Host.Contracts.ApprovalQueue.Messages.Timekeeping;
 using Platform.Shared.Domain;
-using Platform.Shared.Domain;
 
 namespace F2pPlatform.Host.Core.ApprovalQueue;
 
@@ -51,7 +50,7 @@ public sealed class ApprovalQueueFacade : IApprovalQueueFacade
             .ToList();
 
         Task<GetHoursInWindowReply> hoursTask = _timekeepingReadActor.Ask<GetHoursInWindowReply>(
-            new GetHoursInWindow(assignmentIds, TimeRangePreset.SinceLastSubmission),
+            new GetHoursInWindow(assignmentIds, query.Filter.TimeRange),
             AskTimeout,
             cancellationToken);
 

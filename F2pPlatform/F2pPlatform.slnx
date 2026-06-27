@@ -10,6 +10,7 @@
   <Folder Name="/src/Modules/PlatformConfig/">
     <Project Path="src/Modules/PlatformConfig/PlatformConfig.Application/PlatformConfig.Application.csproj" />
     <Project Path="src/Modules/PlatformConfig/PlatformConfig.Infrastructure/PlatformConfig.Infrastructure.csproj" />
+    <Project Path="src/Modules/PlatformConfig/PlatformConfig.Data.Migrations/PlatformConfig.Data.Migrations.csproj" />
     <Project Path="src/Modules/PlatformConfig/PlatformConfig.Api/PlatformConfig.Api.csproj" />
   </Folder>
   <Folder Name="/src/Modules/Identity/">
@@ -17,12 +18,6 @@
     <Project Path="src/Modules/Identity/Identity.Application/Identity.Application.csproj" />
     <Project Path="src/Modules/Identity/Identity.Infrastructure/Identity.Infrastructure.csproj" />
     <Project Path="src/Modules/Identity/Identity.Api/Identity.Api.csproj" />
-  </Folder>
-  <Folder Name="/src/Modules/ControlPlane/">
-    <Project Path="src/Modules/ControlPlane/ControlPlane.Domain/ControlPlane.Domain.csproj" />
-    <Project Path="src/Modules/ControlPlane/ControlPlane.Application/ControlPlane.Application.csproj" />
-    <Project Path="src/Modules/ControlPlane/ControlPlane.Infrastructure/ControlPlane.Infrastructure.csproj" />
-    <Project Path="src/Modules/ControlPlane/ControlPlane.Api/ControlPlane.Api.csproj" />
   </Folder>
   <Folder Name="/src/Modules/Reference/">
     <Project Path="src/Modules/Reference/Reference.Domain/Reference.Domain.csproj" />
@@ -44,9 +39,8 @@
     <Project Path="tests/Modules/Identity/Identity.Unit.Tests/Identity.Unit.Tests.csproj" />
     <Project Path="tests/Modules/Identity/Identity.Characterization.Tests/Identity.Characterization.Tests.csproj" />
   </Folder>
-  <Folder Name="/tests/Modules/ControlPlane/">
-    <Project Path="tests/Modules/ControlPlane/ControlPlane.Unit.Tests/ControlPlane.Unit.Tests.csproj" />
-    <Project Path="tests/Modules/ControlPlane/ControlPlane.Characterization.Tests/ControlPlane.Characterization.Tests.csproj" />
+  <Folder Name="/tests/Modules/PlatformConfig/">
+    <Project Path="tests/Modules/PlatformConfig/PlatformConfig.Characterization.Tests/PlatformConfig.Characterization.Tests.csproj" />
   </Folder>
   <Folder Name="/tests/Modules/Reference/">
     <Project Path="tests/Modules/Reference/Reference.Unit.Tests/Reference.Unit.Tests.csproj" />

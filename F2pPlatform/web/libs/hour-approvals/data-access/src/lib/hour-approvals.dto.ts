@@ -65,6 +65,7 @@ export interface ApprovalQueueFilter {
   organisationIds: OrganisationId[];
   submissionCategories: SubmissionCategory[];
   search: string;
+  timeWindow: TimeWindow;
 }
 
 export interface ApprovalQueueComputedDto {

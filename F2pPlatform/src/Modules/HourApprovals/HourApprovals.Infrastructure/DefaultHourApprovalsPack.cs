@@ -5,7 +5,9 @@ namespace HourApprovals.Infrastructure;
 
 public sealed class DefaultHourApprovalsPack : IHourApprovalsCustomizationPack
 {
-    public string PackId => "default-hour-approvals-v1";
+    public const string DefaultPackId = "default-hour-approvals-v1";
+
+    public string PackId => DefaultPackId;
 
     public ViewDefinition GetView(string screenId) =>
         screenId switch

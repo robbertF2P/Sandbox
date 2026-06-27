@@ -51,9 +51,15 @@ services:
     environment:
       ASPNETCORE_ENVIRONMENT: Production
       Kestrel__Endpoints__Http__Url: http://0.0.0.0:5080
-      Platform__ConfigurationApiKey: "${PLATFORM_CONFIG_API_KEY:-dev-platform-config-key}"
+      Platform__ConfigurationApiKey: "${PLATFORM_CONFIG_API_KEY:?Set PLATFORM_CONFIG_API_KEY}"
+      ConnectionStrings__PlatformConfig: "Server=sqlserver,1433;Database=F2pPlatform;User Id=sa;Password=${PLATFORM_MSSQL_SA_PASSWORD:-Your_strong_password123};TrustServerCertificate=True;Encrypt=False"
+      ConnectionStrings__HourApprovals: "Server=sqlserver,1433;Database=HourApprovals;User Id=sa;Password=${PLATFORM_MSSQL_SA_PASSWORD:-Your_strong_password123};TrustServerCertificate=True;Encrypt=False"
+      Tenant__FeatureFlags__hours-progress-approval: "true"
+      Tenant__PackEntitlements__customizationPacks__0: acme-hour-approvals-v1
       Seq__ServerUrl: http://seq:5341
     depends_on:
+      sqlserver:
+        condition: service_healthy
       seq:
         condition: service_started
     ports:
@@ -68,7 +74,7 @@ services:
       Kestrel__Endpoints__Http__Url: http://0.0.0.0:5090
       ConnectionStrings__ControlPlane: "Server=sqlserver,1433;Database=ControlPlane;User Id=sa;Password=${PLATFORM_MSSQL_SA_PASSWORD:-Your_strong_password123};TrustServerCertificate=True;Encrypt=False"
       Platform__BaseUrl: http://f2p-platform-api:5080
-      Platform__ConfigurationApiKey: "${PLATFORM_CONFIG_API_KEY:-dev-platform-config-key}"
+      Platform__ConfigurationApiKey: "${PLATFORM_CONFIG_API_KEY:?Set PLATFORM_CONFIG_API_KEY}"
       Cors__AllowedOrigins__0: http://localhost:5190
       Seq__ServerUrl: http://seq:5341
     depends_on:

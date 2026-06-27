@@ -1,10 +1,10 @@
 using F2pPlatform.Host.ApprovalQueue;
 using F2pPlatform.Host.Hubs;
 using F2pPlatform.Host.Services;
-using Platform.Serilog.Logging;
-using ControlPlane.Api;
-using HourApprovals.Api;
+using HourApprovals.Infrastructure;
 using HourApprovals.Packs.Acme;
+using Platform.Serilog.Logging;
+using HourApprovals.Api;
 using Identity.Api;
 using PlatformConfig.Api;
 using Reference.Api;
@@ -33,9 +33,12 @@ try
     builder.Services.AddIdentityModule(builder.Configuration);
     builder.Services.AddPlatformConfigModule(builder.Configuration);
     builder.Services.AddReferenceModule(builder.Configuration);
-    builder.Services.AddAcmeHourApprovalsPack();
+    builder.Services.AddHourApprovalsCustomizationPacks(packs =>
+    {
+        packs.AddPack<DefaultHourApprovalsPack>();
+        packs.AddPack<AcmeHourApprovalsPack>();
+    });
     builder.Services.AddHourApprovalsModule(builder.Configuration);
-    builder.Services.AddControlPlaneModule(builder.Configuration);
 
     var app = builder.Build();
 
@@ -54,7 +57,6 @@ try
         Swagger = "/swagger",
         IdentityLogin = "/api/identity/login",
         ReferenceStatus = "/api/reference/status",
-        AdminTenants = "/admin/tenants",
         PlatformTenants = "/api/v1/platform/tenants",
         Health = "/health",
         SignalRHub = "/hubs/platform-events",
@@ -67,7 +69,6 @@ try
     app.MapReferenceModule();
     app.MapHourApprovalsModule();
     app.MapApprovalQueueEndpoints();
-    app.MapControlPlaneModule();
     app.MapHub<PlatformEventsHub>("/hubs/platform-events");
 
     app.Run();

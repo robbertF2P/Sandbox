@@ -1,6 +1,6 @@
 {
   "/admin": {
-    "target": "http://localhost:5080",
+    "target": "http://localhost:5090",
     "secure": false,
     "changeOrigin": true
   }

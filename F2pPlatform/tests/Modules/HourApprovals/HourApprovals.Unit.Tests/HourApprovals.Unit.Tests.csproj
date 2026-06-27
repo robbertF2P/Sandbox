@@ -24,6 +24,7 @@
     <ProjectReference Include="..\..\..\..\src\Modules\HourApprovals\HourApprovals.Domain\HourApprovals.Domain.csproj" />
     <ProjectReference Include="..\..\..\..\src\Modules\HourApprovals\HourApprovals.Application\HourApprovals.Application.csproj" />
     <ProjectReference Include="..\..\..\..\src\Modules\HourApprovals\HourApprovals.Infrastructure\HourApprovals.Infrastructure.csproj" />
+    <ProjectReference Include="..\..\..\..\src\Modules\PlatformConfig\PlatformConfig.Infrastructure\PlatformConfig.Infrastructure.csproj" />
     <ProjectReference Include="..\..\..\..\src\Packs\HourApprovals.Packs.Acme\HourApprovals.Packs.Acme.csproj" />
     <ProjectReference Include="..\..\..\..\src\Shared\Platform.Shared.View\Platform.Shared.View.csproj" />
     <ProjectReference Include="..\..\..\..\host\F2pPlatform.Host.Core\F2pPlatform.Host.Core.csproj" />

@@ -1,25 +1,3 @@
-# Runnable F2pPlatform stack — API, tenant SPA, and Seq.
-#
-# Prefer the helper script (packs local NuGet packages, waits for health):
-#   ./scripts/podman-up.sh
-#
-# Or manually:
-#   podman compose -f docker-compose.stack.yml up --build
-
-name: f2p-platform-stack
-
-services:
-  seq:
-    image: docker.io/datalust/seq:latest
-    environment:
-      ACCEPT_EULA: "Y"
-      SEQ_FIRSTRUN_NOAUTHENTICATION: "true"
-    ports:
-      - "5343:5341"
-      - "8083:80"
-    volumes:
-      - f2p-stack-seq-data:/data
-
   f2p-platform-api:
     build:
       context: ..
@@ -27,27 +5,9 @@ services:
     environment:
       ASPNETCORE_ENVIRONMENT: Production
       Kestrel__Endpoints__Http__Url: http://0.0.0.0:5080
-      Platform__ConfigurationApiKey: "${F2P_PLATFORM_CONFIG_API_KEY:-dev-platform-config-key}"
+      Platform__ConfigurationApiKey: "${F2P_PLATFORM_CONFIG_API_KEY:?Set F2P_PLATFORM_CONFIG_API_KEY}"
       Seq__ServerUrl: http://seq:5341
       Tenant__FeatureFlags__hours-progress-approval: "true"
       Tenant__PackEntitlements__customizationPacks__0: acme-hour-approvals-v1
-      HourApprovals__CustomizationPack: acme-hour-approvals-v1
+      PlatformConfig__UseSqlite: "true"
       HourApprovals__UseSqlite: "true"
-    depends_on:
-      seq:
-        condition: service_started
-    ports:
-      - "5080:5080"
-
-  f2p-platform-web:
-    build:
-      context: ..
-      dockerfile: F2pPlatform/web/Dockerfile
-    depends_on:
-      f2p-platform-api:
-        condition: service_started
-    ports:
-      - "5180:80"
-
-volumes:
-  f2p-stack-seq-data:
