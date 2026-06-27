@@ -27,9 +27,11 @@ Supervisor/foreman hour approval workflow (V2 slice).
 
 | Port | `IHourApprovalsCustomizationPack` |
 | Default pack | `DefaultHourApprovalsPack` (Infrastructure) |
-| Example client pack | `HourApprovals.Packs.Acme` (`acme-hour-approvals-v1`) |
+| Example client pack | `HourApprovals.Packs.Acme` (`acme-hour-approvals-v1`) — see `PACK.md` in pack folder |
 
-See `docs/monolith-modularization/platform-ui-customization-standard.md`.
+See `docs/monolith-modularization/platform-ui-customization-standard.md` and `platform-pack-blueprint.md`.
+
+Scaffold a new pack: `./scripts/scaffold-customization-pack.sh <Context> <Client> <pack-id>`.
 
 ## Scaffold sibling UI
 

@@ -35,7 +35,7 @@ Backend and UI are **paired by context name** in parallel trees. Each backend mo
 
 **Shared frontend:** `web/libs/shared/` (`api-core`, `platform-events`, re-export of `@floorganise/ui`).
 
-**Standards:** `docs/monolith-modularization/platform-frontend-standard.md`, `platform-ui-customization-standard.md`.
+**Standards:** `docs/monolith-modularization/platform-frontend-standard.md`, `platform-ui-customization-standard.md`, `platform-pack-blueprint.md`.
 
 ## Quick start
 

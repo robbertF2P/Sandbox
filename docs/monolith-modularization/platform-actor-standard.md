@@ -4,6 +4,8 @@
 
 **Audience:** Engineers and AI agents scaffolding modules, integration packs, or workflow hosts.
 
+**Pack artifact catalog and customization scaffold:** `platform-pack-blueprint.md`.
+
 **Related:**
 
 | Document | Role |

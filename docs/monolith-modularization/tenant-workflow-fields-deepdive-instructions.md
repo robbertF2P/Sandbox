@@ -51,6 +51,7 @@ If the external repo is unavailable, stop and list what is missing. Do not infer
 | Document | Use for |
 |----------|---------|
 | `platform-ui-customization-standard.md` | View schemas, `extensions` / `computed` bags, customization packs |
+| `platform-pack-blueprint.md` | Pack types, artifact catalog, `PACK.md` manifest, scaffold script |
 | `docs/floor2plan-v2-read-model-playbook.md` | Specification-backed list filters, Nx schema-driven columns |
 | `platform-actor-standard.md` | Tenant rules in actor pipelines (when fields drive orchestration) |
 | `specification-pattern` skill | Encapsulate filter rules; no `IQueryable` leakage |
