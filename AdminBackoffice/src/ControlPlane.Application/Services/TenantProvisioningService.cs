@@ -1,5 +1,6 @@
 using ControlPlane.Application.Ports;
 using Microsoft.Extensions.Logging;
+using Platform.ControlPlane.Client;
 using Platform.ControlPlane.Contracts;
 
 namespace ControlPlane.Application.Services;

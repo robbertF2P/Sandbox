@@ -1,19 +1,9 @@
 using System.Net.Http.Json;
-using ControlPlane.Application.Ports;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Platform.ControlPlane.Contracts;
 
-namespace ControlPlane.Infrastructure.Platform;
-
-public sealed class PlatformConfigurationOptions
-{
-    public const string SectionName = "Platform";
-
-    public string BaseUrl { get; set; } = "http://localhost:5080";
-
-    public string ConfigurationApiKey { get; set; } = "dev-platform-config-key";
-}
+namespace Platform.ControlPlane.Client;
 
 public sealed class PlatformConfigurationHttpClient(
     HttpClient httpClient,
@@ -29,7 +19,7 @@ public sealed class PlatformConfigurationHttpClient(
         var requestUri = new Uri(new Uri(options.Value.BaseUrl.TrimEnd('/')), "/api/v1/platform/tenant-config");
         using var request = new HttpRequestMessage(HttpMethod.Put, requestUri)
         {
-            Content = JsonContent.Create(configuration)
+            Content = JsonContent.Create(configuration),
         };
         request.Headers.Add("X-Platform-Config-Key", options.Value.ConfigurationApiKey);
 

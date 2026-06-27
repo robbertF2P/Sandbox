@@ -16,6 +16,7 @@
   <ItemGroup>
     <ProjectReference Include="..\HourApprovals.Application\HourApprovals.Application.csproj" />
     <ProjectReference Include="..\HourApprovals.Domain\HourApprovals.Domain.csproj" />
+    <ProjectReference Include="..\..\PlatformConfig\PlatformConfig.Application\PlatformConfig.Application.csproj" />
   </ItemGroup>
 
   <Import Project="../../../../../build/Platform.Logging.Library.props" />

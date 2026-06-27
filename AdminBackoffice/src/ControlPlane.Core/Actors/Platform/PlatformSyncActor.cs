@@ -3,6 +3,7 @@ using Akka.Event;
 using ControlPlane.Application.Ports;
 using ControlPlane.Application.Services;
 using ControlPlane.Contracts.Messages.Platform;
+using Platform.ControlPlane.Client;
 using Platform.Serilog.Logging.Akka;
 using Platform.Serilog.Logging.Correlation;
 

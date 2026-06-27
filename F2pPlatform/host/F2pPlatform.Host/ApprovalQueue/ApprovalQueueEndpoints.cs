@@ -2,6 +2,7 @@ using F2pPlatform.Host.Contracts.ApprovalQueue;
 using F2pPlatform.Host.Contracts.ApprovalQueue.Messages;
 using F2pPlatform.Host.Core.ApprovalQueue;
 using HourApprovals.Application.Ports;
+using Microsoft.AspNetCore.Http;
 using Platform.Shared.Domain;
 
 namespace F2pPlatform.Host.ApprovalQueue;
@@ -15,6 +16,7 @@ internal static class ApprovalQueueEndpoints
                 string? organisationIds,
                 string? submissionCategories,
                 string? search,
+                string? timeWindow,
                 IApprovalQueueFacade facade,
                 IHourApprovalsCustomizationPack customizationPack,
                 CancellationToken cancellationToken) =>
@@ -24,7 +26,16 @@ internal static class ApprovalQueueEndpoints
                     return Results.NotFound();
                 }
 
-                ApprovalQueueFilter filter = ParseFilter(organisationIds, submissionCategories, search);
+                ApprovalQueueFilter filter;
+                try
+                {
+                    filter = ParseFilter(organisationIds, submissionCategories, search, timeWindow);
+                }
+                catch (BadHttpRequestException exception)
+                {
+                    return Results.BadRequest(new { error = exception.Message });
+                }
+
                 GetApprovalQueueReply reply = await facade.QueryAsync(new GetApprovalQueue(filter), cancellationToken);
 
                 IReadOnlyList<Guid> taskIds = reply.Rows.Select(row => row.TaskId.Value).ToList();
@@ -54,19 +65,43 @@ internal static class ApprovalQueueEndpoints
     private static ApprovalQueueFilter ParseFilter(
         string? organisationIds,
         string? submissionCategories,
-        string? search)
+        string? search,
+        string? timeWindow)
     {
         IReadOnlyList<OrganisationId> orgIds = ParseOrganisationIds(organisationIds);
         IReadOnlyList<SubmissionCategory> categories = ParseCategories(submissionCategories);
-        return new ApprovalQueueFilter(orgIds, categories, search);
+        return new ApprovalQueueFilter(orgIds, categories, search, ParseTimeRange(timeWindow));
     }
 
-    private static IReadOnlyList<OrganisationId> ParseOrganisationIds(string? csv) =>
-        string.IsNullOrWhiteSpace(csv)
-            ? []
-            : csv.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
-                .Select(part => new OrganisationId(int.Parse(part)))
-                .ToList();
+    private static TimeRangePreset ParseTimeRange(string? timeWindow) =>
+        timeWindow?.Trim().ToLowerInvariant() switch
+        {
+            "since_last_submission" or "since-last-submission" => TimeRangePreset.SinceLastSubmission,
+            "last_week" or "last-week" => TimeRangePreset.LastWeek,
+            "custom" => TimeRangePreset.Custom,
+            _ => TimeRangePreset.CurrentWeek,
+        };
+
+    private static IReadOnlyList<OrganisationId> ParseOrganisationIds(string? csv)
+    {
+        if (string.IsNullOrWhiteSpace(csv))
+        {
+            return [];
+        }
+
+        List<OrganisationId> organisationIds = [];
+        foreach (string part in csv.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
+        {
+            if (!int.TryParse(part, out int organisationId))
+            {
+                throw new BadHttpRequestException($"Invalid organisation id '{part}'.");
+            }
+
+            organisationIds.Add(new OrganisationId(organisationId));
+        }
+
+        return organisationIds;
+    }
 
     private static IReadOnlyList<SubmissionCategory> ParseCategories(string? csv)
     {

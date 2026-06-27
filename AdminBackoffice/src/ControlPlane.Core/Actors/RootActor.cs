@@ -6,6 +6,7 @@ using ControlPlane.Core.Actors.Platform;
 using ControlPlane.Core.Actors.Provisioning;
 using ControlPlane.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
+using Platform.ControlPlane.Client;
 using Platform.Serilog.Logging.Akka;
 
 namespace ControlPlane.Core.Actors;

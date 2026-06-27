@@ -1,9 +1,9 @@
 using ControlPlane.Application.Ports;
 using ControlPlane.Infrastructure.Persistence;
-using ControlPlane.Infrastructure.Platform;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Platform.ControlPlane.Client;
 
 namespace ControlPlane.Infrastructure;
 
@@ -36,7 +36,7 @@ public static class DependencyInjection
         services.Configure<PlatformConfigurationOptions>(
             configuration.GetSection(PlatformConfigurationOptions.SectionName));
 
-        services.AddHttpClient<IPlatformConfigurationClient, PlatformConfigurationHttpClient>();
+        services.AddPlatformConfigurationClient();
         services.AddScoped<ITenantRepository, EfTenantRepository>();
 
         return services;

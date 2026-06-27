@@ -3,7 +3,8 @@ import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { F2pAppNavbarComponent } from '@floorganise/ui';
 import { forkJoin, of } from 'rxjs';
-import { catchError, switchMap } from 'rxjs/operators';
+import { catchError, map, switchMap } from 'rxjs/operators';
+import { shouldProceedToSubmit } from './hour-approvals-submit';
 import { IdentityAuthService } from '@f2p/identity/data-access';
 import {
   ApprovalQueueFilter,
@@ -112,6 +113,7 @@ export class HourApprovalsPageComponent implements OnInit {
     organisationIds: this.selectedOrganisationIds(),
     submissionCategories: this.selectedCategories(),
     search: this.searchTerm().trim(),
+    timeWindow: this.timeWindow(),
   }));
 
   readonly visibleRows = computed(() => {
@@ -132,7 +134,7 @@ export class HourApprovalsPageComponent implements OnInit {
         return false;
       }
 
-      return this.matchesTimeWindow(row);
+      return true;
     });
   });
 
@@ -240,6 +242,7 @@ export class HourApprovalsPageComponent implements OnInit {
 
   onTimeWindowChange(value: TimeWindow): void {
     this.timeWindow.set(value);
+    this.refetchQueue();
   }
 
   toggleSelectAll(checked: boolean): void {
@@ -372,17 +375,28 @@ export class HourApprovalsPageComponent implements OnInit {
           return null;
         }
 
-        return this.api.saveTask(taskId, draft).pipe(catchError(() => of(null)));
+        return this.api.saveTask(taskId, draft).pipe(
+          map(() => true),
+          catchError(() => of(false)),
+        );
       })
       .filter((call): call is ReturnType<HourApprovalsApi['saveTask']> => call !== null);
 
     this.submitting.set(true);
     this.error.set(null);
 
-    const saveStep = dirtySaves.length > 0 ? forkJoin(dirtySaves) : of([]);
+    const saveStep = dirtySaves.length > 0 ? forkJoin(dirtySaves) : of([] as boolean[]);
 
     saveStep
-      .pipe(switchMap(() => this.api.submitTasks(selected)))
+      .pipe(
+        switchMap(results => {
+          if (!shouldProceedToSubmit(results)) {
+            throw new Error('Save failed');
+          }
+
+          return this.api.submitTasks(selected);
+        }),
+      )
       .subscribe({
         next: result => {
           this.submitting.set(false);
@@ -394,24 +408,9 @@ export class HourApprovalsPageComponent implements OnInit {
         },
         error: () => {
           this.submitting.set(false);
-          this.error.set('Submit failed. Check you have Approve Hours/Progress permission.');
+          this.error.set('Submit failed. Save your changes and check you have Approve Hours/Progress permission.');
         },
       });
-  }
-
-  private matchesTimeWindow(row: ApprovalQueueRowDto): boolean {
-    switch (this.timeWindow()) {
-      case 'since_last_submission':
-        return row.hoursWorkedInWindow > 0 || row.lastApproval === null;
-      case 'last_week':
-        return row.hoursWorkedInWindow >= 0;
-      case 'current_week':
-        return true;
-      case 'custom':
-        return true;
-      default:
-        return true;
-    }
   }
 
   private refetchQueue(): void {

@@ -51,6 +51,10 @@ export class HourApprovalsApi {
       params = params.set('search', search);
     }
 
+    if (filter.timeWindow) {
+      params = params.set('timeWindow', filter.timeWindow);
+    }
+
     return this.http
       .get<ApprovalQueueRowDto[]>(`${this.baseUrl}/api/hour-approvals/queue`, { params })
       .pipe(map(rows => rows.map(row => this.mapQueueRow(row))));

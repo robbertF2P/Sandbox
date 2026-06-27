@@ -6,6 +6,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\..\Platform.ControlPlane.Client\Platform.ControlPlane.Client.csproj" />
     <ProjectReference Include="..\..\..\Platform.ControlPlane.Contracts\Platform.ControlPlane.Contracts.csproj" />
   </ItemGroup>
 
