@@ -6,6 +6,8 @@ Tenant-specific display variance for V2 modules — **view schemas** and **exten
 
 **Reference implementation:** Hour Approvals slice — `HourApprovals.Packs.Acme`, `Platform.Shared.View`, `F2pPlatform/web/libs/hour-approvals/`.
 
+**Pack blueprint (artifact catalog, scaffold):** `platform-pack-blueprint.md`.
+
 ---
 
 ## Problem

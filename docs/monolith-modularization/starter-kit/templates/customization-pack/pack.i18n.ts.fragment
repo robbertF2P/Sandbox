@@ -1,0 +1,12 @@
+// Merge into web/libs/<context>/data-access/src/lib/<context>.i18n.ts
+// or publish as @<client>/<context>-pack-i18n
+
+export const <CLIENT>_<CONTEXT>_PACK_I18N = {
+  en: {
+    // 'packs.<pack-id>.columns.exampleField': 'Example field',
+  },
+  nl: {},
+  es: {},
+  ja: {},
+  vi: {},
+} as const;

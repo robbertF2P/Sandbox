@@ -39,6 +39,10 @@ Point monolith `nuget.config` at your internal feed for `Platform.Serilog.Loggin
 | `templates/DependencyInjection.Api.cs` | **done** | `Add<Context>Module` + `Map<Context>Endpoints` stub |
 | `templates/StranglerAdapter.cs` | **done** | `[StranglerAdapter]` marker attribute |
 | `templates/integration-pack/` | **planned** | Pack manifest + ports-only layout (Pilot 2) |
+| `templates/customization-pack/` | **done** | UI customization pack stubs (`PACK.md`, pack class, tests, i18n) |
+| `../platform-pack-blueprint.md` | **done** | Pack types, artifact catalog, distribution, checklist |
+| `../platform-architecture-overview.md` | **done** | V2 layers, module vs pack, presentation outline, glossary |
+| SandBox `scripts/scaffold-customization-pack.sh` | **done** | Generate `F2pPlatform/src/Packs/<Context>.Packs.<Client>/` |
 | `templates/pr-module-extraction.md` | **planned** | PR body checklist |
 | `../module-composition-di.md` | **done** | DI standard — extension methods, no ABP |
 | `../platform-frontend-standard.md` | **done** | `@floorganise/css` + `@floorganise/ui` for V2 modules |

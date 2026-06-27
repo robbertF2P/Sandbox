@@ -18,6 +18,8 @@ You are assisting with **monolith-to-modular migration** using a strangler-fig a
 
 **Start here:** `docs/modularization/foundation-and-pilot-plan.md` — foundation-first sequence and dual-pilot strategy.
 
+**Architecture (modules vs packs, presentations):** `docs/modularization/platform-architecture-overview.md`.
+
 **Starter kit:** `docs/modularization/starter-kit/README.md` — copy in Phase A; scaffold every module from it.
 
 **Module DI (no ABP):** `docs/modularization/module-composition-di.md` — `IServiceCollection` / `WebApplication` extension methods only; no `AbpModule` or new `Volo.Abp.*` in extracted modules.

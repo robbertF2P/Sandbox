@@ -2,6 +2,8 @@
 
 Runnable **Platform 2.0 foundation** for SandBox: composed ASP.NET host, Akka orchestration shell, SignalR progress channel, and bounded-context modules with paired Angular libs.
 
+**Architecture overview (presentations):** `docs/monolith-modularization/platform-architecture-overview.md`.
+
 Copy or scaffold from here into the monolith per `docs/monolith-modularization/foundation-and-pilot-plan.md` (Phase A).
 
 ## Layout
@@ -35,7 +37,7 @@ Backend and UI are **paired by context name** in parallel trees. Each backend mo
 
 **Shared frontend:** `web/libs/shared/` (`api-core`, `platform-events`, re-export of `@floorganise/ui`).
 
-**Standards:** `docs/monolith-modularization/platform-frontend-standard.md`, `platform-ui-customization-standard.md`.
+**Standards:** `docs/monolith-modularization/platform-frontend-standard.md`, `platform-ui-customization-standard.md`, `platform-pack-blueprint.md`.
 
 ## Quick start
 
