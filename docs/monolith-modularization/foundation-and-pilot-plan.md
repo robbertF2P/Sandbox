@@ -17,6 +17,7 @@
 | `module-composition-di.md` | **DI standard** — `IServiceCollection` extensions; no ABP in new modules |
 | `platform-frontend-standard.md` | **Frontend standard** — `@floorganise/css` + `@floorganise/ui` for all V2 modules |
 | `platform-ui-customization-standard.md` | **UI customization** — view schemas, extension projections, tenant packs |
+| `tenant-workflow-fields-deepdive-instructions.md` | **Legacy Text*/Bool*** — investigate tenant filters/screens; judge V2 pack path |
 | `platform-authentication-standard.md` | **Auth design** — OIDC, cloud multi-tenant vs on-prem install config |
 | `platform-actor-standard.md` | **Actor orchestration** — integrations, tenant packs, legacy strangler workflows |
 | `change-handler-migration.md` | **Handler migration** — replace SaveChanges handler chains with domain events + actors |
@@ -504,6 +505,7 @@ IMPLEMENTATION QUALITY (when coding):
 | Before coding | Phase 4 test plan; implement GAP tests first |
 | Extraction PR | "Slice `<slice_id>` only; characterization before/after; list files moved" |
 | Integration pack | `external-integrations-deepdive-instructions.md` Phase C |
+| Tenant Text*/Bool* fields | `tenant-workflow-fields-deepdive-instructions.md` Phase A–F |
 | Coupling check | "Find all references from ContextA to ContextB; classify direct DB / service / message" |
 
 ---
@@ -525,6 +527,7 @@ cp "$SB/docs/monolith-modularization/ai-assisted-delivery-quality-framework.md" 
 cp "$SB/docs/monolith-modularization/agent-instructions-snippet.md"      "$MONO/docs/modularization/"
 cp "$SB/docs/monolith-modularization/module-composition-di.md"           "$MONO/docs/modularization/"
 cp "$SB/docs/monolith-modularization/platform-frontend-standard.md"    "$MONO/docs/modularization/"
+cp "$SB/docs/monolith-modularization/tenant-workflow-fields-deepdive-instructions.md" "$MONO/docs/modularization/"
 cp "$SB/docs/monolith-modularization/templates/"*                      "$MONO/docs/modularization/templates/"
 cp -R "$SB/docs/monolith-modularization/starter-kit/"*                   "$MONO/docs/modularization/starter-kit/"
 cp "$SB/docs/floor2plan-v2-connector-architecture.md"                  "$MONO/docs/modularization/"

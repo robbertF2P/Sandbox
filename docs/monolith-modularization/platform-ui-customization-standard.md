@@ -2,7 +2,7 @@
 
 Tenant-specific display variance for V2 modules — **view schemas** and **extension projections** — without bloating core domain models or forking UI per client.
 
-**Related:** `platform-frontend-standard.md`, `platform-actor-standard.md`, `floor2plan-v2-read-model-playbook.md`, `F2pPlatform/README.md` (module ↔ frontend index).
+**Related:** `platform-frontend-standard.md`, `platform-actor-standard.md`, `floor2plan-v2-read-model-playbook.md`, `tenant-workflow-fields-deepdive-instructions.md` (legacy `Text*` / `Bool*` analysis), `F2pPlatform/README.md` (module ↔ frontend index).
 
 **Reference implementation:** Hour Approvals slice — `HourApprovals.Packs.Acme`, `Platform.Shared.View`, `F2pPlatform/web/libs/hour-approvals/`.
 

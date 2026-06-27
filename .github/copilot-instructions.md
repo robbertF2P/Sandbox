@@ -43,6 +43,8 @@ Use when designing repositories, EF queries, or reusable domain criteria.
 - **`docs/monolith-modularization/agent-instructions-snippet.md`** — agent-agnostic rules (copy to monolith `agent-rules.md` + `.github/copilot-instructions.md`).
 - **`docs/monolith-modularization/module-composition-di.md`** — no ABP in new modules; `IServiceCollection` / `WebApplication` extension methods.
 - **`docs/monolith-modularization/starter-kit/README.md`** — module scaffold kit (copy into monolith).
+- **`docs/monolith-modularization/tenant-workflow-fields-deepdive-instructions.md`** — legacy `Text*` / `Bool*` tenant fields: investigate filtering, screens, workflow rules; judge V2 pack vs promote path.
+- **`docs/monolith-modularization/platform-ui-customization-standard.md`** — V2 target for tenant display variance (view schemas, extension projections, customization packs).
 
 ## .NET / C#
 
