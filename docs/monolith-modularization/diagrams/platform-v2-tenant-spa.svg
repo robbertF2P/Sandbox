@@ -1,0 +1,120 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 560" font-family="Segoe UI, system-ui, sans-serif">
+  <defs>
+    <marker id="arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+      <path d="M0,0 L8,4 L0,8 Z" fill="#334155"/>
+    </marker>
+    <style>
+      .title { font-size: 18px; font-weight: 700; fill: #0f172a; }
+      .subtitle { font-size: 12px; fill: #475569; }
+      .section { font-size: 12px; font-weight: 700; fill: #1e40af; }
+      .box { fill: #f8fafc; stroke: #334155; stroke-width: 1.5; rx: 8; }
+      .box-shell { fill: #eff6ff; stroke: #2563eb; stroke-width: 1.5; rx: 8; }
+      .box-lib { fill: #f0fdf4; stroke: #16a34a; stroke-width: 1.5; rx: 8; }
+      .box-shared { fill: #faf5ff; stroke: #7c3aed; stroke-width: 1.5; rx: 8; }
+      .box-host { fill: #fff7ed; stroke: #ea580c; stroke-width: 1.5; rx: 8; }
+      .label { font-size: 13px; font-weight: 600; fill: #0f172a; }
+      .detail { font-size: 10.5px; fill: #475569; }
+      .line { stroke: #334155; stroke-width: 1.5; fill: none; marker-end: url(#arrow); }
+      .line-muted { stroke: #94a3b8; stroke-width: 1.2; fill: none; stroke-dasharray: 5 4; }
+    </style>
+  </defs>
+
+  <text x="20" y="28" class="title">Platform 2.0  Tenant SPA (single application)</text>
+  <text x="20" y="48" class="subtitle">f2p-shell + lazy context libs · one auth session · same-origin /api and /hubs</text>
+
+  <!-- SPA boundary -->
+  <rect x="20" y="68" width="560" height="300" fill="none" stroke="#2563eb" stroke-width="2" rx="12" stroke-dasharray="8 4"/>
+  <text x="36" y="90" class="section">Single SPA  f2p-shell</text>
+
+  <!-- Shell core -->
+  <rect x="40" y="104" width="150" height="56" class="box-shell"/>
+  <text x="115" y="126" text-anchor="middle" class="label">Bootstrap</text>
+  <text x="115" y="142" text-anchor="middle" class="detail">main.ts ’ router-outlet</text>
+
+  <rect x="210" y="104" width="170" height="56" class="box-shell"/>
+  <text x="295" y="126" text-anchor="middle" class="label">app.routes.ts</text>
+  <text x="295" y="142" text-anchor="middle" class="detail">authGuard · loadChildren</text>
+
+  <rect x="400" y="104" width="160" height="56" class="box-shell"/>
+  <text x="480" y="126" text-anchor="middle" class="label">Home tiles</text>
+  <text x="480" y="142" text-anchor="middle" class="detail">in-app navigation</text>
+
+  <!-- Shared cross-cutting -->
+  <rect x="40" y="180" width="250" height="56" class="box-shared"/>
+  <text x="165" y="202" text-anchor="middle" class="label">IdentityAuthService</text>
+  <text x="165" y="218" text-anchor="middle" class="detail">guards + bearer interceptor</text>
+
+  <rect x="310" y="180" width="250" height="56" class="box-shared"/>
+  <text x="435" y="202" text-anchor="middle" class="label">@floorganise/css + ui</text>
+  <text x="435" y="218" text-anchor="middle" class="detail">navbar, tiles, design tokens</text>
+
+  <!-- Lazy context libs -->
+  <text x="40" y="262" class="section">Lazy-loaded context libs</text>
+
+  <rect x="40" y="272" width="120" height="48" class="box-lib"/>
+  <text x="100" y="294" text-anchor="middle" class="label">hour-approvals</text>
+  <text x="100" y="308" text-anchor="middle" class="detail">feature-tasks</text>
+
+  <rect x="175" y="272" width="100" height="48" class="box-lib"/>
+  <text x="225" y="294" text-anchor="middle" class="label">reference</text>
+  <text x="225" y="308" text-anchor="middle" class="detail">feature-*</text>
+
+  <rect x="290" y="272" width="130" height="48" class="box-lib"/>
+  <text x="355" y="294" text-anchor="middle" class="label">platform-events</text>
+  <text x="355" y="308" text-anchor="middle" class="detail">SignalR page</text>
+
+  <rect x="435" y="272" width="125" height="48" class="box-lib"/>
+  <text x="497" y="294" text-anchor="middle" class="label">planning, hours&</text>
+  <text x="497" y="308" text-anchor="middle" class="detail">scaffold + route</text>
+
+  <!-- One build -->
+  <rect x="40" y="336" width="520" height="44" class="box"/>
+  <text x="300" y="356" text-anchor="middle" class="label">One build artifact</text>
+  <text x="300" y="370" text-anchor="middle" class="detail">tsconfig paths / Nx libs  @f2p/&lt;context&gt;/feature-*</text>
+
+  <!-- Same origin / deployment -->
+  <rect x="620" y="104" width="320" height="120" class="box"/>
+  <text x="780" y="128" text-anchor="middle" class="label">Same origin</text>
+  <text x="780" y="146" text-anchor="middle" class="detail">F2P_API_BASE_URL = '' (relative URLs)</text>
+  <text x="780" y="164" text-anchor="middle" class="detail">dev: proxy.conf.json ’ :5080</text>
+  <text x="780" y="182" text-anchor="middle" class="detail">prod: nginx /api + /hubs proxy</text>
+  <text x="780" y="200" text-anchor="middle" class="detail">try_files ’ index.html (deep links)</text>
+
+  <!-- Backend host -->
+  <rect x="620" y="250" width="320" height="118" class="box-host"/>
+  <text x="780" y="276" text-anchor="middle" class="label">F2pPlatform.Host</text>
+  <text x="780" y="294" text-anchor="middle" class="detail">AddIdentityModule · AddHourApprovalsModule &</text>
+  <text x="780" y="312" text-anchor="middle" class="detail">MapIdentityModule · MapHourApprovalsModule &</text>
+  <text x="780" y="330" text-anchor="middle" class="detail">MapHub PlatformEventsHub /hubs/platform-events</text>
+  <text x="780" y="352" text-anchor="middle" class="detail">one composed API surface</text>
+
+  <!-- Arrows -->
+  <line x1="295" y1="160" x2="295" y2="180" class="line-muted"/>
+  <line x1="165" y1="236" x2="100" y2="272" class="line-muted"/>
+  <line x1="435" y1="236" x2="355" y2="272" class="line-muted"/>
+  <line x1="300" y1="380" x2="300" y2="420" class="line"/>
+  <line x1="300" y1="420" x2="620" y2="420" class="line"/>
+  <line x1="620" y1="420" x2="620" y2="368" class="line"/>
+  <text x="460" y="412" class="detail">/api/* HTTPS</text>
+
+  <line x1="355" y1="320" x2="355" y2="440" class="line-muted"/>
+  <line x1="355" y1="440" x2="700" y2="440" class="line-muted"/>
+  <line x1="700" y1="440" x2="700" y2="368" class="line-muted"/>
+  <text x="520" y="434" class="detail">/hubs/* WebSocket</text>
+
+  <!-- Not tenant SPA -->
+  <rect x="20" y="400" width="560" height="56" class="box" stroke-dasharray="6 4"/>
+  <text x="300" y="422" text-anchor="middle" class="label">Not the tenant product SPA</text>
+  <text x="300" y="440" text-anchor="middle" class="detail">f2p-admin-shell = platform operator console · legacy Razor/Vue until strangler cutover</text>
+
+  <!-- Legend -->
+  <rect x="620" y="400" width="14" height="14" class="box-shell"/>
+  <text x="642" y="412" class="detail">Shell / routing</text>
+  <rect x="740" y="400" width="14" height="14" class="box-lib"/>
+  <text x="762" y="412" class="detail">Context lib</text>
+  <rect x="840" y="400" width="14" height="14" class="box-host"/>
+  <text x="862" y="412" class="detail">API host</text>
+
+  <text x="20" y="520" class="detail">Reference: F2pPlatform/web/ · Canonical doc: platform-architecture-overview.md</text>
+  <text x="20" y="538" class="detail">SandBox path aliases = monolith Nx libs with identical layering</text>
+</svg>
