@@ -345,6 +345,8 @@ Copy into the **external** repo when ready:
 
 Store dashboard URLs in `docs/modularization/test-dashboards.md` after creation (one link per module).
 
+**NuGet vulnerability → Jira → AI agent:** see `nuget-vulnerability-jira-workflow.md` and `templates/azure-pipelines-nuget-vulnerability-audit.yml`.
+
 ---
 
 ## Relationship to quality framework
