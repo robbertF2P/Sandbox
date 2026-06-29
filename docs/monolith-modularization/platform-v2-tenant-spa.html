@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <title>Platform 2.0 — Tenant SPA (single application)</title>
+  <style>
+    @page { size: A4; margin: 14mm; }
+    * { box-sizing: border-box; }
+    body {
+      font-family: "Segoe UI", system-ui, sans-serif;
+      color: #0f172a;
+      line-height: 1.45;
+      max-width: 210mm;
+      margin: 0 auto;
+      padding: 12mm;
+      font-size: 11pt;
+    }
+    h1 { font-size: 20pt; margin: 0 0 4px; }
+    h2 { font-size: 14pt; margin: 22px 0 8px; border-bottom: 1px solid #cbd5e1; padding-bottom: 4px; page-break-after: avoid; }
+    h3 { font-size: 12pt; margin: 14px 0 6px; page-break-after: avoid; }
+    p, li { margin: 0 0 6px; }
+    .meta { color: #475569; font-size: 10pt; margin-bottom: 18px; }
+    .diagram { width: 100%; margin: 12px 0 18px; page-break-inside: avoid; }
+    table { width: 100%; border-collapse: collapse; margin: 8px 0 14px; font-size: 10pt; page-break-inside: avoid; }
+    th, td { border: 1px solid #cbd5e1; padding: 6px 8px; text-align: left; vertical-align: top; }
+    th { background: #f1f5f9; }
+    code, pre { background: #f1f5f9; border-radius: 3px; font-size: 9.5pt; }
+    code { padding: 1px 4px; }
+    pre { padding: 8px 10px; overflow-x: auto; margin: 8px 0 12px; }
+    .page-break { page-break-before: always; }
+    ul { margin: 0 0 10px; padding-left: 18px; }
+    .footer { margin-top: 24px; font-size: 9pt; color: #64748b; border-top: 1px solid #e2e8f0; padding-top: 8px; }
+  </style>
+</head>
+<body>
+  <h1>Platform 2.0 — Tenant SPA (single application)</h1>
+  <p class="meta">Architecture supplement · SandBox <code>F2pPlatform/web/</code> · Slides 9–12 in <code>platform-architecture-overview.md</code></p>
+
+  <h2>1. Summary</h2>
+  <ul>
+    <li><strong>One tenant product SPA</strong> — <code>f2p-shell</code> is the only Angular app end users run for planning, hours, hour approvals, etc.</li>
+    <li><strong>Bounded contexts are libs</strong> — lazy-loaded via <code>loadChildren</code> / <code>loadComponent</code>; not separate deployed apps.</li>
+    <li><strong>One auth session</strong> — <code>IdentityAuthService</code> (<code>providedIn: 'root'</code>) + shell <code>authGuard</code> + bearer interceptor on all <code>/api/</code> calls.</li>
+    <li><strong>One visual product</strong> — global <code>@import '@floorganise/css'</code>; shared navbar and tiles from <code>@floorganise/ui</code>.</li>
+    <li><strong>Same origin</strong> — empty API base URL; dev proxy and production nginx forward <code>/api</code> and <code>/hubs</code> to the composed host.</li>
+    <li><strong>Separate operator app</strong> — <code>f2p-admin-shell</code> is the platform console (tenant provisioning), not the tenant product.</li>
+  </ul>
+
+  <h2>2. Architecture diagram</h2>
+  <img class="diagram" src="diagrams/platform-v2-tenant-spa.svg" alt="Tenant SPA single application diagram"/>
+
+  <h2>3. What unifies the experience</h2>
+  <table>
+    <tr><th>Mechanism</th><th>What it unifies</th><th>Key location</th></tr>
+    <tr><td>Shell host</td><td>One bootstrap, one <code>&lt;router-outlet /&gt;</code></td><td><code>apps/f2p-shell/</code></td></tr>
+    <tr><td>Lazy routes</td><td>In-app navigation between contexts</td><td><code>app.routes.ts</code></td></tr>
+    <tr><td>Monorepo libs</td><td>One build artifact</td><td><code>tsconfig.json</code> paths, <code>libs/&lt;context&gt;/</code></td></tr>
+    <tr><td>Root auth</td><td>One login for all modules</td><td><code>libs/identity/data-access/</code></td></tr>
+    <tr><td>HTTP interceptors</td><td>Bearer + correlation headers</td><td><code>app.config.ts</code>, <code>api-core</code></td></tr>
+    <tr><td>Design system</td><td>Shared chrome and tokens</td><td><code>@floorganise/css</code>, <code>@floorganise/ui</code></td></tr>
+    <tr><td>Same-origin API</td><td>Browser sees one backend</td><td><code>proxy.conf.json</code>, <code>nginx.docker.conf</code></td></tr>
+    <tr><td>SPA fallback</td><td>Deep links without per-route apps</td><td>nginx <code>try_files … /index.html</code></td></tr>
+    <tr><td>Composed API host</td><td>All module endpoints on one host</td><td><code>F2pPlatform.Host/Program.cs</code></td></tr>
+  </table>
+
+  <div class="page-break"></div>
+
+  <h2>4. Shell composition root</h2>
+  <p>The shell is thin: bootstrap, router, global styles, and cross-cutting providers only.</p>
+  <pre>// apps/f2p-shell/src/app/app.component.ts
+@Component({
+  selector: 'f2p-root',
+  imports: [RouterOutlet],
+  template: '&lt;router-outlet /&gt;',
+})
+export class AppComponent {}</pre>
+
+  <pre>// apps/f2p-shell/src/app/app.config.ts
+export const appConfig: ApplicationConfig = {
+  providers: [
+    provideRouter(routes),
+    provideHttpClient(withInterceptors([correlationInterceptor, identityAuthInterceptor])),
+    { provide: F2P_API_BASE_URL, useValue: '' },
+  ],
+};</pre>
+
+  <h2>5. Lazy routes — modules plug into one router</h2>
+  <pre>// apps/f2p-shell/src/app/app.routes.ts (excerpt)
+{
+  path: 'hour-approvals',
+  canActivate: [authGuard],
+  loadChildren: () =&gt;
+    import('@f2p/hour-approvals/feature-tasks').then(m =&gt; m.hourApprovalsRoutes),
+},</pre>
+
+  <p>Each context <code>feature-*</code> lib exports child routes and optional capability guards. Adding a context:</p>
+  <ol>
+    <li><code>./scripts/scaffold-frontend-module.sh &lt;Context&gt;</code></li>
+    <li>Register lazy route in <code>app.routes.ts</code></li>
+    <li>Add home tile in <code>home-page.component.ts</code></li>
+    <li>Pair with backend <code>./scripts/scaffold-module.sh &lt;Context&gt;</code> + <code>Program.cs</code></li>
+  </ol>
+
+  <h2>6. Shared auth and HTTP</h2>
+  <table>
+    <tr><th>Concern</th><th>Pattern</th></tr>
+    <tr><td>Login session</td><td><code>IdentityAuthService</code> — localStorage / sessionStorage</td></tr>
+    <tr><td>Route protection</td><td><code>authGuard</code> / <code>guestGuard</code> on shell routes</td></tr>
+    <tr><td>API identity</td><td><code>identityAuthInterceptor</code> → <code>Authorization: Bearer …</code></td></tr>
+    <tr><td>Tracing</td><td><code>correlationInterceptor</code> → <code>X-Correlation-Id</code>, <code>X-Use-Case</code></td></tr>
+    <tr><td>Feature gating</td><td>Context guards (e.g. <code>hourApprovalsFeatureGuard</code>)</td></tr>
+  </table>
+
+  <h2>7. Monorepo layout</h2>
+  <pre>web/
+├── apps/f2p-shell/              tenant product SPA
+├── apps/f2p-admin-shell/        platform operator (separate)
+└── libs/
+    ├── shared/api-core/         correlation interceptor
+    ├── shared/platform-events/  root SignalR client
+    ├── identity/data-access/    auth service, guards
+    └── &lt;context&gt;/
+        ├── data-access/         API clients, feature guards
+        └── feature-*/           routes, smart pages</pre>
+
+  <p>SandBox uses TypeScript path aliases; monolith <code>floor2plan-web</code> uses Nx with identical layering. Nx boundary tags prevent cross-context imports while keeping one deployable SPA.</p>
+
+  <h2>8. Same-origin deployment</h2>
+  <p><strong>Development:</strong> Angular dev server proxies <code>/api</code> and <code>/hubs</code> to <code>localhost:5080</code>.</p>
+  <p><strong>Production:</strong> nginx serves the SPA bundle and proxies API/SignalR; <code>try_files $uri $uri/ /index.html</code> enables deep links like <code>/hour-approvals</code>.</p>
+
+  <h2>9. Backend mirror</h2>
+  <p>The frontend single-origin model matches one composed API host:</p>
+  <pre>builder.Services.AddIdentityModule(builder.Configuration);
+builder.Services.AddHourApprovalsModule(builder.Configuration);
+app.MapIdentityModule();
+app.MapHourApprovalsModule();
+app.MapHub&lt;PlatformEventsHub&gt;("/hubs/platform-events");</pre>
+
+  <h2>10. Related standards</h2>
+  <table>
+    <tr><th>Topic</th><th>Document</th></tr>
+    <tr><td>Full architecture deck</td><td><code>platform-architecture-overview.md</code></td></tr>
+    <tr><td>Frontend standard</td><td><code>platform-frontend-standard.md</code></td></tr>
+    <tr><td>Nx layout &amp; boundaries</td><td><code>floor2plan-v2-read-model-playbook.md</code> §3</td></tr>
+    <tr><td>Auth (design)</td><td><code>platform-authentication-standard.md</code></td></tr>
+    <tr><td>Runnable reference</td><td><code>F2pPlatform/web/README.md</code></td></tr>
+  </table>
+
+  <p class="footer">Canonical source: <code>docs/monolith-modularization/platform-architecture-overview.md</code> · Diagram: <code>diagrams/platform-v2-tenant-spa.svg</code></p>
+</body>
+</html>
