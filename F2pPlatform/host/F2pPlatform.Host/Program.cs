@@ -1,4 +1,3 @@
-using F2pPlatform.Host.ApprovalQueue;
 using F2pPlatform.Host.Hubs;
 using F2pPlatform.Host.Services;
 using HourApprovals.Infrastructure;
@@ -68,7 +67,6 @@ try
     app.MapPlatformConfigModule();
     app.MapReferenceModule();
     app.MapHourApprovalsModule();
-    app.MapApprovalQueueEndpoints();
     app.MapHub<PlatformEventsHub>("/hubs/platform-events");
 
     app.Run();

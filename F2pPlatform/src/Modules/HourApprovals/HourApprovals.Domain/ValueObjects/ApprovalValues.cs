@@ -1,11 +1,12 @@
+using Platform.Shared.Domain;
+
 namespace HourApprovals.Domain.ValueObjects;
 
 public sealed record ApprovalValues(
     decimal HoursToGo,
-    decimal Progress,
-    decimal WorkedHours,
     DateOnly? PlannedStart,
-    DateOnly? PlannedFinish)
+    DateOnly? PlannedFinish,
+    UserName AssignedUser)
 {
     public bool Matches(ApprovalValues? other)
     {
@@ -15,9 +16,8 @@ public sealed record ApprovalValues(
         }
 
         return HoursToGo == other.HoursToGo
-            && Progress == other.Progress
-            && WorkedHours == other.WorkedHours
             && PlannedStart == other.PlannedStart
-            && PlannedFinish == other.PlannedFinish;
+            && PlannedFinish == other.PlannedFinish
+            && AssignedUser == other.AssignedUser;
     }
 }

@@ -23,11 +23,9 @@ namespace HourApprovals.Data.Migrations.Migrations
                     Title = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: false),
                     ActivityCode = table.Column<string>(type: "nvarchar(64)", maxLength: 64, nullable: false),
                     HoursToGo = table.Column<decimal>(type: "decimal(18,4)", precision: 18, scale: 4, nullable: false),
-                    Progress = table.Column<decimal>(type: "decimal(18,4)", precision: 18, scale: 4, nullable: false),
-                    WorkedHours = table.Column<decimal>(type: "decimal(18,4)", precision: 18, scale: 4, nullable: false),
                     PlannedStart = table.Column<DateOnly>(type: "date", nullable: true),
                     PlannedFinish = table.Column<DateOnly>(type: "date", nullable: true),
-                    IsActiveForCurrentUser = table.Column<bool>(type: "bit", nullable: false)
+                    AssignedUser = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: false)
                 },
                 constraints: table =>
                 {
@@ -41,13 +39,13 @@ namespace HourApprovals.Data.Migrations.Migrations
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     TaskId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    ApprovalDay = table.Column<DateOnly>(type: "date", nullable: false),
                     ApprovedBy = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: false),
                     ApprovedAtUtc = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
                     HoursToGo = table.Column<decimal>(type: "decimal(18,4)", precision: 18, scale: 4, nullable: false),
-                    Progress = table.Column<decimal>(type: "decimal(18,4)", precision: 18, scale: 4, nullable: false),
-                    WorkedHours = table.Column<decimal>(type: "decimal(18,4)", precision: 18, scale: 4, nullable: false),
                     PlannedStart = table.Column<DateOnly>(type: "date", nullable: true),
-                    PlannedFinish = table.Column<DateOnly>(type: "date", nullable: true)
+                    PlannedFinish = table.Column<DateOnly>(type: "date", nullable: true),
+                    AssignedUser = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: false)
                 },
                 constraints: table =>
                 {
@@ -62,10 +60,11 @@ namespace HourApprovals.Data.Migrations.Migrations
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_approval_records_TaskId_ApprovedAtUtc",
+                name: "IX_approval_records_TaskId_ApprovalDay",
                 schema: "hour_approvals",
                 table: "approval_records",
-                columns: new[] { "TaskId", "ApprovedAtUtc" });
+                columns: new[] { "TaskId", "ApprovalDay" },
+                unique: true);
         }
 
         /// <inheritdoc />

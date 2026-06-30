@@ -10,15 +10,11 @@ public sealed class ActiveTaskEntity
 
     public decimal HoursToGo { get; set; }
 
-    public decimal Progress { get; set; }
-
-    public decimal WorkedHours { get; set; }
-
     public DateOnly? PlannedStart { get; set; }
 
     public DateOnly? PlannedFinish { get; set; }
 
-    public bool IsActiveForCurrentUser { get; set; }
+    public string AssignedUser { get; set; } = string.Empty;
 
     public List<ApprovalRecordEntity> ApprovalRecords { get; set; } = [];
 }
