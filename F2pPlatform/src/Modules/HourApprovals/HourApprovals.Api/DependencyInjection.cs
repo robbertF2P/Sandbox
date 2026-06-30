@@ -129,7 +129,7 @@ internal static class HourApprovalsEndpoints
                 }
             })
             .WithName("SaveHourApprovalTask")
-            .WithSummary("Save task values and auto-approve as the acting user.");
+            .WithSummary("Save task values without recording an approval.");
 
         group.MapPost("/tasks/{taskId:guid}/approve", async (
                 HttpContext httpContext,
@@ -247,17 +247,15 @@ internal static class HourApprovalsEndpoints
     private static ApprovalValues MapValues(SaveTaskBody body) =>
         new(
             body.HoursToGo,
-            body.Progress,
-            body.WorkedHours,
             body.PlannedStart,
-            body.PlannedFinish);
+            body.PlannedFinish,
+            new UserName(body.AssignedUser));
 
     private static object MapTask(TaskApprovalView view) => new
     {
         id = view.Task.Id.Value,
         title = view.Task.Title.Value,
         activityCode = view.Task.ActivityCode.Value,
-        isActiveForCurrentUser = view.Task.IsActiveForCurrentUser,
         approvalState = view.State.ToString(),
         isApproved = view.State == TaskApprovalState.Approved,
         currentValues = MapValues(view.Task.CurrentValues),
@@ -268,6 +266,7 @@ internal static class HourApprovalsEndpoints
                 id = view.LastApproval.Id,
                 approvedBy = view.LastApproval.ApprovedBy.Value,
                 approvedAtUtc = view.LastApproval.ApprovedAtUtc,
+                approvalDay = view.LastApproval.ApprovalDay.ToString("yyyy-MM-dd"),
                 approvedValues = MapValues(view.LastApproval.ApprovedValues),
             },
     };
@@ -275,18 +274,16 @@ internal static class HourApprovalsEndpoints
     private static object MapValues(ApprovalValues values) => new
     {
         hoursToGo = values.HoursToGo,
-        progress = values.Progress,
-        workedHours = values.WorkedHours,
         plannedStart = values.PlannedStart,
         plannedFinish = values.PlannedFinish,
+        assignedUser = values.AssignedUser.Value,
     };
 
     private sealed record SaveTaskBody(
         decimal HoursToGo,
-        decimal Progress,
-        decimal WorkedHours,
         DateOnly? PlannedStart,
-        DateOnly? PlannedFinish);
+        DateOnly? PlannedFinish,
+        string AssignedUser);
 
     private sealed record SubmitTasksBody(IReadOnlyList<Guid> TaskIds);
 }

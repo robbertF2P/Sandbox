@@ -8,6 +8,9 @@ public static class HourApprovalRules
 {
     public const string ApproveHoursProgressPermission = "ApproveHoursProgress";
 
+    public static DateOnly ResolveApprovalDay(DateTimeOffset approvedAtUtc) =>
+        DateOnly.FromDateTime(approvedAtUtc.UtcDateTime);
+
     public static TaskApprovalState ResolveState(
         ApprovalValues currentValues,
         ApprovalRecord? lastApproval) =>

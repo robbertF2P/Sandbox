@@ -1,285 +1,148 @@
 <div class="floorboard-page">
   <f2p-app-navbar title="FLOOR2PLAN" [moduleMenuEnabled]="false">
     <ng-container navbarActions>
-      <span class="nav-link text-sm text-white/80">{{ primaryOrganisation() }}</span>
-      <span class="nav-link text-sm text-white">{{ displayName || 'Metal Shop Lead' }}</span>
-      <button type="button" class="nav-link text-sm text-white/80" aria-label="Settings">⚙</button>
+      <span class="nav-link text-sm text-white">{{ displayName || 'Foreman' }}</span>
     </ng-container>
   </f2p-app-navbar>
 
-  <div class="floorboard-layout">
-    <aside class="floorboard-filters">
-      <h2 class="floorboard-filters__title">FILTERS</h2>
+  <main class="floorboard-main max-w-6xl mx-auto p-6">
+    <header class="flex flex-wrap items-center justify-between gap-4 mb-6">
+      <div>
+        <h1 class="text-2xl font-semibold">Task approvals</h1>
+        <p class="text-sm text-gray-600 mt-1">
+          Select tasks, adjust values if needed, then approve. Changed values require re-approval.
+        </p>
+      </div>
 
-      <section class="floorboard-filter-section">
-        <h3>Departments</h3>
-        <div class="floorboard-filter-options">
-          @for (org of organisationOptions(); track org.value) {
-            <label class="floorboard-filter-option">
-              <input
-                type="checkbox"
-                [checked]="selectedOrganisationIds().includes(org.value)"
-                (change)="onOrganisationToggle(org.value, $any($event.target).checked)"
-              />
-              <span class="floorboard-filter-option__label">{{ org.label }}</span>
-            </label>
-          }
-        </div>
-      </section>
+      <div class="flex flex-wrap items-center gap-3">
+        <input
+          type="search"
+          class="floorboard-search border rounded px-3 py-2"
+          placeholder="Search tasks"
+          [ngModel]="searchTerm()"
+          (ngModelChange)="onSearchChange($event)"
+        />
 
-      <section class="floorboard-filter-section">
-        <h3>Discipline</h3>
-        <div class="floorboard-filter-options">
-          @for (option of disciplineOptions(); track option.value) {
-            <label class="floorboard-filter-option">
-              <input
-                type="checkbox"
-                [checked]="selectedDisciplines().includes(option.value)"
-                (change)="onDisciplineToggle(option.value, $any($event.target).checked)"
-              />
-              <span class="floorboard-filter-option__label">{{ option.label }}</span>
-            </label>
-          }
-        </div>
-      </section>
+        <select
+          class="border rounded px-3 py-2"
+          [ngModel]="statusFilter()"
+          (ngModelChange)="onStatusFilterChange($event)"
+        >
+          <option value="all">All tasks</option>
+          <option value="approved">Approved</option>
+          <option value="not_approved">Needs approval</option>
+        </select>
 
-      <section class="floorboard-filter-section">
-        <h3>Project</h3>
-        <div class="floorboard-filter-options">
-          @for (option of projectOptions(); track option.value) {
-            <label class="floorboard-filter-option">
-              <input
-                type="checkbox"
-                [checked]="selectedProjects().includes(option.value)"
-                (change)="onProjectToggle(option.value, $any($event.target).checked)"
-              />
-              <span class="floorboard-filter-option__label">{{ option.label }}</span>
-            </label>
-          }
-        </div>
-      </section>
+        <button
+          type="button"
+          class="f2ps-btn-primary"
+          [disabled]="!submitEnabled()"
+          (click)="submitSelected()"
+        >
+          {{ submitting() ? 'Approving…' : 'Approve selected' }}
+        </button>
+      </div>
+    </header>
 
-      <section class="floorboard-filter-section">
-        <h3>Submission status</h3>
-        <div class="floorboard-filter-options">
-          @for (option of categoryOptions; track option.value) {
-            <label class="floorboard-filter-option">
-              <input
-                type="checkbox"
-                [checked]="selectedCategories().includes(option.value)"
-                (change)="onCategoryToggle(option.value, $any($event.target).checked)"
-              />
-              <span class="floorboard-filter-option__label">{{ option.label }}</span>
-            </label>
-          }
-        </div>
-      </section>
+    @if (error()) {
+      <p class="text-red-600 mb-4" role="alert">{{ error() }}</p>
+    }
 
-      <section class="floorboard-filter-section">
-        <h3>Location</h3>
-        <div class="floorboard-filter-options">
-          @for (option of locationOptions(); track option.value) {
-            <label class="floorboard-filter-option">
-              <input
-                type="checkbox"
-                [checked]="selectedLocations().includes(option.value)"
-                (change)="onLocationToggle(option.value, $any($event.target).checked)"
-              />
-              <span class="floorboard-filter-option__label">{{ option.label }}</span>
-            </label>
-          }
-        </div>
-      </section>
-    </aside>
-
-    <main class="floorboard-main">
-      <header class="floorboard-toolbar">
-        <div class="space-y-3">
-          <h1 class="floorboard-toolbar__title">FLOORBOARD</h1>
-          <div class="floorboard-time-window">
-            @for (option of timeWindowOptions; track option.value) {
-              <label>
+    @if (loading()) {
+      <p>Loading tasks…</p>
+    } @else {
+      <div class="overflow-x-auto border rounded">
+        <table class="w-full text-sm">
+          <thead class="bg-gray-50 border-b">
+            <tr>
+              <th class="p-3 text-left">
                 <input
-                  type="radio"
-                  name="timeWindow"
-                  [value]="option.value"
-                  [checked]="timeWindow() === option.value"
-                  (change)="onTimeWindowChange(option.value)"
+                  type="checkbox"
+                  [checked]="allVisibleSelected()"
+                  (change)="toggleSelectAll($any($event.target).checked)"
+                  aria-label="Select all visible tasks"
                 />
-                {{ option.label }}
-              </label>
-            }
-          </div>
-        </div>
-
-        <div class="floorboard-toolbar-actions">
-          <input
-            type="search"
-            class="floorboard-search"
-            placeholder="Search"
-            [ngModel]="searchTerm()"
-            (ngModelChange)="onSearchChange($event)"
-          />
-          @if (canApprove()) {
-            <label class="flex items-center gap-2 text-sm text-f2p-ink">
-              <input
-                type="checkbox"
-                [checked]="allVisibleSelected()"
-                (change)="toggleSelectAll($any($event.target).checked)"
-              />
-              Select all
-            </label>
-            <button
-              type="button"
-              class="f2ps-btn-primary f2ps-btn-sm"
-              [disabled]="!submitEnabled()"
-              (click)="submitSelected()"
-            >
-              {{ submitting() ? 'Submitting…' : 'Submit' }}
-            </button>
-          }
-        </div>
-      </header>
-
-      @if (error()) {
-        <div class="panel mb-4 border-f2p-danger/30 bg-f2p-danger/5 p-4 text-sm text-f2p-danger">
-          {{ error() }}
-        </div>
-      }
-
-      @if (loading()) {
-        <p class="text-sm text-f2p-ink-muted">Loading queue…</p>
-      } @else if (groupedSections().length === 0) {
-        <div class="rounded border border-f2p-border p-6 text-sm text-f2p-ink-muted">
-          No tasks match the current filters.
-        </div>
-      } @else {
-        @for (section of groupedSections(); track section.category) {
-          <section class="floorboard-section">
-            <h2 class="floorboard-section__title">{{ section.title | uppercase }}</h2>
-
-            @for (group of section.projectGroups; track group.projectLabel) {
-              <div class="floorboard-project-group">
-                <div class="floorboard-project-group__header">
-                  <span>{{ group.projectLabel }}</span>
-                  @if (canApprove()) {
-                    <label class="flex items-center gap-2 text-xs font-normal text-f2p-ink-muted">
+              </th>
+              <th class="p-3 text-left">Task</th>
+              <th class="p-3 text-left">Activity</th>
+              @for (column of editableColumns(); track column.id) {
+                <th class="p-3 text-left">{{ columnLabel(column) }}</th>
+              }
+              @for (column of extensionColumns(); track column.id) {
+                <th class="p-3 text-left">{{ columnLabel(column) }}</th>
+              }
+              <th class="p-3 text-left">Status</th>
+              <th class="p-3 text-left">Last approval</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (task of visibleTasks(); track task.id) {
+              <tr class="border-b" [ngClass]="{ 'bg-green-50': task.isApproved }">
+                <td class="p-3">
+                  <input
+                    type="checkbox"
+                    [checked]="isSelected(task.id)"
+                    (change)="toggleRowSelection(task.id, $any($event.target).checked)"
+                    [attr.aria-label]="'Select ' + task.title"
+                  />
+                </td>
+                <td class="p-3 font-medium">{{ task.title }}</td>
+                <td class="p-3">{{ task.activityCode }}</td>
+                @for (column of editableColumns(); track column.id) {
+                  <td class="p-3" [ngClass]="fieldClass(task, column.id)">
+                    @if (column.id === 'assignedUser') {
                       <input
-                        type="checkbox"
-                        [checked]="isGroupSelected(group.rows)"
-                        (change)="toggleGroupSelection(group.rows, $any($event.target).checked)"
+                        type="text"
+                        class="border rounded px-2 py-1 w-full"
+                        [ngModel]="draftFor(task.id)?.assignedUser"
+                        (ngModelChange)="onDraftChange(task.id, 'assignedUser', $event)"
                       />
-                      Select group
-                    </label>
-                  }
-                </div>
-
-                @for (row of group.rows; track row.taskId) {
-                  @if (draftFor(row.taskId); as draft) {
-                    <article class="floorboard-row">
-                      <div class="floorboard-row__task">
-                        <div class="floorboard-row__task-icon">{{ row.taskNumber }}</div>
-                        <div class="min-w-0">
-                          <div class="floorboard-row__task-title">{{ row.title }}</div>
-                          <div class="floorboard-row__task-meta">{{ row.locationPath }}</div>
-                          @if (row.lastApproval; as approval) {
-                            <div class="floorboard-row__last-submitted">
-                              Last submitted: {{ approval.approvedBy }} |
-                              {{ approval.approvedAtUtc | date: 'mediumDate' }}
-                            </div>
-                          }
-                        </div>
-                      </div>
-
-                      <div class="floorboard-progress">
-                        <div class="progress-bar">
-                          <div class="progress-bar__fill" [style.width.%]="draft.progress"></div>
-                        </div>
-                        <span class="text-xs font-medium text-f2p-ink">{{ draft.progress }}%</span>
-                      </div>
-
-                      <div class="floorboard-dates">
-                        <span>📅 {{ row.lookbackValues.plannedStart || '—' }}</span>
-                        <span>📅 {{ row.lookbackValues.plannedFinish || '—' }}</span>
-                      </div>
-
-                      <div class="floorboard-dates">
-                        <span>📅 {{ draft.plannedStart || '—' }}</span>
-                        <span>📅 {{ draft.plannedFinish || '—' }}</span>
-                      </div>
-
-                      <div class="floorboard-metrics">
-                        <span>⏱ {{ row.totalHoursBooked }}</span>
-                        <span>👥 {{ hoursWindowLabel(row) }}</span>
-                      </div>
-
-                      <div class="floorboard-team">
-                        <span aria-hidden="true">👥</span>
-                        <span>{{ row.teamCount }}</span>
-                      </div>
-
-                      <div class="floorboard-approval-fields">
-                        @for (column of editableColumns(); track column.id) {
-                          @if (isEditableField(column.id)) {
-                            <label class="floorboard-field" [ngClass]="fieldClass(row, column.id)">
-                              <span>{{ columnLabel(column) }}</span>
-                              <input
-                                [type]="column.format === 'date' ? 'date' : 'number'"
-                                [step]="column.format === 'date' ? undefined : '0.1'"
-                                [ngModel]="draft[column.id]"
-                                (ngModelChange)="onDraftChange(row.taskId, column.id, $event)"
-                                [disabled]="!canApprove()"
-                              />
-                            </label>
-                          }
-                        }
-
-                        @for (column of extensionColumns(); track column.id) {
-                          <div class="floorboard-field floorboard-field--readonly">
-                            <span>{{ columnLabel(column) }}</span>
-                            <span class="text-sm text-f2p-ink">{{ extensionValue(row, column) }}</span>
-                          </div>
-                        }
-
-                        @for (column of computedColumns(); track column.id) {
-                          <div class="floorboard-field floorboard-field--readonly">
-                            <span>{{ columnLabel(column) }}</span>
-                            <span class="text-sm text-f2p-ink">{{ computedValue(row, column) }}</span>
-                          </div>
-                        }
-
-                        <label class="floorboard-field floorboard-100">
-                          <span>100%</span>
-                          <input
-                            type="checkbox"
-                            [checked]="isAt100(row.taskId)"
-                            [disabled]="!canApprove()"
-                            (change)="onAt100Toggle(row.taskId, $any($event.target).checked)"
-                          />
-                        </label>
-
-                        <label class="floorboard-field floorboard-field--select">
-                          <span>Select</span>
-                          <input
-                            type="checkbox"
-                            [checked]="isSelected(row.taskId)"
-                            [disabled]="!canApprove()"
-                            (change)="toggleRowSelection(row.taskId, $any($event.target).checked)"
-                          />
-                        </label>
-                      </div>
-                    </article>
-                  }
+                    } @else if (column.id === 'hoursToGo') {
+                      <input
+                        type="number"
+                        step="0.5"
+                        class="border rounded px-2 py-1 w-24"
+                        [ngModel]="draftFor(task.id)?.hoursToGo"
+                        (ngModelChange)="onDraftChange(task.id, 'hoursToGo', $event)"
+                      />
+                    } @else if (column.id === 'plannedStart') {
+                      <input
+                        type="date"
+                        class="border rounded px-2 py-1"
+                        [ngModel]="draftFor(task.id)?.plannedStart"
+                        (ngModelChange)="onDraftChange(task.id, 'plannedStart', $event)"
+                      />
+                    } @else if (column.id === 'plannedFinish') {
+                      <input
+                        type="date"
+                        class="border rounded px-2 py-1"
+                        [ngModel]="draftFor(task.id)?.plannedFinish"
+                        (ngModelChange)="onDraftChange(task.id, 'plannedFinish', $event)"
+                      />
+                    }
+                  </td>
                 }
-              </div>
+                @for (column of extensionColumns(); track column.id) {
+                  <td class="p-3">{{ extensionValue(task, column) }}</td>
+                }
+                <td class="p-3">
+                  <span [ngClass]="task.isApproved ? 'text-green-700' : 'text-amber-700'">
+                    {{ task.isApproved ? 'Approved' : 'Needs approval' }}
+                  </span>
+                </td>
+                <td class="p-3 text-gray-600">
+                  @if (task.lastApproval) {
+                    {{ task.lastApproval.approvedBy }}
+                    <span class="block text-xs">{{ task.lastApproval.approvedAtUtc | date: 'medium' }}</span>
+                  } @else {
+                    —
+                  }
+                </td>
+              </tr>
             }
-          </section>
-        }
-      }
-
-      @if (!canApprove()) {
-        <p class="mt-4 text-sm text-f2p-ink-muted">Read-only — foreman can view queue and approval metadata.</p>
-      }
-    </main>
-  </div>
+          </tbody>
+        </table>
+      </div>
+    }
+  </main>
 </div>

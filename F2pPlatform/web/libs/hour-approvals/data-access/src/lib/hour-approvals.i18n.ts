@@ -4,39 +4,34 @@ export type HourApprovalsLabelBundle = Record<string, string>;
 
 export const HOUR_APPROVALS_CORE_I18N: Record<HourApprovalsLocale, HourApprovalsLabelBundle> = {
   en: {
+    'hourApprovals.columns.assignedUser': 'Assigned user',
     'hourApprovals.columns.hoursToGo': 'Hours to go',
-    'hourApprovals.columns.progress': 'Progress',
     'hourApprovals.columns.plannedStart': 'Planned start',
     'hourApprovals.columns.plannedFinish': 'Planned finish',
-    'hourApprovals.columns.daysSinceLastSubmission': 'Days since last submission',
   },
   nl: {
+    'hourApprovals.columns.assignedUser': 'Toegewezen gebruiker',
     'hourApprovals.columns.hoursToGo': 'Uren te gaan',
-    'hourApprovals.columns.progress': 'Voortgang',
     'hourApprovals.columns.plannedStart': 'Geplande start',
     'hourApprovals.columns.plannedFinish': 'Geplande finish',
-    'hourApprovals.columns.daysSinceLastSubmission': 'Dagen sinds laatste indiening',
   },
   es: {
+    'hourApprovals.columns.assignedUser': 'Usuario asignado',
     'hourApprovals.columns.hoursToGo': 'Horas restantes',
-    'hourApprovals.columns.progress': 'Progreso',
     'hourApprovals.columns.plannedStart': 'Inicio planificado',
     'hourApprovals.columns.plannedFinish': 'Fin planificado',
-    'hourApprovals.columns.daysSinceLastSubmission': 'Días desde el último envío',
   },
   ja: {
+    'hourApprovals.columns.assignedUser': '担当者',
     'hourApprovals.columns.hoursToGo': '残り時間',
-    'hourApprovals.columns.progress': '進捗',
     'hourApprovals.columns.plannedStart': '予定開始',
     'hourApprovals.columns.plannedFinish': '予定終了',
-    'hourApprovals.columns.daysSinceLastSubmission': '最終提出からの日数',
   },
   vi: {
+    'hourApprovals.columns.assignedUser': 'Người được giao',
     'hourApprovals.columns.hoursToGo': 'Giờ còn lại',
-    'hourApprovals.columns.progress': 'Tiến độ',
     'hourApprovals.columns.plannedStart': 'Ngày bắt đầu dự kiến',
     'hourApprovals.columns.plannedFinish': 'Ngày kết thúc dự kiến',
-    'hourApprovals.columns.daysSinceLastSubmission': 'Số ngày kể từ lần gửi cuối',
   },
 };
 

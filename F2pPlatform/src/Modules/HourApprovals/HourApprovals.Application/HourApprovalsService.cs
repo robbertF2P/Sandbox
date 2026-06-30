@@ -90,25 +90,8 @@ public sealed class HourApprovalsService : IHourApprovalsService
         }
 
         ActiveTask task = await RequireTaskAsync(taskId, cancellationToken);
-        ApprovalRecord? previousApproval = await _repository.GetLatestApprovalAsync(taskId, cancellationToken);
-        bool wasApproved = HourApprovalRules.ResolveState(task.CurrentValues, previousApproval)
-            == TaskApprovalState.Approved;
-
-        task.UpdateValues(values, isActiveForCurrentUser: false);
+        task.UpdateValues(values);
         await _repository.SaveTaskAsync(task, cancellationToken);
-
-        ApprovalRecord record = ApprovalRecord.Create(
-            taskId,
-            actingUser,
-            DateTimeOffset.UtcNow,
-            values);
-
-        await _repository.AppendApprovalRecordAsync(record, cancellationToken);
-
-        if (wasApproved)
-        {
-            task.UpdateValues(values, isActiveForCurrentUser: false);
-        }
 
         return await BuildViewAsync(task, cancellationToken);
     }
@@ -128,14 +111,20 @@ public sealed class HourApprovalsService : IHourApprovalsService
         }
 
         ActiveTask task = await RequireTaskAsync(taskId, cancellationToken);
+        DateTimeOffset approvedAtUtc = DateTimeOffset.UtcNow;
+        DateOnly approvalDay = HourApprovalRules.ResolveApprovalDay(approvedAtUtc);
 
-        ApprovalRecord record = ApprovalRecord.Create(
-            taskId,
-            actingUser,
-            DateTimeOffset.UtcNow,
-            task.CurrentValues);
+        ApprovalRecord? existing = await _repository.GetApprovalForDayAsync(taskId, approvalDay, cancellationToken);
+        ApprovalRecord record = existing is null
+            ? ApprovalRecord.Create(taskId, approvalDay, actingUser, approvedAtUtc, task.CurrentValues)
+            : existing;
 
-        await _repository.AppendApprovalRecordAsync(record, cancellationToken);
+        if (existing is not null)
+        {
+            record.Update(actingUser, approvedAtUtc, task.CurrentValues);
+        }
+
+        await _repository.UpsertDailyApprovalAsync(record, cancellationToken);
         return await BuildViewAsync(task, cancellationToken);
     }
 

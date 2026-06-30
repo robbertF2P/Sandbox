@@ -114,7 +114,7 @@ public sealed class HourApprovalsEndpointTests : IClassFixture<HourApprovalsWebA
     }
 
     [Fact]
-    public async Task SaveTask_CreatesApprovalRecord_ForSupervisor()
+    public async Task SaveTask_UpdatesValues_WithoutApproving()
     {
         Guid taskId = Guid.Parse("11111111-1111-1111-1111-111111111101");
 
@@ -124,10 +124,9 @@ public sealed class HourApprovalsEndpointTests : IClassFixture<HourApprovalsWebA
             new
             {
                 hoursToGo = 11m,
-                progress = 36m,
-                workedHours = 49m,
                 plannedStart = "2026-06-10",
                 plannedFinish = "2026-06-24",
+                assignedUser = "j.doe",
             });
 
         using HttpResponseMessage saveResponse = await _client.SendAsync(saveRequest);
@@ -135,9 +134,8 @@ public sealed class HourApprovalsEndpointTests : IClassFixture<HourApprovalsWebA
 
         var saved = await saveResponse.Content.ReadFromJsonAsync<TaskResponse>();
         Assert.NotNull(saved);
-        Assert.Equal("Approved", saved.ApprovalState);
-        Assert.NotNull(saved.LastApproval);
-        Assert.Equal("supervisor.demo", saved.LastApproval.ApprovedBy);
+        Assert.Equal("NotApproved", saved.ApprovalState);
+        Assert.Null(saved.LastApproval);
     }
 
     [Fact]
@@ -151,10 +149,9 @@ public sealed class HourApprovalsEndpointTests : IClassFixture<HourApprovalsWebA
             new
             {
                 hoursToGo = 18m,
-                progress = 12m,
-                workedHours = 9m,
                 plannedStart = "2026-06-12",
                 plannedFinish = "2026-07-01",
+                assignedUser = "m.smith",
             });
 
         using HttpResponseMessage saveResponse = await _client.SendAsync(saveRequest);
@@ -198,6 +195,35 @@ public sealed class HourApprovalsEndpointTests : IClassFixture<HourApprovalsWebA
     }
 
     [Fact]
+    public async Task SubmitTasks_UpdatesSameDayApproval_WhenSubmittedTwice()
+    {
+        Guid taskId = Guid.Parse("11111111-1111-1111-1111-111111111102");
+
+        using HttpRequestMessage firstSubmit = CreateSupervisorRequest(
+            HttpMethod.Post,
+            "/api/hour-approvals/submit",
+            new { taskIds = new[] { taskId } });
+        using HttpRequestMessage secondSubmit = CreateSupervisorRequest(
+            HttpMethod.Post,
+            "/api/hour-approvals/submit",
+            new { taskIds = new[] { taskId } });
+
+        using HttpResponseMessage firstResponse = await _client.SendAsync(firstSubmit);
+        using HttpResponseMessage secondResponse = await _client.SendAsync(secondSubmit);
+
+        Assert.Equal(HttpStatusCode.OK, firstResponse.StatusCode);
+        Assert.Equal(HttpStatusCode.OK, secondResponse.StatusCode);
+
+        var first = await firstResponse.Content.ReadFromJsonAsync<SubmitTasksResponse>();
+        var second = await secondResponse.Content.ReadFromJsonAsync<SubmitTasksResponse>();
+
+        Assert.NotNull(first);
+        Assert.NotNull(second);
+        Assert.Equal(first.Approved[0].LastApproval?.Id, second.Approved[0].LastApproval?.Id);
+        Assert.True(second.Approved[0].LastApproval!.ApprovedAtUtc >= first.Approved[0].LastApproval!.ApprovedAtUtc);
+    }
+
+    [Fact]
     public async Task SubmitTasks_ReturnsForbidden_ForForemanWithoutPermission()
     {
         Guid taskId = Guid.Parse("11111111-1111-1111-1111-111111111102");
@@ -212,66 +238,33 @@ public sealed class HourApprovalsEndpointTests : IClassFixture<HourApprovalsWebA
     }
 
     [Fact]
-    public async Task GetApprovalQueue_ComposesPlanningTimekeepingAndHours()
+    public async Task ChangedValues_RequireReapproval()
     {
-        using HttpRequestMessage request = CreateSupervisorRequest(
-            HttpMethod.Get,
-            "/api/hour-approvals/queue?submissionCategories=worked_on");
+        Guid taskId = Guid.Parse("11111111-1111-1111-1111-111111111101");
 
-        using HttpResponseMessage response = await _client.SendAsync(request);
-        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        using HttpRequestMessage submitRequest = CreateSupervisorRequest(
+            HttpMethod.Post,
+            "/api/hour-approvals/submit",
+            new { taskIds = new[] { taskId } });
+        using HttpResponseMessage submitResponse = await _client.SendAsync(submitRequest);
+        Assert.Equal(HttpStatusCode.OK, submitResponse.StatusCode);
 
-        var rows = await response.Content.ReadFromJsonAsync<List<QueueRowResponse>>();
-        Assert.NotNull(rows);
-        Assert.Equal(2, rows.Count);
-        Assert.All(rows, row => Assert.Equal("worked_on", row.SubmissionCategory));
-        Assert.Contains(rows, row => row.ActivityCode == "ACT-204-WIR");
-        Assert.Contains(rows, row => row.ActivityCode == "ACT-DCK-COT");
-    }
+        using HttpRequestMessage saveRequest = CreateSupervisorRequest(
+            HttpMethod.Put,
+            $"/api/hour-approvals/tasks/{taskId}",
+            new
+            {
+                hoursToGo = 99m,
+                plannedStart = "2026-06-10",
+                plannedFinish = "2026-06-24",
+                assignedUser = "j.doe",
+            });
+        using HttpResponseMessage saveResponse = await _client.SendAsync(saveRequest);
+        Assert.Equal(HttpStatusCode.OK, saveResponse.StatusCode);
 
-    [Fact]
-    public async Task GetApprovalQueue_ReturnsDifferentHours_ForTimeWindow()
-    {
-        using HttpRequestMessage currentWeekRequest = CreateSupervisorRequest(
-            HttpMethod.Get,
-            "/api/hour-approvals/queue?timeWindow=current_week");
-        using HttpRequestMessage lastWeekRequest = CreateSupervisorRequest(
-            HttpMethod.Get,
-            "/api/hour-approvals/queue?timeWindow=last_week");
-
-        using HttpResponseMessage currentWeekResponse = await _client.SendAsync(currentWeekRequest);
-        using HttpResponseMessage lastWeekResponse = await _client.SendAsync(lastWeekRequest);
-
-        Assert.Equal(HttpStatusCode.OK, currentWeekResponse.StatusCode);
-        Assert.Equal(HttpStatusCode.OK, lastWeekResponse.StatusCode);
-
-        var currentWeekRows = await currentWeekResponse.Content.ReadFromJsonAsync<List<QueueRowWithHoursResponse>>();
-        var lastWeekRows = await lastWeekResponse.Content.ReadFromJsonAsync<List<QueueRowWithHoursResponse>>();
-
-        Assert.NotNull(currentWeekRows);
-        Assert.NotNull(lastWeekRows);
-
-        QueueRowWithHoursResponse wiringRow = Assert.Single(
-            currentWeekRows,
-            row => row.ActivityCode == "ACT-204-WIR");
-        QueueRowWithHoursResponse wiringLastWeek = Assert.Single(
-            lastWeekRows,
-            row => row.ActivityCode == "ACT-204-WIR");
-
-        Assert.Equal(2m, wiringRow.HoursWorkedInWindow);
-        Assert.Equal(6m, wiringLastWeek.HoursWorkedInWindow);
-    }
-
-    [Fact]
-    public async Task GetApprovalQueue_ReturnsBadRequest_ForInvalidOrganisationIds()
-    {
-        using HttpRequestMessage request = CreateSupervisorRequest(
-            HttpMethod.Get,
-            "/api/hour-approvals/queue?organisationIds=abc");
-
-        using HttpResponseMessage response = await _client.SendAsync(request);
-
-        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+        var saved = await saveResponse.Content.ReadFromJsonAsync<TaskResponse>();
+        Assert.NotNull(saved);
+        Assert.Equal("NotApproved", saved.ApprovalState);
     }
 
     private static HttpRequestMessage CreateSupervisorRequest(
@@ -329,17 +322,7 @@ public sealed class HourApprovalsEndpointTests : IClassFixture<HourApprovalsWebA
         string ApprovalState,
         LastApprovalResponse? LastApproval);
 
-    private sealed record LastApprovalResponse(string ApprovedBy, DateTimeOffset ApprovedAtUtc);
-
-    private sealed record QueueRowResponse(
-        [property: JsonPropertyName("taskId")] Guid TaskId,
-        [property: JsonPropertyName("activityCode")] string ActivityCode,
-        [property: JsonPropertyName("submissionCategory")] string SubmissionCategory,
-        [property: JsonPropertyName("approvalState")] string ApprovalState);
-
-    private sealed record QueueRowWithHoursResponse(
-        [property: JsonPropertyName("activityCode")] string ActivityCode,
-        [property: JsonPropertyName("hoursWorkedInWindow")] decimal HoursWorkedInWindow);
+    private sealed record LastApprovalResponse(Guid Id, string ApprovedBy, DateTimeOffset ApprovedAtUtc);
 
     private sealed record SubmitTasksResponse(
         [property: JsonPropertyName("approved")] List<TaskResponse> Approved,
@@ -372,9 +355,9 @@ public sealed class HourApprovalsFeatureFlagTests : IClassFixture<HourApprovalsD
     }
 
     [Fact]
-    public async Task GetApprovalQueue_ReturnsNotFound_WhenFeatureDisabled()
+    public async Task ListTasks_ReturnsNotFound_WhenFeatureDisabled()
     {
-        using HttpRequestMessage request = new(HttpMethod.Get, "/api/hour-approvals/queue");
+        using HttpRequestMessage request = new(HttpMethod.Get, "/api/hour-approvals/tasks");
         request.Headers.Add("X-User-Name", "supervisor.demo");
         using HttpResponseMessage response = await _client.SendAsync(request);
 

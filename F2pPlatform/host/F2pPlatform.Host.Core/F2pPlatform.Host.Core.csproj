@@ -13,7 +13,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\F2pPlatform.Host.Contracts\F2pPlatform.Host.Contracts.csproj" />
-    <ProjectReference Include="..\..\src\Modules\HourApprovals\HourApprovals.Application\HourApprovals.Application.csproj" />
   </ItemGroup>
 
   <Import Project="../../../build/Platform.Logging.Library.props" />
