@@ -36,6 +36,8 @@ For **tenant workflow extension fields** (`Text1`, `Text2`, …, `Bool1`, `Bool2
 
 For **team education** on legacy connector submodules vs integration packs: `docs/floor2plan-legacy-connector-submodule-antipattern.md`.
 
+For **customer version visibility** (which platform version and customization profile each tenant runs; support matrix; deployment registry), use `docs/modularization/customer-version-visibility-deepdive-instructions.md`. Run against **customized Floor2Plan delivery repos** (parent assembler with `core/` + `client/` + `connectors/`) and the **core product repo** for branch topology — not SandBox.
+
 For a **concrete legacy → V2 pack proposal** on one connector:
 
 - `docs/floor2plan-v2-connector-prompt-plm-planning.md` — **recommended first** (PLM structure → planning)
