@@ -1,0 +1,34 @@
+stateDiagram-v2
+    direction LR
+
+    [*] --> Draft
+
+    Draft --> Reported : Submit\n[Hours.Report]
+    Rejected --> Reported : Resubmit\n[Hours.Report]
+
+    Reported --> Checked : CheckPass\n[Hours.Check]
+    Reported --> Rejected : CheckFail\n[Hours.Check]
+
+    Checked --> Approved : Approve\n[ApproveHoursProgress]
+    Checked --> Rejected : Reject\n[ApproveHoursProgress]
+    Checked --> Reported : SendBack\n[Hours.Check]
+
+    Approved --> Exported : Export\n[Hours.Export]
+    Approved --> Reported : Reopen\n[Hours.Reopen]
+
+    Exported --> [*]
+
+    note right of Reported
+        Foreman queue:
+        awaiting check
+    end note
+
+    note right of Checked
+        Approver queue:
+        awaiting approval
+    end note
+
+    note right of Approved
+        Export job:
+        ready for payroll
+    end note
