@@ -43,6 +43,8 @@ For a **concrete legacy → V2 pack proposal** on one connector:
 
 Generic template: `docs/floor2plan-v2-connector-migration-prompt.md`
 
+For **Primavera XER bulk project import** (~9k components, ~250k activities, HiLo + batched EF Core): `docs/modularization/primavera-xer-import-service-instructions.md` — run against the **external F2P monolith repo**; SandBox POCs are `reference_only`.
+
 ## Non-negotiable rules
 
 1. **Behaviour preservation first** — characterize legacy behaviour before refactoring.
