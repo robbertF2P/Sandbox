@@ -402,9 +402,15 @@ Import/
 ├── Import.Api/
 │   └── MapImportEndpoints.cs             # POST /import/structure (model) + /import/xer (file)
 └── Import.Tests/
-    ├── ProjectStructure/                 # validator + model tests (no DB)
+    ├── Fixtures/
+    │   └── minimal-project-structure.xer   # embedded resource — see below
+    ├── Infrastructure/
+    │   └── EmbeddedXerFixture.cs           # loads embedded .xer streams
+    ├── Integration/
+    │   └── XerProjectImportEndToEndTests.cs  # REQUIRED — full pipeline + DB
+    ├── ProjectStructure/
     ├── Persistence/HiLoProjectImportServiceTests.cs
-    ├── Sources/Xer/                        # parser + adapter golden tests
+    ├── Sources/Xer/
     └── Characterization/LegacyXerImportBaselineTests.cs
 ```
 
@@ -442,6 +448,182 @@ Hangfire `ImportXerJob` / `ImportSciformaJob` become thin triggers: **adapter �
 
 ---
 
+## Embedded golden XER integration test (required)
+
+Claude **must** implement an end-to-end integration test that loads a real XER file from an **embedded resource**, runs parse → adapter → `IProjectImportService`, and asserts the database state. This is the primary proof that the pipeline works — not optional.
+
+### Reference fixture (copy into monolith)
+
+SandBox ships a minimal golden file for structure and expected counts:
+
+| File | Contents |
+|------|----------|
+| `docs/monolith-modularization/fixtures/minimal-project-structure.xer` | 1 project, 3 WBS nodes, 5 tasks, 2 predecessors, 1 assignment |
+
+Copy (or trim from a legacy `TestData` XER) into `Import.Tests/Fixtures/minimal-project-structure.xer` in the **external monolith**.
+
+**Expected counts after import:**
+
+| Entity | Count | Sample external id (`Primavera`) |
+|--------|-------|----------------------------------|
+| Project | 1 | project keyed via `proj_id` / name `MV-ALPHA` |
+| Component | 3 | `1000`, `1001`, `1002` |
+| Activity | 5 | `2000` … `2004` |
+| ActivityRelation | 2 | `2000→2001` (FS), `2002→2004` (FS) |
+| Assignment | 1 | task `2000` → resource `4000` |
+
+Adjust assertions if legacy maps `proj_id` differently — cite Phase 0 evidence or align adapter to fixture.
+
+### Embed the file in the test project
+
+```xml
+<!-- Import.Tests/Import.Tests.csproj -->
+<ItemGroup>
+  <EmbeddedResource Include="Fixtures\minimal-project-structure.xer" />
+</ItemGroup>
+```
+
+Use logical name `Fixtures.minimal-project-structure.xer` (default) or set explicitly:
+
+```xml
+<EmbeddedResource Include="Fixtures\minimal-project-structure.xer">
+  <LogicalName>Import.Tests.Fixtures.minimal-project-structure.xer</LogicalName>
+</EmbeddedResource>
+```
+
+### Fixture loader helper
+
+```csharp
+namespace Import.Tests.Infrastructure;
+
+internal static class EmbeddedXerFixture
+{
+    public static Stream OpenMinimalProjectStructure() =>
+        typeof(EmbeddedXerFixture).Assembly
+            .GetManifestResourceStream("Import.Tests.Fixtures.minimal-project-structure.xer")
+        ?? throw new InvalidOperationException(
+            "Embedded XER not found. Add Fixtures/minimal-project-structure.xer as EmbeddedResource.");
+
+    public static async Task<Stream> OpenMinimalProjectStructureAsync(CancellationToken ct = default)
+    {
+        var stream = OpenMinimalProjectStructure();
+        var memory = new MemoryStream();
+        await stream.CopyToAsync(memory, ct);
+        memory.Position = 0;
+        await stream.DisposeAsync();
+        return memory;
+    }
+}
+```
+
+List manifest names in a one-time diagnostic if the stream is null:
+
+```csharp
+[assembly: CollectionBehavior(DisableTestParallelization = true)] // optional for shared DB
+```
+
+### Required integration test
+
+Place in `Import.Tests/Integration/XerProjectImportEndToEndTests.cs`. Use **real SQL Server** (Testcontainers or shared test DB pattern from existing monolith tests — match nearest project; cite `reference_only` from `ApiImportActorPoc` SQL test infra if needed).
+
+```csharp
+public sealed class XerProjectImportEndToEndTests : IAsyncLifetime
+{
+    private ImportTestDatabase _db = null!;
+    private IProjectImportService _importService = null!;
+    private XerProjectStructureAdapter _adapter = null!;
+
+    public async ValueTask InitializeAsync()
+    {
+        _db = await ImportTestDatabase.CreateAsync();
+        _importService = _db.CreateProjectImportService();
+        _adapter = new XerProjectStructureAdapter(new StreamingXerParser());
+    }
+
+    [Fact]
+    public async Task Import_minimal_embedded_xer_persists_project_tree_and_relations()
+    {
+        await using var xer = await EmbeddedXerFixture.OpenMinimalProjectStructureAsync();
+
+        var validation = await _adapter.MapAsync(xer);
+        Assert.True(validation.IsValid, string.Join("; ", validation.Issues.Select(i => i.Message)));
+
+        var result = await _importService.PersistAsync(validation.Model!);
+
+        await using var verify = await _db.CreateDbContextAsync();
+
+        var project = await verify.Projects.SingleAsync();
+        Assert.Equal("MV-ALPHA", project.Name);
+
+        Assert.Equal(3, await verify.Components.CountAsync());
+        Assert.Equal(5, await verify.Activities.CountAsync());
+        Assert.Equal(2, await verify.ActivityRelations.CountAsync());
+        Assert.Equal(1, await verify.Assignments.CountAsync());
+
+        // Hierarchy: hull and outfit under root
+        var root = await verify.Components.SingleAsync(c => c.Name == "wbs-root");
+        var hull = await verify.Components.SingleAsync(c => c.Name == "wbs-hull");
+        Assert.Equal(root.Id, hull.ParentComponentId);
+
+        // Activity under correct component
+        var erection = await verify.Activities.SingleAsync(a => a.Name == "Hull Block Erection");
+        Assert.Equal(hull.Id, erection.ComponentId);
+
+        // Finish-to-start: erection → welding
+        var welding = await verify.Activities.SingleAsync(a => a.Name == "Hull Welding");
+        Assert.True(await verify.ActivityRelations.AnyAsync(r =>
+            r.SourceActivityId == erection.Id && r.TargetActivityId == welding.Id));
+
+        // External id round-trip
+        var primaveraActivityId = await verify.EntityExternalIds
+            .Where(e => e.System == "Primavera" && e.Value == "2000")
+            .Select(e => e.InternalEntityId)
+            .SingleAsync();
+        Assert.Equal(erection.Id, primaveraActivityId);
+    }
+
+    [Fact]
+    public async Task Reimport_same_embedded_xer_updates_without_duplicates()
+    {
+        await using var xer1 = await EmbeddedXerFixture.OpenMinimalProjectStructureAsync();
+        var model1 = (await _adapter.MapAsync(xer1)).Model!;
+        var first = await _importService.PersistAsync(model1);
+
+        await using var xer2 = await EmbeddedXerFixture.OpenMinimalProjectStructureAsync();
+        var model2 = (await _adapter.MapAsync(xer2)).Model!;
+        var second = await _importService.PersistAsync(model2);
+
+        Assert.Equal(first.ProjectId, second.ProjectId);
+
+        await using var verify = await _db.CreateDbContextAsync();
+        Assert.Equal(5, await verify.Activities.CountAsync());
+        Assert.Equal(5, await verify.EntityExternalIds.CountAsync(e => e.EntityKind == ImportEntityKind.Activity));
+    }
+}
+```
+
+### What the integration test must assert
+
+| Assertion | Why |
+|-----------|-----|
+| Row counts match fixture | Parser + adapter completeness |
+| `ParentComponentId` / `ComponentId` correct | Tree FK integrity |
+| Activity relation source/target ids exist | Deferred relation pass |
+| `EntityExternalId` rows for `Primavera` | Upsert / re-import contract |
+| Re-import does not duplicate rows | Idempotency |
+| No orphan rows after failed import (separate test) | Transaction boundaries |
+
+### CI vs nightly
+
+| Test | Fixture | When |
+|------|---------|------|
+| `XerProjectImportEndToEndTests` | `minimal-project-structure.xer` (embedded) | **Every CI build** |
+| `XerImport_LargeFile_*` | Full production-scale XER (not embedded; file share or `[Explicit]`) | Nightly / manual |
+
+Keep the embedded fixture **small** (< 50 KB) so CI stays fast. Scale tests use a separate file path.
+
+---
+
 ## Phased workflow for Claude
 
 ### Phase 0 — Forensic (external repo)
@@ -476,11 +658,12 @@ Deliverable: `docs/modularization/integrations/primavera-xer-import-phase0.md` c
 - Implement `HiLoProjectImportService` with batched passes.
 - Integration test: persist a hand-built `ProjectStructureImportModel` with 10k activities in < N seconds.
 
-### Phase 2 — XER adapter
+### Phase 2 — XER adapter + embedded integration test
 
 - Implement `StreamingXerParser` (XER-only; outputs `XerParseResult`).
 - Implement `XerProjectStructureAdapter` → `ProjectStructureImportModel`.
-- Golden file test: adapter output row counts match legacy parser.
+- Copy `minimal-project-structure.xer` into `Import.Tests/Fixtures/` as **EmbeddedResource**.
+- Implement `EmbeddedXerFixture` + **`XerProjectImportEndToEndTests`** (parse → adapter → persist → DB assertions). **Must pass in CI.**
 - Wire `ImportXerJob` → parse → adapter → **`IProjectImportService`** (not direct EF).
 
 ### Phase 3 — Wire + strangler
