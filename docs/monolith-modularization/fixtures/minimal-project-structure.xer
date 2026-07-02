@@ -1,0 +1,26 @@
+ERMHDR	2024-01-15	USER	admin	dbxDatabaseNoName	Project Management	USD
+%T	PROJECT
+%F	proj_id	proj_short_name	plan_start_date
+%R	100	MV-ALPHA	2024-01-01 00:00
+%T	PROJWBS
+%F	wbs_id	proj_id	parent_wbs_id	wbs_short_name
+%R	1000	100		wbs-root
+%R	1001	100	1000	wbs-hull
+%R	1002	100	1000	wbs-outfit
+%T	TASK
+%F	task_id	proj_id	wbs_id	task_name
+%R	2000	100	1001	Hull Block Erection
+%R	2001	100	1001	Hull Welding
+%R	2002	100	1002	Pipe Install
+%R	2003	100	1002	Electrical Pull
+%R	2004	100	1000	Sea Trials Prep
+%T	TASKPRED
+%F	task_id	pred_task_id	pred_type	lag_hr_cnt
+%R	2001	2000	PR_FS	0
+%R	2004	2002	PR_FS	0
+%T	TASKRSRC
+%F	taskrsrc_id	task_id	rsrc_id	target_qty
+%R	3000	2000	4000	40
+%T	RSRC
+%F	rsrc_id	rsrc_name
+%R	4000	Welder Pool
