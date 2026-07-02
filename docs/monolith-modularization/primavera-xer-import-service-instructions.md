@@ -1,6 +1,12 @@
 # Primavera XER project import service — build instructions
 
-**Purpose:** Guide Claude (or any AI assistant) to design and implement a **fast, reliable** project import service that reads an Oracle Primavera **XER** file and persists ~9,000 components and ~250,000 activities (tree + relations) into EF Core with correct foreign keys.
+**Purpose:** Guide Claude (or any AI assistant) to design and implement:
+
+1. A **vendor-neutral intermediate import model** (`ProjectStructureImportModel`) shared by all structure import sources.
+2. A **reusable `ProjectImportService`** that persists that model to EF Core (fast, batched HiLo).
+3. A **Primavera XER adapter** that maps XER → intermediate model (~9,000 components, ~250,000 activities).
+
+XER is the first adapter; Sciforma, Excel/Aspose, PLM packs, and JSON/API import must plug into the **same** persist service — not duplicate EF logic per vendor.
 
 **Audience:** Engineers and AI agents implementing the Import / Sync bounded context in Platform 2.0.
 
@@ -70,18 +76,22 @@ The **legacy XER import is slow and fragile**. Root causes to confirm in Phase 0
 ## Non-negotiable rules
 
 1. **Behaviour preservation first** — run legacy import on a golden XER; capture row counts, timings, and sample entities before refactoring.
-2. **Parse → canonical model → persist** — three layers; no EF entities in the parser.
-3. **Bulk persist** — batched inserts; **never** `SaveChangesAsync` per row at this scale.
-4. **HiLo (or equivalent) for greenfield inserts** — pre-assign integer PKs so FKs are set before `AddRange`.
-5. **Deferred relations** — activity predecessors need both endpoints mapped; insert relations in a final pass (see POC `deferredRelations` pattern).
-6. **One EF boundary** — single persist service/actor touches `DbContext` for the import workflow (`platform-actor-standard.md`).
-7. **External ids** — every imported entity carries `Primavera:<task_id|wbs_id|…>`; upsert matches on external id, not name.
-8. **No ABP in new modules** — `AddImportModule` / `MapImportEndpoints`; legacy bridged via `[StranglerAdapter]`.
-9. **Cite evidence** — `path:line` for legacy claims; `[NEEDS REVIEW]` when uncertain.
+2. **Three layers, strict boundaries** — `Source adapter` (XER, Excel, PLM, …) → **`ProjectStructureImportModel`** → `ProjectImportService` (EF). No EF entities in adapters; **no vendor types in the persist service**.
+3. **One persist service for all sources** — `IProjectImportService.PersistAsync(ProjectStructureImportModel)` is the only bulk-write entry point. XER, Sciforma (EP-2002), Aspose (EP-2004), and integration packs each supply a mapper; they do **not** call `DbContext` directly.
+4. **Bulk persist** — batched inserts; **never** `SaveChangesAsync` per row at this scale.
+5. **HiLo (or equivalent) for greenfield inserts** — pre-assign integer PKs so FKs are set before `AddRange`.
+6. **Deferred relations** — activity predecessors need both endpoints mapped; insert relations in a final pass (see POC `deferredRelations` pattern).
+7. **One EF boundary** — `ProjectImportService` (or its persist actor) is the sole `DbContext` writer for structure import (`platform-actor-standard.md`).
+8. **External ids** — every entity carries `IReadOnlyDictionary<string, string> ExternalIds` (e.g. `"Primavera"`, `"PLM"`, `"Sciforma"`). Upsert matches on `(system, value)`, not name. Vendor-specific ids stay in adapters until mapped into `ExternalIds`.
+9. **Import keys inside the batch** — intermediate model links rows with opaque `ImportKey` strings (unique within the batch). Adapters set keys from vendor ids; the persist service never reads Primavera `wbs_id` / `task_id` directly.
+10. **No ABP in new modules** — `AddImportModule` / `MapImportEndpoints`; legacy bridged via `[StranglerAdapter]`.
+11. **Cite evidence** — `path:line` for legacy claims; `[NEEDS REVIEW]` when uncertain.
 
 ---
 
-## XER format (parser contract)
+## XER format (parser contract — adapter input only)
+
+The streaming parser is **XER-specific**. It outputs `XerParseResult` (internal to `Import.Infrastructure.Sources.Xer`). The **`XerProjectStructureAdapter`** maps that to `ProjectStructureImportModel`. The persist service never sees XER tables or field names.
 
 Primavera XER is a line-oriented, tab-delimited text file:
 
@@ -112,24 +122,134 @@ Primavera XER is a line-oriented, tab-delimited text file:
 
 ---
 
-## Canonical intermediate model
+## Intermediate import model (vendor-neutral contract)
 
-Align with `ApiImportActorPoc` import payloads (`reference_only`):
+**This is the centre of the design.** All import sources converge here before any database write.
+
+Place types in **`Import.Domain`** (or `Import.Contracts`) — referenced by adapters, the persist service, API, and integration packs. **No** XER, Excel, or PLM types in this project.
+
+### Design principles
+
+| Principle | Detail |
+|-----------|--------|
+| **Flat lists** | Not nested trees — optimised for bulk insert and 250k+ rows |
+| **ImportKey linking** | Opaque string keys unique within the batch (`"cmp:1"`, `"act:42"`). Adapters assign keys; persist service maps `ImportKey` → internal `int` id |
+| **ExternalIds for upsert** | Multi-namespace dictionary per entity; persist service resolves existing rows by any `(system, value)` pair |
+| **Optional nested JSON** | API/POC may accept nested `ComponentImportPayload` trees; deserializer **flattens** to this model before persist |
+| **Parse issues stay upstream** | `ImportValidationResult` wraps model + issues; persist service rejects invalid models |
+
+### Core types (illustrative — implement in monolith)
 
 ```csharp
-// Illustrative — adapt to monolith Import module contracts
-public sealed record XerImportBatch(
-    ProjectImportPayload Project,
-    IReadOnlyList<ComponentImportRow> Components,      // flat, with ParentPrimaveraId
-    IReadOnlyList<ActivityImportRow> Activities,       // flat, with ComponentPrimaveraId
-    IReadOnlyList<AssignmentImportRow> Assignments,
-    IReadOnlyList<ActivityRelationImportRow> Relations,
-    IReadOnlyList<ParseIssue> Issues);
+namespace Import.Domain.ProjectStructure;
+
+/// <summary>Vendor-neutral project structure batch. Sole input to IProjectImportService.</summary>
+public sealed record ProjectStructureImportModel(
+    ProjectImportPart Project,
+    IReadOnlyList<ComponentImportPart> Components,
+    IReadOnlyList<ActivityImportPart> Activities,
+    IReadOnlyList<AssignmentImportPart> Assignments,
+    IReadOnlyList<ActivityRelationImportPart> Relations);
+
+public sealed record ProjectImportPart(
+    string ImportKey,
+    string Name,
+    IReadOnlyDictionary<string, string> ExternalIds);
+
+public sealed record ComponentImportPart(
+    string ImportKey,
+    string? ParentImportKey,          // null = root under project
+    string Name,
+    bool IsTemplate,
+    IReadOnlyDictionary<string, string> ExternalIds);
+
+public sealed record ActivityImportPart(
+    string ImportKey,
+    string ComponentImportKey,
+    string Name,
+    IReadOnlyDictionary<string, string> ExternalIds);
+
+public sealed record AssignmentImportPart(
+    string ImportKey,
+    string ActivityImportKey,
+    string PersonName,
+    string? Description,
+    decimal? BudgetedHours,
+    IReadOnlyDictionary<string, string> ExternalIds);
+
+public sealed record ActivityRelationImportPart(
+    string SourceActivityImportKey,
+    string TargetActivityImportKey,
+    ActivityRelationType Type,        // FinishToStart, StartToStart, …
+    int? LagDays);
+
+public sealed record ImportValidationResult(
+    ProjectStructureImportModel? Model,
+    IReadOnlyList<ImportIssue> Issues)
+{
+    public bool IsValid => Model is not null && Issues.Count == 0;
+}
 ```
 
-**Flat lists, not nested trees**, for bulk insert. Tree shape is recovered via `ParentPrimaveraId` / `ComponentPrimaveraId` foreign keys to Primavera ids, then mapped to internal ids.
+Align field names and external-id rules with `ApiImportActorPoc` import payloads (`reference_only`) — same semantics, **flat** shape for scale.
 
-External id namespace: **`Primavera`** (match `PrimaveraExcelReader` and POC).
+### Persist port (single entry point)
+
+```csharp
+namespace Import.Application;
+
+public interface IProjectImportService
+{
+    Task<ProjectImportResult> PersistAsync(
+        ProjectStructureImportModel model,
+        IProgress<ImportPersistProgress>? progress = null,
+        CancellationToken cancellationToken = default);
+}
+```
+
+**Only** `IProjectImportService` (and its HiLo implementation) touches EF for structure import. Vendor jobs call adapters, then this interface.
+
+### Source adapters (one per vendor/format)
+
+Each adapter implements **`IProjectStructureSourceAdapter`** or a dedicated mapper — lives in Infrastructure or an integration pack:
+
+```csharp
+public interface IProjectStructureSourceAdapter<TSource>
+{
+    Task<ImportValidationResult> MapAsync(TSource source, CancellationToken cancellationToken = default);
+}
+```
+
+| Adapter | Input | Maps to | Legacy entry |
+|---------|-------|---------|--------------|
+| `XerProjectStructureAdapter` | XER file stream | `ProjectStructureImportModel` | `ImportXerJob` (EP-2001) |
+| `SciformaProjectStructureAdapter` | Sciforma export | same | `ImportSciformaJob` (EP-2002) |
+| `PrimaveraExcelProjectStructureAdapter` | Excel workbook | same | Aspose / `PrimaveraExcelReader` pattern |
+| `PlmProjectStructureAdapter` | PLM canonical JSON | same | PLM pack / `PlmImport` |
+| `JsonProjectStructureAdapter` | Nested API JSON | same (flatten) | `ApiImportActorPoc` round-trip |
+
+**XER adapter example** — Primavera ids become import keys and external ids; persist service never sees `wbs_id`:
+
+```csharp
+// Inside XerProjectStructureAdapter only:
+ComponentImportPart.FromWbs(wbs) => new(
+    ImportKey: $"wbs:{wbs.WbsId}",
+    ParentImportKey: wbs.ParentWbsId is null ? null : $"wbs:{wbs.ParentWbsId}",
+    Name: wbs.ShortName,
+    IsTemplate: false,
+    ExternalIds: new Dictionary<string, string> { ["Primavera"] = wbs.WbsId });
+```
+
+### Validation before persist
+
+Run on the intermediate model (adapter or shared `ProjectStructureImportValidator`):
+
+- Unique `ImportKey` per entity kind within the batch
+- Every `ParentImportKey` / `ComponentImportKey` / activity relation endpoint references an existing key
+- No duplicate `(system, value)` in `ExternalIds` across the batch
+- Component graph is acyclic
+
+Reject persist when `ImportValidationResult.IsValid` is false; return issues to caller (UI / job log).
 
 ---
 
@@ -176,34 +296,36 @@ Mark `[StranglerAdapter]` if legacy and new paths share tables during transition
 
 ## Bulk insert algorithm (required)
 
+`ProjectImportService` implements this — **vendor-agnostic**. Input is always `ProjectStructureImportModel`.
+
 Replace recursive `UpsertComponentsAsync` + per-row `SaveChanges` with a **multi-pass pipeline**:
 
 ```text
 Pass 0 — Resolve project
   Upsert project row (single SaveChanges or merge statement)
-  Build externalIdMap: PrimaveraId → InternalId (preload from DB for re-import)
+  Build externalIdMap: (system, value) → InternalId (preload from DB for re-import)
+  Build importKeyMap: ImportKey → InternalId (starts empty; filled as rows insert)
 
 Pass 1 — Components (topological order)
-  Sort PROJWBS by depth (parents before children)
+  Sort by depth using ParentImportKey (parents before children)
   Allocate HiLo ids for new components
-  Set ParentComponentId from idMap[parent_wbs_id]
+  Set ParentComponentId from importKeyMap[parentImportKey]
   AddRange(components) in batches of 2,000–5,000
   SaveChangesAsync per batch (ChangeTracker.Clear() between batches)
-  Update idMap with new Primavera → internal ids
+  Update importKeyMap and externalIdMap
   Write EntityExternalId rows in same batch
 
 Pass 2 — Activities
-  For each activity: ComponentId = idMap[task.wbs_id]
-  Allocate HiLo ids; AddRange in batches; SaveChanges; update idMap
+  ComponentId = importKeyMap[activity.ComponentImportKey]
+  Allocate HiLo ids; AddRange in batches; SaveChanges; update maps
 
-Pass 3 — Assignments (if in scope)
-  ActivityId = idMap[task_id]; batched AddRange
+Pass 3 — Assignments (if present)
+  ActivityId = importKeyMap[assignment.ActivityImportKey]; batched AddRange
 
 Pass 4 — Activity relations (deferred)
-  SourceActivityId = idMap[task_id]
-  TargetActivityId = idMap[pred_task_id]
-  Map pred_type → FinishToStart / StartToStart / … (match legacy mapping — cite tests)
-  AddRange in batches; single SaveChanges per batch
+  SourceActivityId = importKeyMap[relation.SourceActivityImportKey]
+  TargetActivityId = importKeyMap[relation.TargetActivityImportKey]
+  AddRange in batches; SaveChanges per batch
 
 Pass 5 — External ids (if not written inline)
   Bulk insert remaining EntityExternalId rows
@@ -249,7 +371,7 @@ If profiling shows EF insert still too slow after batching:
 | Scenario | Strategy |
 |----------|----------|
 | First import | HiLo bulk insert (passes 1–4) |
-| Re-import same XER | Load `EntityExternalId` for `System = 'Primavera'` into memory; match rows; **update** changed scalars; **insert** only new Primavera ids; **soft-delete or tombstone** removed entities only if legacy does (confirm in Phase 0) |
+| Re-import same file | Load `EntityExternalId` into memory; match by any `(system, value)` in `ExternalIds`; **update** changed scalars; **insert** only entities with no matching external id; tombstone removed entities only if legacy does (confirm in Phase 0) |
 
 The POC `ProjectImportIdentityResolver` (`reference_only`) shows external-id-first resolution — port the **idea**, not the per-row persist.
 
@@ -259,22 +381,44 @@ The POC `ProjectImportIdentityResolver` (`reference_only`) shows external-id-fir
 
 ```text
 Import/
-├── Import.Domain/              # XerImportBatch, ports, parse issues
+├── Import.Domain/
+│   └── ProjectStructure/           # ProjectStructureImportModel, ImportKey, ImportIssue
 ├── Import.Application/
-│   ├── IXerParser.cs
-│   ├── IProjectImportPersistPort.cs
-│   └── ProjectImportService.cs # orchestrates parse → persist
+│   ├── IProjectImportService.cs    # sole persist port — vendor-agnostic
+│   ├── ProjectStructureImportValidator.cs
+│   └── ImportPersistProgress.cs
 ├── Import.Infrastructure/
-│   ├── Xer/StreamingXerParser.cs
-│   ├── Persistence/HiLoProjectImportWriter.cs
-│   └── Strangler/LegacyXerImportAdapter.cs   # [StranglerAdapter] delegates to ImportXerJob during cutover
+│   ├── Persistence/
+│   │   └── HiLoProjectImportService.cs   # implements IProjectImportService
+│   ├── Sources/
+│   │   ├── Xer/
+│   │   │   ├── StreamingXerParser.cs     # XER-only; outputs XerParseResult
+│   │   │   └── XerProjectStructureAdapter.cs  # XerParseResult → ProjectStructureImportModel
+│   │   ├── Json/
+│   │   │   └── JsonProjectStructureAdapter.cs # nested API payload → flat model
+│   │   └── Sciforma/                     # future; same pattern
+│   └── Strangler/
+│       └── LegacyXerImportAdapter.cs     # [StranglerAdapter] feature-flag cutover
 ├── Import.Api/
-│   └── MapImportEndpoints.cs
+│   └── MapImportEndpoints.cs             # POST /import/structure (model) + /import/xer (file)
 └── Import.Tests/
-    ├── Golden/                  # real XER fixtures (sanitized)
-    ├── XerParserTests.cs
-    ├── HiLoBulkInsertTests.cs
+    ├── ProjectStructure/                 # validator + model tests (no DB)
+    ├── Persistence/HiLoProjectImportServiceTests.cs
+    ├── Sources/Xer/                        # parser + adapter golden tests
     └── Characterization/LegacyXerImportBaselineTests.cs
+```
+
+Integration packs (PLM, SAP, …) ship **`IProjectStructureSourceAdapter`** implementations that reference **`Import.Domain` only** — not `Import.Infrastructure` or EF.
+
+### Data flow
+
+```text
+┌─────────────┐   ┌──────────────────────┐   ┌─────────────────────────┐   ┌──────────┐
+│ XER file    │──▶│ XerProjectStructure  │──▶│ ProjectStructureImport  │──▶│ Project  │
+│ Excel / PLM │──▶│ Adapter (per source) │──▶│ Model                   │──▶│ Import   │
+│ JSON API    │──▶│                      │──▶│ (vendor-neutral)        │──▶│ Service  │
+└─────────────┘   └──────────────────────┘   └─────────────────────────┘   └──────────┘
+     parse              map only                    validate                    EF only
 ```
 
 ### Actor orchestration (optional, recommended)
@@ -285,11 +429,16 @@ Per `platform-actor-standard.md`:
 POST /api/import/xer
   → ImportManagerActor
     → XerParseActor (CPU-bound, no EF)
-    → ProjectImportDataActor (sole DbContext — calls HiLoProjectImportWriter)
+    → XerMapActor → ProjectStructureImportModel
+    → ProjectImportDataActor (sole DbContext — calls IProjectImportService)
   → ImportPersisted event
+
+POST /api/import/structure          # same persist path for JSON / pack submissions
+  → ImportManagerActor
+    → ProjectImportDataActor
 ```
 
-Hangfire `ImportXerJob` becomes a thin trigger that sends the same command during migration.
+Hangfire `ImportXerJob` / `ImportSciformaJob` become thin triggers: **adapter → `IProjectImportService`**.
 
 ---
 
@@ -320,23 +469,25 @@ Deliverable: `docs/modularization/integrations/primavera-xer-import-phase0.md` c
 | Baseline metrics | Component count, activity count, duration, failure modes |
 | Tests | Existing tests or `none found` |
 
-### Phase 1 — Parser
+### Phase 1 — Intermediate model + persist service
 
-- Implement `StreamingXerParser` with issue collection.
-- Unit tests per table; golden file test asserting row counts match legacy parser.
-- **No database** in parser tests.
+- Define `ProjectStructureImportModel` and `IProjectImportService` in Domain/Application.
+- Implement `ProjectStructureImportValidator` with unit tests (no DB).
+- Implement `HiLoProjectImportService` with batched passes.
+- Integration test: persist a hand-built `ProjectStructureImportModel` with 10k activities in < N seconds.
 
-### Phase 2 — HiLo migration + writer
+### Phase 2 — XER adapter
 
-- Add sequences / HiLo configuration.
-- Implement `HiLoProjectImportWriter` with batched passes.
-- Integration test: insert 10k activities in < N seconds (set N from local CI; e.g. < 30s).
+- Implement `StreamingXerParser` (XER-only; outputs `XerParseResult`).
+- Implement `XerProjectStructureAdapter` → `ProjectStructureImportModel`.
+- Golden file test: adapter output row counts match legacy parser.
+- Wire `ImportXerJob` → parse → adapter → **`IProjectImportService`** (not direct EF).
 
 ### Phase 3 — Wire + strangler
 
-- New `IProjectImportPersistPort` implementation.
-- `[StranglerAdapter]` routes `ImportXerJob` to new writer behind feature flag.
-- Characterization test: new import ≡ legacy import for golden XER (counts + sampled hashes).
+- `[StranglerAdapter]` routes legacy job behind feature flag.
+- Characterization test: XER path ≡ legacy import for golden file (counts + sampled hashes).
+- Add `JsonProjectStructureAdapter` for API round-trip (optional; proves reuse).
 
 ### Phase 4 — Observability
 
@@ -350,11 +501,13 @@ Deliverable: `docs/modularization/integrations/primavera-xer-import-phase0.md` c
 
 | Test | Purpose |
 |------|---------|
-| `XerParser_ParsesGoldenFile_MatchesLegacyCounts` | Parser parity |
-| `HiLoWriter_Inserts250kActivities_AllForeignKeysValid` | Scale test (use reduced fixture in CI; full file nightly) |
-| `Reimport_SameXer_UpdatesByPrimaveraExternalId` | Idempotency |
-| `Import_Relations_MapsPredTypesCorrectly` | TASKPRED → ActivityRelation |
-| `Import_InvalidWbsReference_CollectsParseIssue` | Fail gracefully, no partial orphan rows |
+| `ProjectStructureValidator_RejectsOrphanActivity` | Model validation without DB |
+| `ProjectImportService_PersistsHandBuiltModel` | Persist service in isolation (no XER) |
+| `JsonAdapter_FlattensNestedPayload_ToSameModelAsFlat` | API reuse path |
+| `XerAdapter_MapsGoldenFile_MatchesLegacyCounts` | XER adapter parity |
+| `XerImport_EndToEnd_250kActivities_AllForeignKeysValid` | Scale test (reduced fixture in CI; full file nightly) |
+| `Reimport_SameXer_UpdatesByExternalId` | Idempotency via `ExternalIds` |
+| `Import_Relations_MapsPredTypesCorrectly` | TASKPRED → `ActivityRelationImportPart` |
 | `LegacyXerImport_Baseline` | Characterization — must pass before and after |
 
 Store golden XER under `Import.Tests/Golden/` (or legacy `TestData/` path — cite which).
@@ -363,10 +516,13 @@ Store golden XER under `Import.Tests/Golden/` (or legacy `TestData/` path — ci
 
 ## Acceptance criteria
 
+- [ ] `ProjectStructureImportModel` defined in Domain; no vendor types in Application persist layer.
+- [ ] `IProjectImportService` is the **only** bulk EF entry point for project structure (XER, JSON, future Sciforma/PLM).
+- [ ] XER adapter maps to intermediate model; persist service has zero Primavera-specific code.
 - [ ] Parses real Primavera XER without loading entire file into DOM/XML.
 - [ ] Inserts ~9k components + ~250k activities with valid `ParentComponentId`, `ComponentId`, relation FKs.
 - [ ] Greenfield import completes in **< 10 minutes** on reference hardware (document specs) — stretch goal **< 3 minutes** with batching + HiLo.
-- [ ] Re-import updates existing rows by `Primavera` external id; no duplicate activities.
+- [ ] Re-import updates existing rows by external id; no duplicate activities.
 - [ ] Single transaction per batch; failed batch rolls back without corrupt graph.
 - [ ] No `SaveChanges` inside loops over entities.
 - [ ] Legacy `ImportXerJob` delegable via feature flag.
@@ -377,7 +533,7 @@ Store golden XER under `Import.Tests/Golden/` (or legacy `TestData/` path — ci
 ## Copy-paste prompt for Claude
 
 ```text
-@workspace Build a fast Primavera XER project import service
+@workspace Build project structure import (intermediate model + XER adapter)
 
 Read first:
 - docs/modularization/primavera-xer-import-service-instructions.md (this file)
@@ -385,14 +541,18 @@ Read first:
 - docs/modularization/module-composition-di.md
 - Legacy: Src/Application/Application.Sync/ImportJobs/Xer/ImportXerJob.cs
 
+Architecture (mandatory):
+1. ProjectStructureImportModel in Import.Domain — vendor-neutral, flat lists, ImportKey linking
+2. IProjectImportService — sole EF bulk persist (HiLo + batched AddRange); NO vendor code
+3. XerProjectStructureAdapter — XER parse → intermediate model only
+4. Future sources (Sciforma, Excel, PLM pack, JSON API) add adapters; reuse same persist service
+
 Constraints:
-- ~9,000 components, ~250,000 activities — batched HiLo bulk insert, NO per-row SaveChanges
-- Parse XER streaming (%T/%F/%R); flat canonical model; deferred activity relations
-- Upsert by external id namespace "Primavera"
-- One persist boundary (service or ProjectImportDataActor)
+- ~9,000 components, ~250,000 activities — NO per-row SaveChanges
+- Upsert by ExternalIds dictionary (e.g. "Primavera", "PLM") — not by name
 - Characterization tests against golden XER before replacing legacy job
 
-Start with Phase 0 forensic doc, then parser tests, then HiLoProjectImportWriter.
+Order: Phase 0 forensic → intermediate model + validator → IProjectImportService → XER adapter → strangler.
 Cite file:line for every legacy claim.
 ```
 
