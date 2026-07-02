@@ -9,14 +9,12 @@ public sealed class ActiveTask
         TaskId id,
         TaskTitle title,
         ActivityCode activityCode,
-        ApprovalValues currentValues,
-        bool isActiveForCurrentUser)
+        ApprovalValues currentValues)
     {
         Id = id;
         Title = title;
         ActivityCode = activityCode;
         CurrentValues = currentValues;
-        IsActiveForCurrentUser = isActiveForCurrentUser;
     }
 
     public TaskId Id { get; }
@@ -27,19 +25,12 @@ public sealed class ActiveTask
 
     public ApprovalValues CurrentValues { get; private set; }
 
-    public bool IsActiveForCurrentUser { get; private set; }
-
     public static ActiveTask Create(
         TaskId id,
         TaskTitle title,
         ActivityCode activityCode,
-        ApprovalValues currentValues,
-        bool isActiveForCurrentUser) =>
-        new(id, title, activityCode, currentValues, isActiveForCurrentUser);
+        ApprovalValues currentValues) =>
+        new(id, title, activityCode, currentValues);
 
-    public void UpdateValues(ApprovalValues values, bool isActiveForCurrentUser)
-    {
-        CurrentValues = values;
-        IsActiveForCurrentUser = isActiveForCurrentUser;
-    }
+    public void UpdateValues(ApprovalValues values) => CurrentValues = values;
 }

@@ -1,14 +1,15 @@
 # Floor2Plan planning adjustment approvals POC
 
-Reference implementation for **foreman approval of adjusted planning** after assignment progress changes — kept separate from the Planning aggregate model.
+Reference implementation for **foreman approval of selected work assignments** — kept separate from the Planning aggregate model.
 
-Demonstrates:
+Aligned with the simplified **HourApprovals** V2 slice (`F2pPlatform/src/Modules/HourApprovals/`).
 
-- Supporting bounded context **`PlanningApprovals`** beside Planning
-- Per-assignment **`AssignmentApprovalRequest`** aggregates (scales to hundreds)
-- Append-only **`ApprovalDecision`** audit trail + immutable **`ApprovedPlanSnapshot`**
-- Append-only **`AssignmentPlanningCheckpoint`** history + **~1 week lookback baseline** on each request
-- Optional **`ForemanApprovalBatch`** for bulk UI workflow
+## Core workflow
+
+1. **Active assignments** carry hours to go, planned start/finish, and assigned user.
+2. Foreman **selects** assignments and records approval for current values.
+3. If values change after approval → assignment needs **re-approval**.
+4. **One approval record per assignment per UTC day**; repeat approval the same day **updates** that record.
 
 ## Run
 
@@ -21,23 +22,16 @@ dotnet run --project tests/PlanningApprovals.Tests
 
 | Project | Role |
 |---------|------|
-| `PlanningApprovals.Domain` | Aggregates, value objects, staleness evaluator, coordinator |
-| `PlanningApprovals.Infrastructure` | EF Core `PlanningApprovalsDbContext` (separate schema) |
-| `PlanningApprovals.Tests` | Domain scenarios + SQLite persistence characterization |
+| `PlanningApprovals.Domain` | `ActiveAssignment`, `AssignmentApprovalRecord`, rules, coordinator |
+| `PlanningApprovals.Infrastructure` | EF Core `PlanningApprovalsDbContext` (SQLite) |
+| `PlanningApprovals.Tests` | Domain rules + SQLite persistence |
 
 ## Design doc
 
-Full architecture and Floor2Plan integration notes:
+Broader Floor2Plan integration notes (historical / target architecture):
 
 [`docs/floor2plan-planning-approval-data-model.md`](../docs/floor2plan-planning-approval-data-model.md)
 
-## Floor2Plan mapping
-
-| POC type | Floor2Plan concept |
-|----------|-------------------|
-| `ProgressRevisionRef` | `AssignmentProgressHistory` + `AssignmentSummary` |
-| `PlanSnapshot` | Recalculated assignment dates/profile after progress |
-| `AssignmentApprovalRequest` | New — not on `Assignment` entity |
-| Integration events | Replace cross-context SaveChanges handlers over time |
+The runnable POC intentionally stays thin; the design doc describes the fuller production model (checkpoints, integration events, etc.).
 
 **POC / reference only** — not production Floor2Plan behaviour.

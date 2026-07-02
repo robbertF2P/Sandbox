@@ -13,10 +13,9 @@ internal sealed class ApprovalRecordEntityConfiguration : IEntityTypeConfigurati
         builder.HasKey(record => record.Id);
 
         builder.Property(record => record.ApprovedBy).HasMaxLength(256).IsRequired();
+        builder.Property(record => record.AssignedUser).HasMaxLength(256).IsRequired();
         builder.Property(record => record.HoursToGo).HasPrecision(18, 4);
-        builder.Property(record => record.Progress).HasPrecision(18, 4);
-        builder.Property(record => record.WorkedHours).HasPrecision(18, 4);
 
-        builder.HasIndex(record => new { record.TaskId, record.ApprovedAtUtc });
+        builder.HasIndex(record => new { record.TaskId, record.ApprovalDay }).IsUnique();
     }
 }

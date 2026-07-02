@@ -1,12 +1,10 @@
-using Platform.Shared.Domain;
-
-namespace HourApprovals.Domain.ValueObjects;
+namespace PlanningApprovals.Domain.ValueObjects;
 
 public sealed record ApprovalValues(
     decimal HoursToGo,
     DateOnly? PlannedStart,
     DateOnly? PlannedFinish,
-    UserName AssignedUser)
+    AssignedUser AssignedUser)
 {
     public bool Matches(ApprovalValues? other)
     {

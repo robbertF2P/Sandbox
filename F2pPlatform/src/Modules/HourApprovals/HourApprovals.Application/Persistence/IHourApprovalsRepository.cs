@@ -11,7 +11,9 @@ public interface IHourApprovalsRepository
 
     Task SaveTaskAsync(ActiveTask task, CancellationToken cancellationToken);
 
-    Task AppendApprovalRecordAsync(ApprovalRecord record, CancellationToken cancellationToken);
+    Task UpsertDailyApprovalAsync(ApprovalRecord record, CancellationToken cancellationToken);
 
     Task<ApprovalRecord?> GetLatestApprovalAsync(TaskId taskId, CancellationToken cancellationToken);
+
+    Task<ApprovalRecord?> GetApprovalForDayAsync(TaskId taskId, DateOnly approvalDay, CancellationToken cancellationToken);
 }

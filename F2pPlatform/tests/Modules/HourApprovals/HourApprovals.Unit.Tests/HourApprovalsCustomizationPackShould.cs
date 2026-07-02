@@ -9,14 +9,16 @@ namespace HourApprovals.Unit.Tests;
 public sealed class HourApprovalsCustomizationPackShould
 {
     [Fact]
-    public void DefaultPack_HidesPlannedDates_AndHasNoExtensions()
+    public void DefaultPack_ShowsCoreApprovalColumns()
     {
         var pack = new DefaultHourApprovalsPack();
         ViewDefinition view = pack.GetView(HourApprovalsScreens.Queue);
         var taskId = Guid.NewGuid();
 
-        Assert.False(view.IsVisible("plannedStart"));
-        Assert.False(view.IsVisible("plannedFinish"));
+        Assert.True(view.IsVisible("assignedUser"));
+        Assert.True(view.IsVisible("hoursToGo"));
+        Assert.True(view.IsVisible("plannedStart"));
+        Assert.True(view.IsVisible("plannedFinish"));
         Assert.Empty(pack.GetRowExtensions([taskId]));
     }
 
@@ -34,8 +36,6 @@ public sealed class HourApprovalsCustomizationPackShould
         ColumnDef? sapColumn = view.FindColumn("sapCostElement");
         Assert.NotNull(sapColumn);
         Assert.Equal("packs.acme-hour-approvals-v1.columns.sapCostElement", sapColumn.LabelKey);
-
-        Assert.True(view.IsVisible("daysSinceLastSubmission"));
 
         IReadOnlyDictionary<Guid, IReadOnlyDictionary<string, object?>> extensions =
             pack.GetRowExtensions([taskId, Guid.NewGuid()]);

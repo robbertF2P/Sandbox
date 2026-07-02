@@ -34,12 +34,14 @@ namespace HourApprovals.Data.Migrations.Migrations
                         .HasMaxLength(64)
                         .HasColumnType("nvarchar(64)");
 
+                    b.Property<string>("AssignedUser")
+                        .IsRequired()
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
                     b.Property<decimal>("HoursToGo")
                         .HasPrecision(18, 4)
                         .HasColumnType("decimal(18,4)");
-
-                    b.Property<bool>("IsActiveForCurrentUser")
-                        .HasColumnType("bit");
 
                     b.Property<DateOnly?>("PlannedFinish")
                         .HasColumnType("date");
@@ -47,18 +49,10 @@ namespace HourApprovals.Data.Migrations.Migrations
                     b.Property<DateOnly?>("PlannedStart")
                         .HasColumnType("date");
 
-                    b.Property<decimal>("Progress")
-                        .HasPrecision(18, 4)
-                        .HasColumnType("decimal(18,4)");
-
                     b.Property<string>("Title")
                         .IsRequired()
                         .HasMaxLength(256)
                         .HasColumnType("nvarchar(256)");
-
-                    b.Property<decimal>("WorkedHours")
-                        .HasPrecision(18, 4)
-                        .HasColumnType("decimal(18,4)");
 
                     b.HasKey("Id");
 
@@ -79,6 +73,14 @@ namespace HourApprovals.Data.Migrations.Migrations
                     b.Property<DateTimeOffset>("ApprovedAtUtc")
                         .HasColumnType("datetimeoffset");
 
+                    b.Property<DateOnly>("ApprovalDay")
+                        .HasColumnType("date");
+
+                    b.Property<string>("AssignedUser")
+                        .IsRequired()
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
                     b.Property<decimal>("HoursToGo")
                         .HasPrecision(18, 4)
                         .HasColumnType("decimal(18,4)");
@@ -89,20 +91,13 @@ namespace HourApprovals.Data.Migrations.Migrations
                     b.Property<DateOnly?>("PlannedStart")
                         .HasColumnType("date");
 
-                    b.Property<decimal>("Progress")
-                        .HasPrecision(18, 4)
-                        .HasColumnType("decimal(18,4)");
-
                     b.Property<Guid>("TaskId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<decimal>("WorkedHours")
-                        .HasPrecision(18, 4)
-                        .HasColumnType("decimal(18,4)");
-
                     b.HasKey("Id");
 
-                    b.HasIndex("TaskId", "ApprovedAtUtc");
+                    b.HasIndex("TaskId", "ApprovalDay")
+                        .IsUnique();
 
                     b.ToTable("approval_records", "hour_approvals");
                 });

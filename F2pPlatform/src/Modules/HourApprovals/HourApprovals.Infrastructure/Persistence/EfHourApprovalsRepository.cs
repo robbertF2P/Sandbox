@@ -42,9 +42,22 @@ internal sealed class EfHourApprovalsRepository(HourApprovalsDbContext dbContext
         await dbContext.SaveChangesAsync(cancellationToken);
     }
 
-    public async Task AppendApprovalRecordAsync(ApprovalRecord record, CancellationToken cancellationToken)
+    public async Task UpsertDailyApprovalAsync(ApprovalRecord record, CancellationToken cancellationToken)
     {
-        dbContext.ApprovalRecords.Add(HourApprovalsDomainMapper.ToEntity(record));
+        ApprovalRecordEntity? existing = await dbContext.ApprovalRecords
+            .FirstOrDefaultAsync(
+                approval => approval.TaskId == record.TaskId.Value && approval.ApprovalDay == record.ApprovalDay,
+                cancellationToken);
+
+        if (existing is null)
+        {
+            dbContext.ApprovalRecords.Add(HourApprovalsDomainMapper.ToEntity(record));
+        }
+        else
+        {
+            HourApprovalsDomainMapper.ApplyDomain(existing, record);
+        }
+
         await dbContext.SaveChangesAsync(cancellationToken);
     }
 
@@ -56,8 +69,23 @@ internal sealed class EfHourApprovalsRepository(HourApprovalsDbContext dbContext
             .ToListAsync(cancellationToken);
 
         ApprovalRecordEntity? entity = entities
-            .OrderByDescending(record => record.ApprovedAtUtc)
+            .OrderByDescending(record => record.ApprovalDay)
+            .ThenByDescending(record => record.ApprovedAtUtc)
             .FirstOrDefault();
+
+        return entity is null ? null : HourApprovalsDomainMapper.ToDomain(entity);
+    }
+
+    public async Task<ApprovalRecord?> GetApprovalForDayAsync(
+        TaskId taskId,
+        DateOnly approvalDay,
+        CancellationToken cancellationToken)
+    {
+        ApprovalRecordEntity? entity = await dbContext.ApprovalRecords
+            .AsNoTracking()
+            .FirstOrDefaultAsync(
+                record => record.TaskId == taskId.Value && record.ApprovalDay == approvalDay,
+                cancellationToken);
 
         return entity is null ? null : HourApprovalsDomainMapper.ToDomain(entity);
     }

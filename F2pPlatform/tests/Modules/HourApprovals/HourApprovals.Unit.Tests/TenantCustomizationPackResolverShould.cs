@@ -40,7 +40,8 @@ public sealed class TenantCustomizationPackResolverShould
         IHourApprovalsCustomizationPack resolver = BuildResolver(_ => { }, configuration);
 
         Assert.Equal("default-hour-approvals-v1", resolver.PackId);
-        Assert.False(resolver.GetView(HourApprovalsScreens.Queue).IsVisible("plannedStart"));
+        Assert.True(resolver.GetView(HourApprovalsScreens.Queue).IsVisible("plannedStart"));
+        Assert.False(resolver.GetView(HourApprovalsScreens.Queue).IsVisible("sapCostElement"));
     }
 
     private static IHourApprovalsCustomizationPack BuildResolver(

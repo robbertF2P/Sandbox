@@ -1,115 +1,32 @@
-using PlanningApprovals.Domain.Enums;
 using PlanningApprovals.Domain.Models;
+using PlanningApprovals.Domain.Rules;
 using PlanningApprovals.Domain.ValueObjects;
 
 namespace PlanningApprovals.Domain.Services;
 
 public static class PlanningApprovalCoordinator
 {
-    public static ApprovalSyncResult SynchronizeAfterPlanningChange(
-        ProjectId projectId,
-        AssignmentId assignmentId,
-        ProgressRevisionRef currentProgress,
-        PlanSnapshot proposedPlan,
-        IEnumerable<AssignmentPlanningCheckpoint> checkpointHistory,
-        AssignmentApprovalRequest? openPendingRequest,
-        ApprovedPlanSnapshot? lastApproved,
-        DateTimeOffset occurredAt,
-        ProcessName openedByProcess,
-        ApprovalLookbackWindow? lookbackWindow = null)
-    {
-        ApprovalLookbackWindow window = lookbackWindow ?? ApprovalLookbackWindow.OneWeek;
-
-        PlanningStateSnapshot? lookbackBaseline = LookbackBaselineResolver.Resolve(
-            checkpointHistory,
-            occurredAt,
-            window);
-
-        StalenessEvaluation evaluation = ApprovalStalenessEvaluator.Evaluate(
-            currentProgress,
-            proposedPlan,
-            lookbackBaseline,
-            lastApproved);
-
-        if (!evaluation.RequiresApproval)
-        {
-            return ApprovalSyncResult.NoAction;
-        }
-
-        if (openPendingRequest is not null
-            && openPendingRequest.Status == ApprovalRequestStatus.Pending
-            && MatchesCurrentWork(openPendingRequest, currentProgress, proposedPlan))
-        {
-            return ApprovalSyncResult.NoAction;
-        }
-
-        PlanningStateSnapshot baseline = lookbackBaseline
-            ?? throw new InvalidOperationException(
-                $"No planning checkpoint found at or before the {window.Duration.TotalDays:0}-day lookback for assignment {assignmentId}.");
-
-        List<ApprovalSyncAction> actions = [];
-
-        if (openPendingRequest is { Status: ApprovalRequestStatus.Pending })
-        {
-            openPendingRequest.MarkSuperseded(occurredAt);
-            actions.Add(ApprovalSyncAction.Supersede(openPendingRequest));
-        }
-
-        AssignmentApprovalRequest opened = AssignmentApprovalRequest.Open(
-            projectId,
-            assignmentId,
-            evaluation.RequiredBecause,
-            currentProgress,
-            proposedPlan,
-            baseline,
-            lastApproved,
-            occurredAt,
-            openedByProcess);
-
-        actions.Add(ApprovalSyncAction.Open(opened));
-        return new ApprovalSyncResult(actions);
-    }
-
-    public static ForemanDecisionResult RecordForemanDecision(
-        AssignmentApprovalRequest request,
-        ApprovalDecisionType decision,
+    public static AssignmentApprovalRecord RecordForemanApproval(
+        ActiveAssignment assignment,
         PersonId foremanPersonId,
-        DateTimeOffset decidedAt,
-        DecisionComment? comment,
-        CorrelationId correlationId,
-        ApprovalPublicId? batchPublicId)
+        DateTimeOffset approvedAtUtc,
+        AssignmentApprovalRecord? existingForDay)
     {
-        ApprovalDecision recorded = ApprovalDecision.Record(
-            request,
-            decision,
-            foremanPersonId,
-            decidedAt,
-            comment,
-            correlationId,
-            batchPublicId);
+        ArgumentNullException.ThrowIfNull(assignment);
 
-        ApprovedPlanSnapshot? snapshot = null;
+        DateOnly approvalDay = PlanningApprovalRules.ResolveApprovalDay(approvedAtUtc);
 
-        switch (decision)
+        if (existingForDay is null)
         {
-            case ApprovalDecisionType.Approved:
-                request.MarkApproved(decidedAt);
-                snapshot = ApprovedPlanSnapshot.FromApproval(recorded, request);
-                break;
-            case ApprovalDecisionType.Rejected:
-                request.MarkRejected(decidedAt);
-                break;
-            default:
-                throw new ArgumentOutOfRangeException(nameof(decision), decision, "Unsupported decision.");
+            return AssignmentApprovalRecord.Create(
+                assignment.Id,
+                approvalDay,
+                foremanPersonId,
+                approvedAtUtc,
+                assignment.CurrentValues);
         }
 
-        return new ForemanDecisionResult(request, recorded, snapshot);
+        existingForDay.Update(foremanPersonId, approvedAtUtc, assignment.CurrentValues);
+        return existingForDay;
     }
-
-    private static bool MatchesCurrentWork(
-        AssignmentApprovalRequest request,
-        ProgressRevisionRef currentProgress,
-        PlanSnapshot proposedPlan) =>
-        string.Equals(request.ProgressRevision.Fingerprint, currentProgress.Fingerprint, StringComparison.Ordinal)
-        && string.Equals(request.ProposedPlan.Fingerprint, proposedPlan.Fingerprint, StringComparison.Ordinal);
 }
