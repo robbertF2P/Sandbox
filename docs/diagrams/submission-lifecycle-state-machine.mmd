@@ -1,34 +1,42 @@
-stateDiagram-v2
-    direction LR
+flowchart LR
+    start(( )) --> Draft
 
-    [*] --> Draft
+    subgraph intake["1 · Intake — Hours.Report"]
+        Draft -->|Submit| Reported
+    end
 
-    Draft --> Reported : Submit\n[Hours.Report]
-    Rejected --> Reported : Resubmit\n[Hours.Report]
+    subgraph review["2 · Review — Hours.Check"]
+        Reported -->|CheckPass| Checked
+        Reported -->|CheckFail| Rejected
+        Checked -->|SendBack| Reported
+    end
 
-    Reported --> Checked : CheckPass\n[Hours.Check]
-    Reported --> Rejected : CheckFail\n[Hours.Check]
+    subgraph approval["3 · Approval — ApproveHoursProgress"]
+        Checked -->|Approve| Approved
+        Checked -->|Reject| Rejected
+    end
 
-    Checked --> Approved : Approve\n[ApproveHoursProgress]
-    Checked --> Rejected : Reject\n[ApproveHoursProgress]
-    Checked --> Reported : SendBack\n[Hours.Check]
+    subgraph export["4 · Export — Hours.Export"]
+        Approved -->|Export| Exported
+    end
 
-    Approved --> Exported : Export\n[Hours.Export]
-    Approved --> Reported : Reopen\n[Hours.Reopen]
+    subgraph correction["Correction lane"]
+        Rejected -->|Resubmit| Reported
+        Approved -->|Reopen · Hours.Reopen| Reported
+    end
 
-    Exported --> [*]
+    Exported --> end(( ))
 
-    note right of Reported
-        Foreman queue:
-        awaiting check
-    end note
+    classDef draft fill:#f1f5f9,stroke:#64748b,stroke-dasharray:4 3
+    classDef reported fill:#eff6ff,stroke:#2563eb
+    classDef checked fill:#fef9c3,stroke:#ca8a04
+    classDef approved fill:#dcfce7,stroke:#16a34a
+    classDef exported fill:#f3e8ff,stroke:#9333ea
+    classDef rejected fill:#fee2e2,stroke:#dc2626
 
-    note right of Checked
-        Approver queue:
-        awaiting approval
-    end note
-
-    note right of Approved
-        Export job:
-        ready for payroll
-    end note
+    class Draft draft
+    class Reported reported
+    class Checked checked
+    class Approved approved
+    class Exported exported
+    class Rejected rejected
