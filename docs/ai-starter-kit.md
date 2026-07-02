@@ -53,6 +53,7 @@ After editing skills in `.cursor/skills/`:
 - **Akka + SignalR + Vue:** `AkkaSignalRVuePoc/`
 - **Import + hours progress:** `ApiImportActorPoc/`
 - **Planning adjustment approvals (foreman):** `PlanningApprovalsPoc/` — see [floor2plan-planning-approval-data-model.md](floor2plan-planning-approval-data-model.md)
+- **Recorded progress approval (multi-stage → ERP):** `RecordedProgressApprovalsPoc/` — see [floor2plan-recorded-progress-approval-workflow.md](floor2plan-recorded-progress-approval-workflow.md)
 - **Platform packages:** `Platform.Serilog.Logging/`, `build/Platform.Logging.*.props`
 
 ## Platform standards (docs)
