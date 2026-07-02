@@ -3,8 +3,10 @@
 **Purpose:** Guide Claude (or any AI assistant) to design and implement:
 
 1. A **vendor-neutral intermediate import model** (`ProjectStructureImportModel`) shared by all structure import sources.
-2. A **reusable `ProjectImportService`** that persists that model to EF Core (fast, batched HiLo).
+2. A **reusable `ProjectImportService`** that reliably inserts and updates from that model (batched EF, correct FKs, idempotent upsert).
 3. A **Primavera XER adapter** that maps XER → intermediate model (~9,000 components, ~250,000 activities).
+
+**Design priority:** correctness and a clean reusable service over premature optimization. **Do not** introduce HiLo, schema migrations, or bulk-copy infrastructure unless profiling proves batched `SaveChanges` with existing `IDENTITY` columns is insufficient.
 
 XER is the first adapter; Sciforma, Excel/Aspose, PLM packs, and JSON/API import must plug into the **same** persist service — not duplicate EF logic per vendor.
 
@@ -66,12 +68,28 @@ The **legacy XER import is slow and fragile**. Root causes to confirm in Phase 0
 1. **Per-entity `SaveChanges`** — N round-trips to SQL Server (POC does this explicitly; legacy likely similar).
 2. **EF change-tracker overhead** on hundreds of thousands of tracked entities.
 3. **N+1 queries** — load parent, insert child, reload graph.
-4. **Identity column round-trips** — cannot assign FKs until each parent row exists.
+4. **Per-row identity assignment** — legacy may `SaveChanges` after every insert just to obtain `IDENTITY` FKs; batched multi-pass persist fixes this **without** changing PK strategy.
 5. **Single giant transaction** or **no transaction** — timeouts vs partial corrupt state.
 6. **Fragile parsing** — assumes field order, missing null handling, encoding issues, duplicate external ids.
 7. **SaveChanges change-handler chain** — `Floor2PlanDbContext` registers **55+ handlers** (`change-handler-migration.md`); debugging has shown **~28 handlers firing on a single `SaveChanges`** during XER import. Each batch save can re-run the full chain over thousands of tracked entities, multiplying work far beyond the insert itself.
 
-**Target:** Full greenfield import of a 250k-activity XER in **minutes, not hours**, with idempotent re-import and structured error reporting.
+**Target:** Reliable insert and update with correct relationships; acceptable performance at 250k activities through **batching + handler suppression** — not through invasive schema changes on day one.
+
+---
+
+## Design philosophy — minimal impact, expand later
+
+| Priority | What to build first | Defer until proven necessary |
+|----------|---------------------|------------------------------|
+| 1 | **`ProjectStructureImportModel`** — vendor-neutral, validated, flat | Nested graph APIs in persist layer |
+| 2 | **`IProjectImportService`** — correct insert, update, FK wiring, external-id upsert | HiLo / sequence migrations |
+| 3 | **Batched `SaveChanges`** with existing `IDENTITY` columns | `SqlBulkCopy`, staging tables |
+| 4 | **Handler suppression** + single post-import event | Per-handler rewrites |
+| 5 | **Embedded XER integration test** | Nightly 250k scale benchmark |
+
+A good intermediate model + reliable persist service is the **product**. XER is the first consumer. Once that works, wire Sciforma, Excel, PLM packs, and JSON API through the **same** `IProjectImportService` — no second persist path.
+
+**HiLo is optional optimization**, not a v1 requirement. It touches entity configuration, migrations, and sequence ownership across shared legacy tables — higher blast radius than batched inserts on the current schema. Revisit only if, after handler suppression and batching, persist time still exceeds the agreed SLA.
 
 ---
 
@@ -161,7 +179,7 @@ Persist flow:
 
 ```text
 1. Begin ImportExecutionScope (SuppressChangeHandlers = true)
-2. Batched HiLo inserts (passes 1–4)
+2. Batched inserts/updates (passes 1–4) using existing IDENTITY columns
 3. Commit
 4. End scope
 5. Publish ProjectStructureImported (single integration/domain event)
@@ -193,15 +211,16 @@ Add a **diagnostic test** (can be `[Explicit]`) that runs one `SaveChanges` with
 1. **Behaviour preservation first** — run legacy import on a golden XER; capture row counts, timings, and sample entities before refactoring.
 2. **Three layers, strict boundaries** — `Source adapter` (XER, Excel, PLM, …) → **`ProjectStructureImportModel`** → `ProjectImportService` (EF). No EF entities in adapters; **no vendor types in the persist service**.
 3. **One persist service for all sources** — `IProjectImportService.PersistAsync(ProjectStructureImportModel)` is the only bulk-write entry point. XER, Sciforma (EP-2002), Aspose (EP-2004), and integration packs each supply a mapper; they do **not** call `DbContext` directly.
-4. **Bulk persist** — batched inserts; **never** `SaveChangesAsync` per row at this scale.
-5. **HiLo (or equivalent) for greenfield inserts** — pre-assign integer PKs so FKs are set before `AddRange`.
-6. **Deferred relations** — activity predecessors need both endpoints mapped; insert relations in a final pass (see POC `deferredRelations` pattern).
-7. **One EF boundary** — `ProjectImportService` (or its persist actor) is the sole `DbContext` writer for structure import (`platform-actor-standard.md`).
-8. **External ids** — every entity carries `IReadOnlyDictionary<string, string> ExternalIds` (e.g. `"Primavera"`, `"PLM"`, `"Sciforma"`). Upsert matches on `(system, value)`, not name. Vendor-specific ids stay in adapters until mapped into `ExternalIds`.
-9. **Import keys inside the batch** — intermediate model links rows with opaque `ImportKey` strings (unique within the batch). Adapters set keys from vendor ids; the persist service never reads Primavera `wbs_id` / `task_id` directly.
-10. **No ABP in new modules** — `AddImportModule` / `MapImportEndpoints`; legacy bridged via `[StranglerAdapter]`.
-11. **Change handlers** — inventory every handler that runs on `SaveChanges` during import; **suppress or defer** bulk-inappropriate handlers; replay needed effects **once** via `ProjectStructureImported` — never 250k handler executions.
-12. **Cite evidence** — `path:line` for legacy claims; `[NEEDS REVIEW]` when uncertain.
+4. **Bulk persist** — batched inserts/updates; **never** `SaveChangesAsync` per row at this scale.
+5. **Keep existing `IDENTITY` PKs** — use multi-pass batching; refresh `importKeyMap` from the change tracker (or external-id lookup) after each `SaveChanges`. **No HiLo migration in v1** unless profiling proves it necessary.
+6. **Correct upsert** — insert new entities by external id; update existing scalars on re-import; no duplicate rows.
+7. **Deferred relations** — activity predecessors need both endpoints mapped; insert relations in a final pass (see POC `deferredRelations` pattern).
+8. **One EF boundary** — `ProjectImportService` (or its persist actor) is the sole `DbContext` writer for structure import (`platform-actor-standard.md`).
+9. **External ids** — every entity carries `IReadOnlyDictionary<string, string> ExternalIds` (e.g. `"Primavera"`, `"PLM"`, `"Sciforma"`). Upsert matches on `(system, value)`, not name. Vendor-specific ids stay in adapters until mapped into `ExternalIds`.
+10. **Import keys inside the batch** — intermediate model links rows with opaque `ImportKey` strings (unique within the batch). Adapters set keys from vendor ids; the persist service never reads Primavera `wbs_id` / `task_id` directly.
+11. **No ABP in new modules** — `AddImportModule` / `MapImportEndpoints`; legacy bridged via `[StranglerAdapter]`.
+12. **Change handlers** — inventory every handler that runs on `SaveChanges` during import; **suppress or defer** bulk-inappropriate handlers; replay needed effects **once** via `ProjectStructureImported` — never 250k handler executions.
+13. **Cite evidence** — `path:line` for legacy claims; `[NEEDS REVIEW]` when uncertain.
 
 ---
 
@@ -323,7 +342,7 @@ public interface IProjectImportService
 }
 ```
 
-**Only** `IProjectImportService` (and its HiLo implementation) touches EF for structure import. Vendor jobs call adapters, then this interface.
+**Only** `IProjectImportService` (and its implementation) touches EF for structure import. Vendor jobs call adapters, then this interface.
 
 ### Source adapters (one per vendor/format)
 
@@ -369,44 +388,30 @@ Reject persist when `ImportValidationResult.IsValid` is false; return issues to 
 
 ---
 
-## Persistence strategy — why HiLo
+## Persistence strategy — batched EF on existing schema
 
-SQL Server `IDENTITY` requires insert-before-FK-assignment unless using `SET IDENTITY_INSERT` (slow, locks table) or **application-assigned keys**.
+**Default v1 approach:** keep legacy `UseIdentityColumn()` / SQL Server `IDENTITY`. No HiLo sequences, no PK strategy migration.
 
-### HiLo configuration
+### Why this is enough for v1
 
-Use **one HiLo sequence per entity type** with a **large increment** to minimize sequence round-trips:
+Multi-pass batching solves the FK problem without pre-assigning ids:
 
-```csharp
-// In IEntityTypeConfiguration<T> — example
-builder.Property(e => e.Id)
-    .UseHiLo("component_hilo", schema: "Import")
-    .HasValueGeneratorFactory<CustomHiLoGenerator>(); // optional: tune increment
+1. Insert a batch of parent components → `SaveChanges` → SQL Server assigns ids → read ids from change tracker into `importKeyMap`.
+2. Insert child components with `ParentComponentId` from `importKeyMap`.
+3. Insert activity batches with `ComponentId` from `importKeyMap`.
+4. Insert relations after all activities exist in `importKeyMap`.
 
-// Or via modelBuilder in OnModelCreating:
-modelBuilder.HasSequence<int>("activity_hilo", schema: "Import")
-    .IncrementsBy(10_000); // tune: 1k–10k for 250k rows
-```
+~9k components and ~250k activities at 2k–5k per batch ⇒ **tens of `SaveChanges` calls**, not hundreds of thousands. With handlers suppressed, that is acceptable for v1.
 
-| Entity | Suggested HiLo increment (starting point) |
-|--------|-------------------------------------------|
-| Component | 1,000 |
-| Activity | 10,000 |
-| Assignment | 5,000 |
-| ActivityRelation | 10,000 |
-| EntityExternalId | 10,000 |
+### When to consider HiLo or bulk copy (later only)
 
-**Greenfield import only** uses HiLo-assigned ids. **Re-import / upsert** resolves existing rows via `EntityExternalId` table first; only insert rows with no matching external id (do not re-HiLo existing rows).
+| Signal | Escalation |
+|--------|------------|
+| Persist still > SLA after batching **and** handler suppression | Profile; consider HiLo **or** `SqlBulkCopy` — pick smaller blast radius |
+| Cannot suppress handlers safely | Staging tables + merge (bypasses EF handlers) |
+| Shared table ownership blocks import flags | Dedicated import schema |
 
-### Migration note
-
-Legacy tables may use `IDENTITY`. HiLo requires a migration that:
-
-1. Adds SQL Server sequences (or EF HiLo tables).
-2. Switches `UseIdentityColumn()` → `UseHiLo(...)` on import-target entities **or** uses a dedicated import staging schema.
-3. Sets sequence start above `MAX(Id)` to avoid collisions.
-
-Mark `[StranglerAdapter]` if legacy and new paths share tables during transition.
+Document the decision in `primavera-xer-import-phase0.md` with timings. **Do not start with HiLo** because it is theoretically faster.
 
 ---
 
@@ -417,35 +422,49 @@ Mark `[StranglerAdapter]` if legacy and new paths share tables during transition
 Replace recursive `UpsertComponentsAsync` + per-row `SaveChanges` with a **multi-pass pipeline**:
 
 ```text
-Pass 0 — Resolve project
-  Upsert project row (single SaveChanges or merge statement)
-  Build externalIdMap: (system, value) → InternalId (preload from DB for re-import)
-  Build importKeyMap: ImportKey → InternalId (starts empty; filled as rows insert)
+Pass 0 — Resolve project + existing external ids
+  Upsert project row
+  Preload externalIdMap: (system, value) → InternalId from EntityExternalId (for re-import)
+  Seed importKeyMap from matched existing entities where external ids overlap
 
 Pass 1 — Components (topological order)
   Sort by depth using ParentImportKey (parents before children)
-  Allocate HiLo ids for new components
-  Set ParentComponentId from importKeyMap[parentImportKey]
-  AddRange(components) in batches of 2,000–5,000
-  SaveChangesAsync per batch (ChangeTracker.Clear() between batches)
-  Update importKeyMap and externalIdMap
-  Write EntityExternalId rows in same batch
+  For each batch:
+    - INSERT new components (no matching external id) OR UPDATE existing scalars
+    - Set ParentComponentId from importKeyMap[parentImportKey]
+    - AddRange → SaveChangesAsync
+    - Refresh importKeyMap from tracker: ImportKey → entity.Id (new rows get IDENTITY ids here)
+    - Upsert EntityExternalId rows for the batch
+    - ChangeTracker.Clear()
 
-Pass 2 — Activities
+Pass 2 — Activities (same insert/update split)
   ComponentId = importKeyMap[activity.ComponentImportKey]
-  Allocate HiLo ids; AddRange in batches; SaveChanges; update maps
+  Batch → SaveChanges → refresh importKeyMap → external ids → Clear()
 
-Pass 3 — Assignments (if present)
-  ActivityId = importKeyMap[assignment.ActivityImportKey]; batched AddRange
+Pass 3 — Assignments
+  ActivityId = importKeyMap[assignment.ActivityImportKey]
+  Batch → SaveChanges → refresh maps → Clear()
 
-Pass 4 — Activity relations (deferred)
-  SourceActivityId = importKeyMap[relation.SourceActivityImportKey]
-  TargetActivityId = importKeyMap[relation.TargetActivityImportKey]
-  AddRange in batches; SaveChanges per batch
-
-Pass 5 — External ids (if not written inline)
-  Bulk insert remaining EntityExternalId rows
+Pass 4 — Activity relations (deferred; usually insert-only on greenfield)
+  SourceActivityId / TargetActivityId from importKeyMap
+  Batch → SaveChanges → Clear()
 ```
+
+### Refreshing `importKeyMap` after `SaveChanges` (IDENTITY)
+
+```csharp
+private static void AbsorbGeneratedIds<T>(
+    IEnumerable<T> batch,
+    Func<T, string> importKeySelector,
+    Func<T, int> idSelector,
+    Dictionary<string, int> importKeyMap)
+{
+    foreach (var entity in batch)
+        importKeyMap[importKeySelector(entity)] = idSelector(entity);
+}
+```
+
+Call **before** `ChangeTracker.Clear()`. For updates, `importKeyMap` was seeded in pass 0 from `externalIdMap`.
 
 ### EF Core performance settings (per persist operation)
 
@@ -468,17 +487,15 @@ catch
 }
 ```
 
-### When HiLo is not enough
-
-If profiling shows EF insert still too slow after batching:
+### When batched EF is not enough (measure first)
 
 | Escalation | When |
 |------------|------|
-| `EFCore.BulkExtensions` / `BulkInsert` | EF-managed bulk with FK columns set |
-| `SqlBulkCopy` via staging tables | >250k rows; merge into final tables in SQL |
-| Table-valued parameter + stored proc | DBA-owned merge for re-import |
+| HiLo sequences | Profiling shows id-generation round-trips dominate; team accepts migration cost |
+| `EFCore.BulkExtensions` | Need faster inserts without changing PK strategy |
+| `SqlBulkCopy` / staging | Handlers cannot be suppressed; or SLA still missed after batching |
 
-**Do not** jump to `SqlBulkCopy` without measuring EF batched HiLo first — it adds operational complexity.
+**Do not** add HiLo or bulk copy in v1 without documented profiling on a real XER file.
 
 ---
 
@@ -486,8 +503,8 @@ If profiling shows EF insert still too slow after batching:
 
 | Scenario | Strategy |
 |----------|----------|
-| First import | HiLo bulk insert (passes 1–4) |
-| Re-import same file | Load `EntityExternalId` into memory; match by any `(system, value)` in `ExternalIds`; **update** changed scalars; **insert** only entities with no matching external id; tombstone removed entities only if legacy does (confirm in Phase 0) |
+| First import | Batched insert (passes 1–4); IDENTITY assigns ids per batch |
+| Re-import | Preload `EntityExternalId`; match by `(system, value)`; **update** changed scalars on existing rows; **insert** only new keys; tombstone removed entities only if legacy does (confirm in Phase 0) |
 
 The POC `ProjectImportIdentityResolver` (`reference_only`) shows external-id-first resolution — port the **idea**, not the per-row persist.
 
@@ -505,7 +522,7 @@ Import/
 │   └── ImportPersistProgress.cs
 ├── Import.Infrastructure/
 │   ├── Persistence/
-│   │   └── HiLoProjectImportService.cs   # implements IProjectImportService
+│   │   └── EfProjectImportService.cs     # implements IProjectImportService (batched IDENTITY)
 │   ├── Sources/
 │   │   ├── Xer/
 │   │   │   ├── StreamingXerParser.cs     # XER-only; outputs XerParseResult
@@ -525,7 +542,7 @@ Import/
     ├── Integration/
     │   └── XerProjectImportEndToEndTests.cs  # REQUIRED — full pipeline + DB
     ├── ProjectStructure/
-    ├── Persistence/HiLoProjectImportServiceTests.cs
+    ├── Persistence/ProjectImportServiceTests.cs
     ├── Sources/Xer/
     └── Characterization/LegacyXerImportBaselineTests.cs
 ```
@@ -776,8 +793,8 @@ Deliverable: `docs/modularization/integrations/primavera-xer-import-phase0.md` c
 - Define `ProjectStructureImportModel` and `IProjectImportService` in Domain/Application.
 - Implement `ProjectStructureImportValidator` with unit tests (no DB).
 - Implement **`ImportExecutionScope`** (or equivalent) to suppress change handlers during bulk persist.
-- Implement `HiLoProjectImportService` with batched passes.
-- Integration test: persist a hand-built `ProjectStructureImportModel` with 10k activities in < N seconds **with handlers suppressed**.
+- Implement `EfProjectImportService` with batched multi-pass insert/update (existing IDENTITY — no HiLo).
+- Integration test: persist a hand-built `ProjectStructureImportModel`; assert correct FKs and re-import idempotency.
 
 ### Phase 1b — Handler audit + post-import event (parallel or immediately after Phase 0)
 
@@ -833,9 +850,10 @@ Golden XER fixture: embed `minimal-project-structure.xer` in `Import.Tests` (see
 - [ ] `IProjectImportService` is the **only** bulk EF entry point for project structure (XER, JSON, future Sciforma/PLM).
 - [ ] XER adapter maps to intermediate model; persist service has zero Primavera-specific code.
 - [ ] Parses real Primavera XER without loading entire file into DOM/XML.
+- [ ] Re-import **updates** existing rows and **inserts** only new external ids; no duplicate activities.
+- [ ] Greenfield import acceptable on reference hardware after handler suppression (document measured time; no fixed HiLo requirement).
 - [ ] Inserts ~9k components + ~250k activities with valid `ParentComponentId`, `ComponentId`, relation FKs.
-- [ ] Greenfield import completes in **< 10 minutes** on reference hardware (document specs) — stretch goal **< 3 minutes** with batching + HiLo.
-- [ ] Re-import updates existing rows by external id; no duplicate activities.
+- [ ] **No HiLo / sequence migration in v1** unless profiling doc justifies it.
 - [ ] Single transaction per batch; failed batch rolls back without corrupt graph.
 - [ ] No `SaveChanges` inside loops over entities.
 - [ ] **Change-handler audit complete**; bulk import runs with handlers suppressed or allow-listed; post-import event covers deferred effects.
@@ -858,12 +876,12 @@ Read first:
 
 Architecture (mandatory):
 1. ProjectStructureImportModel in Import.Domain — vendor-neutral, flat lists, ImportKey linking
-2. IProjectImportService — sole EF bulk persist (HiLo + batched AddRange); NO vendor code
+2. IProjectImportService — sole EF persist; batched SaveChanges on existing IDENTITY columns; reliable insert + update
 3. XerProjectStructureAdapter — XER parse → intermediate model only
-4. Future sources (Sciforma, Excel, PLM pack, JSON API) add adapters; reuse same persist service
+4. Future sources add adapters; reuse same persist service — expand usage once service is proven
 
 Constraints:
-- ~9,000 components, ~250,000 activities — NO per-row SaveChanges
+- ~9,000 components, ~250,000 activities — NO per-row SaveChanges; NO HiLo in v1 unless profiling proves need
 - CRITICAL: Floor2PlanDbContext change handlers (~28+ per SaveChanges observed) — inventory, suppress during bulk, defer effects to ProjectStructureImported
 - Upsert by ExternalIds dictionary (e.g. "Primavera", "PLM") — not by name
 - REQUIRED: XerProjectImportEndToEndTests with minimal-project-structure.xer as EmbeddedResource
