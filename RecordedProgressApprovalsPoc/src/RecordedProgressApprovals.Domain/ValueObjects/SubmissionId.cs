@@ -1,0 +1,8 @@
+namespace RecordedProgressApprovals.Domain.ValueObjects;
+
+public readonly record struct SubmissionId(Guid Value)
+{
+    public static SubmissionId New() => new(Guid.NewGuid());
+
+    public override string ToString() => Value.ToString();
+}
