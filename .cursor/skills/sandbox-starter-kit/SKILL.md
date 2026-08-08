@@ -30,6 +30,7 @@ Use this skill first. It routes you to focused skills and repo standards — do 
 | Platform packages feed | `local-feed/` | Packed NuGet (`Platform.Serilog.Logging*`) |
 | Import domain | `ImportPipeline/` | `ImportPipeline.Domain` NuGet |
 | Modularization program | `docs/monolith-modularization/` | Roadmap, logging/correlation/frontend/**actor** standards, quality framework |
+| Laptop handoff pack | `docs/monolith-modularization/PLATFORM-V2-LAPTOP-HANDOFF.md` | Bundle plan + pilots for monolith laptop (`scripts/bundle-platform-v2-handoff.sh`) |
 | Coding standards | `docs/coding-standards/` | C# (ReSharper) + Angular team guidelines |
 | Agent skills (source) | `.cursor/skills/` | Author skills here; sync with `./scripts/sync-agent-skills.sh` |
 | Agent entry | `AGENTS.md` | Skill index for all tools |

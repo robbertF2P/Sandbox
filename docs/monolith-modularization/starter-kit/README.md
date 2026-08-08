@@ -4,6 +4,8 @@
 
 **Parent plan:** `../foundation-and-pilot-plan.md` (Phase A7)
 
+**Laptop handoff:** `../PLATFORM-V2-LAPTOP-HANDOFF.md` — bundle plan docs + pilots for your work machine (`./scripts/bundle-platform-v2-handoff.sh`).
+
 ---
 
 ## Install (monolith repo)
