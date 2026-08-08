@@ -72,6 +72,13 @@ Apply this skill for C# and ASP.NET Core work in this repository. Prefer existin
 - Extension methods like `AddAkkaActors` keep registration cohesive.
 - **Extracted bounded-context modules:** use `IServiceCollection.Add<Context>Module` and `WebApplication.Map<Context>Module` per `docs/monolith-modularization/module-composition-di.md`. Do **not** use ABP (`AbpModule`, `Volo.Abp.*`) in new module code.
 
+### Object mapping (Platform 2.0)
+
+- **Avoid AutoMapper** in new modules — prefer explicit mapping (constructors, `With*` helpers, small static mappers).
+- **Exception:** simple `CreateMap<Source, Dest>()` profiles only (no custom `ForMember`, converters, or lifecycle hooks).
+- **Required:** unit tests that build `MapperConfiguration` and call `AssertConfigurationIsValid()` for each profile.
+- Strangler adapters may call legacy AutoMapper; do not add new profiles in extracted module layers.
+
 ### Configuration
 
 - Bind options from `IConfiguration` sections (`GetSection`, `GetValue`, or `IOptions<T>`).

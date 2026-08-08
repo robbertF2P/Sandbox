@@ -124,8 +124,20 @@ Do **not** qualify with `this.` or type name unless resolving ambiguity.
 | Responses | `TypedResults` / `IResult`; correct status codes |
 | Logging | `Platform.Serilog.Logging` MSBuild props; structured logging |
 | Correlation | `Platform.Correlation` patterns for HTTP → actors → events |
+| Object mapping | Prefer explicit mapping (constructors, `With*` helpers, small static mappers). **Avoid AutoMapper** in new Platform 2.0 modules — see below |
 
 **No ABP** in new extracted modules — see `docs/monolith-modularization/module-composition-di.md`.
+
+### AutoMapper (avoid)
+
+**Default:** do not add `AutoMapper` to new Platform 2.0 modules. Prefer explicit mapping at the boundary (API DTO ↔ application model ↔ domain) so shape changes are compile-time visible.
+
+**Exception (rare):** AutoMapper is allowed only when:
+
+1. The profile is **simple** — direct property maps with `CreateMap<Source, Dest>()`; no `ForMember` logic, custom converters, `AfterMap` / `BeforeMap`, or conditional mapping.
+2. The profile is covered by **unit tests** that call AutoMapper configuration validation — `configuration.AssertConfigurationIsValid()` (or equivalent `MapperConfiguration` verify) for every profile in the module.
+
+**Strangler adapters** bridging legacy AutoMapper-heavy code may keep existing profiles temporarily; do not spread AutoMapper into new module layers.
 
 ## Domain and architecture
 

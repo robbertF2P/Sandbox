@@ -18,6 +18,7 @@
 | **Host is composition root** | Only `Program.cs` / host startup calls `Add*Module`; modules do not reference each other’s Infrastructure |
 | **Endpoints via `WebApplication`** | `Map<Context>Endpoints` extension on `WebApplication` or `IEndpointRouteBuilder` |
 | **Strangler to legacy ABP** | New module → `[StranglerAdapter]` → legacy service interface; adapter lives in Infrastructure, registered explicitly |
+| **Avoid AutoMapper** | Prefer explicit mapping in Application/Api; AutoMapper only for **simple** profiles with unit tests calling `AssertConfigurationIsValid()` |
 
 ---
 
@@ -182,6 +183,8 @@ Test projects call the same `Add*Module` extensions as production — no paralle
 | Hidden assembly scanning for “all handlers” | Explicit `AddScoped<IHandler, Handler>()` or documented Scrutor scan list |
 | Module A references module B Infrastructure | Contracts + host wires both |
 | New code inheriting `AbpDbContext` | `DbContext` + explicit `OnModelCreating` |
+| AutoMapper for new module DTOs | Explicit constructors, `With*` helpers, or small static mappers |
+| AutoMapper without `AssertConfigurationIsValid` tests | Unit test per profile before merge |
 
 ---
 
@@ -193,6 +196,25 @@ Test projects call the same `Add*Module` extensions as production — no paralle
 - [ ] Endpoints mapped via `Map<Context>Endpoints` / `Map<Context>Module`
 - [ ] Strangler adapters registered explicitly with `[StranglerAdapter]` and removal ticket
 - [ ] Tests use same `Add*Module` path as production
+- [ ] No new `AutoMapper` unless profile is simple and covered by `AssertConfigurationIsValid` unit tests
+
+---
+
+## AutoMapper
+
+**Avoid** in new modules. Use explicit mapping at API and application boundaries.
+
+**Allowed only when:**
+
+- Profile is **simple** — `CreateMap<Source, Dest>()` with matching property names; no custom `ForMember`, converters, or lifecycle hooks.
+- **Unit tests** build `MapperConfiguration` with the profile(s) and call `AssertConfigurationIsValid()` (AutoMapper verify).
+
+```csharp
+var configuration = new MapperConfiguration(cfg => cfg.AddProfile<ImportDtoProfile>());
+configuration.AssertConfigurationIsValid();
+```
+
+Strangler adapters may delegate to legacy AutoMapper profiles; do not add new profiles in extracted module Domain or Application layers.
 
 ---
 
@@ -200,4 +222,5 @@ Test projects call the same `Add*Module` extensions as production — no paralle
 
 | Version | Date | Notes |
 |---------|------|-------|
+| 1.1 | 2026-08-08 | AutoMapper avoidance rule; simple-profile + verify-test exception |
 | 1.0 | 2026-06-21 | Initial standard; ABP excluded from new modules |
