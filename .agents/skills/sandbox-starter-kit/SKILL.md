@@ -22,13 +22,15 @@ Use this skill first. It routes you to focused skills and repo standards — do 
 |------|------|---------|
 | Actor + SignalR POC | `AkkaSignalRVuePoc/` | Akka.NET, SignalR, catalog API patterns |
 | Import + progress POC | `ApiImportActorPoc/` | Import sessions, hours booking, multi-manager actors |
-| Planning approvals POC | `PlanningApprovalsPoc/` | Foreman approval of adjusted planning after assignment progress |
+| Planning approvals POC | `PlanningApprovalsPoc/` | Thin domain POC — foreman approves assignment hours/dates/user (pairs with HourApprovals) |
+| Hour approvals (V2 slice) | `F2pPlatform/src/Modules/HourApprovals/` | End-to-end module + Angular floorboard UI |
 | Platform logging | `Platform.Serilog.Logging/`, `build/Platform.Logging.*.props` | Serilog, Seq, App Insights, test sink |
 | Frontend design system | `FloorganiseCss/` | `@floorganise/css` — Tailwind v4 tokens + semantic aliases |
 | Admin backoffice UI (reference) | `AdminBackoffice/web/` | Exemplary Angular + `@floorganise/css` operator screens |
 | Platform packages feed | `local-feed/` | Packed NuGet (`Platform.Serilog.Logging*`) |
 | Import domain | `ImportPipeline/` | `ImportPipeline.Domain` NuGet |
 | Modularization program | `docs/monolith-modularization/` | Roadmap, logging/correlation/frontend/**actor** standards, quality framework |
+| Laptop handoff pack | `docs/monolith-modularization/PLATFORM-V2-LAPTOP-HANDOFF.md` | Bundle plan + pilots for monolith laptop (`scripts/bundle-platform-v2-handoff.sh`) |
 | Coding standards | `docs/coding-standards/` | C# (ReSharper) + Angular team guidelines |
 | Agent skills (source) | `.cursor/skills/` | Author skills here; sync with `./scripts/sync-agent-skills.sh` |
 | Agent entry | `AGENTS.md` | Skill index for all tools |
