@@ -569,6 +569,7 @@ Yes — platform capability, not a tenant product feature. It typically has no c
 |-------|----------|
 | Modularization roadmap & pilots | `foundation-and-pilot-plan.md` |
 | Module DI (no ABP) | `module-composition-di.md` |
+| Object mapping (avoid AutoMapper) | `module-composition-di.md` · `../coding-standards/csharp-coding-standards.md` |
 | Pack artifact catalog & scaffold | `platform-pack-blueprint.md` |
 | UI view schemas & extensions | `platform-ui-customization-standard.md` |
 | Actor pipelines | `platform-actor-standard.md` |

@@ -46,5 +46,5 @@ After editing skills: `./scripts/sync-agent-skills.sh`.
 
 **Platform 2.0 (Floorganise-specific)**
 
-- `docs/monolith-modularization/module-composition-di.md` — no ABP in new modules
+- `docs/monolith-modularization/module-composition-di.md` — no ABP in new modules; avoid AutoMapper (simple profiles + verify tests only)
 - `docs/monolith-modularization/platform-frontend-standard.md` — `@floorganise/css` + `@floorganise/ui`

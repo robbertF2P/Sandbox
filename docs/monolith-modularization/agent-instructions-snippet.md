@@ -63,6 +63,7 @@ For **Primavera XER bulk project import** (~9k components, ~250k activities, int
 12. **Shared UI** — shell, tiles, buttons, forms, and cross-context widgets from **`@floorganise/ui`**; context `ui` libs only for context-specific presentational components.
 13. **OOP in the large, FP in detail** — structure with modules, ports, and actors at boundaries; implement rules as pure, testable functions on immutable data inside; side effects only in Infrastructure and at the host/actor shell.
 14. **Actor orchestration** — long-running workflows (import, integration, legacy handoff) use explicit actor pipelines per `platform-actor-standard.md`; client variance via packs, not core branches; `[StranglerAdapter]` for unavoidable legacy.
+15. **AutoMapper** — avoid in new modules; prefer explicit mapping. Allowed only for **simple** profiles (direct property maps) covered by unit tests that call AutoMapper `AssertConfigurationIsValid()` — see `module-composition-di.md` and `docs/coding-standards/csharp-coding-standards.md`.
 
 ## Target architecture
 
