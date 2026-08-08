@@ -1,0 +1,5 @@
+{
+  "install": "",
+  "start": "./scripts/export-steam-library.sh",
+  "terminals": []
+}
