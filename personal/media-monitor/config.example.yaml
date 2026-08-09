@@ -1,0 +1,30 @@
+# Copy to config.yaml and adjust paths/secrets.
+
+output_dir: /opt/cursor/artifacts/media-monitor
+state_file: /opt/cursor/artifacts/media-monitor/state.json
+
+steam:
+  api_key: ${STEAMAPIKEY}
+  steam_id: ${STEAMID}
+  country_code: nl
+  # Tags to watch for new releases (matched against store search)
+  watch_tags:
+    - Space
+    - Sci-fi
+    - Strategy
+    - RPG
+  min_discount_percent: 25
+  min_playtime_hours_for_tag_weight: 5
+
+kindle:
+  export_dir: ./kindle-data
+  marketplace: www.amazon.nl
+  amazon_domain: www.amazon.nl
+  # Extra authors/series to watch beyond auto-detected profile
+  watch_authors: []
+  watch_series: []
+  watch_keywords:
+    - space opera
+    - military science fiction
+  min_reading_hours_for_author_weight: 3
+  max_results_per_author: 5

@@ -434,3 +434,10 @@ FodyWeavers.xsd
 
 # Repo-specific
 sql
+
+# Personal media monitor (local config + Kindle export data)
+kindle-data/
+Kindle.zip
+personal/media-monitor/.venv/
+personal/media-monitor/config.yaml
+personal/media-monitor/**/__pycache__/
