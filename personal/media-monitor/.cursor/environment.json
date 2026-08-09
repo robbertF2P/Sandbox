@@ -1,0 +1,4 @@
+{
+  "install": "cd personal/media-monitor && python3 -m venv .venv && .venv/bin/pip install -r requirements.txt",
+  "start": "./personal/media-monitor/run-monitor.sh run --all --mark-seen"
+}
