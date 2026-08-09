@@ -74,6 +74,7 @@ Use this in workshops and PR review to filter AI output quickly.
 - [ ] **Analyzer warnings** introduced in touched files
 - [ ] **Style drift** — does not match neighbouring files and workspace rules
 - [ ] **Cross-context leakage** — vendor types in Domain, cross-context DbContext writes
+- [ ] **AutoMapper in new module** — without simple profile + `AssertConfigurationIsValid` unit tests
 - [ ] **Large PR** — multiple slices or unrelated contexts in one change
 
 **Action:** Return to author with specific fixes. Do not "fix slop" in review without sending back for proper test/artifact linkage.
@@ -152,6 +153,7 @@ AI and human authors follow the **same** standards. Guidelines are not optional 
 | Actors | Messages/events in Contracts; `Tell`/`Forward` inside actors; `Ask` only at boundaries |
 | EF | One DbContext per bounded context; review migrations before commit |
 | Tests | xUnit; descriptive `Method_Scenario_Expected` names; assert behaviour not internals |
+| Mapping | Avoid AutoMapper in new modules; explicit mapping preferred; simple profiles only with `AssertConfigurationIsValid` unit tests |
 | **Logging** | `Platform.Serilog.Logging`: Development → Seq, Production → Application Insights; tests → `Platform.Serilog.Logging.Testing` (xUnit sink). See `03-modularization-roadmap.md`. |
 
 ### AI agent instruction (paste for implementation work)

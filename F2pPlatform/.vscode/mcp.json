@@ -1,0 +1,20 @@
+{
+  "inputs": [],
+  "servers": {
+    "floor2plan": {
+      "type": "stdio",
+      "command": "dotnet",
+      "args": [
+        "run",
+        "--project",
+        "tools/F2pPlatform.McpGateway/F2pPlatform.McpGateway.csproj",
+        "--no-launch-profile"
+      ],
+      "env": {
+        "F2P_API_BASE_URL": "http://localhost:5080",
+        "F2P_USER_NAME": "supervisor.demo",
+        "F2P_USER_PERMISSIONS": "ApproveHoursProgress"
+      }
+    }
+  }
+}

@@ -1,4 +1,7 @@
 <Solution>
+  <Folder Name="/tools/">
+    <Project Path="tools/F2pPlatform.McpGateway/F2pPlatform.McpGateway.csproj" />
+  </Folder>
   <Folder Name="/host/">
     <Project Path="host/F2pPlatform.Host/F2pPlatform.Host.csproj" />
     <Project Path="host/F2pPlatform.Host.Contracts/F2pPlatform.Host.Contracts.csproj" />

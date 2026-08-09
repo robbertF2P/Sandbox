@@ -18,6 +18,7 @@ When scaffolding or extracting bounded-context modules (Platform 2.0 / F2P stran
 4. **Host only** calls module `Add*` / `Map*` methods — modules are libraries; the web host is the composition root.
 5. **Explicit registrations** — grep-able `AddScoped`/`AddSingleton`; no magic convention scanning unless explicitly approved.
 6. **Legacy ABP** in the monolith is bridged via `[StranglerAdapter]` in Infrastructure, not by extending ABP modules.
+7. **Avoid AutoMapper** in new modules — explicit mapping preferred; simple profiles only with unit tests calling `AssertConfigurationIsValid()`.
 
 Full standard: `docs/monolith-modularization/module-composition-di.md`
 
