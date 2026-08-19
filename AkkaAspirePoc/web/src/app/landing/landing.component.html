@@ -1,0 +1,31 @@
+<main class="page">
+  <header>
+    <h1>Akka Aspire POC</h1>
+    <p>Portal for the todo demo — Aspire dashboard, Sentry, API, and the Angular app.</p>
+  </header>
+
+  @if (loading()) {
+    <p class="status">Loading links…</p>
+  } @else if (error()) {
+    <p class="error">{{ error() }}</p>
+  }
+
+  <div class="grid">
+    @for (card of cards(); track card.title) {
+      <section class="card" [class.disabled]="!card.available">
+        <h2>{{ card.title }}</h2>
+        <p>{{ card.description }}</p>
+
+        @if (card.available && card.url) {
+          @if (card.external) {
+            <a class="button" [href]="card.url" target="_blank" rel="noreferrer">{{ card.label }}</a>
+          } @else {
+            <a class="button" [routerLink]="card.url">{{ card.label }}</a>
+          }
+        } @else {
+          <span class="muted">Not configured — see README.</span>
+        }
+      </section>
+    }
+  </div>
+</main>

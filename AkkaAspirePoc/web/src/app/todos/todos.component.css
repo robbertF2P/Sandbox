@@ -1,15 +1,14 @@
-:host {
-  display: block;
-  min-height: 100vh;
-  background: linear-gradient(160deg, #0f172a 0%, #1e293b 45%, #0f766e 100%);
-  color: #e2e8f0;
-  font-family: Inter, system-ui, sans-serif;
-}
-
 .page {
   max-width: 640px;
   margin: 0 auto;
   padding: 3rem 1.5rem;
+}
+
+.back {
+  display: inline-block;
+  margin-bottom: 1rem;
+  color: #5eead4;
+  text-decoration: none;
 }
 
 header h1 {

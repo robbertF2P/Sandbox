@@ -45,26 +45,31 @@ dotnet run --project AkkaAspirePoc.AppHost
 cd tests/AkkaAspirePoc.Tests && dotnet run
 ```
 
-Open the Aspire dashboard URL printed in the console, then:
+Open the Aspire dashboard URL printed in the **AppHost console** (or set `Aspire:DashboardUrl` / `aspire-dashboard-url` parameter).
 
+- **Portal (Angular)**: `http://localhost:4200` — links to dashboard, Sentry, API, and todos
+- **API portal (HTML)**: `http://localhost:5080/` — same links served by the API
 - **API**: `http://localhost:5080`
-- **Angular**: `http://localhost:4200`
-- **Swagger/health**: `/health`, `/api/todos`
+- **Todos**: `http://localhost:4200/todos`
+- **Swagger/health**: `/health`, `/api/todos`, `/api/links`
 
 ## Sentry
 
-Set your DSN in `AkkaAspirePoc.Api/appsettings.Development.json` or via user secrets:
+Set your DSN and project URL in `AkkaAspirePoc.Api/appsettings.Development.json` or via user secrets / AppHost parameters:
 
 ```json
 {
   "Sentry": {
     "Dsn": "https://<key>@o<org>.ingest.sentry.io/<project>",
+    "ProjectUrl": "https://<org>.sentry.io/projects/<project>/",
     "TracesSampleRate": 1.0
   }
 }
 ```
 
-Leave `Dsn` empty to disable Sentry locally.
+AppHost parameters: `sentry-project-url`, `aspire-dashboard-url`.
+
+Leave `Dsn` empty to disable Sentry locally. Sentry has no local UI — the portal links to your cloud project.
 
 ## EF Core migrations
 

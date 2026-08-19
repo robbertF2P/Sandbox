@@ -38,14 +38,7 @@ app.UseSentryTracing();
 app.UseCors("AngularDev");
 app.MapDefaultEndpoints();
 
-app.MapGet("/", () => Results.Ok(new
-{
-    Name = "Akka.NET + Aspire Todo API",
-    Health = "/health",
-    Todos = "/api/todos",
-    Cluster = "Akka cluster via Aaron.Akka.Aspire"
-}));
-
+app.MapLinksEndpoints();
 app.MapTodoEndpoints();
 
 await TodoDatabaseInitializer.InitializeAsync(app.Services);
