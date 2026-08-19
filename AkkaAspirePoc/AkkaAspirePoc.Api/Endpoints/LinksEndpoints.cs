@@ -39,22 +39,26 @@ public static class LinksEndpoints
         var apiBase = $"{request.Scheme}://{request.Host}";
         var sentryDsn = config["Sentry:Dsn"];
         var sentryProjectUrl = config["Sentry:ProjectUrl"];
-        var aspireDashboardUrl = config["Aspire:DashboardUrl"];
+        var aspireDashboardUrl = PortalLinkResolver.ResolveAspireDashboardUrl(config);
         var webBase = ResolveWebBase(config, request, apiBase);
+        var aspireAvailable = !string.IsNullOrWhiteSpace(aspireDashboardUrl);
+        var sentryAvailable = !string.IsNullOrWhiteSpace(sentryDsn) && !string.IsNullOrWhiteSpace(sentryProjectUrl);
 
         return new PortalLinksResponse(
             AspireDashboard: CreateLink(
                 "Aspire dashboard",
                 aspireDashboardUrl,
                 "Distributed app orchestration, logs, traces, and resource health.",
-                !string.IsNullOrWhiteSpace(aspireDashboardUrl)),
+                aspireAvailable,
+                aspireAvailable ? null : PortalLinkResolver.AspireUnavailableStatus(config)),
             Sentry: CreateLink(
                 "Sentry performance",
                 sentryProjectUrl,
-                string.IsNullOrWhiteSpace(sentryDsn)
-                    ? "Configure Sentry:Dsn and Sentry:ProjectUrl to send and view traces."
-                    : "View performance traces and errors in your Sentry project.",
-                !string.IsNullOrWhiteSpace(sentryDsn) && !string.IsNullOrWhiteSpace(sentryProjectUrl)),
+                sentryAvailable
+                    ? "View performance traces and errors in your Sentry project."
+                    : "Optional cloud observability — no local UI.",
+                sentryAvailable,
+                sentryAvailable ? null : PortalLinkResolver.SentryUnavailableStatus(config)),
             Api: new ApiLinks(apiBase, $"{apiBase}/health", $"{apiBase}/api/todos", $"{apiBase}/api/links"),
             Web: new WebLinks(webBase, $"{webBase}/todos"));
     }
@@ -75,8 +79,13 @@ public static class LinksEndpoints
             : configuredWeb;
     }
 
-    private static PortalLink CreateLink(string title, string? url, string description, bool available) =>
-        new(title, url, description, available);
+    private static PortalLink CreateLink(
+        string title,
+        string? url,
+        string description,
+        bool available,
+        string? status = null) =>
+        new(title, url, description, available, status);
 
     private static string RenderLandingHtml(PortalLinksResponse links) =>
         $$"""
@@ -108,8 +117,8 @@ public static class LinksEndpoints
             <p class="lead">Portal for the API host. Open the Angular app for the full experience.</p>
             <div class="grid">
               {{RenderCard(links.Web.TodosUrl, "Angular app", "Todo UI and portal home.", true, "Open app")}}
-              {{RenderCard(links.AspireDashboard.Url, links.AspireDashboard.Title, links.AspireDashboard.Description, links.AspireDashboard.Available)}}
-              {{RenderCard(links.Sentry.Url, links.Sentry.Title, links.Sentry.Description, links.Sentry.Available)}}
+              {{RenderCard(links.AspireDashboard)}}
+              {{RenderCard(links.Sentry)}}
               {{RenderCard(links.Api.HealthUrl, "API health", "Liveness and readiness checks.", true, "Health")}}
               {{RenderCard(links.Api.TodosUrl, "Todos API", "REST endpoint backed by Akka actors.", true, "API")}}
             </div>
@@ -119,31 +128,38 @@ public static class LinksEndpoints
         </html>
         """;
 
-    private static string RenderCard(string? url, string title, string description, bool available, string? label = null)
+    private static string RenderCard(string url, string title, string description, bool available, string? label = null) =>
+        RenderCard(new PortalLink(title, url, description, available), label);
+
+    private static string RenderCard(PortalLink link, string? label = null)
     {
         var buttonLabel = label ?? "Open";
-        if (!available || string.IsNullOrWhiteSpace(url))
+        if (!link.Available || string.IsNullOrWhiteSpace(link.Url))
         {
+            var status = string.IsNullOrWhiteSpace(link.Status)
+                ? "Unavailable — see README."
+                : link.Status;
+
             return $"""
             <section class="card disabled">
-              <h2>{title}</h2>
-              <p>{description}</p>
-              <span class="muted">Not configured — see README.</span>
+              <h2>{link.Title}</h2>
+              <p>{link.Description}</p>
+              <span class="muted">{status}</span>
             </section>
             """;
         }
 
         return $"""
         <section class="card">
-          <h2>{title}</h2>
-          <p>{description}</p>
-          <a class="button" href="{url}" target="_blank" rel="noreferrer">{buttonLabel}</a>
+          <h2>{link.Title}</h2>
+          <p>{link.Description}</p>
+          <a class="button" href="{link.Url}" target="_blank" rel="noreferrer">{buttonLabel}</a>
         </section>
         """;
     }
 }
 
-public sealed record PortalLink(string Title, string? Url, string Description, bool Available);
+public sealed record PortalLink(string Title, string? Url, string Description, bool Available, string? Status = null);
 
 public sealed record ApiLinks(string BaseUrl, string HealthUrl, string TodosUrl, string LinksUrl);
 

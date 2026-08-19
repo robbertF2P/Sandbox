@@ -3,6 +3,7 @@ export interface PortalLink {
   url: string | null;
   description: string;
   available: boolean;
+  status?: string | null;
 }
 
 export interface ApiLinks {

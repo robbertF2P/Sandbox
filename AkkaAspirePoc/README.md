@@ -45,7 +45,9 @@ dotnet run --project AkkaAspirePoc.AppHost
 cd tests/AkkaAspirePoc.Tests && dotnet run
 ```
 
-Open the Aspire dashboard URL printed in the **AppHost console** (or set `Aspire:DashboardUrl` / `aspire-dashboard-url` parameter).
+Open the Aspire dashboard URL printed in the **AppHost console** (default `https://localhost:17261` for the https profile).
+
+> **API-only demo** (SQLite + static Angular, no Docker): runs the API without AppHost. The portal will explain that the Aspire dashboard requires `dotnet run --project AkkaAspirePoc.AppHost`.
 
 - **Portal (Angular)**: `http://localhost:4200` — links to dashboard, Sentry, API, and todos
 - **API portal (HTML)**: `http://localhost:5080/` — same links served by the API
@@ -67,7 +69,7 @@ Set your DSN and project URL in `AkkaAspirePoc.Api/appsettings.Development.json`
 }
 ```
 
-AppHost parameters: `sentry-project-url`, `aspire-dashboard-url`.
+AppHost parameter: `sentry-project-url`. The Aspire dashboard URL is fixed in `AppHost.cs` (`https://localhost:17261`) and auto-detected when the API runs under AppHost.
 
 Leave `Dsn` empty to disable Sentry locally. Sentry has no local UI — the portal links to your cloud project.
 

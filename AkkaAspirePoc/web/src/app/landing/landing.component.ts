@@ -11,6 +11,7 @@ interface PortalCard {
   available: boolean;
   label: string;
   external: boolean;
+  status?: string | null;
 }
 
 @Component({
@@ -87,7 +88,8 @@ export class LandingComponent implements OnInit {
       url: link.url,
       available: link.available,
       label,
-      external: true
+      external: true,
+      status: link.status
     };
   }
 
@@ -103,19 +105,21 @@ export class LandingComponent implements OnInit {
       },
       {
         title: 'Aspire dashboard',
-        description: 'Check the AppHost console for the dashboard URL.',
+        description: 'Distributed app orchestration, logs, traces, and resource health.',
         url: (window as unknown as { __ASPIRE_DASHBOARD_URL__?: string }).__ASPIRE_DASHBOARD_URL__ ?? null,
         available: false,
         label: 'Open dashboard',
-        external: true
+        external: true,
+        status: 'Start the AppHost — the dashboard is not available in API-only demo mode.'
       },
       {
         title: 'Sentry performance',
-        description: 'Configure Sentry:Dsn and Sentry:ProjectUrl in the API.',
+        description: 'Optional cloud observability — no local UI.',
         url: (window as unknown as { __SENTRY_PROJECT_URL__?: string }).__SENTRY_PROJECT_URL__ ?? null,
         available: false,
         label: 'Open Sentry',
-        external: true
+        external: true,
+        status: 'Optional — set Sentry:Dsn and Sentry:ProjectUrl in the API.'
       }
     ];
   }

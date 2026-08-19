@@ -23,7 +23,7 @@
             <a class="button" [routerLink]="card.url">{{ card.label }}</a>
           }
         } @else {
-          <span class="muted">Not configured — see README.</span>
+          <span class="muted">{{ card.status ?? 'Unavailable — see README.' }}</span>
         }
       </section>
     }

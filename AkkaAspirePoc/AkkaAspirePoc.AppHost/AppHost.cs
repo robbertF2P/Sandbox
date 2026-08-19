@@ -3,7 +3,9 @@ using Aaron.Akka.Aspire.Hosting;
 var builder = DistributedApplication.CreateBuilder(args);
 
 var password = builder.AddParameter("sql-password", secret: true);
-var aspireDashboardUrl = builder.AddParameter("aspire-dashboard-url", "https://localhost:17261");
+
+// Literal URL — AddParameter resolves to a placeholder in child env vars, so the portal never saw a real link.
+const string aspireDashboardUrl = "https://localhost:17261";
 var sentryProjectUrl = builder.AddParameter("sentry-project-url", "");
 
 var sql = builder.AddSqlServer("sql", password)
