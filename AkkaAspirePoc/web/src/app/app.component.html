@@ -1,0 +1,41 @@
+<main class="page">
+  <header>
+    <h1>Akka Aspire Todo</h1>
+    <p>Angular frontend · Akka.NET actors · SQL Server · Sentry-ready API</p>
+  </header>
+
+  @if (error()) {
+    <p class="error">{{ error() }}</p>
+  }
+
+  <form class="add-form" (ngSubmit)="addTodo()">
+    <input
+      type="text"
+      name="title"
+      [(ngModel)]="newTitle"
+      placeholder="What needs doing?"
+      maxlength="200"
+      autocomplete="off"
+    />
+    <button type="submit">Add</button>
+  </form>
+
+  @if (loading()) {
+    <p class="status">Loading…</p>
+  } @else if (todos().length === 0) {
+    <p class="status">No todos yet — add one above.</p>
+  } @else {
+    <ul class="todo-list">
+      @for (todo of todos(); track todo.id) {
+        <li [class.completed]="todo.isCompleted">
+          <span>{{ todo.title }}</span>
+          @if (!todo.isCompleted) {
+            <button type="button" (click)="completeTodo(todo.id)">Done</button>
+          } @else {
+            <span class="badge">Completed</span>
+          }
+        </li>
+      }
+    </ul>
+  }
+</main>

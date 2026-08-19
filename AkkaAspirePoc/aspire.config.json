@@ -1,0 +1,5 @@
+{
+  "appHost": {
+    "path": "AkkaAspirePoc.AppHost/AkkaAspirePoc.AppHost.csproj"
+  }
+}
