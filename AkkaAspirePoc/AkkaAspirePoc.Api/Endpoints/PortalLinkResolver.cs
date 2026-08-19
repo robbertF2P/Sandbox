@@ -25,7 +25,7 @@ public static class PortalLinkResolver
     public static string AspireUnavailableStatus(IConfiguration config) =>
         IsRunningUnderAspire(config)
             ? $"Open the dashboard at {DefaultAspireDashboardUrl} (see AppHost console for the login token)."
-            : "Start the AppHost (`dotnet run --project AkkaAspirePoc.AppHost`) — the dashboard is not available in API-only demo mode.";
+            : "Start the AppHost with Docker (`dotnet run --project AkkaAspirePoc.AppHost`).";
 
     public static string SentryUnavailableStatus(IConfiguration config)
     {

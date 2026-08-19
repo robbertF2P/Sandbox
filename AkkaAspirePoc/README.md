@@ -47,7 +47,7 @@ cd tests/AkkaAspirePoc.Tests && dotnet run
 
 Open the Aspire dashboard URL printed in the **AppHost console** (default `https://localhost:17261` for the https profile).
 
-> **API-only demo** (SQLite + static Angular, no Docker): runs the API without AppHost. The portal will explain that the Aspire dashboard requires `dotnet run --project AkkaAspirePoc.AppHost`.
+**Docker is required.** The API expects SQL Server (`todosdb`) and Redis from AppHost — do not run the API standalone without those Aspire resources.
 
 - **Portal (Angular)**: `http://localhost:4200` — links to dashboard, Sentry, API, and todos
 - **API portal (HTML)**: `http://localhost:5080/` — same links served by the API

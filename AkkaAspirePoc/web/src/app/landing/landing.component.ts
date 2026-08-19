@@ -110,7 +110,7 @@ export class LandingComponent implements OnInit {
         available: false,
         label: 'Open dashboard',
         external: true,
-        status: 'Start the AppHost — the dashboard is not available in API-only demo mode.'
+        status: 'Start the AppHost with Docker (`dotnet run --project AkkaAspirePoc.AppHost`).'
       },
       {
         title: 'Sentry performance',
