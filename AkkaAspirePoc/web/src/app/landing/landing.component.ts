@@ -72,10 +72,10 @@ export class LandingComponent implements OnInit {
       {
         title: 'API portal',
         description: 'HTML landing page served by the API host.',
-        url: links.api.baseUrl,
+        url: '/',
         available: true,
         label: 'Open API portal',
-        external: true
+        external: false
       }
     ];
   }

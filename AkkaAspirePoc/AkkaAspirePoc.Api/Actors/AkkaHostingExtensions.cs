@@ -22,20 +22,25 @@ public sealed class TodoActorFacade(IActorRef todoActor)
 
 public static class AkkaHostingExtensions
 {
-    public static IServiceCollection AddTodoActors(this IServiceCollection services)
+    public static IServiceCollection AddTodoActors(this IServiceCollection services, IConfiguration configuration)
     {
-        services.AddAkka("TodoCluster", (akkaBuilder, sp) =>
+        var demoMode = configuration.GetValue("Demo:UseSqlite", false);
+
+        services.AddAkka(demoMode ? "TodoDemoSystem" : "TodoCluster", (akkaBuilder, sp) =>
         {
-            akkaBuilder.WithAspireClusterBootstrap(sp,
-                configureDiscovery: (b, config) =>
-                {
-                    var redisConn = config.GetConnectionString("akka-discovery");
-                    if (!string.IsNullOrEmpty(redisConn))
+            if (!demoMode)
+            {
+                akkaBuilder.WithAspireClusterBootstrap(sp,
+                    configureDiscovery: (b, config) =>
                     {
-                        b.WithRedisDiscovery(redisConn, config["Akka:Cluster:ServiceName"]);
-                    }
-                },
-                clusterConfigure: c => c.Roles = ["todo-api"]);
+                        var redisConn = config.GetConnectionString("akka-discovery");
+                        if (!string.IsNullOrEmpty(redisConn))
+                        {
+                            b.WithRedisDiscovery(redisConn, config["Akka:Cluster:ServiceName"]);
+                        }
+                    },
+                    clusterConfigure: c => c.Roles = ["todo-api"]);
+            }
 
             akkaBuilder.WithActors((system, registry, resolver) =>
             {

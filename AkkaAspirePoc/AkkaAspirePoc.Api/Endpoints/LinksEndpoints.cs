@@ -5,36 +5,7 @@ public static class LinksEndpoints
     public static IEndpointRouteBuilder MapLinksEndpoints(this IEndpointRouteBuilder app)
     {
         app.MapGet("/api/links", (IConfiguration config, HttpContext http) =>
-        {
-            var request = http.Request;
-            var apiBase = $"{request.Scheme}://{request.Host}";
-
-            var sentryDsn = config["Sentry:Dsn"];
-            var sentryProjectUrl = config["Sentry:ProjectUrl"];
-            var aspireDashboardUrl = config["Aspire:DashboardUrl"];
-
-            return Results.Ok(new PortalLinksResponse(
-                AspireDashboard: CreateLink(
-                    "Aspire dashboard",
-                    aspireDashboardUrl,
-                    "Distributed app orchestration, logs, traces, and resource health.",
-                    !string.IsNullOrWhiteSpace(aspireDashboardUrl)),
-                Sentry: CreateLink(
-                    "Sentry performance",
-                    sentryProjectUrl,
-                    string.IsNullOrWhiteSpace(sentryDsn)
-                        ? "Configure Sentry:Dsn and Sentry:ProjectUrl to send and view traces."
-                        : "View performance traces and errors in your Sentry project.",
-                    !string.IsNullOrWhiteSpace(sentryDsn) && !string.IsNullOrWhiteSpace(sentryProjectUrl)),
-                Api: new ApiLinks(
-                    BaseUrl: apiBase,
-                    HealthUrl: $"{apiBase}/health",
-                    TodosUrl: $"{apiBase}/api/todos",
-                    LinksUrl: $"{apiBase}/api/links"),
-                Web: new WebLinks(
-                    BaseUrl: config["Web:BaseUrl"] ?? "http://localhost:4200",
-                    TodosUrl: $"{config["Web:BaseUrl"] ?? "http://localhost:4200"}/todos")));
-        })
+            Results.Ok(BuildLinks(config, http)))
         .WithTags("Portal");
 
         app.MapGet("/", (IConfiguration config, HttpContext http) =>
@@ -69,7 +40,7 @@ public static class LinksEndpoints
         var sentryDsn = config["Sentry:Dsn"];
         var sentryProjectUrl = config["Sentry:ProjectUrl"];
         var aspireDashboardUrl = config["Aspire:DashboardUrl"];
-        var webBase = config["Web:BaseUrl"] ?? "http://localhost:4200";
+        var webBase = ResolveWebBase(config, request, apiBase);
 
         return new PortalLinksResponse(
             AspireDashboard: CreateLink(
@@ -86,6 +57,22 @@ public static class LinksEndpoints
                 !string.IsNullOrWhiteSpace(sentryDsn) && !string.IsNullOrWhiteSpace(sentryProjectUrl)),
             Api: new ApiLinks(apiBase, $"{apiBase}/health", $"{apiBase}/api/todos", $"{apiBase}/api/links"),
             Web: new WebLinks(webBase, $"{webBase}/todos"));
+    }
+
+    private static string ResolveWebBase(IConfiguration config, HttpRequest request, string apiBase)
+    {
+        var configuredWeb = config["Web:BaseUrl"];
+        if (string.IsNullOrWhiteSpace(configuredWeb))
+        {
+            return apiBase;
+        }
+
+        var isLocalRequest = request.Host.Host.Contains("localhost", StringComparison.OrdinalIgnoreCase);
+        var isLocalWebConfig = configuredWeb.Contains("localhost", StringComparison.OrdinalIgnoreCase);
+
+        return isLocalWebConfig && !isLocalRequest
+            ? apiBase
+            : configuredWeb;
     }
 
     private static PortalLink CreateLink(string title, string? url, string description, bool available) =>
@@ -120,7 +107,7 @@ public static class LinksEndpoints
             <h1>Akka Aspire POC</h1>
             <p class="lead">Portal for the API host. Open the Angular app for the full experience.</p>
             <div class="grid">
-              {{RenderCard(links.Web.BaseUrl + "/", "Angular app", "Todo UI and portal home.", true, "Open app")}}
+              {{RenderCard(links.Web.TodosUrl, "Angular app", "Todo UI and portal home.", true, "Open app")}}
               {{RenderCard(links.AspireDashboard.Url, links.AspireDashboard.Title, links.AspireDashboard.Description, links.AspireDashboard.Available)}}
               {{RenderCard(links.Sentry.Url, links.Sentry.Title, links.Sentry.Description, links.Sentry.Available)}}
               {{RenderCard(links.Api.HealthUrl, "API health", "Liveness and readiness checks.", true, "Health")}}

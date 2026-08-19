@@ -13,7 +13,7 @@ export interface TodoItem {
 @Injectable({ providedIn: 'root' })
 export class TodoService {
   private readonly apiBase = (window as unknown as { __API_URL__?: string }).__API_URL__
-    ?? 'http://localhost:5080';
+    ?? '';
 
   constructor(private readonly http: HttpClient) {}
 

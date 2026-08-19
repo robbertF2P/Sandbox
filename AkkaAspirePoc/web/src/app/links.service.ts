@@ -6,7 +6,7 @@ import { PortalLinksResponse } from './portal-links';
 @Injectable({ providedIn: 'root' })
 export class LinksService {
   private readonly apiBase = (window as unknown as { __API_URL__?: string }).__API_URL__
-    ?? 'http://localhost:5080';
+    ?? '';
 
   constructor(private readonly http: HttpClient) {}
 
