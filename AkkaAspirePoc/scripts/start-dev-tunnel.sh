@@ -24,7 +24,7 @@ pkill -f 'localtunnel --port' 2>/dev/null || true
 fuser -k "${PROXY_PORT}/tcp" 2>/dev/null || true
 sleep 1
 
-node "${ROOT}/scripts/dev-tunnel-proxy.mjs >"${PROXY_LOG}" 2>&1 &
+node "${ROOT}/scripts/dev-tunnel-proxy.mjs" >"${PROXY_LOG}" 2>&1 &
 sleep 1
 
 pkill -f 'ngrok http' 2>/dev/null || true

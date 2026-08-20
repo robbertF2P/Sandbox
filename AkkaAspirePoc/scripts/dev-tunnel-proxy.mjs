@@ -40,24 +40,24 @@ if (dashboardLoginToken) {
 
 function routeRequest(pathname) {
   if (pathname.startsWith('/api') || pathname === '/health' || pathname.startsWith('/health/')) {
-    return { target: apiTarget, path: pathname };
+    return { target: apiTarget, path: pathname, isAspire: false };
   }
 
   if (pathname === aspirePrefix || pathname.startsWith(`${aspirePrefix}/`)) {
     const stripped = pathname === aspirePrefix
       ? '/'
       : pathname.slice(aspirePrefix.length) || '/';
-    return { target: aspireTarget, path: stripped };
+    return { target: aspireTarget, path: stripped, isAspire: true };
   }
 
-  return { target: webTarget, path: pathname };
+  return { target: webTarget, path: pathname, isAspire: false };
 }
 
-function buildForwardHeaders(clientReq, target, publicHost) {
+function buildForwardHeaders(clientReq, target) {
   const forwardedProto =
     clientReq.headers['x-forwarded-proto']
     ?? (clientReq.socket.encrypted ? 'https' : 'http');
-  const forwardedHost = clientReq.headers['x-forwarded-host'] ?? clientReq.headers.host ?? publicHost ?? target.host;
+  const forwardedHost = clientReq.headers['x-forwarded-host'] ?? clientReq.headers.host ?? target.host;
 
   return {
     ...clientReq.headers,
@@ -68,7 +68,7 @@ function buildForwardHeaders(clientReq, target, publicHost) {
   };
 }
 
-function rewriteLocation(location, publicHost) {
+function rewriteAspireLocation(location, publicHost) {
   if (!location || !publicHost) {
     return location;
   }
@@ -81,18 +81,25 @@ function rewriteLocation(location, publicHost) {
 
     const suffix = `${resolved.pathname}${resolved.search}`;
     const normalized = suffix.startsWith('/') ? suffix : `/${suffix}`;
-    return `https://${publicHost}${aspirePrefix}${normalized === '/' ? '/login' : normalized}`;
+    const aspirePath = normalized === '/' ? `${aspirePrefix}/` : `${aspirePrefix}${normalized}`;
+    return `https://${publicHost}${aspirePath}`;
   } catch {
     return location;
   }
 }
 
-function rewriteResponseHeaders(headers, clientReq) {
+function rewriteAspireHtml(body) {
+  return body
+    .replace(/<base\s+href="\/"\s*\/?>/gi, `<base href="${aspirePrefix}/" />`)
+    .replace(/<base\s+href='\/'\s*\/?>/gi, `<base href="${aspirePrefix}/" />`);
+}
+
+function rewriteResponseHeaders(headers, clientReq, isAspire) {
   const publicHost = clientReq.headers['x-forwarded-host'] ?? clientReq.headers.host;
   const rewritten = { ...headers };
 
-  if (rewritten.location) {
-    rewritten.location = rewriteLocation(
+  if (isAspire && rewritten.location) {
+    rewritten.location = rewriteAspireLocation(
       Array.isArray(rewritten.location) ? rewritten.location[0] : rewritten.location,
       publicHost,
     );
@@ -116,8 +123,25 @@ function proxyRequest(clientReq, clientRes, route) {
       rejectUnauthorized: false,
     },
     (proxyRes) => {
-      clientRes.writeHead(proxyRes.statusCode ?? 502, rewriteResponseHeaders(proxyRes.headers, clientReq));
-      proxyRes.pipe(clientRes);
+      const headers = rewriteResponseHeaders(proxyRes.headers, clientReq, route.isAspire);
+      const contentType = String(headers['content-type'] ?? '');
+      const shouldRewriteHtml = route.isAspire && contentType.includes('text/html');
+
+      if (!shouldRewriteHtml) {
+        clientRes.writeHead(proxyRes.statusCode ?? 502, headers);
+        proxyRes.pipe(clientRes);
+        return;
+      }
+
+      const chunks = [];
+      proxyRes.on('data', (chunk) => chunks.push(chunk));
+      proxyRes.on('end', () => {
+        const body = rewriteAspireHtml(Buffer.concat(chunks).toString('utf8'));
+        headers['content-length'] = Buffer.byteLength(body);
+        delete headers['transfer-encoding'];
+        clientRes.writeHead(proxyRes.statusCode ?? 502, headers);
+        clientRes.end(body);
+      });
     },
   );
 
@@ -157,7 +181,7 @@ server.on('upgrade', (req, socket, head) => {
       `HTTP/1.1 ${proxyRes.statusCode} ${proxyRes.statusMessage}\r\n` +
         Object.entries(proxyRes.headers)
           .filter(([, value]) => value !== undefined)
-          .map(([key, value]) => `${key}: ${value}`)
+          .map(([key, value]) => `${key}: ${Array.isArray(value) ? value.join(', ') : value}`)
           .join('\r\n') +
         '\r\n\r\n',
     );
@@ -169,6 +193,9 @@ server.on('upgrade', (req, socket, head) => {
   });
 
   proxyReq.on('error', () => socket.destroy());
+  if (head?.length > 0) {
+    proxyReq.write(head);
+  }
   proxyReq.end();
 });
 
