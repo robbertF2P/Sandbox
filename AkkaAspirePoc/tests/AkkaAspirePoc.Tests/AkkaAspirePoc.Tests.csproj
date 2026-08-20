@@ -1,0 +1,23 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Akka.Hosting.TestKit.Xunit2" Version="1.5.70" />
+    <PackageReference Include="Microsoft.Data.Sqlite" Version="10.0.1" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="10.0.1" />
+    <PackageReference Include="TUnit" Version="1.7.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\AkkaAspirePoc.Domain\AkkaAspirePoc.Domain.csproj" />
+    <ProjectReference Include="..\..\AkkaAspirePoc.Data\AkkaAspirePoc.Data.csproj" />
+    <ProjectReference Include="..\..\AkkaAspirePoc.Api\AkkaAspirePoc.Api.csproj" />
+  </ItemGroup>
+
+</Project>

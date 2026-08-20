@@ -1,0 +1,23 @@
+<Project Sdk="Aspire.AppHost.Sdk/13.5.0">
+
+  <ItemGroup>
+    <ProjectReference Include="..\AkkaAspirePoc.Api\AkkaAspirePoc.Api.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Aaron.Akka.Aspire.Hosting" Version="0.2.1" />
+    <PackageReference Include="Aspire.Hosting.JavaScript" Version="13.5.0" />
+    <PackageReference Include="Aspire.Hosting.Redis" Version="13.5.0" />
+    <PackageReference Include="Aspire.Hosting.SqlServer" Version="13.5.0" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <AspireUseCliBundle>false</AspireUseCliBundle>
+    <UserSecretsId>56b7b104-45c3-42be-aeeb-29e401a13f1d</UserSecretsId>
+  </PropertyGroup>
+
+</Project>
