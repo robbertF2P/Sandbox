@@ -22,10 +22,31 @@ public static class PortalLinkResolver
         || !string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable("OTEL_EXPORTER_OTLP_ENDPOINT"))
         || !string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable("DOTNET_RESOURCE_SERVICE_ENDPOINT_URL"));
 
+    public static bool IsLocalHost(string? host) =>
+        string.IsNullOrWhiteSpace(host)
+        || host.Equals("localhost", StringComparison.OrdinalIgnoreCase)
+        || host.Equals("127.0.0.1", StringComparison.OrdinalIgnoreCase);
+
+    /// <summary>
+    /// Drops localhost-only URLs when the incoming request came from a public host (tunnel, ngrok, etc.).
+    /// </summary>
+    public static string? SanitizeLinkForPublicRequest(string? url, HttpRequest request)
+    {
+        if (string.IsNullOrWhiteSpace(url) || !Uri.TryCreate(url, UriKind.Absolute, out var uri))
+        {
+            return url;
+        }
+
+        return !IsLocalHost(request.Host.Host) && IsLocalHost(uri.Host) ? null : url;
+    }
+
     public static string AspireUnavailableStatus(IConfiguration config) =>
         IsRunningUnderAspire(config)
             ? $"Open the dashboard at {DefaultAspireDashboardUrl} (see AppHost console for the login token)."
             : "Start the AppHost with Docker (`dotnet run --project AkkaAspirePoc.AppHost`).";
+
+    public static string AspireLocalOnlyStatus(string localUrl) =>
+        $"Available on the dev machine only ({localUrl}).";
 
     public static string SentryUnavailableStatus(IConfiguration config)
     {

@@ -10,6 +10,22 @@ function routeToApi(pathname) {
   return pathname.startsWith('/api') || pathname === '/health' || pathname.startsWith('/health/');
 }
 
+function buildForwardHeaders(clientReq, target) {
+  const forwardedProto =
+    clientReq.headers['x-forwarded-proto']
+    ?? (clientReq.socket.encrypted ? 'https' : 'http');
+  const forwardedHost = clientReq.headers['x-forwarded-host'] ?? clientReq.headers.host ?? target.host;
+  const forwardedFor = clientReq.headers['x-forwarded-for'] ?? clientReq.socket.remoteAddress;
+
+  return {
+    ...clientReq.headers,
+    host: target.host,
+    'x-forwarded-host': forwardedHost,
+    'x-forwarded-proto': forwardedProto,
+    'x-forwarded-for': forwardedFor,
+  };
+}
+
 function proxyRequest(clientReq, clientRes, target) {
   const requestFn = target.protocol === 'https:' ? httpsRequest : httpRequest;
   const url = new URL(clientReq.url ?? '/', target);
@@ -21,10 +37,7 @@ function proxyRequest(clientReq, clientRes, target) {
       port: target.port,
       path: `${url.pathname}${url.search}`,
       method: clientReq.method,
-      headers: {
-        ...clientReq.headers,
-        host: target.host,
-      },
+      headers: buildForwardHeaders(clientReq, target),
     },
     (proxyRes) => {
       clientRes.writeHead(proxyRes.statusCode ?? 502, proxyRes.headers);
@@ -59,10 +72,7 @@ server.on('upgrade', (req, socket, head) => {
     port: target.port,
     path: req.url,
     method: req.method,
-    headers: {
-      ...req.headers,
-      host: target.host,
-    },
+    headers: buildForwardHeaders(req, target),
   });
 
   proxyReq.on('upgrade', (proxyRes, proxySocket, proxyHead) => {

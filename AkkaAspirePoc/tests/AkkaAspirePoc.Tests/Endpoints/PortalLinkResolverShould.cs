@@ -1,4 +1,5 @@
 using AkkaAspirePoc.Api.Endpoints;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 
 namespace AkkaAspirePoc.Tests.Endpoints;
@@ -58,5 +59,41 @@ public sealed class PortalLinkResolverShould
         var status = PortalLinkResolver.SentryUnavailableStatus(config);
 
         await Assert.That(status).Contains("Optional");
+    }
+
+    [Test]
+    public async Task SanitizeLinkForPublicRequest_removes_localhost_urls_for_public_hosts()
+    {
+        var request = new DefaultHttpContext().Request;
+        request.Host = new HostString("example.loca.lt");
+        request.Scheme = "https";
+
+        var sanitized = PortalLinkResolver.SanitizeLinkForPublicRequest("http://localhost:4200", request);
+
+        await Assert.That(sanitized).IsNull();
+    }
+
+    [Test]
+    public async Task SanitizeLinkForPublicRequest_keeps_localhost_urls_for_local_hosts()
+    {
+        var request = new DefaultHttpContext().Request;
+        request.Host = new HostString("localhost", 4200);
+        request.Scheme = "http";
+
+        var sanitized = PortalLinkResolver.SanitizeLinkForPublicRequest("http://localhost:4200", request);
+
+        await Assert.That(sanitized).IsEqualTo("http://localhost:4200");
+    }
+
+    [Test]
+    public async Task SanitizeLinkForPublicRequest_keeps_public_urls_for_public_hosts()
+    {
+        var request = new DefaultHttpContext().Request;
+        request.Host = new HostString("example.loca.lt");
+        request.Scheme = "https";
+
+        var sanitized = PortalLinkResolver.SanitizeLinkForPublicRequest("https://org.sentry.io/projects/demo/", request);
+
+        await Assert.That(sanitized).IsEqualTo("https://org.sentry.io/projects/demo/");
     }
 }

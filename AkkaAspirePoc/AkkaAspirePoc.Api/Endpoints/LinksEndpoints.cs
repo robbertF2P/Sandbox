@@ -38,10 +38,16 @@ public static class LinksEndpoints
         var request = http.Request;
         var apiBase = $"{request.Scheme}://{request.Host}";
         var sentryDsn = config["Sentry:Dsn"];
-        var sentryProjectUrl = config["Sentry:ProjectUrl"];
-        var aspireDashboardUrl = PortalLinkResolver.ResolveAspireDashboardUrl(config);
+        var sentryProjectUrl = PortalLinkResolver.SanitizeLinkForPublicRequest(config["Sentry:ProjectUrl"], request);
+        var rawAspireDashboardUrl = PortalLinkResolver.ResolveAspireDashboardUrl(config);
+        var aspireDashboardUrl = PortalLinkResolver.SanitizeLinkForPublicRequest(rawAspireDashboardUrl, request);
         var webBase = ResolveWebBase(config, request, apiBase);
         var aspireAvailable = !string.IsNullOrWhiteSpace(aspireDashboardUrl);
+        var aspireStatus = aspireAvailable
+            ? null
+            : !string.IsNullOrWhiteSpace(rawAspireDashboardUrl) && !PortalLinkResolver.IsLocalHost(request.Host.Host)
+                ? PortalLinkResolver.AspireLocalOnlyStatus(rawAspireDashboardUrl!)
+                : PortalLinkResolver.AspireUnavailableStatus(config);
         var sentryAvailable = !string.IsNullOrWhiteSpace(sentryDsn) && !string.IsNullOrWhiteSpace(sentryProjectUrl);
 
         return new PortalLinksResponse(
@@ -50,7 +56,7 @@ public static class LinksEndpoints
                 aspireDashboardUrl,
                 "Distributed app orchestration, logs, traces, and resource health.",
                 aspireAvailable,
-                aspireAvailable ? null : PortalLinkResolver.AspireUnavailableStatus(config)),
+                aspireStatus),
             Sentry: CreateLink(
                 "Sentry performance",
                 sentryProjectUrl,
@@ -71,8 +77,9 @@ public static class LinksEndpoints
             return apiBase;
         }
 
-        var isLocalRequest = request.Host.Host.Contains("localhost", StringComparison.OrdinalIgnoreCase);
-        var isLocalWebConfig = configuredWeb.Contains("localhost", StringComparison.OrdinalIgnoreCase);
+        var isLocalRequest = PortalLinkResolver.IsLocalHost(request.Host.Host);
+        var isLocalWebConfig = configuredWeb.Contains("localhost", StringComparison.OrdinalIgnoreCase)
+            || configuredWeb.Contains("127.0.0.1", StringComparison.OrdinalIgnoreCase);
 
         return isLocalWebConfig && !isLocalRequest
             ? apiBase
