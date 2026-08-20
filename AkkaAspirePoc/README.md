@@ -55,6 +55,18 @@ Open the Aspire dashboard URL printed in the **AppHost console** (default `https
 - **Todos**: `http://localhost:4200/todos`
 - **Swagger/health**: `/health`, `/api/todos`, `/api/links`
 
+## Share remotely (optional)
+
+```bash
+# Terminal 1
+cd AkkaAspirePoc && aspire run
+
+# Terminal 2 — expose the Angular app (proxies /api to the API)
+ngrok http 4200
+```
+
+Open the ngrok URL. The Aspire dashboard stays on the dev machine — use the login URL printed by `aspire run`.
+
 ## Sentry
 
 Set your DSN and project URL in `AkkaAspirePoc.Api/appsettings.Development.json` or via user secrets / AppHost parameters:

@@ -34,7 +34,6 @@ var api = builder.AddProject<Projects.AkkaAspirePoc_Api>("api")
 var web = builder.AddJavaScriptApp("web", "../web", "start")
     .WithHttpEndpoint(port: 4200, env: "PORT")
     .WithReference(api)
-    .WithEnvironment("API_URL", api.GetEndpoint("http"))
     .WithEnvironment("ASPIRE_DASHBOARD_URL", aspireDashboardUrl)
     .WithEnvironment("SENTRY_PROJECT_URL", sentryProjectUrl)
     .WithExternalHttpEndpoints();

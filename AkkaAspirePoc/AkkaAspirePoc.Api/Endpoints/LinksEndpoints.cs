@@ -39,7 +39,9 @@ public static class LinksEndpoints
         var apiBase = $"{request.Scheme}://{request.Host}";
         var sentryDsn = config["Sentry:Dsn"];
         var sentryProjectUrl = PortalLinkResolver.SanitizeLinkForPublicRequest(config["Sentry:ProjectUrl"], request);
-        var aspireDashboardUrl = PortalLinkResolver.ResolveAspireDashboardUrlForRequest(config, request);
+        var aspireDashboardUrl = PortalLinkResolver.SanitizeLinkForPublicRequest(
+            PortalLinkResolver.ResolveAspireDashboardUrl(config),
+            request);
         var webBase = ResolveWebBase(config, request, apiBase);
         var aspireAvailable = !string.IsNullOrWhiteSpace(aspireDashboardUrl);
         var aspireStatus = aspireAvailable
