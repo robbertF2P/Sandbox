@@ -10,11 +10,73 @@ public static class PortalLinkResolver
         {
             if (IsResolvableUrl(candidate))
             {
-                return candidate;
+                return ToLoginUrl(candidate, config);
             }
         }
 
         return null;
+    }
+
+    public static string? ToLoginUrl(string? baseUrl, IConfiguration config)
+    {
+        if (string.IsNullOrWhiteSpace(baseUrl))
+        {
+            return null;
+        }
+
+        var token = ResolveDashboardLoginToken(config);
+        if (string.IsNullOrWhiteSpace(token))
+        {
+            return baseUrl.TrimEnd('/');
+        }
+
+        var separator = baseUrl.Contains('?', StringComparison.Ordinal) ? '&' : '?';
+        return $"{baseUrl.TrimEnd('/')}/login{separator}t={token}";
+    }
+
+    private static string? ResolveDashboardLoginToken(IConfiguration config)
+    {
+        var configured = config["Aspire:DashboardLoginToken"];
+        if (!string.IsNullOrWhiteSpace(configured))
+        {
+            return configured;
+        }
+
+        var fromEnv = Environment.GetEnvironmentVariable("ASPIRE_DASHBOARD_LOGIN_TOKEN");
+        if (!string.IsNullOrWhiteSpace(fromEnv))
+        {
+            return fromEnv;
+        }
+
+        try
+        {
+            var logDir = Path.Combine(
+                Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
+                ".aspire",
+                "logs");
+            if (!Directory.Exists(logDir))
+            {
+                return null;
+            }
+
+            var latest = Directory.GetFiles(logDir, "cli_*.log")
+                .OrderByDescending(File.GetLastWriteTimeUtc)
+                .FirstOrDefault();
+
+            if (latest is null)
+            {
+                return null;
+            }
+
+            var match = System.Text.RegularExpressions.Regex.Match(
+                File.ReadAllText(latest),
+                @"login\?t=([a-f0-9]+)");
+            return match.Success ? match.Groups[1].Value : null;
+        }
+        catch (IOException)
+        {
+            return null;
+        }
     }
 
     public static bool IsRunningUnderAspire(IConfiguration config) =>
@@ -42,7 +104,7 @@ public static class PortalLinkResolver
 
     public static string AspireUnavailableStatus(IConfiguration config) =>
         IsRunningUnderAspire(config)
-            ? $"Open locally at {DefaultAspireDashboardUrl} (login token is printed by aspire run)."
+            ? "Start cloudflared for the dashboard: cloudflared tunnel --url https://127.0.0.1:17261 --no-tls-verify"
             : "Start the AppHost with Docker (`dotnet run --project AkkaAspirePoc.AppHost`).";
 
     public static string SentryUnavailableStatus(IConfiguration config)
@@ -65,12 +127,30 @@ public static class PortalLinkResolver
 
     private static IEnumerable<string?> GetAspireDashboardCandidates(IConfiguration config)
     {
+        yield return config["Aspire:DashboardPublicUrl"];
+        yield return Environment.GetEnvironmentVariable("ASPIRE_DASHBOARD_PUBLIC_URL");
+        yield return ReadPublicDashboardUrlFromFile();
         yield return config["Aspire:DashboardUrl"];
         yield return Environment.GetEnvironmentVariable("ASPIRE_DASHBOARD_URL");
 
         if (IsRunningUnderAspire(config))
         {
             yield return DefaultAspireDashboardUrl;
+        }
+    }
+
+    private static string? ReadPublicDashboardUrlFromFile()
+    {
+        var publicUrlFile = Environment.GetEnvironmentVariable("ASPIRE_DASHBOARD_PUBLIC_URL_FILE")
+            ?? "/tmp/aspire-dashboard-public-url.txt";
+
+        try
+        {
+            return File.ReadAllText(publicUrlFile).Trim();
+        }
+        catch (IOException)
+        {
+            return null;
         }
     }
 

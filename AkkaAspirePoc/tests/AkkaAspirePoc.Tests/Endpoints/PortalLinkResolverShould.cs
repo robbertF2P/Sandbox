@@ -6,6 +6,13 @@ namespace AkkaAspirePoc.Tests.Endpoints;
 
 public sealed class PortalLinkResolverShould
 {
+    [Before(Test)]
+    public void IgnorePublicDashboardUrlFile()
+    {
+        Environment.SetEnvironmentVariable(
+            "ASPIRE_DASHBOARD_PUBLIC_URL_FILE",
+            "/tmp/aspire-dashboard-public-url-tests-missing");
+    }
     [Test]
     public async Task ResolveAspireDashboardUrl_uses_configured_url()
     {
@@ -18,7 +25,7 @@ public sealed class PortalLinkResolverShould
 
         var url = PortalLinkResolver.ResolveAspireDashboardUrl(config);
 
-        await Assert.That(url).IsEqualTo("https://localhost:17261");
+        await Assert.That(url).StartsWith("https://localhost:17261");
     }
 
     [Test]
@@ -48,7 +55,7 @@ public sealed class PortalLinkResolverShould
 
         var url = PortalLinkResolver.ResolveAspireDashboardUrl(config);
 
-        await Assert.That(url).IsEqualTo("https://localhost:17261");
+        await Assert.That(url).StartsWith("https://localhost:17261");
     }
 
     [Test]

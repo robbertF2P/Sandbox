@@ -61,11 +61,12 @@ Open the Aspire dashboard URL printed in the **AppHost console** (default `https
 # Terminal 1
 cd AkkaAspirePoc && aspire run
 
-# Terminal 2 — expose the Angular app (proxies /api to the API)
-ngrok http 4200
+# Terminal 2 — app + aspire dashboard (two tunnels)
+./scripts/share.sh
 ```
 
-Open the ngrok URL. The Aspire dashboard stays on the dev machine — use the login URL printed by `aspire run`.
+- **App** → ngrok on port 4200
+- **Aspire dashboard** → cloudflared on port 17261 (public URL, not localhost)
 
 ## Sentry
 
