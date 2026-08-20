@@ -39,15 +39,12 @@ public static class LinksEndpoints
         var apiBase = $"{request.Scheme}://{request.Host}";
         var sentryDsn = config["Sentry:Dsn"];
         var sentryProjectUrl = PortalLinkResolver.SanitizeLinkForPublicRequest(config["Sentry:ProjectUrl"], request);
-        var rawAspireDashboardUrl = PortalLinkResolver.ResolveAspireDashboardUrl(config);
-        var aspireDashboardUrl = PortalLinkResolver.SanitizeLinkForPublicRequest(rawAspireDashboardUrl, request);
+        var aspireDashboardUrl = PortalLinkResolver.ResolveAspireDashboardUrlForRequest(config, request);
         var webBase = ResolveWebBase(config, request, apiBase);
         var aspireAvailable = !string.IsNullOrWhiteSpace(aspireDashboardUrl);
         var aspireStatus = aspireAvailable
             ? null
-            : !string.IsNullOrWhiteSpace(rawAspireDashboardUrl) && !PortalLinkResolver.IsLocalHost(request.Host.Host)
-                ? PortalLinkResolver.AspireLocalOnlyStatus(rawAspireDashboardUrl!)
-                : PortalLinkResolver.AspireUnavailableStatus(config);
+            : PortalLinkResolver.AspireUnavailableStatus(config);
         var sentryAvailable = !string.IsNullOrWhiteSpace(sentryDsn) && !string.IsNullOrWhiteSpace(sentryProjectUrl);
 
         return new PortalLinksResponse(

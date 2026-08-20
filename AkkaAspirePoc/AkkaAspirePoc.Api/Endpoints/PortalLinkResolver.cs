@@ -40,6 +40,54 @@ public static class PortalLinkResolver
         return !IsLocalHost(request.Host.Host) && IsLocalHost(uri.Host) ? null : url;
     }
 
+    public static string? ResolveAspireDashboardUrlForRequest(IConfiguration config, HttpRequest request)
+    {
+        var localUrl = ResolveAspireDashboardUrl(config);
+        if (string.IsNullOrWhiteSpace(localUrl))
+        {
+            return null;
+        }
+
+        if (IsLocalHost(request.Host.Host))
+        {
+            return localUrl;
+        }
+
+        var publicBase = $"{request.Scheme}://{request.Host}".TrimEnd('/');
+        var token = ResolveDashboardLoginToken(config);
+
+        return string.IsNullOrWhiteSpace(token)
+            ? $"{publicBase}/aspire/login"
+            : $"{publicBase}/aspire/login?t={token}";
+    }
+
+    private static string? ResolveDashboardLoginToken(IConfiguration config)
+    {
+        var configured = config["Aspire:DashboardLoginToken"];
+        if (!string.IsNullOrWhiteSpace(configured))
+        {
+            return configured;
+        }
+
+        var fromEnv = Environment.GetEnvironmentVariable("ASPIRE_DASHBOARD_LOGIN_TOKEN");
+        if (!string.IsNullOrWhiteSpace(fromEnv))
+        {
+            return fromEnv;
+        }
+
+        var tokenFile = Environment.GetEnvironmentVariable("ASPIRE_DASHBOARD_LOGIN_TOKEN_FILE")
+            ?? "/tmp/aspire-dashboard-login-token.txt";
+
+        try
+        {
+            return File.ReadAllText(tokenFile).Trim();
+        }
+        catch (IOException)
+        {
+            return null;
+        }
+    }
+
     public static string AspireUnavailableStatus(IConfiguration config) =>
         IsRunningUnderAspire(config)
             ? $"Open the dashboard at {DefaultAspireDashboardUrl} (see AppHost console for the login token)."
