@@ -37,8 +37,18 @@ class KindleProfile:
 
 
 @dataclass
+class LibraryGame:
+    app_id: int
+    name: str
+    note: str
+    in_library: bool
+    tags: list[str] = field(default_factory=list)
+
+
+@dataclass
 class SteamProfile:
     owned_app_ids: set[int]
     wishlist_app_ids: set[int]
     top_games: list[tuple[int, str, int]]
     tag_weights: dict[str, float]
+    library_games: list[LibraryGame] = field(default_factory=list)

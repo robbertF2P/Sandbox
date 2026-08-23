@@ -52,6 +52,16 @@ def cmd_profile_steam(config_path: Path) -> int:
             {"app_id": app_id, "name": name, "hours": round(minutes / 60, 1)}
             for app_id, name, minutes in profile.top_games[:15]
         ],
+        "library_games": [
+            {
+                "app_id": game.app_id,
+                "name": game.name,
+                "note": game.note,
+                "in_library": game.in_library,
+                "tags": game.tags,
+            }
+            for game in profile.library_games
+        ],
     }
     print(json.dumps(payload, indent=2))
     return 0
@@ -60,8 +70,9 @@ def cmd_profile_steam(config_path: Path) -> int:
 def cmd_run(config_path: Path, steam: bool, kindle: bool, mark_seen: bool) -> int:
     config = load_config(config_path)
     state = MonitorState(config.state_file)
-    books = []
-    games = []
+    books: list = []
+    games: list = []
+    library_games_for_report = []
 
     if kindle:
         export_path = Path(config.kindle.export_dir)
@@ -84,6 +95,7 @@ def cmd_run(config_path: Path, steam: bool, kindle: bool, mark_seen: bool) -> in
         except ValueError as exc:
             print(str(exc), file=sys.stderr)
             return 1
+        library_games_for_report = profile.library_games
         discovered = discover_steam_deals(profile, config.steam)
         discovered.extend(discover_steam_recommendations(profile, config.steam))
         for game in discovered:
@@ -94,7 +106,9 @@ def cmd_run(config_path: Path, steam: bool, kindle: bool, mark_seen: bool) -> in
             if mark_seen:
                 state.mark_game(key)
 
-    json_path, md_path = write_report(config.output_dir, books, games)
+    json_path, md_path = write_report(
+        config.output_dir, books, games, library_games_for_report
+    )
     if mark_seen:
         state.save()
     print(f"Report written:\n  {json_path}\n  {md_path}")

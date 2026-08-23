@@ -14,11 +14,20 @@ def _expand_env(value: str) -> str:
 
 
 @dataclass
+class SteamWatchGame:
+    app_id: int
+    name: str
+    tags: list[str] = field(default_factory=list)
+    note: str = ""
+
+
+@dataclass
 class SteamConfig:
     api_key: str = ""
     steam_id: str = ""
     country_code: str = "nl"
     watch_tags: list[str] = field(default_factory=list)
+    watch_games: list[SteamWatchGame] = field(default_factory=list)
     min_discount_percent: int = 25
     min_playtime_hours_for_tag_weight: int = 5
 
@@ -50,11 +59,22 @@ def load_config(path: str | Path) -> MonitorConfig:
     steam_raw = raw.get("steam", {})
     kindle_raw = raw.get("kindle", {})
 
+    watch_games = [
+        SteamWatchGame(
+            app_id=int(game["app_id"]),
+            name=str(game.get("name", f"App {game['app_id']}")),
+            tags=[str(tag) for tag in game.get("tags", [])],
+            note=str(game.get("note", "")),
+        )
+        for game in steam_raw.get("watch_games", [])
+    ]
+
     steam = SteamConfig(
         api_key=_expand_env(str(steam_raw.get("api_key", ""))),
         steam_id=_expand_env(str(steam_raw.get("steam_id", ""))),
         country_code=str(steam_raw.get("country_code", "nl")),
         watch_tags=list(steam_raw.get("watch_tags", [])),
+        watch_games=watch_games,
         min_discount_percent=int(steam_raw.get("min_discount_percent", 25)),
         min_playtime_hours_for_tag_weight=int(
             steam_raw.get("min_playtime_hours_for_tag_weight", 5)

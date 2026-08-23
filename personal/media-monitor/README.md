@@ -29,6 +29,7 @@ cp config.example.yaml config.yaml
 
 Edit `config.yaml`:
 - `kindle.export_dir` — path to extracted Kindle export (default `./kindle-data`)
+- `steam.watch_games` — games you own or recently bought (boosts recommendations)
 - Steam secrets via environment: `STEAMAPIKEY`, `STEAMID`
 
 ## Usage

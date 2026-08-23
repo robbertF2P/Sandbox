@@ -3,7 +3,7 @@ from __future__ import annotations
 import requests
 
 from media_monitor.config import SteamConfig
-from media_monitor.models import GameCandidate, SteamProfile
+from media_monitor.models import GameCandidate, LibraryGame, SteamProfile
 
 STEAM_STORE_BASE = "https://store.steampowered.com"
 
@@ -78,11 +78,27 @@ def load_steam_profile(config: SteamConfig) -> SteamProfile:
     for tag in config.watch_tags:
         tag_weights[tag] = tag_weights.get(tag, 0.0) + 10.0
 
+    for game in config.watch_games:
+        for tag in game.tags:
+            tag_weights[tag] = tag_weights.get(tag, 0.0) + 15.0
+
+    library_games = [
+        LibraryGame(
+            app_id=game.app_id,
+            name=game.name,
+            note=game.note,
+            in_library=game.app_id in owned_app_ids,
+            tags=game.tags,
+        )
+        for game in config.watch_games
+    ]
+
     return SteamProfile(
         owned_app_ids=owned_app_ids,
         wishlist_app_ids=wishlist_app_ids,
         top_games=top_games,
         tag_weights=tag_weights,
+        library_games=[LibraryGame(**entry) for entry in library_games],
     )
 
 

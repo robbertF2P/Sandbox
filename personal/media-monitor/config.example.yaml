@@ -9,10 +9,21 @@ steam:
   country_code: nl
   # Tags to watch for new releases (matched against store search)
   watch_tags:
-    - Space
-    - Sci-fi
-    - Strategy
-    - RPG
+    - Action
+    - Adventure
+    - Puzzle
+    - VR
+    - Indie
+  # Games you own or recently bought — boosts taste tags and shows in reports
+  watch_games:
+    - app_id: 870780
+      name: CONTROL Ultimate Edition
+      tags: [Action, Adventure]
+      note: recently purchased
+    - app_id: 918060
+      name: "Obstruction : VR"
+      tags: [Puzzle, VR, Indie, Casual]
+      note: owned
   min_discount_percent: 25
   min_playtime_hours_for_tag_weight: 5
 
