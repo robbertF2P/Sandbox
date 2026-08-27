@@ -1,0 +1,23 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <ItemGroup>
+    <ProjectReference Include="..\AkkaAspirePoc.ServiceDefaults\AkkaAspirePoc.ServiceDefaults.csproj" />
+    <ProjectReference Include="..\AkkaAspirePoc.Domain\AkkaAspirePoc.Domain.csproj" />
+    <ProjectReference Include="..\AkkaAspirePoc.Data\AkkaAspirePoc.Data.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Aaron.Akka.Aspire" Version="0.2.1" />
+    <PackageReference Include="Aaron.Akka.Discovery.Redis" Version="0.2.1" />
+    <PackageReference Include="Akka.Hosting" Version="1.5.70" />
+    <PackageReference Include="Aspire.Microsoft.EntityFrameworkCore.SqlServer" Version="13.5.0" />
+    <PackageReference Include="Sentry.AspNetCore" Version="6.9.0" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+</Project>
