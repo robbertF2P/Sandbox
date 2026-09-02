@@ -132,7 +132,7 @@ How work flows inside the ActorSystem.
 
 ```mermaid
 flowchart TB
-  BTN["User or system sync start"] --> P6["P6SyncActor tenant"]
+  BTN["Raw data test button"] --> P6["P6SyncActor tenant"]
   CH["Change handler bridge"] --> BUS["Akka bus"]
   BUS --> P6
   P6 --> MAP["Map to EPPM message"]
@@ -144,7 +144,10 @@ flowchart TB
 ### Flows
 
 **Sync start (user or system initiated)**  
-Raw data button, scheduled job, or other trigger → `facade.Tell(StartP6Sync)` → P6 actor runs sync → P6 API.
+Scheduled job or explicit sync trigger → `facade.Tell(StartP6Sync)` → P6 actor → P6 API → update messages to DataActor when persisting.
+
+**Raw data test (connector bypass)**  
+Raw data button bypasses the connector import path — it does not import into F2P. It is a quick test: call the API client read, display what comes back. Useful to verify P6 connectivity and mapping before wiring full sync.
 
 **F2P → P6 (reactive)**  
 User saves → change handler → bridge publishes core update event → P6 actor handles only events it deems relevant → maps to EPPM → P6 API.
@@ -170,7 +173,7 @@ flowchart LR
     ACTOR["P6SyncActor"]
   end
 
-  START["StartP6Sync"] --> ACTOR
+  START["RawDataTest or StartP6Sync"] --> ACTOR
   BUS["Core update events selective"] --> ACTOR
   ACTOR --> MAP --> CLIENT --> P6API["P6 API"]
 ```
@@ -227,28 +230,28 @@ public interface IEventToEppmMapper
 - Implement `IActorSystemFacade`.
 - Smoke test: dummy actor receives a message.
 
-### Phase 2 — Raw data button (first trigger)
+### Phase 2 — Raw data button (connector bypass, quick test)
 
-- Wire existing raw data connector button to core import.
-- Core imports into core entities and saves.
-- `facade.Tell(StartP6Sync)` to kick off P6 sync.
+- Wire raw data button as a connector bypass — skips import, no DB write.
+- Calls API client read only and displays the response (verify connectivity and mapping).
+- `facade.Tell(RawDataTest)` to route through P6 actor + mock client.
 
 ### Phase 3 — P6 actor + mock
 
 - Implement `P6SyncActor` in tenant customization.
-- Handle `StartP6Sync` messages.
-- Mock `IP6Client` (log / fake 200).
+- Handle `RawDataTest` and `StartP6Sync` messages.
+- Mock `IP6Client` returns sample EPPM data for display.
 - Register actor at startup.
 
 ### Phase 4 — Change handler bridge
 
 - Bridge publishes core update events onto Akka bus on `SaveChanges`.
 - P6 actor handles only events it deems relevant.
-- Tenant mapper converts those events → EPPM messages.
+- Tenant mapper converts those events to EPPM messages.
 
 ### Phase 5 — DataActor + real P6
 
-- Core `DataActor` handles update messages from P6 actor.
+- Core `DataActor` handles update messages from P6 actor when full sync persists to F2P.
 - Swap mock for real `P6.Client`.
 
 ---
