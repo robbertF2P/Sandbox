@@ -49,7 +49,7 @@ Core stays one codebase. Tenant customization adds actors and mapping — not se
 | **Reusable P6 client** | Shared `P6.Client` NuGet; per-tenant mapper only. |
 | **After-commit only** | Bridge publishes **after** transaction commits — never from inside `SaveChanges`. |
 | **Commands vs events** | Commands (`StartP6Sync`, `RawDataTest`) → direct `Tell` via facade. Domain events → **EventStream** (local bus). |
-| **Event bus** | Local EventStream is fine now. Upgrade to DistributedPubSub when you need events across servers — same publish API, different transport. |
+| **Event bus** | Local EventStream is fine now. Upgrade to DistributedPubSub when you need events across servers — same publish API, different transport. **Integration point for future connectors** (SAP, Kronos, etc.) — register a new actor, subscribe, done. |
 | **Typed messages** | Commands and events in a Contracts project — no `Tell(object)`. |
 | **Observable** | `CorrelationId` + `SyncId` + `TenantId` on every sync run and log line; optional P6 request/response logging. |
 | **One P6 path** | Replace existing connector/Hangfire path — do not run two parallel integrations. |
@@ -140,6 +140,8 @@ flowchart TB
 | **Domain events** | `EventStream.Publish(...)` after commit | Core state changed — WbsUpdated, ActivitySaved, etc. |
 
 **Why an event bus:** subscribers decide what they care about. P6SyncActor subscribes in `PreStart`. Tomorrow you add another actor without changing the bridge.
+
+**Future connectors:** the after-commit EventStream is the shared integration point. P6 is the first consumer; SAP, Kronos, or other vendor actors subscribe to the same events with their own mapper and client. Core publishes once — connectors react independently.
 
 | Bus | When |
 |-----|------|
@@ -438,7 +440,7 @@ Strangler approach: wire new path behind feature flag, cut over per tenant, remo
 
 ## One-liner
 
-> Core runs the ActorSystem and owns data via DataActor and application services. After commit, a thin bridge publishes domain events to EventStream. Commands go via facade Tell. Tenant customization registers P6SyncActor to subscribe and react, with typed messages, correlation, and a shared P6 client.
+> Core runs the ActorSystem and owns data via DataActor and application services. After commit, a thin bridge publishes domain events to EventStream — the shared integration point for P6 and future connectors. Commands go via facade Tell.
 
 ---
 
