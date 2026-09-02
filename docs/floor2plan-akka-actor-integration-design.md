@@ -1,4 +1,4 @@
-# Floor2Plan — Akka Actor Integration Design
+# Floor2Plan - Akka Actor Integration Design
 
 **Purpose:** Design for moving tenant customization (e.g. P6 / EPPM integration) from service inheritance on forked branches to custom actors registered against a core ActorSystem.
 
@@ -15,13 +15,13 @@ Each Floor2Plan tenant gets a customized branch with a submodule pointing at cor
 ```mermaid
 flowchart TB
   subgraph tenant["Tenant customization branch"]
-    OVR["AcmeImportService : ImportService"]
-    OVR2["AcmePlanningService : PlanningService"]
-    SUB["git submodule → core repo"]
+    OVR["AcmeImportService overrides ImportService"]
+    OVR2["AcmePlanningService overrides PlanningService"]
+    SUB["git submodule to core repo"]
   end
 
   subgraph core["Core repo"]
-    SVC["ImportService, PlanningService, …"]
+    SVC["ImportService, PlanningService"]
     DB[("DB")]
   end
 
@@ -59,27 +59,27 @@ How the solution is built and wired.
 ```mermaid
 flowchart TB
   subgraph host["Host"]
-    API["API / services"]
+    API["API and services"]
     SVC["Core services"]
     EF["DbContext"]
     CH["SaveChanges change handlers"]
-    IMP["Import (core entities)"]
+    IMP["Import core entities"]
     HOST["Akka hosting"]
     AS["ActorSystem"]
     FACADE["IActorSystemFacade"]
     BRIDGE["Change handler bridge"]
     BUS["Akka bus"]
-    DATA_ACTOR["DataActor\n(core — persists updates)"]
+    DATA_ACTOR["DataActor persists updates"]
   end
 
   subgraph core_lib["Core libraries"]
-    CONTRACTS["*.Contracts\n(events, messages)"]
+    CONTRACTS["Contracts events and messages"]
   end
 
   subgraph tenant["Tenant customization"]
     P6_PROJ["Acme.P6Integration"]
-    MAP["Event → EPPM mapper"]
-    P6_ACTOR["P6SyncActor\n(sync start + selective bus events)"]
+    MAP["Event to EPPM mapper"]
+    P6_ACTOR["P6SyncActor"]
     REG["Register at startup"]
   end
 
@@ -89,7 +89,7 @@ flowchart TB
 
   subgraph external["External"]
     DB[("F2P database")]
-    P6API["P6 / EPPM API"]
+    P6API["P6 EPPM API"]
   end
 
   API --> SVC
@@ -101,9 +101,9 @@ flowchart TB
   FACADE --> AS
   DATA_ACTOR --> EF
   REG --> FACADE
-  BUS -.->|subscribe| P6_ACTOR
+  BUS -.-> P6_ACTOR
   P6_ACTOR --> MAP --> P6_CLIENT --> P6API
-  P6_ACTOR -->|update messages| DATA_ACTOR
+  P6_ACTOR --> DATA_ACTOR
   P6_PROJ --> CONTRACTS
   P6_PROJ --> FACADE
   P6_PROJ --> P6_CLIENT
@@ -132,15 +132,12 @@ How work flows inside the ActorSystem.
 
 ```mermaid
 flowchart TB
-  BTN["User / system\nsync start"] -->|Tell StartP6Sync| P6["P6SyncActor\n(tenant)"]
-
-  CH["Change handler bridge"] -->|publish| BUS["Akka bus"]
-  BUS -->|core update events\n(actor picks what matters)| P6
-
+  BTN["User or system sync start"] --> P6["P6SyncActor tenant"]
+  CH["Change handler bridge"] --> BUS["Akka bus"]
+  BUS --> P6
   P6 --> MAP["Map to EPPM message"]
-  MAP --> P6API["P6 / EPPM API"]
-
-  P6 -->|ImportUpdate| DATA["DataActor\n(core)"]
+  MAP --> P6API["P6 EPPM API"]
+  P6 --> DATA["DataActor core"]
   DATA --> DB[("F2P DB")]
 ```
 
@@ -163,8 +160,8 @@ Tenant actor never touches `DbContext` directly.
 
 ```mermaid
 flowchart LR
-  subgraph shared["Reusable (all tenants)"]
-    CLIENT["P6.Client\nHTTP, auth, retries"]
+  subgraph shared["Reusable all tenants"]
+    CLIENT["P6.Client"]
     DTO["EPPM DTOs"]
   end
 
@@ -173,8 +170,8 @@ flowchart LR
     ACTOR["P6SyncActor"]
   end
 
-  START["StartP6Sync\n(user / system)"] --> ACTOR
-  BUS["Core update events\n(selective)"] --> ACTOR
+  START["StartP6Sync"] --> ACTOR
+  BUS["Core update events selective"] --> ACTOR
   ACTOR --> MAP --> CLIENT --> P6API["P6 API"]
 ```
 
