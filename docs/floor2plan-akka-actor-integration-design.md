@@ -48,6 +48,8 @@ Core stays one codebase. Tenant customization adds actors and mapping — not se
 | **Tenant owns integration** | P6 actor, EPPM mapping, P6 client configuration. |
 | **Reusable P6 client** | Shared `P6.Client` NuGet; per-tenant mapper only. |
 | **After-commit only** | Bridge publishes **after** transaction commits — never from inside `SaveChanges`. |
+| **Commands vs events** | Commands (`StartP6Sync`, `RawDataTest`) → direct `Tell` via facade. Domain events → **EventStream** (local bus). |
+| **Event bus** | Local EventStream is fine now. Upgrade to DistributedPubSub when you need events across servers — same publish API, different transport. |
 | **Typed messages** | Commands and events in a Contracts project — no `Tell(object)`. |
 | **Observable** | `CorrelationId` + `SyncId` + `TenantId` on every sync run and log line; optional P6 request/response logging. |
 | **One P6 path** | Replace existing connector/Hangfire path — do not run two parallel integrations. |
@@ -67,6 +69,7 @@ flowchart TB
     CH["Change handlers detect changes"]
     COMMIT["After transaction commits"]
     BRIDGE["Change handler bridge"]
+    BUS["EventStream local bus"]
     HOST["Akka hosting"]
     AS["ActorSystem"]
     FACADE["IActorSystemFacade"]
@@ -96,7 +99,8 @@ flowchart TB
 
   API --> SVC --> EF --> DB
   EF --> CH --> COMMIT --> BRIDGE
-  BRIDGE --> FACADE
+  BRIDGE --> BUS
+  BUS -.-> P6_ACTOR
   HOST --> AS
   FACADE --> AS
   FACADE --> P6_ACTOR
@@ -118,8 +122,9 @@ flowchart TB
 |-----------|-------|------|
 | **Core application services** | Core | User actions, import, business rules |
 | **Change handlers** | Core | Detect what changed during save |
-| **After-commit bridge** | Core | Publish typed events to ActorSystem only after DB commit |
-| **ActorSystem + facade** | Core | Runs actors; holds registered actor refs; typed `Tell` |
+| **After-commit bridge** | Core | Publish typed domain events to **EventStream** after DB commit |
+| **EventStream** | Core | Local event bus — any actor can subscribe; upgrade to DistributedPubSub later |
+| **ActorSystem + facade** | Core | Runs actors; typed `Tell` for commands; holds registered actor refs |
 | **DataActor** | Core | Receives inbound update commands; calls application services — not `DbContext` directly |
 | **Contracts** | Core | Typed commands and events with correlation fields |
 | **P6.Client** | Shared | Reusable P6 HTTP client; optional request/response logging |
@@ -127,15 +132,21 @@ flowchart TB
 | **P6SyncActor** | Tenant | Sync-start + selective core events; PipeTo for HTTP; state machine |
 | **Registration** | Tenant | `facade.RegisterActor(...)` at startup |
 
-### Message routing (pick one, document it)
+### Commands vs events (two paths)
 
-| Option | When to use |
-|--------|-------------|
-| **Tell to registered actor ref** | **Default for Phase 1–4.** Simplest. Facade holds `IActorRef` for P6SyncActor. |
-| **EventStream** | Single-server fan-out to multiple subscribers. Does **not** work across cluster nodes. |
-| **DistributedPubSub** | Multi-server / cluster later. |
+| Path | Mechanism | Use for |
+|------|-----------|---------|
+| **Commands** | `facade.Tell(...)` to a known actor | `StartP6Sync`, `RawDataTest`, inbound update commands to DataActor |
+| **Domain events** | `EventStream.Publish(...)` after commit | Core state changed — WbsUpdated, ActivitySaved, etc. |
 
-Start with **direct Tell to P6SyncActor ref**. Add EventStream or pub-sub only when you need fan-out.
+**Why an event bus:** subscribers decide what they care about. P6SyncActor subscribes in `PreStart`. Tomorrow you add another actor without changing the bridge.
+
+| Bus | When |
+|-----|------|
+| **EventStream** | **Now.** Single server. Local in-process pub/sub. |
+| **DistributedPubSub** | **Later.** Multi-server or cluster. Same publish pattern, different adapter. |
+
+EventStream does not cross cluster nodes — that is fine until you need it. The design keeps a clear **publish** boundary so swapping to DistributedPubSub is an infrastructure change, not a rewrite.
 
 ---
 
@@ -145,9 +156,10 @@ How work flows inside the ActorSystem.
 
 ```mermaid
 flowchart TB
-  BTN["Raw data test button"] --> FACADE["Facade Tell"]
+  BTN["Raw data test button"] --> FACADE["Facade Tell command"]
   FACADE --> P6["P6SyncActor tenant"]
-  COMMIT["After commit bridge"] --> FACADE
+  COMMIT["After commit bridge"] --> BUS["EventStream"]
+  BUS --> P6
   P6 --> MAP["Map to EPPM message"]
   MAP --> P6API["P6 EPPM API"]
   P6 --> DATA["DataActor core"]
@@ -164,7 +176,7 @@ Raw data button bypasses connector import — no DB write. Quick test: `facade.T
 `facade.Tell(new StartP6Sync(...))` → P6 actor (Idle → Syncing → Done) → P6 API via PipeTo → update commands to DataActor when persisting.
 
 **F2P to P6 (reactive, Phase 4+)**  
-User saves → after commit → bridge → `facade.Tell(new CoreEntityUpdated(...))` → P6 actor handles only events it deems relevant → EPPM → P6 API. If P6 export fails, F2P data is already saved — plan retry and idempotent P6 calls.
+User saves → after commit → bridge **publishes** typed event to EventStream → P6 actor subscribes and handles only what it deems relevant → EPPM → P6 API. If P6 export fails, F2P data is already saved — plan retry and idempotent P6 calls.
 
 **P6 to F2P (inbound)**  
 P6 actor receives response → `Tell` typed update command → DataActor → application service → F2P database.
@@ -176,6 +188,7 @@ Tenant actor never touches `DbContext` directly.
 | Requirement | Detail |
 |-------------|--------|
 | **State machine** | `Become`: Idle → Syncing → Done (or Failed) |
+| **Subscriptions** | `PreStart`: subscribe to relevant event types on EventStream |
 | **Async HTTP** | `PipeTo` for all P6 calls — never block in `Receive` |
 | **Cancellation** | `CancellationToken` when sync cancelled or actor stops |
 | **Errors** | try/catch for HTTP timeouts; supervision for unexpected failures |
@@ -241,7 +254,7 @@ flowchart LR
   end
 
   START["RawDataTest or StartP6Sync"] --> ACTOR
-  EVENTS["Core update events selective"] --> ACTOR
+  BUS["EventStream core events"] --> ACTOR
   ACTOR --> MAP --> CLIENT --> P6API["P6 API"]
 ```
 
@@ -264,23 +277,33 @@ flowchart LR
 ## Suggested interfaces
 
 ```csharp
-// Core — facade (typed Tell only)
+// Core — facade (typed Tell for commands only)
 public interface IActorSystemFacade
 {
-    void Tell<TMessage>(TMessage message) where TMessage : IActorMessage;
+    void Tell<TCommand>(TCommand command) where TCommand : IActorCommand;
     IActorRef RegisterActor(string name, Props props);
 }
 
-// Marker for typed commands/events in Contracts
-public interface IActorMessage
+// Core — event publishing (after commit)
+public interface IActorEventPublisher
 {
-    string CorrelationId { get; }
-    string TenantId { get; }
+    void Publish<TEvent>(TEvent domainEvent) where TEvent : IActorEvent;
 }
+
+// Marker types in Contracts
+public interface IActorCommand : IActorMessage { }
+public interface IActorEvent : IActorMessage { }
+```
 
 public interface ISyncMessage : IActorMessage
 {
     Guid SyncId { get; }
+}
+
+public interface IActorMessage
+{
+    string CorrelationId { get; }
+    string TenantId { get; }
 }
 
 // Shared — reusable
@@ -329,8 +352,8 @@ Strangler approach: wire new path behind feature flag, cut over per tenant, remo
 
 | Model | Implication |
 |-------|-------------|
-| **One tenant per server** (current forked-branch model) | Direct Tell to actor ref is sufficient. EventStream OK. |
-| **Many tenants in one app** | Need tenant-scoped actor refs or routing; consider DistributedPubSub later. |
+| **One tenant per server** (current forked-branch model) | EventStream is sufficient. Commands via facade Tell. |
+| **Many tenants in one app** | Tenant-scoped subscriptions; DistributedPubSub when events must cross servers. |
 
 ---
 
@@ -356,11 +379,11 @@ Strangler approach: wire new path behind feature flag, cut over per tenant, remo
 - Register actor at startup via `Props`.
 - Tests: Akka.Hosting.TestKit, mock client, prove PipeTo does not block mailbox.
 
-### Phase 4 — After-commit bridge
+### Phase 4 — After-commit bridge + EventStream
 
-- Bridge publishes typed events **after transaction commits** (not in `SaveChanges`).
+- Bridge publishes typed events to **EventStream** after transaction commits (not in `SaveChanges`).
+- P6SyncActor subscribes in `PreStart` to event types it cares about.
 - Consider outbox table for reliable delivery and retry.
-- `facade.Tell` to P6SyncActor for events it deems relevant.
 - Idempotent P6 calls; dedup repeated saves.
 
 ### Phase 5 — DataActor + real P6.Client
@@ -385,7 +408,7 @@ Strangler approach: wire new path behind feature flag, cut over per tenant, remo
 | # | Topic | Resolution |
 |---|-------|------------|
 | 1 | Bridge timing | After-commit only; outbox considered for Phase 4 |
-| 2 | Name the bus | Direct Tell to actor ref (default); EventStream/cluster noted |
+| 2 | Name the bus | EventStream for domain events now; DistributedPubSub when multi-server |
 | 3 | P6SyncActor | State machine, PipeTo, cancellation, supervision |
 | 4 | DataActor | Application services, not DbContext; pool later if needed |
 | 5 | Existing stack | Strangler table above — no parallel P6 path |
@@ -406,7 +429,7 @@ Strangler approach: wire new path behind feature flag, cut over per tenant, remo
 |---|-------|----------|
 | **Tenant variance** | Inherit and override core services on forked branch | Register actors + mapper |
 | **P6 integration** | Buried in handlers / subclasses / Hangfire | `P6SyncActor` + shared `P6.Client` |
-| **Trigger** | Change handlers inline | After-commit bridge → facade Tell |
+| **Trigger** | Change handlers inline | After-commit publish to EventStream |
 | **DB writes from P6** | Ad-hoc in customization | DataActor → application services |
 | **Observability** | Ad-hoc logging | SyncId + CorrelationId end-to-end |
 | **New tenant** | New branch, merge pain | New mapper + actor registration |
@@ -415,7 +438,7 @@ Strangler approach: wire new path behind feature flag, cut over per tenant, remo
 
 ## One-liner
 
-> Core runs the ActorSystem and owns data via DataActor and application services. After commit, a thin bridge tells the P6 actor. Tenant customization registers P6SyncActor with typed messages, correlation, and a shared P6 client — replacing forked service overrides and the old connector path.
+> Core runs the ActorSystem and owns data via DataActor and application services. After commit, a thin bridge publishes domain events to EventStream. Commands go via facade Tell. Tenant customization registers P6SyncActor to subscribe and react, with typed messages, correlation, and a shared P6 client.
 
 ---
 
