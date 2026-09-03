@@ -73,3 +73,6 @@ without a network.
 
 - `DataIngestionActorTests` â€” full run over all pages, every record processed, lifecycle events
 - `MockDataApiClientTests` â€” the fake client itself behaves as specified
+---
+
+[? Phase 5 — Async work](../Phase5_AsyncWork/README.md)  |  [Index](../README.md)  |  [Phase 7 — Hosting ?](../Phase7_Hosting/README.md)

@@ -59,3 +59,6 @@ decides what a failure means â€” no restart needed for an expected error.
 
 `PipeToDemoActorTests` â€” mailbox stays responsive while a fetch is in flight, and a failing
 service surfaces as a failed-status message rather than a crash.
+---
+
+[? Phase 4 — Behaviour switching](../Phase4_BehaviorSwitching/README.md)  |  [Index](../README.md)  |  [Phase 6 — Routers and pipelines ?](../Phase6_RoutersAndPipelines/README.md)

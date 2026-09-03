@@ -77,3 +77,6 @@ Use it for notifications where the sender should not care who is listening.
 - `AddressingDemoActorTests` â€” Sender semantics, Tell vs Forward, child addressing
 - `PeerActorTests` â€” direct peer messaging, cross-mesh, full-mesh wiring
 - `WorkCoordinatorActorTests` â€” delegation to a child, state, EventStream publishing
+---
+
+[? Phase 2 — Identity and lifecycle](../Phase2_IdentityAndLifecycle/README.md)  |  [Index](../README.md)  |  [Phase 4 — Behaviour switching ?](../Phase4_BehaviorSwitching/README.md)
