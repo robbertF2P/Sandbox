@@ -119,7 +119,7 @@ dotnet test AkkaSignalRVuePoc.slnx --filter "FullyQualifiedName~Actors"
 
 - Blocking inside `Receive` handlers (`Thread.Sleep`, `.Result`, `.Wait()`).
 - Sharing mutable static state between actors.
-- Passing `IServiceProvider` into actors instead of resolving dependencies at `Props` creation time.
+- Stashing `IServiceProvider` in actor fields and calling `GetService` ad hoc — resolve singletons at `Props` time; for scoped services (`DbContext`), inject `IServiceScopeFactory` and `CreateAsyncScope()` per message handler.
 - Sending large object graphs; prefer immutable records with IDs.
 - Creating a new `ActorSystem` per request — use the hosted singleton system.
 
