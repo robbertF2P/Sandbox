@@ -54,22 +54,3 @@ public sealed class AddressingDemoActor : ReceiveActor
     public static Props Props(IActorRef greeter) =>
         Akka.Actor.Props.Create(() => new AddressingDemoActorWithInjectedGreeter(greeter));
 }
-
-/// <summary>
-/// Same routing logic, but the greeter address is passed in via constructor.
-/// </summary>
-internal sealed class AddressingDemoActorWithInjectedGreeter : ReceiveActor
-{
-    private readonly IActorRef _greeter;
-
-    public AddressingDemoActorWithInjectedGreeter(IActorRef greeter)
-    {
-        _greeter = greeter;
-
-        Receive<AskViaTellCommand>(command =>
-            _greeter.Tell(new SayHelloCommand(command.Name), Sender));
-
-        Receive<AskViaForwardCommand>(command =>
-            _greeter.Forward(new SayHelloCommand(command.Name)));
-    }
-}

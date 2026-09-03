@@ -54,8 +54,8 @@ public sealed class SessionActor : ReceiveActor
 
         Receive<EndSessionCommand>(_ =>
         {
-            var sessionId = _sessionId!;
-            var totalSteps = _stepsRecorded;
+            string sessionId = _sessionId!;
+            int totalSteps = _stepsRecorded;
             _log.Info("Session {SessionId} ended after {Steps} steps", sessionId, totalSteps);
             Context.System.EventStream.Publish(new SessionEnded(sessionId, totalSteps));
             ReplyIfAsked(Sender, new SessionStateResponse("Completed", sessionId, totalSteps));

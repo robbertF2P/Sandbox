@@ -15,7 +15,7 @@ public sealed class DataRecordWorkerActor : ReceiveActor
     {
         Receive<ProcessDataRecordCommand>(command =>
         {
-            var processed = command.Record.Value * 2;
+            int processed = command.Record.Value * 2;
             _log.Debug(
                 "Worker {Worker} processed {RecordId} from {Source}: {Value} -> {Processed}",
                 Self.Path.Name,

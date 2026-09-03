@@ -16,7 +16,7 @@ public sealed class WorkItemProcessorActor : ReceiveActor
     {
         Receive<ProcessWorkItemCommand>(command =>
         {
-            var result = command.Payload * 2;
+            int result = command.Payload * 2;
             _log.Info("Processed item {ItemId}: {Payload} -> {Result}", command.ItemId, command.Payload, result);
             Sender.Tell(new WorkItemProcessed(command.ItemId, result));
         });

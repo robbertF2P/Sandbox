@@ -9,6 +9,23 @@ A small teaching application that demonstrates core Akka.NET concepts:
 - **Hosting** — `Akka.Hosting` registers actors in DI; a background worker drives demo traffic
 - **Logging** — Serilog for the host; Akka's built-in logger adapter inside actors
 
+## Start here — the learning path
+
+The **tests are the course**, ordered into seven phases. Each phase folder has a README with a
+diagram, so they double as talking points when discussing a concept.
+
+→ **[tests/AkkaTeach.Tests/README.md](tests/AkkaTeach.Tests/README.md)** — the reading order
+
+| Phase | Concept | Diagram |
+|-------|---------|---------|
+| 1 | ActorSystem, Props, ActorOf, IActorRef | [Phase 1](tests/AkkaTeach.Tests/Phase1_ActorSystemAndCreation/README.md) |
+| 2 | Identity, paths, lifecycle hooks, supervision | [Phase 2](tests/AkkaTeach.Tests/Phase2_IdentityAndLifecycle/README.md) |
+| 3 | Tell vs Ask, Sender, Forward, EventStream | [Phase 3](tests/AkkaTeach.Tests/Phase3_Messaging/README.md) |
+| 4 | Become / Unbecome — state as behaviour | [Phase 4](tests/AkkaTeach.Tests/Phase4_BehaviorSwitching/README.md) |
+| 5 | PipeTo — async without blocking the mailbox | [Phase 5](tests/AkkaTeach.Tests/Phase5_AsyncWork/README.md) |
+| 6 | Routers, fan-out/aggregate, injected IO | [Phase 6](tests/AkkaTeach.Tests/Phase6_RoutersAndPipelines/README.md) |
+| 7 | Akka.Hosting, DI, ActorRegistry | [Phase 7](tests/AkkaTeach.Tests/Phase7_Hosting/README.md) |
+
 ## Projects
 
 | Project | Purpose |
@@ -16,7 +33,19 @@ A small teaching application that demonstrates core Akka.NET concepts:
 | `AkkaTeach.Contracts` | Messages, queries, and events |
 | `AkkaTeach.Core` | Actors + `IDataApiClient` port |
 | `AkkaTeach.Worker` | Host, `MockDataApiClient`, background worker |
-| `AkkaTeach.Tests` | TestKit unit tests |
+| `AkkaTeach.Console` | Interactive REPL for driving the actors by hand |
+| `AkkaTeach.Tests` | TestKit unit tests, organised as the phased course |
+
+## Run the console
+
+The quickest way to poke at the actors yourself:
+
+```bash
+cd AkkaTeach
+dotnet run --project src/AkkaTeach.Console
+```
+
+Commands: `work`, `session start|step|end|reset|state`, `ingest`, `status`, `help`, `quit`.
 
 ## Run the worker
 
@@ -53,6 +82,12 @@ xUnit v3 runs the test project as an executable:
 ```bash
 cd AkkaTeach
 dotnet run --project tests/AkkaTeach.Tests
+```
+
+Or via the test runner:
+
+```bash
+dotnet test tests/AkkaTeach.Tests/AkkaTeach.Tests.csproj
 ```
 
 ## Actor model guide

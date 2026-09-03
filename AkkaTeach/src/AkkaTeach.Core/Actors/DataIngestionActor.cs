@@ -71,7 +71,7 @@ public sealed class DataIngestionActor : ReceiveActor
 
     private void FetchNextPage()
     {
-        var nextPage = _currentPage + 1;
+        int nextPage = _currentPage + 1;
         _log.Debug("Fetching API page {Page}", nextPage);
 
         _apiClient.FetchPageAsync(nextPage).PipeTo(
@@ -85,7 +85,7 @@ public sealed class DataIngestionActor : ReceiveActor
 
     private void OnPageReceived(ApiPageReceived message)
     {
-        var page = message.Page;
+        ApiDataPage page = message.Page;
         _currentPage = page.PageNumber;
         _totalPages = page.TotalPages;
         _totalRecordsExpected = page.TotalPages * page.Records.Count;
@@ -110,7 +110,7 @@ public sealed class DataIngestionActor : ReceiveActor
             return;
         }
 
-        foreach (var record in page.Records)
+        foreach (ExternalDataRecord record in page.Records)
         {
             _workerPool.Tell(new ProcessDataRecordCommand(record), Self);
         }
@@ -143,7 +143,7 @@ public sealed class DataIngestionActor : ReceiveActor
 
     private void FinishCollection()
     {
-        var elapsedMs = (DateTime.UtcNow.Ticks - _startedAtTicks) / TimeSpan.TicksPerMillisecond;
+        long elapsedMs = (DateTime.UtcNow.Ticks - _startedAtTicks) / TimeSpan.TicksPerMillisecond;
         _log.Info(
             "Collection {CollectionId} completed: {Records} records in {ElapsedMs}ms",
             _collectionId,
@@ -153,7 +153,7 @@ public sealed class DataIngestionActor : ReceiveActor
         Context.System.EventStream.Publish(
             new DataCollectionCompleted(_collectionId, _recordsProcessed, elapsedMs));
 
-        var response = CreateStatus("Completed");
+        IngestionStatusResponse response = CreateStatus("Completed");
         _requester?.Tell(response);
         _requester = null;
         Become(Idle);

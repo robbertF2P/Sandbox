@@ -1,6 +1,5 @@
 using AkkaTeach.Contracts;
 using AkkaTeach.Core.Clients;
-using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
 namespace AkkaTeach.Worker.Clients;
@@ -29,7 +28,7 @@ public sealed class MockDataApiClient : IDataApiClient
 
         await Task.Delay(_options.FetchDelayMilliseconds, cancellationToken);
 
-        var records = Enumerable.Range(1, _options.PageSize)
+        List<ExternalDataRecord> records = Enumerable.Range(1, _options.PageSize)
             .Select(index => new ExternalDataRecord(
                 Id: $"page-{pageNumber:D3}-item-{index:D4}",
                 Value: (pageNumber * 1000) + index,
