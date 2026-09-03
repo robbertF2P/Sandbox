@@ -7,11 +7,8 @@ using FluentAssertions;
 
 namespace AkkaTeach.Tests.Phase4_BehaviorSwitching;
 
-public sealed class SessionActorTests : TestKit
+public sealed class SessionActorTests(ITestOutputHelper output) : TeachingTestKit(output)
 {
-    protected override void ConfigureAkka(AkkaConfigurationBuilder builder, IServiceProvider provider)
-    {
-    }
 
     [Fact]
     public void NewActor_StartsInIdleState()

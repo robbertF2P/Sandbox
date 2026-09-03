@@ -1,18 +1,12 @@
 using Akka.Actor;
-using Akka.Hosting;
-using Akka.Hosting.TestKit;
 using AkkaTeach.Contracts;
 using AkkaTeach.Core.Actors;
 using FluentAssertions;
 
 namespace AkkaTeach.Tests.Phase3_Messaging;
 
-public sealed class WorkCoordinatorActorTests : TestKit
+public sealed class WorkCoordinatorActorTests(ITestOutputHelper output) : TeachingTestKit(output)
 {
-    protected override void ConfigureAkka(AkkaConfigurationBuilder builder, IServiceProvider provider)
-    {
-    }
-
     [Fact]
     public void ProcessWorkItem_ForwardsToProcessor_AndRepliesWithDoubledResult()
     {

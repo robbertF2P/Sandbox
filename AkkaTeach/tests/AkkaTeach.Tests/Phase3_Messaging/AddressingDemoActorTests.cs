@@ -7,11 +7,8 @@ using FluentAssertions;
 
 namespace AkkaTeach.Tests.Phase3_Messaging;
 
-public sealed class AddressingDemoActorTests : TestKit
+public sealed class AddressingDemoActorTests(ITestOutputHelper output) : TeachingTestKit(output)
 {
-    protected override void ConfigureAkka(AkkaConfigurationBuilder builder, IServiceProvider provider)
-    {
-    }
 
     [Fact]
     public void DirectTell_WithExplicitSender_ReplyGoesToCaller()

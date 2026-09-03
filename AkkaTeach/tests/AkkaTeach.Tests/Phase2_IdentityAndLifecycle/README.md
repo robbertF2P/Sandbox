@@ -84,6 +84,7 @@ Stopping a parent stops its whole subtree.
 - `Lesson2_ActorIdentityTests` — guardian, nesting, unique names, generated names, `ActorSelection`
 - `Lesson3_ActorLifecycleTests` — hooks, restart-by-default, state loss, `Directive.Stop` override,
   death watch, restart-is-not-termination, parent teardown
+
 ---
 
-[? Phase 1 � Actor system and creation](../Phase1_ActorSystemAndCreation/README.md)  |  [Index](../README.md)  |  [Phase 3 � Messaging ?](../Phase3_Messaging/README.md)
+[← Phase 1 — Actor system and creation](../Phase1_ActorSystemAndCreation/README.md)  |  [Index](../README.md)  |  [Phase 3 — Messaging →](../Phase3_Messaging/README.md)

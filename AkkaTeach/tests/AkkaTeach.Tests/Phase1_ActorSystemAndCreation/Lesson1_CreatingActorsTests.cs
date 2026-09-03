@@ -1,10 +1,13 @@
 using Akka.Actor;
 using Akka.Hosting;
 using Akka.Hosting.TestKit;
+using Akka.Logger.Serilog;
 using Akka.TestKit;
 using AkkaTeach.Contracts;
 using AkkaTeach.Core.Actors;
 using FluentAssertions;
+using Serilog;
+using Serilog.Sinks.XUnit3;
 
 namespace AkkaTeach.Tests.Phase1_ActorSystemAndCreation;
 
@@ -24,12 +27,8 @@ namespace AkkaTeach.Tests.Phase1_ActorSystemAndCreation;
 /// You describe it with <c>Props</c>, ask the system to create it, and talk to the
 /// <see cref="IActorRef"/> you get back.</para>
 /// </remarks>
-public sealed class Lesson1_CreatingActorsTests : TestKit
+public sealed class Lesson1_CreatingActorsTests(ITestOutputHelper output) : TeachingTestKit(output)
 {
-    protected override void ConfigureAkka(AkkaConfigurationBuilder builder, IServiceProvider provider)
-    {
-    }
-
     /// <summary>
     /// 1. The ActorSystem is the container every actor lives in.
     /// It owns the threads, the mailboxes, and the address space.

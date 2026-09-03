@@ -42,6 +42,7 @@ method that registers only the handlers that are legal in that state.
 
 `SessionActorTests` — initial state, each transition, rejection of illegal commands in
 `Completed`, and the events published along the way.
+
 ---
 
-[? Phase 3 � Messaging](../Phase3_Messaging/README.md)  |  [Index](../README.md)  |  [Phase 5 � Async work ?](../Phase5_AsyncWork/README.md)
+[← Phase 3 — Messaging](../Phase3_Messaging/README.md)  |  [Index](../README.md)  |  [Phase 5 — Async work →](../Phase5_AsyncWork/README.md)

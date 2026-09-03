@@ -27,11 +27,8 @@ namespace AkkaTeach.Tests.Phase2_IdentityAndLifecycle;
 /// calls <c>PostStop</c> so your cleanup runs before the instance is replaced, and the default
 /// <c>PostRestart</c> calls <c>PreStart</c> so your setup runs again.</para>
 /// </remarks>
-public sealed class Lesson3_ActorLifecycleTests : TestKit
+public sealed class Lesson3_ActorLifecycleTests(ITestOutputHelper output) : TeachingTestKit(output)
 {
-    protected override void ConfigureAkka(AkkaConfigurationBuilder builder, IServiceProvider provider)
-    {
-    }
 
     /// <summary>
     /// PreStart runs before the actor handles its first message — the place for setup.

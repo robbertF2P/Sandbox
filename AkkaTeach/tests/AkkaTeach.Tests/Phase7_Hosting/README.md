@@ -61,6 +61,7 @@ keep using `Tell`.
 
 `AkkaHostingRegistrationTests` — the registered actors are resolvable from the `ActorRegistry`,
 proving the host wiring is correct.
+
 ---
 
-[? Phase 6 � Routers and pipelines](../Phase6_RoutersAndPipelines/README.md)  |  [Index](../README.md)  |  [Course index ?](../README.md)
+[← Phase 6 — Routers and pipelines](../Phase6_RoutersAndPipelines/README.md)  |  [Index](../README.md)  |  [Course index →](../README.md)

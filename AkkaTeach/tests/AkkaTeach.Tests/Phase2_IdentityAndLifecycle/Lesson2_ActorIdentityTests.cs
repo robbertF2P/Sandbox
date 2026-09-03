@@ -20,12 +20,8 @@ namespace AkkaTeach.Tests.Phase2_IdentityAndLifecycle;
 /// <item><description>Names must be unique among siblings.</description></item>
 /// </list>
 /// </remarks>
-public sealed class Lesson2_ActorIdentityTests : TestKit
+public sealed class Lesson2_ActorIdentityTests(ITestOutputHelper output) : TeachingTestKit(output)
 {
-    protected override void ConfigureAkka(AkkaConfigurationBuilder builder, IServiceProvider provider)
-    {
-    }
-
     /// <summary>
     /// Actors you create live under the /user guardian.
     /// </summary>

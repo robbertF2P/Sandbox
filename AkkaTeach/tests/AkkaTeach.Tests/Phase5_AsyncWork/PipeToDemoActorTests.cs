@@ -11,11 +11,8 @@ namespace AkkaTeach.Tests.Phase5_AsyncWork;
 /// <summary>
 /// Tests that prove <see cref="PipeToDemoActor"/> stays responsive during async I/O.
 /// </summary>
-public sealed class PipeToDemoActorTests : TestKit
+public sealed class PipeToDemoActorTests(ITestOutputHelper output) : TeachingTestKit(output)
 {
-    protected override void ConfigureAkka(AkkaConfigurationBuilder builder, IServiceProvider provider)
-    {
-    }
 
     [Fact]
     public void FetchQuote_UsesPipeTo_MailboxStaysResponsiveWhileWaiting()

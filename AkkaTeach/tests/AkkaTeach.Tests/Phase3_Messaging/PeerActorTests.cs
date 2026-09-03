@@ -10,11 +10,8 @@ namespace AkkaTeach.Tests.Phase3_Messaging;
 /// <summary>
 /// Proves that sibling peers can message each other directly — no parent/child routing required.
 /// </summary>
-public sealed class PeerActorTests : TestKit
+public sealed class PeerActorTests(ITestOutputHelper output) : TeachingTestKit(output)
 {
-    protected override void ConfigureAkka(AkkaConfigurationBuilder builder, IServiceProvider provider)
-    {
-    }
 
     [Fact]
     public void AnyPeer_CanMessageAnyOtherPeer_DirectlyViaIActorRef()

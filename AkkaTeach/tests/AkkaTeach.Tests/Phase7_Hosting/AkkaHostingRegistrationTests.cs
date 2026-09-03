@@ -11,7 +11,7 @@ using Microsoft.Extensions.Hosting;
 
 namespace AkkaTeach.Tests.Phase7_Hosting;
 
-public sealed class AkkaHostingRegistrationTests : TestKit
+public sealed class AkkaHostingRegistrationTests(ITestOutputHelper output) : TeachingTestKit(output)
 {
     protected override void ConfigureServices(HostBuilderContext context, IServiceCollection services)
     {
@@ -27,6 +27,8 @@ public sealed class AkkaHostingRegistrationTests : TestKit
 
     protected override void ConfigureAkka(AkkaConfigurationBuilder builder, IServiceProvider provider)
     {
+        base.ConfigureAkka(builder, provider);
+
         builder.AddAkkaTeachActors();
     }
 

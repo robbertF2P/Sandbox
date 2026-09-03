@@ -12,7 +12,7 @@ using Microsoft.Extensions.Options;
 
 namespace AkkaTeach.Tests.Phase6_RoutersAndPipelines;
 
-public sealed class DataIngestionActorTests : TestKit
+public sealed class DataIngestionActorTests(ITestOutputHelper output) : TeachingTestKit(output)
 {
     protected override void ConfigureServices(HostBuilderContext context, IServiceCollection services)
     {
@@ -27,6 +27,8 @@ public sealed class DataIngestionActorTests : TestKit
 
     protected override void ConfigureAkka(AkkaConfigurationBuilder builder, IServiceProvider provider)
     {
+        base.ConfigureAkka(builder, provider);
+
         builder.WithActors((system, registry, resolver) =>
         {
             var ingestion = system.ActorOf(resolver.Props<DataIngestionActor>(), "data-ingestion");

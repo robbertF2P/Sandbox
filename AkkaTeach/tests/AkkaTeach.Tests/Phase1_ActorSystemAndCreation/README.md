@@ -51,6 +51,7 @@ Actors create other actors via `Context.ActorOf`, so the system is a tree, not a
 
 `Lesson1_CreatingActorsTests` — system as container, Props inertness, ActorOf, ref-not-instance,
 message-only interaction, parent/child, independent instances from one Props.
+
 ---
 
-[? Course index](../README.md)  |  [Index](../README.md)  |  [Phase 2 � Identity and lifecycle ?](../Phase2_IdentityAndLifecycle/README.md)
+[← Course index](../README.md)  |  [Index](../README.md)  |  [Phase 2 — Identity and lifecycle →](../Phase2_IdentityAndLifecycle/README.md)
