@@ -58,8 +58,11 @@ without a network.
                              └── HttpDataApiClient   (real life)
 ```
 
-> Actors should never `new` up an `HttpClient` or reach for `IServiceProvider`. Resolve
-> dependencies when you build the `Props`.
+> Actors should never `new` up an `HttpClient` or stash `IServiceProvider` in a field and call
+> `GetService` whenever you need something. Resolve **singleton** dependencies when you build
+> `Props`. If you need **scoped** services (e.g. `DbContext`), inject `IServiceScopeFactory`
+> instead and create a short-lived scope at the start of each message handler — dispose it when
+> the handler finishes. See [actor-model-guide §14](../../../docs/actor-model-guide.md#14-scoped-dependencies-dbcontext-per-message-work).
 
 ## What is reused here
 
