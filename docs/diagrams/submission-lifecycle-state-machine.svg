@@ -1,0 +1,163 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 980 540" font-family="Segoe UI, system-ui, sans-serif">
+  <defs>
+    <marker id="arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+      <path d="M0,0 L8,4 L0,8 Z" fill="#334155"/>
+    </marker>
+    <marker id="arrow-green" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+      <path d="M0,0 L8,4 L0,8 Z" fill="#16a34a"/>
+    </marker>
+    <marker id="arrow-red" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+      <path d="M0,0 L8,4 L0,8 Z" fill="#dc2626"/>
+    </marker>
+    <marker id="arrow-blue" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+      <path d="M0,0 L8,4 L0,8 Z" fill="#2563eb"/>
+    </marker>
+    <style>
+      .title { font-size: 18px; font-weight: 700; fill: #0f172a; }
+      .subtitle { font-size: 12px; fill: #475569; }
+      .phase-title { font-size: 11px; font-weight: 700; fill: #334155; }
+      .phase-sub { font-size: 9px; fill: #64748b; }
+      .lane { fill: #f8fafc; stroke: #e2e8f0; stroke-width: 1; }
+      .lane-correction { fill: #fff7ed; stroke: #fed7aa; stroke-width: 1; }
+      .state-draft { fill: #f1f5f9; stroke: #64748b; stroke-width: 1.5; stroke-dasharray: 4 3; }
+      .state-reported { fill: #eff6ff; stroke: #2563eb; stroke-width: 1.5; }
+      .state-checked { fill: #fef9c3; stroke: #ca8a04; stroke-width: 1.5; }
+      .state-approved { fill: #dcfce7; stroke: #16a34a; stroke-width: 1.5; }
+      .state-exported { fill: #f3e8ff; stroke: #9333ea; stroke-width: 1.5; }
+      .state-rejected { fill: #fee2e2; stroke: #dc2626; stroke-width: 1.5; }
+      .label { font-size: 13px; font-weight: 600; fill: #0f172a; }
+      .detail { font-size: 10px; fill: #475569; }
+      .perm { font-size: 9px; font-weight: 600; fill: #1d4ed8; }
+      .edge-label { font-size: 10px; fill: #334155; }
+      .line-green { stroke: #16a34a; stroke-width: 1.8; fill: none; marker-end: url(#arrow-green); }
+      .line-red { stroke: #dc2626; stroke-width: 1.3; fill: none; marker-end: url(#arrow-red); }
+      .line-blue { stroke: #2563eb; stroke-width: 1.3; fill: none; marker-end: url(#arrow-blue); stroke-dasharray: 5 3; }
+      .legend-box { fill: #ffffff; stroke: #cbd5e1; stroke-width: 1; }
+      .legend-title { font-size: 11px; font-weight: 700; fill: #0f172a; }
+      .legend-item { font-size: 10px; fill: #475569; }
+    </style>
+  </defs>
+
+  <text x="24" y="28" class="title">Submission lifecycle — permission-gated state machine</text>
+  <text x="24" y="48" class="subtitle">Left-to-right pipeline by workflow phase · correction paths in the lane below</text>
+
+  <!-- Phase swimlanes -->
+  <rect x="24" y="72" width="190" height="250" rx="6" class="lane"/>
+  <text x="119" y="92" text-anchor="middle" class="phase-title">1 · Intake</text>
+  <text x="119" y="106" text-anchor="middle" class="phase-sub">worker · Hours.Report</text>
+
+  <rect x="214" y="72" width="190" height="250" rx="6" class="lane"/>
+  <text x="309" y="92" text-anchor="middle" class="phase-title">2 · Review</text>
+  <text x="309" y="106" text-anchor="middle" class="phase-sub">foreman · Hours.Check</text>
+
+  <rect x="404" y="72" width="190" height="250" rx="6" class="lane"/>
+  <text x="499" y="92" text-anchor="middle" class="phase-title">3 · Approval</text>
+  <text x="499" y="106" text-anchor="middle" class="phase-sub">approver · ApproveHoursProgress</text>
+
+  <rect x="594" y="72" width="190" height="250" rx="6" class="lane"/>
+  <text x="689" y="92" text-anchor="middle" class="phase-title">4 · Export</text>
+  <text x="689" y="106" text-anchor="middle" class="phase-sub">payroll · Hours.Export</text>
+
+  <!-- Correction lane spans intake + review -->
+  <rect x="24" y="330" width="380" height="88" rx="6" class="lane-correction"/>
+  <text x="214" y="350" text-anchor="middle" class="phase-title">Correction lane</text>
+  <text x="214" y="364" text-anchor="middle" class="phase-sub">reject · resubmit · send back · reopen</text>
+
+  <!-- Pipeline states (y = 170, height 48, cy = 194) -->
+  <rect x="44" y="170" width="90" height="48" rx="10" class="state-draft"/>
+  <text x="89" y="190" text-anchor="middle" class="label">Draft</text>
+  <text x="89" y="206" text-anchor="middle" class="detail">editable</text>
+
+  <rect x="144" y="170" width="100" height="48" rx="10" class="state-reported"/>
+  <text x="194" y="190" text-anchor="middle" class="label">Reported</text>
+  <text x="194" y="206" text-anchor="middle" class="detail">in queue</text>
+
+  <rect x="264" y="170" width="100" height="48" rx="10" class="state-checked"/>
+  <text x="314" y="190" text-anchor="middle" class="label">Checked</text>
+  <text x="314" y="206" text-anchor="middle" class="detail">verified</text>
+
+  <rect x="444" y="170" width="100" height="48" rx="10" class="state-approved"/>
+  <text x="494" y="190" text-anchor="middle" class="label">Approved</text>
+  <text x="494" y="206" text-anchor="middle" class="detail">locked</text>
+
+  <rect x="634" y="170" width="100" height="48" rx="10" class="state-exported"/>
+  <text x="684" y="190" text-anchor="middle" class="label">Exported</text>
+  <text x="684" y="206" text-anchor="middle" class="detail">terminal</text>
+
+  <!-- Rejected centered under review -->
+  <rect x="264" y="370" width="100" height="48" rx="10" class="state-rejected"/>
+  <text x="314" y="390" text-anchor="middle" class="label">Rejected</text>
+  <text x="314" y="406" text-anchor="middle" class="detail">needs fix</text>
+
+  <!-- Start / end -->
+  <circle cx="30" cy="194" r="7" fill="#334155"/>
+  <circle cx="770" cy="194" r="9" fill="none" stroke="#334155" stroke-width="2"/>
+  <circle cx="770" cy="194" r="4" fill="#334155"/>
+
+  <!-- Happy path -->
+  <path d="M 37 194 L 44 194" class="line-green"/>
+  <path d="M 134 194 L 144 194" class="line-green"/>
+  <text x="139" y="184" text-anchor="middle" class="edge-label">Submit</text>
+  <text x="139" y="232" text-anchor="middle" class="perm">Hours.Report</text>
+
+  <path d="M 244 194 L 264 194" class="line-green"/>
+  <text x="254" y="184" text-anchor="middle" class="edge-label">CheckPass</text>
+  <text x="254" y="232" text-anchor="middle" class="perm">Hours.Check</text>
+
+  <path d="M 364 194 L 444 194" class="line-green"/>
+  <text x="404" y="184" text-anchor="middle" class="edge-label">Approve</text>
+  <text x="404" y="232" text-anchor="middle" class="perm">ApproveHoursProgress</text>
+
+  <path d="M 544 194 L 634 194" class="line-green"/>
+  <text x="589" y="184" text-anchor="middle" class="edge-label">Export</text>
+  <text x="589" y="232" text-anchor="middle" class="perm">Hours.Export</text>
+
+  <path d="M 734 194 L 761 194" class="line-green"/>
+
+  <!-- Reject paths (down into correction lane) -->
+  <path d="M 194 218 L 194 260 L 314 260 L 314 370" class="line-red"/>
+  <text x="228" y="252" class="edge-label">CheckFail</text>
+  <text x="228" y="264" class="perm">Hours.Check</text>
+
+  <path d="M 314 218 L 314 370" class="line-red"/>
+  <text x="328" y="300" class="edge-label">Reject</text>
+  <text x="328" y="312" class="perm">ApproveHoursProgress</text>
+
+  <!-- Resubmit: correction lane back to Reported -->
+  <path d="M 264 394 L 194 394 L 194 218" class="line-blue"/>
+  <text x="210" y="384" class="edge-label">Resubmit</text>
+  <text x="210" y="396" class="perm">Hours.Report</text>
+
+  <!-- SendBack: Checked to Reported -->
+  <path d="M 304 170 L 304 140 L 194 140 L 194 170" class="line-blue"/>
+  <text x="249" y="134" text-anchor="middle" class="edge-label">SendBack</text>
+  <text x="249" y="156" text-anchor="middle" class="perm">Hours.Check</text>
+
+  <!-- Reopen: Approved to Reported -->
+  <path d="M 494 170 L 494 118 L 194 118 L 194 170" class="line-blue"/>
+  <text x="344" y="112" text-anchor="middle" class="edge-label">Reopen</text>
+  <text x="344" y="126" text-anchor="middle" class="perm">Hours.Reopen</text>
+
+  <!-- Legend panel -->
+  <rect x="784" y="72" width="172" height="250" rx="8" class="legend-box"/>
+  <text x="804" y="96" class="legend-title">Reading the diagram</text>
+  <line x1="804" y1="110" x2="834" y2="110" class="line-green"/>
+  <text x="842" y="114" class="legend-item">Happy path (forward)</text>
+  <line x1="804" y1="130" x2="834" y2="130" class="line-red"/>
+  <text x="842" y="134" class="legend-item">Reject (down)</text>
+  <line x1="804" y1="150" x2="834" y2="150" class="line-blue"/>
+  <text x="842" y="154" class="legend-item">Rework / return</text>
+  <text x="804" y="178" class="legend-title">Gate rule</text>
+  <text x="804" y="196" class="legend-item">Valid transition</text>
+  <text x="804" y="210" class="legend-item">+ permission</text>
+  <text x="804" y="234" class="legend-title">Queues</text>
+  <text x="804" y="252" class="legend-item">Reported ? to check</text>
+  <text x="804" y="266" class="legend-item">Checked ? to approve</text>
+  <text x="804" y="280" class="legend-item">Approved ? to export</text>
+  <text x="804" y="294" class="legend-item">Rejected ? to fix</text>
+
+  <rect x="24" y="440" width="932" height="84" rx="8" class="legend-box"/>
+  <text x="44" y="464" class="legend-title">Permissions</text>
+  <text x="44" y="482" class="legend-item">Hours.Report · Hours.Check · ApproveHoursProgress · Hours.Export · Hours.Reopen</text>
+  <text x="44" y="500" class="legend-item">Scope and ownership enforced in application layer (not shown on diagram)</text>
+</svg>
