@@ -1,0 +1,12 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <ItemGroup>
+    <PackageReference Include="Akka" />
+    <PackageReference Include="Akka.Hosting" />
+    <PackageReference Include="Akka.Logger.Serilog" />
+    <PackageReference Include="Volo.Abp.Core" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\Modules\Core\Src\Common\Common.Utility\Common.Utility.csproj" />
+    <ProjectReference Include="..\Infrastructure.Akka.Contracts\Infrastructure.Akka.Contracts.csproj" />
+  </ItemGroup>
+</Project>

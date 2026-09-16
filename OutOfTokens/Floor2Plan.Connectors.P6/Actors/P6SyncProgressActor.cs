@@ -1,0 +1,126 @@
+using Akka.Actor;
+using Akka.Event;
+using Contracts.Model.Enums;
+using Domain.Model.Sync;
+using Floor2Plan.Connectors.P6.Messages;
+using Infrastructure.Process.Contracts.Scope;
+
+namespace Floor2Plan.Connectors.P6.Actors
+{
+    /// <summary>
+    /// Subscribes to P6 sync progress events on the actor system's EventStream and writes them to the sync
+    /// log (<see cref="IProcessLogger"/>) as they happen. It is owned by P6Actor and acknowledges readiness and
+    /// final logging to its parent so P6Actor coordinates the complete sync lifecycle.
+    /// </summary>
+    public sealed class P6SyncProgressActor : ReceiveActor
+    {
+        private readonly ILoggingAdapter _log = Context.GetLogger();
+        private readonly IProcessLogger _processLogger;
+
+        public P6SyncProgressActor(IProcessLogger processLogger)
+        {
+            _processLogger = processLogger;
+
+            Receive<P6SyncStarted>(message =>
+            {
+                _log.Debug("P6 sync progress: started for {0} project(s)", message.ProjectCount);
+                _processLogger.Log(new SyncLogMessageDto(
+                    $"P6 sync started for {message.ProjectCount} project(s).",
+                    SyncInformation.Information,
+                    SyncType.Unknown));
+            });
+
+            Receive<P6ProjectStarted>(message =>
+            {
+                _processLogger.Log(new SyncLogMessageDto(
+                    $"P6 sync starting for project ObjectId {message.ProjectObjectId} ({message.RemainingAfterThis} project(s) remaining after this one).",
+                    SyncInformation.Information,
+                    SyncType.Unknown));
+            });
+
+            Receive<P6ProjectCatalogFetched>(message =>
+            {
+                _processLogger.Log(new SyncLogMessageDto(
+                    $"P6 sync fetched {message.Kind} for project ObjectId {message.ProjectObjectId}: {message.Count} records.",
+                    SyncInformation.Total,
+                    ToSyncType(message.Kind),
+                    message.Count));
+            });
+
+            Receive<P6ProjectCatalogFetchFailed>(message =>
+            {
+                _processLogger.Log(new SyncLogMessageDto(
+                    $"P6 sync failed while fetching {message.Kind} for project ObjectId {message.ProjectObjectId}: {message.Error}",
+                    SyncInformation.Fail,
+                    ToSyncType(message.Kind)));
+            });
+
+            Receive<P6SyncCompleted>(message =>
+            {
+                var result = message.Result;
+                _processLogger.LogRange(new[]
+                {
+                    new SyncLogMessageDto("Projects retrieved from P6", SyncInformation.Total, SyncType.Project, result.ProjectCount),
+                    new SyncLogMessageDto("WBS elements retrieved from P6", SyncInformation.Total, SyncType.Component, result.WbsCount),
+                    new SyncLogMessageDto("Activities retrieved from P6", SyncInformation.Total, SyncType.Activity, result.ActivityCount),
+                    new SyncLogMessageDto("Resources retrieved from P6", SyncInformation.Total, SyncType.Discipline, result.ResourceCount),
+                    new SyncLogMessageDto("Resource assignments retrieved from P6", SyncInformation.Total, SyncType.Assignment, result.ResourceAssignmentCount),
+                    new SyncLogMessageDto("Relationships retrieved from P6", SyncInformation.Total, SyncType.ActivityRelation, result.RelationshipCount)
+                });
+
+                _processLogger.Log(new SyncLogMessageDto(
+                    $"P6 sync retrieved {result.TotalRecordCount} records in total.",
+                    result.Succeeded ? SyncInformation.Success : SyncInformation.Fail,
+                    SyncType.Unknown));
+
+                foreach (var error in result.Errors)
+                {
+                    _processLogger.Log(new SyncLogMessageDto(error, SyncInformation.Fail, SyncType.Unknown));
+                }
+
+                Context.Parent.Tell(new SyncCompletedLogged());
+            });
+        }
+
+        internal sealed record Ready;
+
+        internal sealed record SyncCompletedLogged;
+
+        public static Props Props(IProcessLogger processLogger)
+        {
+            return Akka.Actor.Props.Create(() => new P6SyncProgressActor(processLogger));
+        }
+
+        protected override void PreStart()
+        {
+            var eventStream = Context.System.EventStream;
+            eventStream.Subscribe(Self, typeof(P6SyncStarted));
+            eventStream.Subscribe(Self, typeof(P6ProjectStarted));
+            eventStream.Subscribe(Self, typeof(P6ProjectCatalogFetched));
+            eventStream.Subscribe(Self, typeof(P6ProjectCatalogFetchFailed));
+            eventStream.Subscribe(Self, typeof(P6SyncCompleted));
+            Context.Parent.Tell(new Ready());
+            base.PreStart();
+        }
+
+        protected override void PostStop()
+        {
+            Context.System.EventStream.Unsubscribe(Self);
+            base.PostStop();
+        }
+
+        private static SyncType ToSyncType(Api.Models.P6EntityKind kind)
+        {
+            return kind switch
+            {
+                Api.Models.P6EntityKind.Projects => SyncType.Project,
+                Api.Models.P6EntityKind.Wbs => SyncType.Component,
+                Api.Models.P6EntityKind.Activities => SyncType.Activity,
+                Api.Models.P6EntityKind.Resources => SyncType.Discipline,
+                Api.Models.P6EntityKind.ResourceAssignments => SyncType.Assignment,
+                Api.Models.P6EntityKind.Relationships => SyncType.ActivityRelation,
+                _ => SyncType.Unknown
+            };
+        }
+    }
+}
