@@ -1,5 +1,3 @@
-#nullable enable
-
 using System.Text.Json.Serialization;
 
 namespace Floor2Plan.Connectors.P6.Api.Models

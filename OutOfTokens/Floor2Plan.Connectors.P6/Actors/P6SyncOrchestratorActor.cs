@@ -27,8 +27,8 @@ namespace Floor2Plan.Connectors.P6.Actors
         private string _sessionCookie = string.Empty;
         private IActorRef _replyTo = ActorRefs.Nobody;
         private int _activeWorkers;
-        private string? _currentProjectId;
-        private int? _currentProjectObjectId;
+        private string _currentProjectId;
+        private int _currentProjectObjectId;
 
         public P6SyncOrchestratorActor(IP6RestApi api, IActorRef store, P6SyncOptions syncOptions)
         {

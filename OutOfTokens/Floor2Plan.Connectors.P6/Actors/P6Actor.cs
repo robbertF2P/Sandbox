@@ -23,7 +23,7 @@ namespace Floor2Plan.Connectors.P6.Actors
         private IActorRef _store = ActorRefs.Nobody;
         private bool _syncRunning;
 
-        public P6Actor(IP6RestApi api, P6AuthOptions authOptions, P6SyncOptions? syncOptions = null)
+        public P6Actor(IP6RestApi api, P6AuthOptions authOptions, P6SyncOptions syncOptions = null)
         {
             _api = api;
             _authOptions = authOptions;
@@ -68,7 +68,7 @@ namespace Floor2Plan.Connectors.P6.Actors
             });
         }
 
-        public static Props Props(IP6RestApi api, P6AuthOptions authOptions, P6SyncOptions? syncOptions = null)
+        public static Props Props(IP6RestApi api, P6AuthOptions authOptions, P6SyncOptions syncOptions = null)
         {
             return Akka.Actor.Props.Create(() => new P6Actor(api, authOptions, syncOptions));
         }

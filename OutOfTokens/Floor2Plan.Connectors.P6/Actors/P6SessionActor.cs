@@ -12,16 +12,16 @@ namespace Floor2Plan.Connectors.P6.Actors
     /// </summary>
     public sealed class P6SessionActor : ReceiveActor, IWithUnboundedStash
     {
-        public IStash Stash { get; set; } = null!;
+        public IStash Stash { get; set; }
         public const string ActorName = "p6-session";
 
         private readonly ILoggingAdapter _log = Context.GetLogger();
         private readonly IP6RestApi _api;
         private readonly P6AuthOptions _authOptions;
 
-        private string? _sessionId;
-        private ICancelable? _logoutSchedule;
-        private object? _loginPendingCommand;
+        private string _sessionId;
+        private ICancelable _logoutSchedule;
+        private object _loginPendingCommand;
 
         public P6SessionActor(IP6RestApi api, P6AuthOptions authOptions)
         {

@@ -1,5 +1,3 @@
-#nullable enable
-
 using System.Text.Json.Serialization;
 
 namespace Floor2Plan.Connectors.P6.Api.Models
@@ -7,19 +5,19 @@ namespace Floor2Plan.Connectors.P6.Api.Models
     public sealed class P6ProjectRecord : P6BaseRecord
     {
         [JsonPropertyName("Id")]
-        public string? Id { get; set; }
+        public string Id { get; set; }
 
         [JsonPropertyName("Name")]
-        public string? Name { get; set; }
+        public string Name { get; set; }
 
         [JsonPropertyName("Status")]
-        public string? Status { get; set; }
+        public string Status { get; set; }
 
         [JsonPropertyName("LastUpdateDate")]
-        public string? LastUpdateDate { get; set; }
+        public string LastUpdateDate { get; set; }
 
         [JsonPropertyName("DataDate")]
-        public string? DataDate { get; set; }
+        public string DataDate { get; set; }
 
         [JsonPropertyName("SummaryActivityCount")]
         public int? SummaryActivityCount { get; set; }
