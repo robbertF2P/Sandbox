@@ -1,6 +1,7 @@
 using Akka.Actor;
 using Akka.Hosting;
 using AwesomeAssertions;
+using Contracts.Infrastructure.Connectors;
 using Domain.Model;
 using Domain.Model.Sync;
 using Floor2Plan.Connectors.P6;

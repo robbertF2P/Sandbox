@@ -1,17 +1,31 @@
 <Project Sdk="Microsoft.NET.Sdk">
-  <Import Project="$(Floor2PlanRoot)Test\UnitTest\UnitTest.Build.props" />
+  <PropertyGroup>
+    <IsPackable>false</IsPackable>
+    <IsTestProject>true</IsTestProject>
+    <OutputType>Exe</OutputType>
+  </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Akka.Hosting.TestKit" />
     <PackageReference Include="Akka.TestKit" />
+    <PackageReference Include="AwesomeAssertions" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Binder" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" />
+    <PackageReference Include="Moq" />
     <PackageReference Include="Refit" />
+    <PackageReference Include="xunit.runner.visualstudio">
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+    <PackageReference Include="xunit.v3" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\Modules\Core\Src\Contracts\Contracts.Infrastructure.Connectors\Contracts.Infrastructure.Connectors.csproj" />
-    <ProjectReference Include="..\..\Modules\Core\Src\Contracts\Contracts.Model\Contracts.Model.csproj" />
-    <ProjectReference Include="..\..\Modules\Core\Src\Domain\Domain.Model\Domain.Model.csproj" />
-    <ProjectReference Include="..\..\Src\Infrastructure.Akka.Contracts\Infrastructure.Akka.Contracts.csproj" />
-    <ProjectReference Include="..\..\Modules\Core\Test\Utility\Floor2Plan.TestUtility.Common\Floor2Plan.TestUtility.Common.csproj" />
-    <ProjectReference Include="..\..\Src\Floor2Plan.Connectors.P6\Floor2Plan.Connectors.P6.csproj" />
-    <ProjectReference Include="..\..\Modules\Core\Src\Infrastructure\Infrastructure.Process.Contracts\Infrastructure.Process.Contracts.csproj" />
+    <ProjectReference Include="..\Stubs\Contracts.Infrastructure.Connectors\Contracts.Infrastructure.Connectors.csproj" />
+    <ProjectReference Include="..\Stubs\Contracts.Model\Contracts.Model.csproj" />
+    <ProjectReference Include="..\Stubs\Domain.Model\Domain.Model.csproj" />
+    <ProjectReference Include="..\Infrastructure.Akka.Contracts\Infrastructure.Akka.Contracts.csproj" />
+    <ProjectReference Include="..\Stubs\Floor2Plan.TestUtility.Common\Floor2Plan.TestUtility.Common.csproj" />
+    <ProjectReference Include="..\Floor2Plan.Connectors.P6\Floor2Plan.Connectors.P6.csproj" />
+    <ProjectReference Include="..\Stubs\Infrastructure.Process.Contracts\Infrastructure.Process.Contracts.csproj" />
   </ItemGroup>
 </Project>
