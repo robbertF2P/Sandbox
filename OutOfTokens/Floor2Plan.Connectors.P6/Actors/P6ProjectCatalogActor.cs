@@ -25,7 +25,7 @@ public sealed class P6ProjectCatalogActor : ReceiveActor
         Receive<Fetch>(message =>
         {
             _log.Info("Fetching P6 project catalog");
-            FetchPage(message, offset: 0, accumulated: []);
+            FetchPage(message.Cookie, message.ReplyTo, offset: 0, accumulated: []);
         });
 
         Receive<PageReceived>(message =>
@@ -33,18 +33,14 @@ public sealed class P6ProjectCatalogActor : ReceiveActor
             var projects = message.Accumulated.Concat(message.Page).ToList();
             if (message.Page.Count < IP6RestApi.ProjectSummaryPageSize)
             {
-                message.Fetch.ReplyTo.Tell(new P6Projects(projects));
-                if (message.Fetch.NotifySessionOnComplete)
-                {
-                    NotifySessionWorkFinished();
-                }
-
+                message.ReplyTo.Tell(new P6Projects(projects));
                 Context.Stop(Self);
                 return;
             }
 
             FetchPage(
-                message.Fetch,
+                message.Cookie,
+                message.ReplyTo,
                 message.Offset + IP6RestApi.ProjectSummaryPageSize,
                 projects);
         });
@@ -52,12 +48,7 @@ public sealed class P6ProjectCatalogActor : ReceiveActor
         Receive<PageFailed>(message =>
         {
             _log.Error(message.Exception, "Failed to retrieve P6 project catalog");
-            message.Fetch.ReplyTo.Tell(new Status.Failure(message.Exception));
-            if (message.Fetch.NotifySessionOnComplete)
-            {
-                NotifySessionWorkFinished();
-            }
-
+            message.ReplyTo.Tell(new Status.Failure(message.Exception));
             Context.Stop(Self);
         });
     }
@@ -67,20 +58,21 @@ public sealed class P6ProjectCatalogActor : ReceiveActor
         return Akka.Actor.Props.Create(() => new P6ProjectCatalogActor(api));
     }
 
-    internal sealed record Fetch(string Cookie, IActorRef ReplyTo, bool NotifySessionOnComplete = true);
+    internal sealed record Fetch(string Cookie, IActorRef ReplyTo);
 
     private sealed record PageReceived(
-        Fetch Fetch,
+        string Cookie,
+        IActorRef ReplyTo,
         int Offset,
         IList<P6ProjectRecord> Accumulated,
         List<P6ProjectRecord> Page);
 
-    private sealed record PageFailed(Fetch Fetch, Exception Exception);
+    private sealed record PageFailed(IActorRef ReplyTo, Exception Exception);
 
-    private void FetchPage(Fetch fetch, int offset, IList<P6ProjectRecord> accumulated)
+    private void FetchPage(string cookie, IActorRef replyTo, int offset, IList<P6ProjectRecord> accumulated)
     {
         _ = _api.GetProjectsAsync(
-                fetch.Cookie,
+                cookie,
                 fields: IP6RestApi.ProjectSummaryFields,
                 orderBy: IP6RestApi.ProjectSummaryOrderBy,
                 filter: IP6RestApi.ProjectSummaryFilter,
@@ -90,12 +82,7 @@ public sealed class P6ProjectCatalogActor : ReceiveActor
             .PipeTo(
                 Self,
                 Self,
-                page => new PageReceived(fetch, offset, accumulated, page),
-                exception => new PageFailed(fetch, exception));
-    }
-
-    private void NotifySessionWorkFinished()
-    {
-        Context.Parent.Tell(new P6SessionActor.WorkFinished());
+                page => new PageReceived(cookie, replyTo, offset, accumulated, page),
+                exception => new PageFailed(replyTo, exception));
     }
 }

@@ -31,7 +31,7 @@ public sealed class P6RawDataBuilderActor : ReceiveActor
         {
             _log.Info("Building P6 raw data export");
             var catalog = Context.ActorOf(P6ProjectCatalogActor.Props(_api));
-            catalog.Tell(new P6ProjectCatalogActor.Fetch(message.Cookie, Self, NotifySessionOnComplete: false));
+            catalog.Tell(new P6ProjectCatalogActor.Fetch(message.Cookie, Self));
             Become(() => WaitingForProjects(message.ReplyTo, message.Cookie));
         });
     }
@@ -59,7 +59,6 @@ public sealed class P6RawDataBuilderActor : ReceiveActor
         Receive<Status.Failure>(message =>
         {
             replyTo.Tell(message);
-            NotifySessionWorkFinished();
             Context.Stop(Self);
         });
     }
@@ -69,7 +68,6 @@ public sealed class P6RawDataBuilderActor : ReceiveActor
         Receive<ActivityCountsReady>(message =>
         {
             replyTo.Tell(CreateRawData(message.Projects, message.CountsByObjectId));
-            NotifySessionWorkFinished();
             Context.Stop(Self);
         });
 
@@ -77,7 +75,6 @@ public sealed class P6RawDataBuilderActor : ReceiveActor
         {
             _log.Error(message.Exception, "Failed to compute per-project activity counts for raw P6 data");
             replyTo.Tell(new Status.Failure(message.Exception));
-            NotifySessionWorkFinished();
             Context.Stop(Self);
         });
     }
@@ -124,10 +121,5 @@ public sealed class P6RawDataBuilderActor : ReceiveActor
             new MemoryStream(bytes),
             "p6-raw-data.json",
             "application/json");
-    }
-
-    private void NotifySessionWorkFinished()
-    {
-        Context.Parent.Tell(new P6SessionActor.WorkFinished());
     }
 }

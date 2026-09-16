@@ -33,14 +33,14 @@ public sealed class P6Actor : ReceiveActor
         {
             _ = message;
             _log.Info("Retrieving raw P6 data");
-            _session.Tell(new RunWithSession(Sender, new BuildRawDataWork()));
+            _session.Tell(new BuildRawData(Sender));
         });
 
         Receive<GetP6Projects>(message =>
         {
             _ = message;
             _log.Info("Retrieving P6 project catalog");
-            _session.Tell(new RunWithSession(Sender, new FetchProjectCatalogWork()));
+            _session.Tell(new FetchProjectCatalog(Sender));
         });
 
         Receive<StartP6Sync>(message =>
@@ -59,7 +59,7 @@ public sealed class P6Actor : ReceiveActor
             }
 
             _syncRunning = true;
-            _session.Tell(new RunWithSession(Sender, new RunSyncWork(projectIds, _store, _syncOptions)));
+            _session.Tell(new RunSync(Sender, projectIds, _store, _syncOptions));
         });
 
         Receive<P6SyncOrchestratorActor.SyncFinished>(_ =>

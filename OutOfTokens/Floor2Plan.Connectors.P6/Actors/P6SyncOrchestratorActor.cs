@@ -156,7 +156,6 @@ public sealed class P6SyncOrchestratorActor : ReceiveActor
     {
         _log.Info("P6 sync completed: {0} records, {1} errors", result.TotalRecordCount, result.Errors.Count);
         _replyTo.Tell(result);
-        Context.Parent.Tell(new P6SessionActor.WorkFinished());
         Context.Parent.Tell(new SyncFinished());
         Context.Stop(Self);
     }

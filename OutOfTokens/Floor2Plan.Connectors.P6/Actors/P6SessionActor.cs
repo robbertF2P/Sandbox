@@ -21,7 +21,7 @@ public sealed class P6SessionActor : ReceiveActor, IWithUnboundedStash
 
     private string? _sessionId;
     private ICancelable? _logoutSchedule;
-    private RunWithSession? _loginPendingWork;
+    private object? _loginPendingCommand;
 
     public P6SessionActor(IP6RestApi api, P6AuthOptions authOptions)
     {
@@ -35,8 +35,6 @@ public sealed class P6SessionActor : ReceiveActor, IWithUnboundedStash
         return Akka.Actor.Props.Create(() => new P6SessionActor(api, authOptions));
     }
 
-    internal sealed record WorkFinished;
-
     protected override void PostStop()
     {
         CancelIdleLogout();
@@ -46,40 +44,44 @@ public sealed class P6SessionActor : ReceiveActor, IWithUnboundedStash
 
     private void Ready()
     {
-        Receive<RunWithSession>(StartWork);
+        Receive<FetchProjectCatalog>(command => StartWork(command));
+        Receive<BuildRawData>(command => StartWork(command));
+        Receive<RunSync>(command => StartWork(command));
         RegisterCommonHandlers();
     }
 
     private void LoggingIn()
     {
-        Receive<SessionReceived>(message =>
+        Receive<P6LoginSucceeded>(message =>
         {
             _sessionId = message.SessionId;
             _log.Info("P6 session established");
-            var pending = _loginPendingWork!;
-            _loginPendingWork = null;
+            var pending = _loginPendingCommand!;
+            _loginPendingCommand = null;
             Become(Ready);
             Dispatch(pending);
             Stash.UnstashAll();
         });
 
-        Receive<SessionFailed>(message =>
+        Receive<P6LoginFailed>(message =>
         {
             _log.Warning("Could not login to P6: {0}", message.Reason);
-            var pending = _loginPendingWork!;
-            _loginPendingWork = null;
+            var pending = _loginPendingCommand!;
+            _loginPendingCommand = null;
             Become(Ready);
-            pending.ReplyTo.Tell(new Status.Failure(new InvalidOperationException(message.Reason)));
+            ReplyLoginFailure(pending, message.Reason);
             Stash.UnstashAll();
         });
 
-        Receive<RunWithSession>(_ => Stash.Stash());
+        Receive<FetchProjectCatalog>(_ => Stash.Stash());
+        Receive<BuildRawData>(_ => Stash.Stash());
+        Receive<RunSync>(_ => Stash.Stash());
         RegisterCommonHandlers();
     }
 
     private void RegisterCommonHandlers()
     {
-        Receive<WorkFinished>(_ => ScheduleIdleLogout());
+        Receive<Terminated>(_ => ScheduleIdleLogout());
         Receive<P6SyncOrchestratorActor.SyncFinished>(message => Context.Parent.Tell(message));
         Receive<SessionIdleTimeoutElapsed>(message =>
         {
@@ -99,47 +101,70 @@ public sealed class P6SessionActor : ReceiveActor, IWithUnboundedStash
         });
     }
 
-    private void StartWork(RunWithSession message)
+    private void StartWork(object command)
     {
         CancelIdleLogout();
 
         if (!string.IsNullOrWhiteSpace(_sessionId))
         {
-            Dispatch(message);
+            Dispatch(command);
             return;
         }
 
-        if (_loginPendingWork != null)
+        if (_loginPendingCommand != null)
         {
-            message.ReplyTo.Tell(new Status.Failure(new InvalidOperationException("P6 login is already in progress.")));
+            ReplyLoginFailure(command, "P6 login is already in progress.");
             return;
         }
 
-        _loginPendingWork = message;
+        _loginPendingCommand = command;
         Become(LoggingIn);
         Context.ActorOf(P6LoginActor.Props(_api, _authOptions)).Tell(new P6LoginActor.LoginRequested());
     }
 
-    private void Dispatch(RunWithSession message)
+    private void Dispatch(object command)
     {
         var cookie = CreateSessionCookie();
 
-        switch (message.Work)
+        switch (command)
         {
-            case FetchProjectCatalogWork:
-                Context.ActorOf(P6ProjectCatalogActor.Props(_api))
-                    .Tell(new P6ProjectCatalogActor.Fetch(cookie, message.ReplyTo));
+            case FetchProjectCatalog catalog:
+                SpawnWorker(P6ProjectCatalogActor.Props(_api))
+                    .Tell(new P6ProjectCatalogActor.Fetch(cookie, catalog.ReplyTo));
                 break;
-            case BuildRawDataWork:
-                Context.ActorOf(P6RawDataBuilderActor.Props(_api))
-                    .Tell(new P6RawDataBuilderActor.Build(cookie, message.ReplyTo));
+            case BuildRawData rawData:
+                SpawnWorker(P6RawDataBuilderActor.Props(_api))
+                    .Tell(new P6RawDataBuilderActor.Build(cookie, rawData.ReplyTo));
                 break;
-            case RunSyncWork sync:
-                Context.ActorOf(P6SyncOrchestratorActor.Props(_api, sync.Store, sync.SyncOptions))
-                    .Tell(new P6SyncOrchestratorActor.Start(sync.ProjectIds, cookie, message.ReplyTo));
+            case RunSync sync:
+                SpawnWorker(P6SyncOrchestratorActor.Props(_api, sync.Store, sync.SyncOptions))
+                    .Tell(new P6SyncOrchestratorActor.Start(sync.ProjectIds, cookie, sync.ReplyTo));
                 break;
             default:
-                message.ReplyTo.Tell(new Status.Failure(new InvalidOperationException("Unsupported P6 session work.")));
+                throw new InvalidOperationException("Unsupported P6 session command.");
+        }
+    }
+
+    private IActorRef SpawnWorker(Props props)
+    {
+        var worker = Context.ActorOf(props);
+        Context.Watch(worker);
+        return worker;
+    }
+
+    private static void ReplyLoginFailure(object command, string reason)
+    {
+        var failure = new Status.Failure(new InvalidOperationException(reason));
+        switch (command)
+        {
+            case FetchProjectCatalog catalog:
+                catalog.ReplyTo.Tell(failure);
+                break;
+            case BuildRawData rawData:
+                rawData.ReplyTo.Tell(failure);
+                break;
+            case RunSync sync:
+                sync.ReplyTo.Tell(failure);
                 break;
         }
     }
