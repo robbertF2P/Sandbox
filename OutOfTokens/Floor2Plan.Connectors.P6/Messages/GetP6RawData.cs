@@ -1,3 +1,4 @@
-namespace Floor2Plan.Connectors.P6.Messages;
-
-public sealed record GetP6RawData;
+namespace Floor2Plan.Connectors.P6.Messages
+{
+    public sealed record GetP6RawData;
+}

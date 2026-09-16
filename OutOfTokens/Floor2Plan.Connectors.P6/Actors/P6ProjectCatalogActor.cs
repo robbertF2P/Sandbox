@@ -8,81 +8,83 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 
-namespace Floor2Plan.Connectors.P6.Actors;
-
-/// <summary>
-/// Pages through the P6 project summary endpoint and returns the full catalog.
-/// </summary>
-public sealed class P6ProjectCatalogActor : ReceiveActor
+namespace Floor2Plan.Connectors.P6.Actors
 {
-    private readonly ILoggingAdapter _log = Context.GetLogger();
-    private readonly IP6RestApi _api;
-
-    public P6ProjectCatalogActor(IP6RestApi api)
+    /// <summary>
+    /// Pages through the P6 project summary endpoint and returns the full catalog.
+    /// </summary>
+    public sealed class P6ProjectCatalogActor : ReceiveActor
     {
-        _api = api;
+        private readonly ILoggingAdapter _log = Context.GetLogger();
+        private readonly IP6RestApi _api;
 
-        Receive<Fetch>(message =>
+        private string _cookie = string.Empty;
+        private IActorRef _replyTo = ActorRefs.Nobody;
+
+        public P6ProjectCatalogActor(IP6RestApi api)
         {
+            _api = api;
+            Receive<Fetch>(StartFetch);
+        }
+
+        public static Props Props(IP6RestApi api)
+        {
+            return Akka.Actor.Props.Create(() => new P6ProjectCatalogActor(api));
+        }
+
+        internal sealed record Fetch(string Cookie, IActorRef ReplyTo);
+
+        private sealed record PageReceived(int Offset, IList<P6ProjectRecord> Accumulated, List<P6ProjectRecord> Page);
+
+        private sealed record PageFailed(Exception Exception);
+
+        private void StartFetch(Fetch message)
+        {
+            _cookie = message.Cookie;
+            _replyTo = message.ReplyTo;
             _log.Info("Fetching P6 project catalog");
-            FetchPage(message.Cookie, message.ReplyTo, offset: 0, accumulated: []);
-        });
+            Become(Paging);
+            FetchPage(offset: 0, accumulated: []);
+        }
 
-        Receive<PageReceived>(message =>
+        private void Paging()
         {
-            var projects = message.Accumulated.Concat(message.Page).ToList();
-            if (message.Page.Count < IP6RestApi.ProjectSummaryPageSize)
+            Receive<PageReceived>(message =>
             {
-                message.ReplyTo.Tell(new P6Projects(projects));
+                var projects = message.Accumulated.Concat(message.Page).ToList();
+                if (message.Page.Count < IP6RestApi.ProjectSummaryPageSize)
+                {
+                    _replyTo.Tell(new P6Projects(projects));
+                    Context.Stop(Self);
+                    return;
+                }
+
+                FetchPage(message.Offset + IP6RestApi.ProjectSummaryPageSize, projects);
+            });
+
+            Receive<PageFailed>(message =>
+            {
+                _log.Error(message.Exception, "Failed to retrieve P6 project catalog");
+                _replyTo.Tell(new Status.Failure(message.Exception));
                 Context.Stop(Self);
-                return;
-            }
+            });
+        }
 
-            FetchPage(
-                message.Cookie,
-                message.ReplyTo,
-                message.Offset + IP6RestApi.ProjectSummaryPageSize,
-                projects);
-        });
-
-        Receive<PageFailed>(message =>
+        private void FetchPage(int offset, IList<P6ProjectRecord> accumulated)
         {
-            _log.Error(message.Exception, "Failed to retrieve P6 project catalog");
-            message.ReplyTo.Tell(new Status.Failure(message.Exception));
-            Context.Stop(Self);
-        });
-    }
-
-    public static Props Props(IP6RestApi api)
-    {
-        return Akka.Actor.Props.Create(() => new P6ProjectCatalogActor(api));
-    }
-
-    internal sealed record Fetch(string Cookie, IActorRef ReplyTo);
-
-    private sealed record PageReceived(
-        string Cookie,
-        IActorRef ReplyTo,
-        int Offset,
-        IList<P6ProjectRecord> Accumulated,
-        List<P6ProjectRecord> Page);
-
-    private sealed record PageFailed(IActorRef ReplyTo, Exception Exception);
-
-    private void FetchPage(string cookie, IActorRef replyTo, int offset, IList<P6ProjectRecord> accumulated)
-    {
-        _ = _api.GetProjectsAsync(
-                cookie,
-                fields: IP6RestApi.ProjectSummaryFields,
-                orderBy: IP6RestApi.ProjectSummaryOrderBy,
-                filter: IP6RestApi.ProjectSummaryFilter,
-                limit: IP6RestApi.ProjectSummaryPageSize,
-                offset: offset,
-                cancellationToken: CancellationToken.None)
-            .PipeTo(
-                Self,
-                Self,
-                page => new PageReceived(cookie, replyTo, offset, accumulated, page),
-                exception => new PageFailed(replyTo, exception));
+            _ = _api.GetProjectsAsync(
+                    _cookie,
+                    fields: IP6RestApi.ProjectSummaryFields,
+                    orderBy: IP6RestApi.ProjectSummaryOrderBy,
+                    filter: IP6RestApi.ProjectSummaryFilter,
+                    limit: IP6RestApi.ProjectSummaryPageSize,
+                    offset: offset,
+                    cancellationToken: CancellationToken.None)
+                .PipeTo(
+                    Self,
+                    Self,
+                    page => new PageReceived(offset, accumulated, page),
+                    exception => new PageFailed(exception));
+        }
     }
 }
