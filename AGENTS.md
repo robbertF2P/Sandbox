@@ -46,6 +46,12 @@ After editing skills in `.cursor/skills/`, run:
 - `domain-specific-languages` — Fowler DSL design and implementation
 - `specification-pattern` — Specification + Repository; Ardalis.Specification; avoid IQueryable leakage
 
+### AI in .NET
+
+- `semantic-search-dotnet` — embeddings, cosine similarity, Microsoft.Extensions.AI
+- `rag-dotnet` — retrieval-augmented generation (ingest + ask)
+- `mcp-server-dotnet` — Model Context Protocol servers (stdio/HTTP tools)
+
 ### .NET
 
 - `dotnet-core-csharp-development` — C# / ASP.NET Core conventions (`docs/coding-standards/csharp-coding-standards.md`)

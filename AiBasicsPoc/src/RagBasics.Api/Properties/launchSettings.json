@@ -1,0 +1,9 @@
+{
+  "profiles": {
+    "RagBasics.Api": {
+      "commandName": "Project",
+      "launchBrowser": false,
+      "applicationUrl": "http://localhost:5090"
+    }
+  }
+}

@@ -23,6 +23,7 @@ Use this skill first. It routes you to focused skills and repo standards — do 
 | Actor + SignalR POC | `AkkaSignalRVuePoc/` | Akka.NET, SignalR, catalog API patterns |
 | Import + progress POC | `ApiImportActorPoc/` | Import sessions, hours booking, multi-manager actors |
 | Planning approvals POC | `PlanningApprovalsPoc/` | Thin domain POC — foreman approves assignment hours/dates/user (pairs with HourApprovals) |
+| AI basics POC | `AiBasicsPoc/` | Semantic search, RAG, MCP doc tools (Ollama + Microsoft.Extensions.AI) |
 | Hour approvals (V2 slice) | `F2pPlatform/src/Modules/HourApprovals/` | End-to-end module + Angular floorboard UI |
 | Platform logging | `Platform.Serilog.Logging/`, `build/Platform.Logging.*.props` | Serilog, Seq, App Insights, test sink |
 | Frontend design system | `FloorganiseCss/` | `@floorganise/css` — Tailwind v4 tokens + semantic aliases |
@@ -54,6 +55,9 @@ Use this skill first. It routes you to focused skills and repo standards — do 
 | Vue/Angular UI, Tailwind, `@floorganise/css` | `tailwind-ui-styling`, `angular-frontend-development` |
 | Functional style in C# | `functional-programming-csharp` |
 | Enum design, status outcomes, promoting enums to classes | `csharp-enum-best-practices` |
+| Semantic search / embeddings in .NET | `semantic-search-dotnet` |
+| RAG (retrieve + generate) | `rag-dotnet` |
+| MCP servers for Cursor/Copilot | `mcp-server-dotnet` |
 
 When multiple apply, read **all** relevant skills before editing.
 
