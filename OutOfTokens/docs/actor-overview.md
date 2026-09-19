@@ -76,8 +76,10 @@ flowchart LR
 | `ReplyTargetWorkerActor` | Store who to reply to once; internal messages stay small | [ReplyTargetWorkerActor.cs](../Infrastructure.Akka/Actors/Workers/ReplyTargetWorkerActor.cs) |
 | `PagedFetchActor<T>` | Call an API page by page until done; reply once | [PagedFetchActor.cs](../Infrastructure.Akka/Actors/Workers/PagedFetchActor.cs) |
 | `SessionGateActor` | Hold a session; login on demand; stash; idle logout | [SessionGateActor.cs](../Infrastructure.Akka/Actors/Session/SessionGateActor.cs) |
+| `ExclusiveGateActor` | At-most-one in-flight operation | [ExclusiveGateActor.cs](../Infrastructure.Akka/Actors/Guards/ExclusiveGateActor.cs) |
+| `KeyedAccumulatorActor<T>` | In-memory keyed aggregation | [KeyedAccumulatorActor.cs](../Infrastructure.Akka/Actors/State/KeyedAccumulatorActor.cs) |
 
-Full catalog (including planned P1 actors): [reusable-actors.md](reusable-actors.md).
+Full catalog (including planned P2 actors): [reusable-actors.md](reusable-actors.md).
 
 ---
 

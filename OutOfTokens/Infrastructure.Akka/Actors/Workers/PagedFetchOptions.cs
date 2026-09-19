@@ -17,5 +17,9 @@ namespace Infrastructure.Akka.Actors.Workers
         public Func<TItem, object> DedupeKey { get; init; }
 
         public Func<IReadOnlyList<TItem>, IReadOnlyList<TItem>, IReadOnlyList<TItem>> MergePages { get; init; }
+
+        /// <summary>Called after each page with only the items added this page (post-dedupe).</summary>
+        public Action<IReadOnlyList<TItem>> OnItemsAdded { get; init; }
     }
 }
+

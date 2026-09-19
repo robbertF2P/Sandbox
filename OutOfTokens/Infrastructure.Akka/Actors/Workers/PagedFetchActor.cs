@@ -46,6 +46,11 @@ namespace Infrastructure.Akka.Actors.Workers
                 var previousCount = message.Accumulated.Count;
                 var accumulated = Merge(message.Accumulated, message.Page);
                 var addedCount = accumulated.Count - previousCount;
+                if (addedCount > 0 && _options.OnItemsAdded != null)
+                {
+                    _options.OnItemsAdded(accumulated.Skip(previousCount).ToList());
+                }
+
                 if (message.Page.Count < _options.PageSize
                     || (_options.DedupeKey != null && addedCount == 0))
                 {

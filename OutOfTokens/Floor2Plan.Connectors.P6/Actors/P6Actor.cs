@@ -2,6 +2,7 @@ using Akka.Actor;
 using Akka.Event;
 using Floor2Plan.Connectors.P6.Api;
 using Floor2Plan.Connectors.P6.Messages;
+using Infrastructure.Akka.Actors.Guards;
 using System;
 using System.Linq;
 
@@ -21,7 +22,7 @@ namespace Floor2Plan.Connectors.P6.Actors
 
         private IActorRef _session = ActorRefs.Nobody;
         private IActorRef _store = ActorRefs.Nobody;
-        private bool _syncRunning;
+        private IActorRef _syncGate = ActorRefs.Nobody;
 
         public P6Actor(IP6RestApi api, P6AuthOptions authOptions, P6SyncOptions syncOptions = null)
         {
@@ -45,12 +46,6 @@ namespace Floor2Plan.Connectors.P6.Actors
 
             Receive<StartP6Sync>(message =>
             {
-                if (_syncRunning)
-                {
-                    Sender.Tell(new Status.Failure(new InvalidOperationException("A P6 synchronization is already running.")));
-                    return;
-                }
-
                 var projectIds = (message.ProjectIds ?? []).Where(x => !string.IsNullOrWhiteSpace(x)).Distinct().ToArray();
                 if (projectIds.Length == 0)
                 {
@@ -58,13 +53,12 @@ namespace Floor2Plan.Connectors.P6.Actors
                     return;
                 }
 
-                _syncRunning = true;
-                _session.Tell(new RunSync(Sender, projectIds, _store, _syncOptions));
+                _syncGate.Tell(new ExclusiveGateActor.Begin(message, Sender));
             });
 
             Receive<P6SyncOrchestratorActor.SyncFinished>(_ =>
             {
-                _syncRunning = false;
+                _syncGate.Tell(new ExclusiveGateActor.Finished());
             });
         }
 
@@ -77,6 +71,22 @@ namespace Floor2Plan.Connectors.P6.Actors
         {
             _store = Context.ActorOf(P6RawDataStoreActor.Props(), P6RawDataStoreActor.ActorName);
             _session = Context.ActorOf(P6SessionActor.Props(_api, _authOptions), P6SessionActor.ActorName);
+            _syncGate = Context.ActorOf(
+                ExclusiveGateActor.Props(new ExclusiveGateOptions
+                {
+                    OnBegin = (work, replyTo) =>
+                    {
+                        var message = (StartP6Sync)work;
+                        var projectIds = (message.ProjectIds ?? [])
+                            .Where(x => !string.IsNullOrWhiteSpace(x))
+                            .Distinct()
+                            .ToArray();
+                        _session.Tell(new RunSync(replyTo, projectIds, _store, _syncOptions));
+                    },
+                    BuildRejection = _ => new Status.Failure(
+                        new InvalidOperationException("A P6 synchronization is already running."))
+                }),
+                "p6-sync-gate");
             base.PreStart();
         }
     }

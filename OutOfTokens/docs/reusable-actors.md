@@ -34,12 +34,34 @@ P6 connector composes all P0 actors — see [P6SessionGateBehavior.cs](../Floor2
 
 ---
 
-## Planned (P1+)
+## Implemented (P1)
+
+| Actor | Package path | When to use |
+|-------|--------------|-------------|
+| **ExclusiveGateActor** | [Actors/Guards/ExclusiveGateActor.cs](../Infrastructure.Akka/Actors/Guards/ExclusiveGateActor.cs) | At-most-one in-flight operation (sync/import mutex) |
+| **KeyedAccumulatorActor&lt;TKey, TValue&gt;** | [Actors/State/KeyedAccumulatorActor.cs](../Infrastructure.Akka/Actors/State/KeyedAccumulatorActor.cs) | In-memory keyed clear / append / query |
+| **KeyedAccumulatorState&lt;TKey, TValue&gt;** | [Actors/State/KeyedAccumulatorState.cs](../Infrastructure.Akka/Actors/State/KeyedAccumulatorState.cs) | Shared state helper (domain actors with custom messages) |
+| **PagedFetchOptions.OnItemsAdded** | [Actors/Workers/PagedFetchOptions.cs](../Infrastructure.Akka/Actors/Workers/PagedFetchOptions.cs) | Side-effect per page (stream to store while paging) |
+
+### P1 usage
+
+```csharp
+// Exclusive gate
+_syncGate.Tell(new ExclusiveGateActor.Begin(work, replyTo));
+_syncGate.Tell(new ExclusiveGateActor.Finished());
+
+// Keyed accumulator
+Context.ActorOf(KeyedAccumulatorActor<MyKey, MyItem>.Props());
+```
+
+P6 reference: [P6Actor.cs](../Floor2Plan.Connectors.P6/Actors/P6Actor.cs) (`ExclusiveGateActor`), [P6RawDataStoreActor.cs](../Floor2Plan.Connectors.P6/Actors/P6RawDataStoreActor.cs) (`KeyedAccumulatorState`), [P6CatalogWorkerActor.cs](../Floor2Plan.Connectors.P6/Actors/P6CatalogWorkerActor.cs) (`PagedFetchActor` + `OnItemsAdded`).
+
+---
+
+## Planned (P2+)
 
 | Actor | Role | Motivation |
 |-------|------|------------|
-| **ExclusiveGateActor** | At-most-one in-flight operation | Sync/import mutex (`P6Actor._syncRunning`) |
-| **KeyedAccumulatorActor&lt;TKey, TItem&gt;** | In-memory keyed aggregation | `P6RawDataStoreActor` pattern |
 | **EventStreamBridgeActor** | Subscribe + side-effect | Progress logging, SignalR push |
 | **BatchOrchestratorActor&lt;TItem&gt;** | Bounded-concurrency batch | `P6SyncOrchestratorActor` outer loop |
 | **PipeWorkerActor&lt;TIn, TOut&gt;** | One-shot PipeTo worker | `P6LoginActor` shape |
