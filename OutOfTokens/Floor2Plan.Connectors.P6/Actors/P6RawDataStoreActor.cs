@@ -1,8 +1,8 @@
 using Akka.Actor;
 using Akka.Event;
 using Floor2Plan.Connectors.P6.Api.Models;
+using Infrastructure.Akka.Actors.State;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace Floor2Plan.Connectors.P6.Actors
 {
@@ -17,7 +17,7 @@ namespace Floor2Plan.Connectors.P6.Actors
     {
         public const string ActorName = "p6-raw-data-store";
 
-        private readonly Dictionary<P6EntityKind, List<P6BaseRecord>> _records = new ();
+        private readonly KeyedAccumulatorState<P6EntityKind, P6BaseRecord> _state = new();
         private readonly ILoggingAdapter _log = Context.GetLogger();
 
         public P6RawDataStoreActor()
@@ -25,36 +25,19 @@ namespace Floor2Plan.Connectors.P6.Actors
             Receive<ClearRawData>(_ =>
             {
                 _log.Debug("Clearing P6 raw data from previous run");
-                _records.Clear();
+                _state.Clear();
             });
 
-            Receive<AppendRawData>(message =>
-            {
-                if (message.Records.Count == 0)
-                {
-                    return;
-                }
-
-                if (!_records.TryGetValue(message.Kind, out var existing))
-                {
-                    existing = new List<P6BaseRecord>();
-                    _records[message.Kind] = existing;
-                }
-
-                existing.AddRange(message.Records);
-            });
+            Receive<AppendRawData>(message => _state.Append(message.Kind, message.Records));
 
             Receive<GetRawData>(message =>
             {
-                var records = _records.TryGetValue(message.Kind, out var existing)
-                    ? existing.ToArray()
-                    : [];
-                Sender.Tell(new RawData(message.Kind, records));
+                Sender.Tell(new RawData(message.Kind, _state.Get(message.Kind)));
             });
 
             Receive<GetRawDataCounts>(_ =>
             {
-                Sender.Tell(new RawDataCounts(_records.ToDictionary(x => x.Key, x => x.Value.Count)));
+                Sender.Tell(new RawDataCounts(_state.GetCounts()));
             });
         }
 

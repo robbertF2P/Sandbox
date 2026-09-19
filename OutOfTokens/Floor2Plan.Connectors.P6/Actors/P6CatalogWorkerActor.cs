@@ -2,6 +2,7 @@ using Akka.Actor;
 using Akka.Event;
 using Floor2Plan.Connectors.P6.Api;
 using Floor2Plan.Connectors.P6.Api.Models;
+using Infrastructure.Akka.Actors.Workers;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -17,8 +18,9 @@ namespace Floor2Plan.Connectors.P6.Actors
         private readonly int _pageSize;
         private readonly string _projectFilter;
         private readonly ILoggingAdapter _log = Context.GetLogger();
+
+        private P6EntityKind _kind;
         private int _totalCount;
-        private HashSet<int> _seenObjectIds = new();
 
         public P6CatalogWorkerActor(IP6RestApi api, IActorRef store, int pageSize, string projectFilter = null)
         {
@@ -27,31 +29,12 @@ namespace Floor2Plan.Connectors.P6.Actors
             _pageSize = pageSize;
             _projectFilter = projectFilter;
 
-            Receive<FetchCatalog>(message =>
+            Receive<FetchCatalog>(StartFetch);
+
+            Receive<CatalogFetched>(message =>
             {
-                _log.Debug("P6 catalog worker fetching {0} page at offset {1}", message.Kind, message.Offset);
-                FetchPage(message);
-            });
-
-            Receive<CatalogPageFetched>(message =>
-            {
-                var newRecords = message.Records.Where(x => _seenObjectIds.Add(x.ObjectId)).ToArray();
-                _store.Tell(new P6RawDataStoreActor.AppendRawData(message.Kind, newRecords));
-                _totalCount += newRecords.Length;
-
-                // The live P6 REST server does not honor Limit/Offset for every endpoint - it can return
-                // the full result set on every request regardless of paging parameters. If a page didn't
-                // introduce any records we haven't already seen, treat the catalog as fully fetched instead
-                // of looping forever on Offset increments the server ignores.
-                var isLastPage = message.Records.Count < _pageSize || newRecords.Length == 0;
-                if (isLastPage)
-                {
-                    Context.Parent.Tell(new CatalogFetched(message.Kind, _totalCount));
-                    Context.Stop(Self);
-                    return;
-                }
-
-                FetchPage(new FetchCatalog(message.Kind, message.Cookie, message.Offset + _pageSize));
+                Context.Parent.Tell(message);
+                Context.Stop(Self);
             });
 
             Receive<CatalogFetchFailed>(message =>
@@ -72,61 +55,69 @@ namespace Floor2Plan.Connectors.P6.Actors
 
         internal sealed record CatalogFetchFailed(P6EntityKind Kind, Exception Exception);
 
-        private sealed record CatalogPageFetched(
-            P6EntityKind Kind,
-            string Cookie,
-            int Offset,
-            IReadOnlyList<P6BaseRecord> Records);
-
-        private void FetchPage(FetchCatalog message)
+        private void StartFetch(FetchCatalog message)
         {
-            _ = FetchPageAsync(message).PipeTo(
-                Self,
-                Self,
-                records => new CatalogPageFetched(message.Kind, message.Cookie, message.Offset, records),
-                exception => new CatalogFetchFailed(message.Kind, exception));
+            _kind = message.Kind;
+            _totalCount = 0;
+            _log.Debug("P6 catalog worker fetching {0}", message.Kind);
+
+            var paging = Context.ActorOf(PagedFetchActor<P6BaseRecord>.Props(new PagedFetchOptions<P6BaseRecord>
+            {
+                PageSize = _pageSize,
+                DedupeKey = record => record.ObjectId,
+                FetchPage = offset => FetchPageAsync(message.Kind, message.Cookie, offset),
+                OnItemsAdded = items =>
+                {
+                    _store.Tell(new P6RawDataStoreActor.AppendRawData(_kind, items));
+                    _totalCount += items.Count;
+                },
+                BuildSuccessReply = _ => new CatalogFetched(_kind, _totalCount),
+                BuildFailureReply = exception => new CatalogFetchFailed(_kind, exception)
+            }));
+
+            paging.Tell(new PagedFetchActor<P6BaseRecord>.Start(Self));
         }
 
-        private async Task<IReadOnlyList<P6BaseRecord>> FetchPageAsync(FetchCatalog message)
+        private async Task<IReadOnlyList<P6BaseRecord>> FetchPageAsync(P6EntityKind kind, string cookie, int offset)
         {
-            return message.Kind switch
+            return kind switch
             {
                 P6EntityKind.Projects => await ToRecordsAsync(_api.GetProjectsAsync(
-                    message.Cookie,
+                    cookie,
                     filter: _projectFilter,
                     limit: _pageSize,
-                    offset: message.Offset,
+                    offset: offset,
                     cancellationToken: CancellationToken.None)),
                 P6EntityKind.Wbs => await ToRecordsAsync(_api.GetWbsAsync(
-                    message.Cookie,
+                    cookie,
                     filter: _projectFilter,
                     limit: _pageSize,
-                    offset: message.Offset,
+                    offset: offset,
                     cancellationToken: CancellationToken.None)),
                 P6EntityKind.Activities => await ToRecordsAsync(_api.GetActivitiesAsync(
-                    message.Cookie,
+                    cookie,
                     filter: _projectFilter,
                     limit: _pageSize,
-                    offset: message.Offset,
+                    offset: offset,
                     cancellationToken: CancellationToken.None)),
                 P6EntityKind.Resources => await ToRecordsAsync(_api.GetResourcesAsync(
-                    message.Cookie,
+                    cookie,
                     limit: _pageSize,
-                    offset: message.Offset,
+                    offset: offset,
                     cancellationToken: CancellationToken.None)),
                 P6EntityKind.ResourceAssignments => await ToRecordsAsync(_api.GetResourceAssignmentsAsync(
-                    message.Cookie,
+                    cookie,
                     filter: _projectFilter,
                     limit: _pageSize,
-                    offset: message.Offset,
+                    offset: offset,
                     cancellationToken: CancellationToken.None)),
                 P6EntityKind.Relationships => await ToRecordsAsync(_api.GetRelationshipsAsync(
-                    message.Cookie,
+                    cookie,
                     filter: _projectFilter,
                     limit: _pageSize,
-                    offset: message.Offset,
+                    offset: offset,
                     cancellationToken: CancellationToken.None)),
-                _ => throw new ArgumentOutOfRangeException(nameof(message), message.Kind, "Unsupported P6 entity kind.")
+                _ => throw new ArgumentOutOfRangeException(nameof(kind), kind, "Unsupported P6 entity kind.")
             };
         }
 

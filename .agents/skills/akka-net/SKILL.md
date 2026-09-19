@@ -18,7 +18,16 @@ metadata:
 
 # Akka.NET Development
 
-Apply this skill for Akka.NET work. The primary reference implementation in this repo is `AkkaSignalRVuePoc`.
+Apply this skill for Akka.NET work.
+
+**Reference implementations in this repo:**
+
+| Path | Best for |
+|------|----------|
+| [OutOfTokens/docs/actor-overview.md](../../OutOfTokens/docs/actor-overview.md) | **Advocacy + reusable actors** (`SessionGateActor`, `PagedFetchActor`) with P6 connector diagrams |
+| `AkkaSignalRVuePoc/` | ASP.NET hosting, SignalR, facades |
+| `AkkaTeach/` | Learning Tell, Become, PipeTo step by step |
+| `ApiImportActorPoc/` | Import pipeline orchestration |
 
 **Core principle:** Keep actor logic pure; push IO (SignalR, HTTP, databases) behind abstractions injected via `Props`.
 
@@ -122,6 +131,10 @@ dotnet test AkkaSignalRVuePoc.slnx --filter "FullyQualifiedName~Actors"
 - Passing `IServiceProvider` into actors instead of resolving dependencies at `Props` creation time.
 - Sending large object graphs; prefer immutable records with IDs.
 - Creating a new `ActorSystem` per request — use the hosted singleton system.
+
+## Reusable actors (OutOfTokens)
+
+Generic actors live in `OutOfTokens/Infrastructure.Akka/`. Catalog and diagrams: [OutOfTokens/docs/reusable-actors.md](../../OutOfTokens/docs/reusable-actors.md) · visual overview: [actor-overview.md](../../OutOfTokens/docs/actor-overview.md).
 
 ## Related skills and rules
 

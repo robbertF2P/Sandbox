@@ -1,0 +1,32 @@
+<Project>
+  <Import Project="..\build\Platform.Logging.Versions.props" />
+
+  <PropertyGroup>
+    <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageVersion Include="Akka" Version="1.5.68" />
+    <PackageVersion Include="Akka.Hosting" Version="1.5.68" />
+    <PackageVersion Include="Akka.Hosting.TestKit" Version="1.5.68" />
+    <PackageVersion Include="Akka.Logger.Serilog" Version="1.5.67" />
+    <PackageVersion Include="Akka.TestKit" Version="1.5.68" />
+    <PackageVersion Include="Akka.TestKit.Xunit" Version="1.5.68" />
+    <PackageVersion Include="AwesomeAssertions" Version="9.6.0" />
+    <PackageVersion Include="Microsoft.Extensions.Configuration.Binder" Version="10.0.10" />
+    <PackageVersion Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="10.0.10" />
+    <PackageVersion Include="Microsoft.Extensions.Http" Version="10.0.10" />
+    <PackageVersion Include="Microsoft.Extensions.Logging" Version="10.0.10" />
+    <PackageVersion Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.10" />
+    <PackageVersion Include="Microsoft.Extensions.Options" Version="10.0.10" />
+    <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.12.0" />
+    <PackageVersion Include="Moq" Version="4.20.72" />
+    <PackageVersion Include="Refit" Version="14.0.0" />
+    <PackageVersion Include="Refit.HttpClientFactory" Version="14.0.0" />
+    <PackageVersion Include="Refit.Reflection" Version="14.0.0" />
+    <PackageVersion Include="Volo.Abp.Core" Version="8.3.4" />
+    <PackageVersion Include="xunit.runner.visualstudio" Version="3.0.0" />
+    <PackageVersion Include="xunit.v3" Version="3.2.2" />
+    <PackageVersion Include="xunit.v3.extensibility.core" Version="3.2.2" />
+  </ItemGroup>
+</Project>

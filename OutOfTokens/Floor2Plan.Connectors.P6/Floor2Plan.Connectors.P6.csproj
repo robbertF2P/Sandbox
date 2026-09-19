@@ -1,16 +1,22 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <ItemGroup>
     <PackageReference Include="Akka" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Binder" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" />
+    <PackageReference Include="Microsoft.Extensions.Http" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" />
+    <PackageReference Include="Microsoft.Extensions.Options" />
     <PackageReference Include="Refit" />
     <PackageReference Include="Refit.HttpClientFactory" />
     <PackageReference Include="Refit.Reflection" />
     <PackageReference Include="Volo.Abp.Core" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\Modules\Core\Src\Contracts\Contracts.Infrastructure.Connectors\Contracts.Infrastructure.Connectors.csproj" />
-    <ProjectReference Include="..\..\Modules\Core\Src\Contracts\Contracts.Model\Contracts.Model.csproj" />
-    <ProjectReference Include="..\..\Modules\Core\Src\Domain\Domain.Model\Domain.Model.csproj" />
+    <ProjectReference Include="..\Stubs\Contracts.Infrastructure.Connectors\Contracts.Infrastructure.Connectors.csproj" />
+    <ProjectReference Include="..\Stubs\Contracts.Model\Contracts.Model.csproj" />
+    <ProjectReference Include="..\Stubs\Domain.Model\Domain.Model.csproj" />
     <ProjectReference Include="..\Infrastructure.Akka.Contracts\Infrastructure.Akka.Contracts.csproj" />
-    <ProjectReference Include="..\..\Modules\Core\Src\Infrastructure\Infrastructure.Process.Contracts\Infrastructure.Process.Contracts.csproj" />
+    <ProjectReference Include="..\Infrastructure.Akka\Infrastructure.Akka.csproj" />
+    <ProjectReference Include="..\Stubs\Infrastructure.Process.Contracts\Infrastructure.Process.Contracts.csproj" />
   </ItemGroup>
 </Project>

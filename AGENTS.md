@@ -53,7 +53,7 @@ After editing skills in `.cursor/skills/`, run:
 - `tailwind-ui-styling` — Tailwind v4 utility-first styling with `@floorganise/css`
 - `dotnet-ef-core` — Entity Framework Core
 - `immutable-domain-ef-core` — immutable aggregates with EF Core (With* helpers, graph reconciliation)
-- `akka-net` — Akka.NET (repo patterns)
+- `akka-net` — Akka.NET (repo patterns); advocacy overview: [OutOfTokens/docs/actor-overview.md](OutOfTokens/docs/actor-overview.md)
 - `reactive-applications-akka-net` — Anthony Brown reactive systems / Akka.NET book
 - `functional-programming-csharp` — functional patterns in C#
 - `csharp-enum-best-practices` — enum design, status outcomes, smart-class evolution (Horvat / Coding Helmet)

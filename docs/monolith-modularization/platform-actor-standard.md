@@ -16,8 +16,9 @@
 | `ApiImportActorPoc/docs/platform-rebuild-proposal-summary.md` | Strategic context (§11) |
 | `ApiImportActorPoc/docs/deployment-profile-sketch.md` | Legacy-hosted vs native tenant routing |
 | `module-composition-di.md` | `IServiceCollection` registration; host is composition root |
+| [OutOfTokens/docs/actor-overview.md](../../OutOfTokens/docs/actor-overview.md) | Visual P6 pipeline + reusable actor advocacy |
 
-**Reference POCs:** `ApiImportActorPoc/`, `AkkaSignalRVuePoc/`, `F2pPlatform/`
+**Reference POCs:** `ApiImportActorPoc/`, `AkkaSignalRVuePoc/`, `F2pPlatform/`, **`OutOfTokens/`** (reusable actors + P6 connector — start at [OutOfTokens/docs/actor-overview.md](../../OutOfTokens/docs/actor-overview.md))
 
 ---
 

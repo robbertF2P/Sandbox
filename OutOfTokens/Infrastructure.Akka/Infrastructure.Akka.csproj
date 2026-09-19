@@ -3,10 +3,12 @@
     <PackageReference Include="Akka" />
     <PackageReference Include="Akka.Hosting" />
     <PackageReference Include="Akka.Logger.Serilog" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" />
     <PackageReference Include="Volo.Abp.Core" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\Modules\Core\Src\Common\Common.Utility\Common.Utility.csproj" />
+    <ProjectReference Include="..\Stubs\Common.Utility\Common.Utility.csproj" />
     <ProjectReference Include="..\Infrastructure.Akka.Contracts\Infrastructure.Akka.Contracts.csproj" />
   </ItemGroup>
 </Project>

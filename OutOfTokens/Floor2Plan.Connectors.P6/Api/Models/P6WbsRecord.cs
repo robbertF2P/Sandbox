@@ -1,5 +1,3 @@
-#nullable enable
-
 using System.Text.Json.Serialization;
 
 namespace Floor2Plan.Connectors.P6.Api.Models
@@ -10,9 +8,9 @@ namespace Floor2Plan.Connectors.P6.Api.Models
         public int? ProjectObjectId { get; set; }
 
         [JsonPropertyName("Name")]
-        public string? Name { get; set; }
+        public string Name { get; set; }
 
         [JsonPropertyName("WbsCode")]
-        public string? WbsCode { get; set; }
+        public string WbsCode { get; set; }
     }
 }

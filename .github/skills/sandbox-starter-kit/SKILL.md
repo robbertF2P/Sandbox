@@ -22,6 +22,7 @@ Use this skill first. It routes you to focused skills and repo standards — do 
 |------|------|---------|
 | Actor + SignalR POC | `AkkaSignalRVuePoc/` | Akka.NET, SignalR, catalog API patterns |
 | Import + progress POC | `ApiImportActorPoc/` | Import sessions, hours booking, multi-manager actors |
+| P6 connector + reusable actors | `OutOfTokens/` | Standalone P6 pipeline; **advocacy diagrams:** [docs/actor-overview.md](../../OutOfTokens/docs/actor-overview.md) |
 | Planning approvals POC | `PlanningApprovalsPoc/` | Thin domain POC — foreman approves assignment hours/dates/user (pairs with HourApprovals) |
 | Hour approvals (V2 slice) | `F2pPlatform/src/Modules/HourApprovals/` | End-to-end module + Angular floorboard UI |
 | Platform logging | `Platform.Serilog.Logging/`, `build/Platform.Logging.*.props` | Serilog, Seq, App Insights, test sink |

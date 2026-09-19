@@ -22,7 +22,7 @@ namespace Floor2Plan.Connectors.P6.Actors
             {
                 if (string.IsNullOrWhiteSpace(_authOptions.Username) || string.IsNullOrWhiteSpace(_authOptions.Password))
                 {
-                    Sender.Tell(new P6Actor.SessionFailed(
+                    Sender.Tell(new P6LoginFailed(
                         $"Configure {P6AuthOptions.SectionName}:Username and {P6AuthOptions.SectionName}:Password before calling the P6 API."));
                     Context.Stop(Self);
                     return;
@@ -41,7 +41,7 @@ namespace Floor2Plan.Connectors.P6.Actors
                 using var response = message.Response;
                 if (!response.IsSuccessStatusCode)
                 {
-                    Sender.Tell(new P6Actor.SessionFailed(
+                    Sender.Tell(new P6LoginFailed(
                         $"P6 login failed with HTTP {(int)response.StatusCode} {response.ReasonPhrase}."));
                     Context.Stop(Self);
                     return;
@@ -49,19 +49,19 @@ namespace Floor2Plan.Connectors.P6.Actors
 
                 if (!TryGetSessionId(response, out var sessionId))
                 {
-                    Sender.Tell(new P6Actor.SessionFailed(
+                    Sender.Tell(new P6LoginFailed(
                         $"P6 login response did not include a valid {IP6RestApi.SessionCookieName} cookie."));
                     Context.Stop(Self);
                     return;
                 }
 
-                Sender.Tell(new P6Actor.SessionReceived(sessionId));
+                Sender.Tell(new P6LoginSucceeded(sessionId));
                 Context.Stop(Self);
             });
 
             Receive<LoginFailed>(message =>
             {
-                Sender.Tell(new P6Actor.SessionFailed(message.Reason));
+                Sender.Tell(new P6LoginFailed(message.Reason));
                 Context.Stop(Self);
             });
         }
