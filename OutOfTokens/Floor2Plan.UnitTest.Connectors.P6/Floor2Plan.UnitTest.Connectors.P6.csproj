@@ -28,4 +28,5 @@
     <ProjectReference Include="..\Floor2Plan.Connectors.P6\Floor2Plan.Connectors.P6.csproj" />
     <ProjectReference Include="..\Stubs\Infrastructure.Process.Contracts\Infrastructure.Process.Contracts.csproj" />
   </ItemGroup>
+  <Import Project="..\..\build\Platform.Logging.Tests.props" />
 </Project>

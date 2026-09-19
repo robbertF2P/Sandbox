@@ -187,7 +187,7 @@ dotnet build OutOfTokens.sln
 dotnet test OutOfTokens.sln --logger "console;verbosity=detailed"
 ```
 
-Actor tests use `AkkaSerilogTestKit` — run with **detailed** console verbosity to see session login, sync progress, and errors in the test output (same logs you would get from Serilog in a host).
+Actor tests use `AkkaSerilogTestKit` with `Platform.Serilog.Logging.Testing` — run with **detailed** console verbosity (or the IDE test view) to see session login, sync progress, and errors in the test output.
 
 ---
 

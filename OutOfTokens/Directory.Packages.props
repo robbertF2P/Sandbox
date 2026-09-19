@@ -1,4 +1,6 @@
 <Project>
+  <Import Project="..\build\Platform.Logging.Versions.props" />
+
   <PropertyGroup>
     <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
   </PropertyGroup>
@@ -22,10 +24,6 @@
     <PackageVersion Include="Refit" Version="14.0.0" />
     <PackageVersion Include="Refit.HttpClientFactory" Version="14.0.0" />
     <PackageVersion Include="Refit.Reflection" Version="14.0.0" />
-    <PackageVersion Include="Serilog" Version="4.3.1" />
-    <PackageVersion Include="Serilog.Extensions.Logging" Version="10.0.0" />
-    <PackageVersion Include="Serilog.Sinks.Console" Version="6.1.1" />
-    <PackageVersion Include="Serilog.Sinks.XUnit3" Version="1.2.0" />
     <PackageVersion Include="Volo.Abp.Core" Version="8.3.4" />
     <PackageVersion Include="xunit.runner.visualstudio" Version="3.0.0" />
     <PackageVersion Include="xunit.v3" Version="3.2.2" />

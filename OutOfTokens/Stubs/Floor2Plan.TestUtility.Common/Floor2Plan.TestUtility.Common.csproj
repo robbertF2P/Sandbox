@@ -2,11 +2,7 @@
   <ItemGroup>
     <PackageReference Include="Akka.TestKit" />
     <PackageReference Include="Akka.TestKit.Xunit" />
-    <PackageReference Include="Microsoft.Extensions.Logging" />
-    <PackageReference Include="Serilog" />
-    <PackageReference Include="Serilog.Extensions.Logging" />
-    <PackageReference Include="Serilog.Sinks.Console" />
-    <PackageReference Include="Serilog.Sinks.XUnit3" />
     <PackageReference Include="xunit.v3.extensibility.core" />
   </ItemGroup>
+  <Import Project="..\..\..\build\Platform.Logging.Tests.props" />
 </Project>
