@@ -66,6 +66,21 @@ P6 reference: [P6Actor.cs](../Floor2Plan.Connectors.P6/Actors/P6Actor.cs) (`Excl
 | **BatchOrchestratorActor&lt;TItem&gt;** | Bounded-concurrency batch | `P6SyncOrchestratorActor` outer loop |
 | **PipeWorkerActor&lt;TIn, TOut&gt;** | One-shot PipeTo worker | `P6LoginActor` shape |
 
+### Deferred — connector sync logging (not now)
+
+**Problem:** Live sync log (`IProcessLogger` / sync-log processor) is tied to the HTTP or Hangfire **request scope**. Fire-and-forget async sync disposes that scope while actors are still running, so progress lines cannot be persisted.
+
+**Intended fix (when we pick this up):**
+
+- `EventStreamBridgeActor` (or wire `P6SyncProgressActor`) subscribes to workflow events on the EventStream.
+- On **each** event: `IServiceScopeFactory.CreateScope()` → resolve scoped `IProcessLogger` → write → dispose.
+- Do **not** inject `IProcessLogger` into long-lived actor constructors.
+- Carry `CorrelationId` / sync run id on events (see [platform-correlation](../../docs/monolith-modularization/platform-correlation-standard.md)).
+
+**Today in OutOfTokens:** `P6Connector` uses synchronous `Ask` and logs metrics at the end; `P6SyncProgressActor` exists but is not wired. See [floor2plan-akka-actor-integration-design.md](../../docs/floor2plan-akka-actor-integration-design.md) (scope per message).
+
+**Status:** Tabled — revisit with EventStreamBridge P2 work.
+
 ---
 
 ## Design rules
