@@ -38,7 +38,7 @@ dotnet test OutOfTokens.sln
 
 Actor tests inherit `AkkaSerilogTestKit` using `Platform.Serilog.Logging.Testing` — pipeline logs appear in xUnit test output during `dotnet test` (use `--logger "console;verbosity=detailed"` or the IDE test view).
 
-`P6Connector.SyncAllAsync` queues sync via **Tell**; live progress is written to the sync log by `P6SyncProgressActor` (scoped `IProcessLogger` per progress message).
+`P6Connector.SyncAllAsync` queues sync via **Tell**; live progress is published on the EventStream and written to the sync log by `P6SyncProgressActor` (scoped `IProcessLogger` per event).
 
 ---
 

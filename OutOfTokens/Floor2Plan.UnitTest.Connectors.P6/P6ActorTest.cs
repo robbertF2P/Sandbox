@@ -228,6 +228,8 @@ namespace Floor2Plan.UnitTest.Connectors.P6
         {
             var api = CreateApi();
             var (scopeFactory, processLogger) = P6TestSupport.CreateScopeFactory();
+            var progressProbe = CreateTestProbe();
+            Sys.EventStream.Subscribe(progressProbe.Ref, typeof(IP6SyncProgressEvent));
 
             var actor = Sys.ActorOf(P6Actor.Props(
                 api.Object,
@@ -240,17 +242,23 @@ namespace Floor2Plan.UnitTest.Connectors.P6
                 TimeSpan.FromSeconds(5),
                 TestContext.Current.CancellationToken);
 
-            await AwaitAssertAsync(
-                () => processLogger.Verify(
-                    x => x.Log(It.Is<SyncLogMessageDto>(m => m.Message.Contains("P6 sync started"))),
-                    Times.AtLeastOnce),
-                TimeSpan.FromSeconds(5),
-                cancellationToken: TestContext.Current.CancellationToken);
+            progressProbe.FishForMessage<IP6SyncProgressEvent>(
+                e => e is P6SyncStarted,
+                TimeSpan.FromSeconds(5));
+            progressProbe.FishForMessage<IP6SyncProgressEvent>(
+                e => e is P6SyncCompleted,
+                TimeSpan.FromSeconds(5));
 
             await AwaitAssertAsync(
-                () => processLogger.Verify(
-                    x => x.Log(It.Is<SyncLogMessageDto>(m => m.SyncInformation == SyncInformation.Success)),
-                    Times.Once),
+                () =>
+                {
+                    processLogger.Verify(
+                        x => x.Log(It.Is<SyncLogMessageDto>(m => m.Message.Contains("P6 sync started"))),
+                        Times.AtLeastOnce);
+                    processLogger.Verify(
+                        x => x.Log(It.Is<SyncLogMessageDto>(m => m.SyncInformation == SyncInformation.Success)),
+                        Times.Once);
+                },
                 TimeSpan.FromSeconds(5),
                 cancellationToken: TestContext.Current.CancellationToken);
         }

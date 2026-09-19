@@ -81,7 +81,7 @@ Context.ActorOf(BatchOrchestratorActor<MyWorkItem>.Props(options))
 
 ## P6 connector — live sync log (wired)
 
-`P6SyncOrchestratorActor` **Tell**s progress events to `P6SyncProgressActor`, which writes to `IProcessLogger` using **`IServiceScopeFactory` per event** (see [floor2plan-akka-actor-integration-design.md](../../docs/floor2plan-akka-actor-integration-design.md)).
+`P6SyncOrchestratorActor` publishes `IP6SyncProgressEvent` on the **EventStream**. `P6SyncProgressActor` subscribes and writes to `IProcessLogger` using **`IServiceScopeFactory` per event** — same pattern as `ApiImportActorPoc` (see [floor2plan-akka-actor-integration-design.md](../../docs/floor2plan-akka-actor-integration-design.md)).
 
 `P6Connector.SyncAllAsync` **Tell**s `StartP6Sync` and returns immediately; the sync log updates as catalogs are fetched.
 

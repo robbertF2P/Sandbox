@@ -21,7 +21,6 @@ namespace Floor2Plan.Connectors.P6.Actors
         private readonly IP6RestApi _api;
         private readonly IActorRef _store;
         private readonly P6SyncOptions _syncOptions;
-        private readonly IActorRef _progress;
 
         private readonly Dictionary<P6EntityKind, int> _catalogCounts = new();
         private readonly Queue<P6ProjectSyncPlan> _pendingPlans = new();
@@ -30,16 +29,11 @@ namespace Floor2Plan.Connectors.P6.Actors
         private string _sessionCookie = string.Empty;
         private IActorRef _replyTo = ActorRefs.Nobody;
 
-        public P6SyncOrchestratorActor(
-            IP6RestApi api,
-            IActorRef store,
-            P6SyncOptions syncOptions,
-            IActorRef progress = null)
+        public P6SyncOrchestratorActor(IP6RestApi api, IActorRef store, P6SyncOptions syncOptions)
         {
             _api = api;
             _store = store;
             _syncOptions = syncOptions;
-            _progress = progress ?? ActorRefs.Nobody;
 
             Receive<Start>(message =>
             {
@@ -68,13 +62,9 @@ namespace Floor2Plan.Connectors.P6.Actors
             Receive<ProjectBatchComplete>(_ => StartNextProjectBatch());
         }
 
-        public static Props Props(
-            IP6RestApi api,
-            IActorRef store,
-            P6SyncOptions syncOptions,
-            IActorRef progress = null)
+        public static Props Props(IP6RestApi api, IActorRef store, P6SyncOptions syncOptions)
         {
-            return Akka.Actor.Props.Create(() => new P6SyncOrchestratorActor(api, store, syncOptions, progress));
+            return Akka.Actor.Props.Create(() => new P6SyncOrchestratorActor(api, store, syncOptions));
         }
 
         internal sealed record Start(
@@ -210,12 +200,9 @@ namespace Floor2Plan.Connectors.P6.Actors
             Context.Stop(Self);
         }
 
-        private void ReportProgress(object progressEvent)
+        private void ReportProgress(IP6SyncProgressEvent progressEvent)
         {
-            if (!_progress.IsNobody())
-            {
-                _progress.Tell(progressEvent);
-            }
+            Context.System.EventStream.Publish(progressEvent);
         }
     }
 }

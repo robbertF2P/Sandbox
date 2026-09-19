@@ -27,7 +27,6 @@ namespace Floor2Plan.Connectors.P6.Actors
         private IActorRef _session = ActorRefs.Nobody;
         private IActorRef _store = ActorRefs.Nobody;
         private IActorRef _syncGate = ActorRefs.Nobody;
-        private IActorRef _progress = ActorRefs.Nobody;
 
         public P6Actor(
             IP6RestApi api,
@@ -86,7 +85,7 @@ namespace Floor2Plan.Connectors.P6.Actors
             _store = Context.ActorOf(P6RawDataStoreActor.Props(), P6RawDataStoreActor.ActorName);
             if (_scopeFactory != null)
             {
-                _progress = Context.ActorOf(P6SyncProgressActor.Props(_scopeFactory), "p6-sync-progress");
+                Context.ActorOf(P6SyncProgressActor.Props(_scopeFactory), "p6-sync-progress");
             }
 
             _session = Context.ActorOf(P6SessionActor.Props(_api, _authOptions), P6SessionActor.ActorName);
@@ -97,7 +96,7 @@ namespace Floor2Plan.Connectors.P6.Actors
                     {
                         var message = (StartP6Sync)work;
                         var (projectIds, syncPlans) = ResolveSyncRequest(message);
-                        _session.Tell(new RunSync(replyTo, projectIds, _store, _syncOptions, syncPlans, _progress));
+                        _session.Tell(new RunSync(replyTo, projectIds, _store, _syncOptions, syncPlans));
                     },
                     BuildRejection = _ => new Status.Failure(
                         new InvalidOperationException("A P6 synchronization is already running."))
