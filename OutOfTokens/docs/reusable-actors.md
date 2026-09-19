@@ -38,7 +38,7 @@ P6 connector composes all P0 actors — see [P6SessionGateBehavior.cs](../Floor2
 
 | Actor | Package path | When to use |
 |-------|--------------|-------------|
-| **ExclusiveGateActor** | [Actors/Guards/ExclusiveGateActor.cs](../Infrastructure.Akka/Actors/Guards/ExclusiveGateActor.cs) | At-most-one in-flight operation (sync/import mutex) |
+| **ExclusiveGateActor** | [Actors/Guards/ExclusiveGateActor.cs](../Infrastructure.Akka/Actors/Guards/ExclusiveGateActor.cs) | At-most-one in-flight operation (reject or queue when busy) |
 | **KeyedAccumulatorActor&lt;TKey, TValue&gt;** | [Actors/State/KeyedAccumulatorActor.cs](../Infrastructure.Akka/Actors/State/KeyedAccumulatorActor.cs) | In-memory keyed clear / append / query |
 | **KeyedAccumulatorState&lt;TKey, TValue&gt;** | [Actors/State/KeyedAccumulatorState.cs](../Infrastructure.Akka/Actors/State/KeyedAccumulatorState.cs) | Shared state helper (domain actors with custom messages) |
 | **PagedFetchOptions.OnItemsAdded** | [Actors/Workers/PagedFetchOptions.cs](../Infrastructure.Akka/Actors/Workers/PagedFetchOptions.cs) | Side-effect per page (stream to store while paging) |

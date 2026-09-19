@@ -30,7 +30,7 @@ Two projects, one pipeline:
 
 | Project | Responsibility |
 |---------|----------------|
-| **`Infrastructure.Akka`** | Reusable orchestration *shape* — session gate, paging, batching, mutex, keyed store |
+| **`Infrastructure.Akka`** | Reusable orchestration *shape* — session gate, paging, batching, exclusive gate, keyed store |
 | **`Floor2Plan.Connectors.P6`** | P6-specific *behavior* — login, REST calls, sync plans, progress events |
 
 The connector **composes** generic actors via `Props` and small option/behavior types. It does not fork or copy them.
@@ -86,8 +86,10 @@ flowchart TB
 **Read the diagram top-down:**
 
 1. **Host** calls `P6Connector` (sync, config, raw data). The connector talks to `P6Actor` — not to HTTP directly.
-2. **`P6Actor`** owns the tree: session gate, sync mutex, raw-data store, progress subscriber.
+2. **`P6Actor`** owns the tree: session gate, exclusive gate (one sync at a time), raw-data store, progress subscriber.
 3. **`Infrastructure.Akka`** actors are the engine; **`P6SessionGateBehavior`** and worker `*Options` types supply P6 rules (cookie, which API to call, concurrency).
+
+Actors are already thread-safe — each processes one message at a time. The **exclusive gate** is a business rule: reject a second full sync while one is in progress, not a threading lock.
 4. **EventStream** decouples progress: orchestrator publishes; `P6SyncProgressActor` (and later SignalR) subscribe without the orchestrator knowing.
 
 ```mermaid
