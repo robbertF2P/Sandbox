@@ -37,7 +37,9 @@ dotnet test Infrastructure.Akka.Tests/Infrastructure.Akka.Tests.csproj
 dotnet test Floor2Plan.UnitTest.Connectors.P6/Floor2Plan.UnitTest.Connectors.P6.csproj
 ```
 
-Actor tests inherit `AkkaSerilogTestKit` (`Floor2Plan.TestUtility.Common`) using `Platform.Serilog.Logging.Testing` — pipeline logs appear in xUnit test output during `dotnet test` (use `--logger "console;verbosity=detailed"` or the IDE test view).
+Actor tests inherit `AkkaSerilogTestKit` using `Platform.Serilog.Logging.Testing` — pipeline logs appear in xUnit test output during `dotnet test` (use `--logger "console;verbosity=detailed"` or the IDE test view).
+
+`P6Connector.SyncAllAsync` queues sync via **Tell**; live progress is written to the sync log by `P6SyncProgressActor` (scoped `IProcessLogger` per EventStream message).
 
 ---
 

@@ -79,27 +79,20 @@ Context.ActorOf(BatchOrchestratorActor<MyWorkItem>.Props(options))
 
 ---
 
+## P6 connector — live sync log (wired)
+
+`P6SyncOrchestratorActor` publishes progress on the **EventStream**. `P6SyncProgressActor` subscribes and writes to `IProcessLogger` using **`IServiceScopeFactory` per event** (see [floor2plan-akka-actor-integration-design.md](../../docs/floor2plan-akka-actor-integration-design.md)).
+
+`P6Connector.SyncAllAsync` **Tell**s `StartP6Sync` and returns immediately; the sync log updates as catalogs are fetched.
+
+---
+
 ## Planned (P3+)
 
 | Actor | Role | Motivation |
 |-------|------|------------|
-| **EventStreamBridgeActor** | Subscribe + side-effect | Progress logging, SignalR push (deferred — see below) |
+| **EventStreamBridgeActor** | Generic subscribe + side-effect | Reusable bridge for SignalR push and other connectors |
 | **PipeWorkerActor&lt;TIn, TOut&gt;** | One-shot PipeTo worker | `P6LoginActor` shape |
-
-### Deferred — connector sync logging (not now)
-
-**Problem:** Live sync log (`IProcessLogger` / sync-log processor) is tied to the HTTP or Hangfire **request scope**. Fire-and-forget async sync disposes that scope while actors are still running, so progress lines cannot be persisted.
-
-**Intended fix (when we pick this up):**
-
-- `EventStreamBridgeActor` (or wire `P6SyncProgressActor`) subscribes to workflow events on the EventStream.
-- On **each** event: `IServiceScopeFactory.CreateScope()` → resolve scoped `IProcessLogger` → write → dispose.
-- Do **not** inject `IProcessLogger` into long-lived actor constructors.
-- Carry `CorrelationId` / sync run id on events (see [platform-correlation](../../docs/monolith-modularization/platform-correlation-standard.md)).
-
-**Today in OutOfTokens:** `P6Connector` uses synchronous `Ask` and logs metrics at the end; `P6SyncProgressActor` exists but is not wired. See [floor2plan-akka-actor-integration-design.md](../../docs/floor2plan-akka-actor-integration-design.md) (scope per message).
-
-**Status:** Tabled — revisit with EventStreamBridge P2 work.
 
 ---
 
@@ -107,7 +100,7 @@ Context.ActorOf(BatchOrchestratorActor<MyWorkItem>.Props(options))
 
 `Infrastructure.Akka.Tests` — TestKit coverage for generic actors (run with `dotnet test Infrastructure.Akka.Tests/Infrastructure.Akka.Tests.csproj`).
 
-`Floor2Plan.UnitTest.Connectors.P6` — P6 connector integration tests (18 tests).
+`Floor2Plan.UnitTest.Connectors.P6` — P6 connector integration tests.
 
 ---
 

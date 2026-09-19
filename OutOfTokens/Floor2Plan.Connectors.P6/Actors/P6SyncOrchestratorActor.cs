@@ -40,7 +40,8 @@ namespace Floor2Plan.Connectors.P6.Actors
                 _sessionCookie = message.Cookie;
                 _replyTo = message.ReplyTo;
                 _pendingPlans.Clear();
-                foreach (var plan in ResolvePlans(message))
+                var plans = ResolvePlans(message);
+                foreach (var plan in plans)
                 {
                     _pendingPlans.Enqueue(plan);
                 }
@@ -49,6 +50,8 @@ namespace Floor2Plan.Connectors.P6.Actors
                     "P6 sync started for {0} project(s) with concurrency limit {1}",
                     _pendingPlans.Count,
                     _syncOptions.MaxConcurrency);
+
+                Publish(new P6SyncStarted(_pendingPlans.Count));
 
                 _catalogCounts.Clear();
                 _syncErrors.Clear();
@@ -103,6 +106,8 @@ namespace Floor2Plan.Connectors.P6.Actors
                 plan.ProjectObjectId,
                 _pendingPlans.Count);
 
+            Publish(new P6ProjectStarted(objectId, _pendingPlans.Count));
+
             var workItems = plan.GetEntityKinds()
                 .Select(kind => new P6CatalogSyncWorkItem(
                     plan,
@@ -145,6 +150,7 @@ namespace Floor2Plan.Connectors.P6.Actors
                         item.Kind,
                         item.Plan.ProjectObjectId,
                         fetched.Count);
+                    Publish(new P6ProjectCatalogFetched(item.ProjectObjectId, item.Kind, fetched.Count));
                 },
                 OnFailure = (item, message, context) =>
                 {
@@ -153,6 +159,10 @@ namespace Floor2Plan.Connectors.P6.Actors
                     context.Errors.Add(error);
                     _syncErrors.Add(error);
                     _log.Error(failed.Exception, "P6 sync failed while fetching {0}", failed.Kind);
+                    Publish(new P6ProjectCatalogFetchFailed(
+                        item.ProjectObjectId,
+                        item.Kind,
+                        failed.Exception.Message));
                 },
                 BuildReply = _ => new ProjectBatchComplete()
             };
@@ -180,9 +190,19 @@ namespace Floor2Plan.Connectors.P6.Actors
         private void CompleteSync(P6SyncResult result)
         {
             _log.Info("P6 sync completed: {0} records, {1} errors", result.TotalRecordCount, result.Errors.Count);
-            _replyTo.Tell(result);
+            Publish(new P6SyncCompleted(result));
+            if (!_replyTo.IsNobody())
+            {
+                _replyTo.Tell(result);
+            }
+
             Context.Parent.Tell(new SyncFinished());
             Context.Stop(Self);
+        }
+
+        private void Publish(object progressEvent)
+        {
+            Context.System.EventStream.Publish(progressEvent);
         }
     }
 }

@@ -3,9 +3,9 @@ using Floor2Plan.Connectors.P6.Api.Models;
 namespace Floor2Plan.Connectors.P6.Messages
 {
     /// <summary>
-    /// Progress events published by <see cref="Actors.P6Actor"/> on the actor system's EventStream while a
-    /// sync is running. <see cref="Actors.P6SyncProgressActor"/> subscribes to these and writes them to the
-    /// sync log as they happen. P6Actor owns that child actor and coordinates its readiness and completion.
+    /// Progress events published by <see cref="Actors.P6SyncOrchestratorActor"/> on the actor system's EventStream.
+    /// <see cref="Actors.P6SyncProgressActor"/> subscribes and writes each event to <see cref="Infrastructure.Process.Contracts.Scope.IProcessLogger"/>
+    /// via a fresh DI scope per message (safe when the HTTP request scope has already ended).
     /// </summary>
     public sealed record P6SyncStarted(int ProjectCount);
 

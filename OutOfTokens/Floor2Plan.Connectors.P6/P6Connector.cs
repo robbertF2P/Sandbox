@@ -10,6 +10,7 @@ using Floor2Plan.Connectors.P6.Messages;
 using Floor2Plan.Connectors.P6.Sync;
 using Infrastructure.Akka.Contracts;
 using Infrastructure.Process.Contracts.Scope;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using System;
 using System.Collections.Generic;
@@ -30,6 +31,7 @@ namespace Floor2Plan.Connectors.P6
         private readonly P6SyncOptions _syncOptions;
         private readonly IProcessLogger<P6Connector> _processLogger;
         private readonly IP6ProjectSelectionStore _projectSelectionStore;
+        private readonly IServiceScopeFactory _scopeFactory;
         private readonly Lazy<Task<IActorRef>> _actor;
 
         public P6Connector(
@@ -38,6 +40,7 @@ namespace Floor2Plan.Connectors.P6
             IOptions<P6AuthOptions> authOptions,
             IProcessLogger<P6Connector> processLogger,
             IP6ProjectSelectionStore projectSelectionStore,
+            IServiceScopeFactory scopeFactory,
             IOptions<P6SyncOptions> syncOptions = null)
         {
             _actorSystemFacade = actorSystemFacade;
@@ -45,9 +48,12 @@ namespace Floor2Plan.Connectors.P6
             _authOptions = authOptions.Value;
             _processLogger = processLogger;
             _projectSelectionStore = projectSelectionStore;
+            _scopeFactory = scopeFactory;
             _syncOptions = syncOptions?.Value ?? new P6SyncOptions();
             _actor = new Lazy<Task<IActorRef>>(
-                () => _actorSystemFacade.RegisterActor(P6Actor.ActorName, P6Actor.Props(_api, _authOptions, _syncOptions)));
+                () => _actorSystemFacade.RegisterActor(
+                    P6Actor.ActorName,
+                    P6Actor.Props(_api, _authOptions, _syncOptions, _scopeFactory)));
         }
 
         public const string ActiveProjectsGroupKey = "ActiveProjects";
@@ -158,42 +164,20 @@ namespace Floor2Plan.Connectors.P6
             // The selection store persists P6 project ObjectIds (resolved once at config-save time), so no
             // extra lookup call is needed here - these values are passed straight through to the actor.
             var selectedProjectObjectIds = (await _projectSelectionStore.GetSelectedProjectIdsAsync()).ToArray();
+            if (selectedProjectObjectIds.Length == 0)
+            {
+                throw new InvalidOperationException("No projects selected to sync.");
+            }
+
             var syncPlans = P6SyncPlanFactory.FromSyncOptions(selectedProjectObjectIds, _syncOptions);
             var actor = await _actor.Value;
-            var syncResult = await actor.Ask<P6SyncResult>(
-                new StartP6Sync(selectedProjectObjectIds, syncPlans),
-                _syncOptions.RequestTimeout,
-                CancellationToken.None);
-            LogSyncMetrics(syncResult);
-            if (!syncResult.Succeeded)
-            {
-                throw new InvalidOperationException($"P6 synchronization failed: {string.Join("; ", syncResult.Errors)}");
-            }
-
-            return new SyncResult();
-        }
-
-        private void LogSyncMetrics(P6SyncResult syncResult)
-        {
-            _processLogger.LogRange(new[]
-            {
-                new SyncLogMessageDto("Projects retrieved from P6", SyncInformation.Total, SyncType.Project, syncResult.ProjectCount),
-                new SyncLogMessageDto("WBS elements retrieved from P6", SyncInformation.Total, SyncType.Component, syncResult.WbsCount),
-                new SyncLogMessageDto("Activities retrieved from P6", SyncInformation.Total, SyncType.Activity, syncResult.ActivityCount),
-                new SyncLogMessageDto("Resources retrieved from P6", SyncInformation.Total, SyncType.Discipline, syncResult.ResourceCount),
-                new SyncLogMessageDto("Resource assignments retrieved from P6", SyncInformation.Total, SyncType.Assignment, syncResult.ResourceAssignmentCount),
-                new SyncLogMessageDto("Relationships retrieved from P6", SyncInformation.Total, SyncType.ActivityRelation, syncResult.RelationshipCount)
-            });
-
+            actor.Tell(new StartP6Sync(selectedProjectObjectIds, syncPlans));
             _processLogger.Log(new SyncLogMessageDto(
-                $"P6 sync retrieved {syncResult.TotalRecordCount} records in total.",
-                syncResult.Succeeded ? SyncInformation.Success : SyncInformation.Fail,
+                $"P6 sync queued for {selectedProjectObjectIds.Length} project(s). Progress is written to the sync log as catalogs are fetched.",
+                SyncInformation.Information,
                 SyncType.Unknown));
 
-            foreach (var error in syncResult.Errors)
-            {
-                _processLogger.Log(new SyncLogMessageDto(error, SyncInformation.Fail, SyncType.Unknown));
-            }
+            return new SyncResult();
         }
     }
 }

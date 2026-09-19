@@ -4,6 +4,7 @@ using Floor2Plan.Connectors.P6.Api;
 using Floor2Plan.Connectors.P6.Messages;
 using Floor2Plan.Connectors.P6.Sync;
 using Infrastructure.Akka.Actors.Guards;
+using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -21,16 +22,22 @@ namespace Floor2Plan.Connectors.P6.Actors
         private readonly IP6RestApi _api;
         private readonly P6AuthOptions _authOptions;
         private readonly P6SyncOptions _syncOptions;
+        private readonly IServiceScopeFactory _scopeFactory;
 
         private IActorRef _session = ActorRefs.Nobody;
         private IActorRef _store = ActorRefs.Nobody;
         private IActorRef _syncGate = ActorRefs.Nobody;
 
-        public P6Actor(IP6RestApi api, P6AuthOptions authOptions, P6SyncOptions syncOptions = null)
+        public P6Actor(
+            IP6RestApi api,
+            P6AuthOptions authOptions,
+            P6SyncOptions syncOptions = null,
+            IServiceScopeFactory scopeFactory = null)
         {
             _api = api;
             _authOptions = authOptions;
             _syncOptions = syncOptions ?? new P6SyncOptions();
+            _scopeFactory = scopeFactory;
 
             Receive<GetP6RawData>(message =>
             {
@@ -64,14 +71,23 @@ namespace Floor2Plan.Connectors.P6.Actors
             });
         }
 
-        public static Props Props(IP6RestApi api, P6AuthOptions authOptions, P6SyncOptions syncOptions = null)
+        public static Props Props(
+            IP6RestApi api,
+            P6AuthOptions authOptions,
+            P6SyncOptions syncOptions = null,
+            IServiceScopeFactory scopeFactory = null)
         {
-            return Akka.Actor.Props.Create(() => new P6Actor(api, authOptions, syncOptions));
+            return Akka.Actor.Props.Create(() => new P6Actor(api, authOptions, syncOptions, scopeFactory));
         }
 
         protected override void PreStart()
         {
             _store = Context.ActorOf(P6RawDataStoreActor.Props(), P6RawDataStoreActor.ActorName);
+            if (_scopeFactory != null)
+            {
+                Context.ActorOf(P6SyncProgressActor.Props(_scopeFactory), "p6-sync-progress");
+            }
+
             _session = Context.ActorOf(P6SessionActor.Props(_api, _authOptions), P6SessionActor.ActorName);
             _syncGate = Context.ActorOf(
                 ExclusiveGateActor.Props(new ExclusiveGateOptions

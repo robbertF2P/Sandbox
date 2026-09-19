@@ -17,6 +17,8 @@ Project B → [ … same six catalogs … ]
 
 Projects run **one after another**; catalogs within a project run **in parallel** via `BatchOrchestratorActor`.
 
+Omit `EntityKinds` and `AdditionalFilter` to keep this default.
+
 ---
 
 ## Extension point: `P6ProjectSyncPlan`
@@ -25,56 +27,72 @@ Projects run **one after another**; catalogs within a project run **in parallel*
 // Floor2Plan.Connectors.P6/Sync/P6ProjectSyncPlan.cs
 public sealed record P6ProjectSyncPlan(
     string ProjectObjectId,
-    IReadOnlySet<P6EntityKind> EntityKinds = null,   // null = all kinds (today)
+    IReadOnlySet<P6EntityKind> EntityKinds = null,   // null = all kinds
     string AdditionalFilter = null);                  // optional P6 REST filter fragment
 ```
 
-`P6SyncOrchestratorActor.Start` accepts optional `SyncPlans`. When omitted, plans are built from project ids with `P6ProjectSyncPlan.Full(id)` (current behaviour).
+`P6SyncOrchestratorActor.Start` accepts optional `SyncPlans`. When omitted, plans are built from project ids with `P6ProjectSyncPlan.Full(id)`.
 
 ---
 
 ## Partial update scenarios
 
-### 1. Entity-kind subset (e.g. activities only)
+### 1. Delta sync (typical) — changed rows since last run
 
-Refresh scheduling data without re-pulling WBS or resources:
-
-```csharp
-new P6ProjectSyncPlan(
-    ProjectObjectId: "10452",
-    EntityKinds: new HashSet<P6EntityKind> { P6EntityKind.Activities, P6EntityKind.Relationships })
-```
-
-Each plan becomes a **batch work list** for `BatchOrchestratorActor` — only the listed kinds spawn `P6CatalogWorkerActor` workers.
-
-### 2. Delta filter (e.g. changed since last sync)
-
-Append a P6 filter clause per catalog fetch:
+The usual reason to avoid a full sync: only rows P6 updated since the previous import.
 
 ```csharp
 new P6ProjectSyncPlan(
     ProjectObjectId: "10452",
+    EntityKinds: new HashSet<P6EntityKind> { P6EntityKind.Activities, P6EntityKind.Relationships },
     AdditionalFilter: "LastUpdateDate>2026-03-01T00:00:00")
 ```
 
-`BuildFilter` composes the project scope with your clause:
+`BuildFilter` composes project scope with your clause:
 
 ```text
 ProjectObjectId=10452;LastUpdateDate>2026-03-01T00:00:00
 ```
 
-Combine with `EntityKinds` for “activities changed since X for project Y”.
+**Appsettings (same slice for every selected project):**
 
-### 3. Mixed plans in one run
+```json
+"P6Sync": {
+  "EntityKinds": [ "Activities", "Relationships" ],
+  "AdditionalFilter": "LastUpdateDate>2026-03-01T00:00:00"
+}
+```
+
+### 2. Delta on all catalogs (no entity-kind filter)
+
+Refresh every catalog type, but only changed rows:
+
+```csharp
+new P6ProjectSyncPlan(
+    ProjectObjectId: "10452",
+    AdditionalFilter: "LastUpdateDate>2026-03-15T00:00:00")
+```
+
+### 3. Entity-kind subset without a date filter
+
+Useful for targeted refresh or connector tests — not the main production pattern:
+
+```csharp
+new P6ProjectSyncPlan(
+    ProjectObjectId: "10452",
+    EntityKinds: new HashSet<P6EntityKind> { P6EntityKind.Wbs })
+```
+
+### 4. Mixed plans in one run
 
 Different projects, different slices — one sync invocation:
 
 ```csharp
 var plans = new[]
 {
-    P6ProjectSyncPlan.Full("10452"),                                    // full
-    new P6ProjectSyncPlan("10453", new[] { P6EntityKind.Wbs }),        // WBS only
-    new P6ProjectSyncPlan("10454", null, "LastUpdateDate>2026-03-15") // delta, all kinds
+    P6ProjectSyncPlan.Full("10452"),
+    new P6ProjectSyncPlan("10453", new[] { P6EntityKind.Wbs }),
+    new P6ProjectSyncPlan("10454", null, "LastUpdateDate>2026-03-15T00:00:00")
 };
 
 new StartP6Sync(projectIds, syncPlans: plans)
@@ -82,7 +100,7 @@ new StartP6Sync(projectIds, syncPlans: plans)
 
 The outer orchestrator still processes plans **sequentially**; each plan’s batch is independent.
 
-### 4. Persist-layer partial apply (future)
+### 5. Persist-layer partial apply (future)
 
 Actor fetch is only half the story. To **apply** partial updates safely:
 
@@ -96,15 +114,26 @@ That persist/import behaviour lives outside `BatchOrchestratorActor` — the pla
 
 ---
 
-## Wiring (enabled)
+## Wiring
 
 | Entry point | How |
 |-------------|-----|
-| **Actor** | `new StartP6Sync(projectIds, syncPlans: plans)` |
-| **Connector config** | `P6Sync:EntityKinds` / `P6Sync:AdditionalFilter` in appsettings → `P6SyncPlanFactory.FromSyncOptions` |
+| **Actor** | `new StartP6Sync(projectIds, syncPlans: plans)` — use `Ask` when the caller must wait for `P6SyncResult` |
+| **Connector** | `SyncAllAsync` **Tell**s `StartP6Sync` and returns immediately; live progress via EventStream → `P6SyncProgressActor` |
+| **Connector config** | `P6Sync:EntityKinds` / `P6Sync:AdditionalFilter` → `P6SyncPlanFactory.FromSyncOptions` |
 | **Session → orchestrator** | `RunSync` → `P6SyncOrchestratorActor.Start(..., syncPlans: sync.SyncPlans)` |
 
-Per-project mixed plans (full sync for project A, WBS-only for project B) pass explicit `SyncPlans` on `StartP6Sync`. UI checkboxes per entity kind can build that list later.
+---
+
+## Live sync log (async runs)
+
+```mermaid
+flowchart LR
+    Orch["P6SyncOrchestratorActor"] -->|EventStream| Progress["P6SyncProgressActor"]
+    Progress -->|scope per event| Logger["IProcessLogger"]
+```
+
+`P6SyncProgressActor` resolves `IProcessLogger<P6Connector>` inside `IServiceScopeFactory.CreateScope()` for **each** progress event, so background sync keeps writing to the sync log after the HTTP request scope ends.
 
 ---
 

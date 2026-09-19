@@ -13,6 +13,7 @@ using Floor2Plan.TestUtility.Common.Akka;
 using Floor2Plan.TestUtility.Common.Framework;
 using Infrastructure.Akka.Contracts;
 using Infrastructure.Process.Contracts.Scope;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using Contracts.Model.Enums;
 using Moq;
@@ -28,6 +29,7 @@ using Xunit;
 
 namespace Floor2Plan.UnitTest.Connectors.P6
 {
+    [Collection("OutOfTokens.P6")]
     public class P6ConnectorTest : AkkaSerilogTestKit
     {
         public P6ConnectorTest(ITestOutputHelper output)
@@ -152,9 +154,11 @@ namespace Floor2Plan.UnitTest.Connectors.P6
         public async Task SyncAllAsync_WithConfiguredEntityKinds_OnlyFetchesSelectedCatalogs()
         {
             var api = CreateApi();
+            var (scopeFactory, _) = CreateScopeFactory();
             var target = CreateTarget(
                 api,
                 CreateSelectionStore("1").Object,
+                scopeFactory: scopeFactory,
                 syncOptions: new P6SyncOptions
                 {
                     MaxConcurrency = 2,
@@ -163,36 +167,57 @@ namespace Floor2Plan.UnitTest.Connectors.P6
 
             await target.SyncAllAsync([]);
 
-            api.Verify(x => x.GetActivitiesAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<int>(), It.IsAny<int>(), It.IsAny<CancellationToken>()), Times.Once);
+            await AwaitAssertAsync(
+                () => api.Verify(
+                    x => x.GetActivitiesAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<int>(), It.IsAny<int>(), It.IsAny<CancellationToken>()),
+                    Times.Once),
+                TimeSpan.FromSeconds(5),
+                cancellationToken: TestContext.Current.CancellationToken);
             api.Verify(x => x.GetWbsAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<int>(), It.IsAny<int>(), It.IsAny<CancellationToken>()), Times.Never);
             api.Verify(x => x.GetRelationshipsAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<int>(), It.IsAny<int>(), It.IsAny<CancellationToken>()), Times.Never);
         }
 
         [F2PFact]
-        public async Task SyncAllAsync_LogsSyncMetrics()
+        public async Task SyncAllAsync_ReturnsImmediatelyAndLogsProgressViaScopedLogger()
         {
             var api = CreateApi();
-            var processLogger = new Mock<IProcessLogger<P6Connector>>();
-            var target = CreateTarget(api, CreateSelectionStore("1").Object, processLogger.Object);
+            var (scopeFactory, processLogger) = CreateScopeFactory();
+            var target = CreateTarget(api, CreateSelectionStore("1").Object, processLogger.Object, scopeFactory);
 
             await target.SyncAllAsync([]);
 
             processLogger.Verify(
-                x => x.LogRange(It.Is<IEnumerable<SyncLogMessageDto>>(
-                    messages => messages.Any(m => m.SyncType == SyncType.Project && m.Quantity == 1))),
+                x => x.Log(It.Is<SyncLogMessageDto>(m => m.Message.Contains("queued"))),
                 Times.Once);
-            processLogger.Verify(
-                x => x.Log(It.Is<SyncLogMessageDto>(m => m.SyncInformation == SyncInformation.Success)),
-                Times.Once);
+
+            await AwaitAssertAsync(
+                () => processLogger.Verify(
+                    x => x.Log(It.Is<SyncLogMessageDto>(m => m.SyncInformation == SyncInformation.Success)),
+                    Times.Once),
+                TimeSpan.FromSeconds(5),
+                cancellationToken: TestContext.Current.CancellationToken);
         }
 
         private P6Connector CreateTarget(
             Mock<IP6RestApi> api,
             IP6ProjectSelectionStore projectSelectionStore,
             IProcessLogger<P6Connector> processLogger = null,
+            IServiceScopeFactory scopeFactory = null,
             P6SyncOptions syncOptions = null)
         {
-            var p6Actor = Sys.ActorOf(P6Actor.Props(api.Object, CreateAuthOptions(), syncOptions));
+            IServiceScopeFactory factory;
+            if (scopeFactory != null)
+            {
+                factory = scopeFactory;
+            }
+            else
+            {
+                var mock = processLogger as Mock<IProcessLogger<P6Connector>>
+                    ?? (processLogger != null ? Mock.Get(processLogger) : null);
+                factory = CreateScopeFactory(mock).ScopeFactory;
+            }
+
+            var p6Actor = Sys.ActorOf(P6Actor.Props(api.Object, CreateAuthOptions(), syncOptions, factory));
             var facade = new Mock<IActorSystemFacade>();
             facade
                 .Setup(x => x.RegisterActor(P6Actor.ActorName, It.IsAny<Props>()))
@@ -204,7 +229,18 @@ namespace Floor2Plan.UnitTest.Connectors.P6
                 Options.Create(CreateAuthOptions()),
                 processLogger ?? Mock.Of<IProcessLogger<P6Connector>>(),
                 projectSelectionStore,
+                factory,
                 Options.Create(syncOptions ?? new P6SyncOptions()));
+        }
+
+        private static (IServiceScopeFactory ScopeFactory, Mock<IProcessLogger<P6Connector>> ProcessLogger) CreateScopeFactory(
+            Mock<IProcessLogger<P6Connector>> processLogger = null)
+        {
+            var logger = processLogger ?? new Mock<IProcessLogger<P6Connector>>();
+            var services = new ServiceCollection();
+            services.AddSingleton<IProcessLogger<P6Connector>>(logger.Object);
+            var provider = services.BuildServiceProvider();
+            return (provider.GetRequiredService<IServiceScopeFactory>(), logger);
         }
 
         private static Mock<IP6ProjectSelectionStore> CreateSelectionStore(params string[] selectedProjectIds)

@@ -3,10 +3,15 @@ using AwesomeAssertions;
 using Floor2Plan.TestUtility.Common.Akka;
 using Floor2Plan.TestUtility.Common.Framework;
 using Floor2Plan.Connectors.P6.Actors;
+using Floor2Plan.Connectors.P6;
 using Floor2Plan.Connectors.P6.Api;
+using Contracts.Model.Enums;
+using Domain.Model.Sync;
 using Floor2Plan.Connectors.P6.Api.Models;
 using Floor2Plan.Connectors.P6.Messages;
 using Floor2Plan.Connectors.P6.Sync;
+using Infrastructure.Process.Contracts.Scope;
+using Microsoft.Extensions.DependencyInjection;
 using Moq;
 using System;
 using System.Collections.Generic;
@@ -19,6 +24,7 @@ using Xunit;
 
 namespace Floor2Plan.UnitTest.Connectors.P6
 {
+    [Collection("OutOfTokens.P6")]
     public class P6ActorTest : AkkaSerilogTestKit
     {
         public P6ActorTest(ITestOutputHelper output)
@@ -216,6 +222,35 @@ namespace Floor2Plan.UnitTest.Connectors.P6
             projects.Records.Should().ContainSingle()
                 .Which.Should().BeOfType<P6ProjectRecord>()
                 .Which.Name.Should().Be("Demo Construction Project");
+        }
+
+        [F2PFact]
+        public async Task StartP6Sync_PublishesProgressToScopedProcessLogger()
+        {
+            var api = CreateApi();
+            var processLogger = new Mock<IProcessLogger<P6Connector>>();
+            var services = new ServiceCollection();
+            services.AddSingleton<IProcessLogger<P6Connector>>(processLogger.Object);
+            var provider = services.BuildServiceProvider();
+            var scopeFactory = provider.GetRequiredService<IServiceScopeFactory>();
+
+            var actor = Sys.ActorOf(P6Actor.Props(
+                api.Object,
+                CreateAuthOptions(),
+                new P6SyncOptions { MaxConcurrency = 2 },
+                scopeFactory));
+
+            await actor.Ask<P6SyncResult>(
+                new StartP6Sync(["1"]),
+                TimeSpan.FromSeconds(5),
+                TestContext.Current.CancellationToken);
+
+            processLogger.Verify(
+                x => x.Log(It.Is<SyncLogMessageDto>(m => m.Message.Contains("P6 sync started"))),
+                Times.AtLeastOnce);
+            processLogger.Verify(
+                x => x.Log(It.Is<SyncLogMessageDto>(m => m.SyncInformation == SyncInformation.Success)),
+                Times.Once);
         }
 
         [F2PFact]
