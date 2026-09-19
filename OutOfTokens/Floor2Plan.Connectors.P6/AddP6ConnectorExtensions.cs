@@ -1,5 +1,6 @@
 using Contracts.Infrastructure.Connectors;
 using Floor2Plan.Connectors.P6.Api;
+using Floor2Plan.Connectors.P6.Api.Models;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
@@ -49,6 +50,15 @@ namespace Floor2Plan.Connectors.P6
                 if (TimeSpan.TryParse(requestTimeoutValue, out var requestTimeout) && requestTimeout > TimeSpan.Zero)
                 {
                     options.RequestTimeout = requestTimeout;
+                }
+
+                options.AdditionalFilter = syncConfigurationSection[nameof(P6SyncOptions.AdditionalFilter)];
+                var entityKinds = syncConfigurationSection
+                    .GetSection(nameof(P6SyncOptions.EntityKinds))
+                    .Get<P6EntityKind[]>();
+                if (entityKinds is { Length: > 0 })
+                {
+                    options.EntityKinds = entityKinds;
                 }
             });
             services.AddTransient<P6HttpLoggingHandler>();

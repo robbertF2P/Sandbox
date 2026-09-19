@@ -7,6 +7,7 @@ using Floor2Plan.Connectors.P6.Actors;
 using Floor2Plan.Connectors.P6.Api;
 using Floor2Plan.Connectors.P6.Configuration;
 using Floor2Plan.Connectors.P6.Messages;
+using Floor2Plan.Connectors.P6.Sync;
 using Infrastructure.Akka.Contracts;
 using Infrastructure.Process.Contracts.Scope;
 using Microsoft.Extensions.Options;
@@ -157,9 +158,10 @@ namespace Floor2Plan.Connectors.P6
             // The selection store persists P6 project ObjectIds (resolved once at config-save time), so no
             // extra lookup call is needed here - these values are passed straight through to the actor.
             var selectedProjectObjectIds = (await _projectSelectionStore.GetSelectedProjectIdsAsync()).ToArray();
+            var syncPlans = P6SyncPlanFactory.FromSyncOptions(selectedProjectObjectIds, _syncOptions);
             var actor = await _actor.Value;
             var syncResult = await actor.Ask<P6SyncResult>(
-                new StartP6Sync(selectedProjectObjectIds),
+                new StartP6Sync(selectedProjectObjectIds, syncPlans),
                 _syncOptions.RequestTimeout,
                 CancellationToken.None);
             LogSyncMetrics(syncResult);

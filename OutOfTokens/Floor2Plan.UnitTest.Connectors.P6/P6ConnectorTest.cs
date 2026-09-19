@@ -8,6 +8,7 @@ using Floor2Plan.Connectors.P6.Actors;
 using Floor2Plan.Connectors.P6.Api;
 using Floor2Plan.Connectors.P6.Api.Models;
 using Floor2Plan.Connectors.P6.Configuration;
+using Floor2Plan.Connectors.P6.Sync;
 using Floor2Plan.TestUtility.Common.Akka;
 using Floor2Plan.TestUtility.Common.Framework;
 using Infrastructure.Akka.Contracts;
@@ -148,6 +149,26 @@ namespace Floor2Plan.UnitTest.Connectors.P6
         }
 
         [F2PFact]
+        public async Task SyncAllAsync_WithConfiguredEntityKinds_OnlyFetchesSelectedCatalogs()
+        {
+            var api = CreateApi();
+            var target = CreateTarget(
+                api,
+                CreateSelectionStore("1").Object,
+                syncOptions: new P6SyncOptions
+                {
+                    MaxConcurrency = 2,
+                    EntityKinds = [P6EntityKind.Activities]
+                });
+
+            await target.SyncAllAsync([]);
+
+            api.Verify(x => x.GetActivitiesAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<int>(), It.IsAny<int>(), It.IsAny<CancellationToken>()), Times.Once);
+            api.Verify(x => x.GetWbsAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<int>(), It.IsAny<int>(), It.IsAny<CancellationToken>()), Times.Never);
+            api.Verify(x => x.GetRelationshipsAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<int>(), It.IsAny<int>(), It.IsAny<CancellationToken>()), Times.Never);
+        }
+
+        [F2PFact]
         public async Task SyncAllAsync_LogsSyncMetrics()
         {
             var api = CreateApi();
@@ -168,9 +189,10 @@ namespace Floor2Plan.UnitTest.Connectors.P6
         private P6Connector CreateTarget(
             Mock<IP6RestApi> api,
             IP6ProjectSelectionStore projectSelectionStore,
-            IProcessLogger<P6Connector> processLogger = null)
+            IProcessLogger<P6Connector> processLogger = null,
+            P6SyncOptions syncOptions = null)
         {
-            var p6Actor = Sys.ActorOf(P6Actor.Props(api.Object, CreateAuthOptions()));
+            var p6Actor = Sys.ActorOf(P6Actor.Props(api.Object, CreateAuthOptions(), syncOptions));
             var facade = new Mock<IActorSystemFacade>();
             facade
                 .Setup(x => x.RegisterActor(P6Actor.ActorName, It.IsAny<Props>()))
@@ -181,7 +203,8 @@ namespace Floor2Plan.UnitTest.Connectors.P6
                 api.Object,
                 Options.Create(CreateAuthOptions()),
                 processLogger ?? Mock.Of<IProcessLogger<P6Connector>>(),
-                projectSelectionStore);
+                projectSelectionStore,
+                Options.Create(syncOptions ?? new P6SyncOptions()));
         }
 
         private static Mock<IP6ProjectSelectionStore> CreateSelectionStore(params string[] selectedProjectIds)

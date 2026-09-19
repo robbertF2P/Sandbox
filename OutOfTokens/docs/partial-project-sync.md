@@ -77,7 +77,7 @@ var plans = new[]
     new P6ProjectSyncPlan("10454", null, "LastUpdateDate>2026-03-15") // delta, all kinds
 };
 
-// P6SyncOrchestratorActor.Start(projectIds, cookie, replyTo, syncPlans: plans)
+new StartP6Sync(projectIds, syncPlans: plans)
 ```
 
 The outer orchestrator still processes plans **sequentially**; each plan’s batch is independent.
@@ -96,23 +96,15 @@ That persist/import behaviour lives outside `BatchOrchestratorActor` — the pla
 
 ---
 
-## Wiring (when you enable it)
+## Wiring (enabled)
 
-Today `RunSync` passes project ids only. To use plans from connector config or API:
+| Entry point | How |
+|-------------|-----|
+| **Actor** | `new StartP6Sync(projectIds, syncPlans: plans)` |
+| **Connector config** | `P6Sync:EntityKinds` / `P6Sync:AdditionalFilter` in appsettings → `P6SyncPlanFactory.FromSyncOptions` |
+| **Session → orchestrator** | `RunSync` → `P6SyncOrchestratorActor.Start(..., syncPlans: sync.SyncPlans)` |
 
-```csharp
-// P6SessionCommands.cs — extend when ready
-internal sealed record RunSync(
-    IActorRef ReplyTo,
-    IReadOnlyList<string> ProjectIds,
-    IActorRef Store,
-    P6SyncOptions SyncOptions,
-    IReadOnlyList<P6ProjectSyncPlan> SyncPlans = null);
-
-// P6SessionGateBehavior → P6SyncOrchestratorActor.Start(..., syncPlans: sync.SyncPlans)
-```
-
-UI/config can later expose checkboxes per entity kind or “delta since” per project; the actor pipeline already accepts the shape.
+Per-project mixed plans (full sync for project A, WBS-only for project B) pass explicit `SyncPlans` on `StartP6Sync`. UI checkboxes per entity kind can build that list later.
 
 ---
 

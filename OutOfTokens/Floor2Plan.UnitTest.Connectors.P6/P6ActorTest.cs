@@ -6,6 +6,7 @@ using Floor2Plan.Connectors.P6.Actors;
 using Floor2Plan.Connectors.P6.Api;
 using Floor2Plan.Connectors.P6.Api.Models;
 using Floor2Plan.Connectors.P6.Messages;
+using Floor2Plan.Connectors.P6.Sync;
 using Moq;
 using System;
 using System.Collections.Generic;
@@ -215,6 +216,117 @@ namespace Floor2Plan.UnitTest.Connectors.P6
             projects.Records.Should().ContainSingle()
                 .Which.Should().BeOfType<P6ProjectRecord>()
                 .Which.Name.Should().Be("Demo Construction Project");
+        }
+
+        [F2PFact]
+        public async Task StartP6Sync_WithEntityKindSubset_OnlyFetchesSelectedCatalogs()
+        {
+            var api = CreateApi();
+            var actor = Sys.ActorOf(P6Actor.Props(api.Object, CreateAuthOptions(), new P6SyncOptions { MaxConcurrency = 2 }));
+            var plans = new[]
+            {
+                new P6ProjectSyncPlan(
+                    "1",
+                    new HashSet<P6EntityKind> { P6EntityKind.Activities, P6EntityKind.Relationships })
+            };
+
+            var result = await actor.Ask<P6SyncResult>(
+                new StartP6Sync(["1"], plans),
+                TimeSpan.FromSeconds(5),
+                TestContext.Current.CancellationToken);
+
+            result.Succeeded.Should().BeTrue();
+            result.ActivityCount.Should().Be(0);
+            result.RelationshipCount.Should().Be(0);
+            api.Verify(x => x.GetActivitiesAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<int>(), It.IsAny<int>(), It.IsAny<CancellationToken>()), Times.Once);
+            api.Verify(x => x.GetRelationshipsAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<int>(), It.IsAny<int>(), It.IsAny<CancellationToken>()), Times.Once);
+            api.Verify(x => x.GetWbsAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<int>(), It.IsAny<int>(), It.IsAny<CancellationToken>()), Times.Never);
+            api.Verify(x => x.GetResourcesAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<int>(), It.IsAny<int>(), It.IsAny<CancellationToken>()), Times.Never);
+            api.Verify(x => x.GetResourceAssignmentsAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<int>(), It.IsAny<int>(), It.IsAny<CancellationToken>()), Times.Never);
+            api.Verify(x => x.GetProjectsAsync(
+                    It.IsAny<string>(),
+                    It.IsAny<string>(),
+                    It.IsAny<string>(),
+                    It.IsAny<string>(),
+                    It.IsAny<int>(),
+                    It.IsAny<int>(),
+                    It.IsAny<CancellationToken>()),
+                Times.Never);
+        }
+
+        [F2PFact]
+        public async Task StartP6Sync_WithAdditionalFilter_PassesFilterToApi()
+        {
+            var api = CreateApi();
+            var actor = Sys.ActorOf(P6Actor.Props(api.Object, CreateAuthOptions(), new P6SyncOptions { MaxConcurrency = 2 }));
+            var plans = new[]
+            {
+                new P6ProjectSyncPlan(
+                    "1",
+                    new HashSet<P6EntityKind> { P6EntityKind.Activities },
+                    "LastUpdateDate>2026-03-01T00:00:00")
+            };
+
+            await actor.Ask<P6SyncResult>(
+                new StartP6Sync(["1"], plans),
+                TimeSpan.FromSeconds(5),
+                TestContext.Current.CancellationToken);
+
+            api.Verify(x => x.GetActivitiesAsync(
+                    It.IsAny<string>(),
+                    It.IsAny<string>(),
+                    "ProjectObjectId=1;LastUpdateDate>2026-03-01T00:00:00",
+                    It.IsAny<int>(),
+                    It.IsAny<int>(),
+                    It.IsAny<CancellationToken>()),
+                Times.Once);
+        }
+
+        [F2PFact]
+        public async Task StartP6Sync_WithMixedSyncPlans_AppliesPerProjectScopes()
+        {
+            var api = CreateApi();
+            api.Setup(x => x.GetWbsAsync(
+                    It.IsAny<string>(),
+                    It.IsAny<string>(),
+                    "ProjectObjectId=2",
+                    It.IsAny<int>(),
+                    It.IsAny<int>(),
+                    It.IsAny<CancellationToken>()))
+                .ReturnsAsync(new List<P6WbsRecord> { new() });
+
+            var actor = Sys.ActorOf(P6Actor.Props(api.Object, CreateAuthOptions(), new P6SyncOptions { MaxConcurrency = 2 }));
+            var plans = new[]
+            {
+                P6ProjectSyncPlan.Full("1"),
+                new P6ProjectSyncPlan("2", new HashSet<P6EntityKind> { P6EntityKind.Wbs })
+            };
+
+            var result = await actor.Ask<P6SyncResult>(
+                new StartP6Sync(["1", "2"], plans),
+                TimeSpan.FromSeconds(5),
+                TestContext.Current.CancellationToken);
+
+            result.Succeeded.Should().BeTrue();
+            result.WbsCount.Should().Be(1);
+            api.Verify(x => x.GetWbsAsync(
+                    It.IsAny<string>(),
+                    It.IsAny<string>(),
+                    "ProjectObjectId=2",
+                    It.IsAny<int>(),
+                    It.IsAny<int>(),
+                    It.IsAny<CancellationToken>()),
+                Times.Once);
+            api.Verify(x => x.GetProjectsAsync(
+                    It.IsAny<string>(),
+                    It.IsAny<string>(),
+                    It.IsAny<string>(),
+                    It.IsAny<string>(),
+                    It.IsAny<int>(),
+                    It.IsAny<int>(),
+                    It.IsAny<CancellationToken>()),
+                Times.Once,
+                "full plan for project 1 fetches Projects; WBS-only plan for project 2 does not");
         }
 
         [F2PFact]
