@@ -27,6 +27,7 @@
     <ProjectReference Include="..\Infrastructure.Akka.Contracts\Infrastructure.Akka.Contracts.csproj" />
     <ProjectReference Include="..\Stubs\Floor2Plan.TestUtility.Common\Floor2Plan.TestUtility.Common.csproj" />
     <ProjectReference Include="..\Floor2Plan.Connectors.P6\Floor2Plan.Connectors.P6.csproj" />
+    <ProjectReference Include="..\Floor2Plan.Connectors.P6.Traditional\Floor2Plan.Connectors.P6.Traditional.csproj" />
     <ProjectReference Include="..\Stubs\Infrastructure.Process.Contracts\Infrastructure.Process.Contracts.csproj" />
   </ItemGroup>
   <Import Project="..\..\build\Platform.Logging.Tests.props" />
