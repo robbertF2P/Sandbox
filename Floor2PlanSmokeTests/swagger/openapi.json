@@ -1,0 +1,1632 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Floor2Plan API",
+    "description": "OpenAPI document generated from Floor2Plan smoke-test API capture. HTML template routes and static assets are excluded.",
+    "version": "2025.14"
+  },
+  "servers": [
+    {
+      "url": "https://2025-14-patch.floor2plan.com"
+    }
+  ],
+  "tags": [
+    {
+      "name": "Event"
+    },
+    {
+      "name": "OptionList"
+    },
+    {
+      "name": "Pbs"
+    },
+    {
+      "name": "do"
+    },
+    {
+      "name": "Do"
+    },
+    {
+      "name": "NewsFeed"
+    },
+    {
+      "name": "Structure"
+    },
+    {
+      "name": "PersonManagement"
+    },
+    {
+      "name": "Allocation"
+    },
+    {
+      "name": "Hr"
+    },
+    {
+      "name": "Check"
+    },
+    {
+      "name": "Ticket"
+    }
+  ],
+  "paths": {
+    "/Event/GetMessageCountForPerson": {
+      "get": {
+        "summary": "GET /Event/GetMessageCountForPerson",
+        "tags": [
+          "Event"
+        ],
+        "responses": {
+          "200": {
+            "description": "application/json; charset=utf-8",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                },
+                "example": "0"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/OptionList/OrganisationHierarchicalOptionsAll": {
+      "get": {
+        "summary": "GET /OptionList/OrganisationHierarchicalOptionsAll",
+        "tags": [
+          "OptionList"
+        ],
+        "responses": {
+          "200": {
+            "description": "application/json; charset=utf-8",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                },
+                "example": "[{\"path\":\";1;\",\"children\":[{\"path\":\";1;3;\",\"children\":[{\"path\":\";1;3;8;\",\"children\":[],\"hasChildren\":false,\"lazyLoadingHasChildren\":null,\"expanded\":false,\"id\":8,\"description\":\"11: Functional Engineering\",\"sequence\":0,\"enabled\":true,\"displayName\":\"11: Functional Engineering\",\"color\":null},{\"path\":\";1;3;9;\",\"children\":[],\"hasChildren\":false,\"lazyLoadingHasChildren\":null,\"expanded\":false,\"id\":9,\"description\":\"12: Detail Design\",\"sequence\":0,\"enabled\":true,\"displayName\":\"12: Detail Design\",\"color\":null},{\"path\":\";1;3;79;\",\"children\":[],\"hasChildren\":false,\"lazyLoadingHasChildren\":null,\"expanded\":false,\"id\":79,\"description\":\"13: Production Engineer\",\"sequence\":0,\"enabled\":true,\"displayName\":\"13: Production Engineer\",\"color\":null}],\"hasChildren\":true,\"lazyLoadingHasChildren\":null,\"expanded\":false,\"id\":3,\"description\":\"10: Engineering\",\"sequence\":0,\"enabled\":true,\"displayName\":\"10: Engineering\",\"color\":null},{\"path\":\";1;4;\",\"children\":[{\"path\":\";1;4;5;\",\"children\":[],\"hasChildren\":false,\"lazyLoadingHasChildren\":null,\"expanded\":false,\"id\":5,\"description\":\"21: Metal Shop\",\"sequence\":0,\"enabled\":true,\"displayName\":\"21: Metal Shop\",\"color\":null},{\"path\":\";1;4;6;\",\"children\":[],\"hasChildren\":false,\"lazyLoadingHasChildren\":null,\"expanded\":false,\"id\":6,\"description\":\"22: Assembly hall\",\"sequence\":0,\"enabled\":true,\"displayName\":\"22: Assembly hall\",\"color\":null},{\"path\":\";1;4;7;\",\"children\":[],\"hasChildren\":false,\"lazyLoadingHasChildren\":null,\"expanded\":false,\"id\":7,\"description\":\"23: Slipway\",\"sequence\":0,\"enabled\":true,\"displayName\":\"23: Slipway\",\"color\":null},{\"path\":\";1;4;11;\",\"children\":[],\"hasChildren\":false,\"lazyLoadingHasChildren\":null,\"expanded\":false,\"id\":11,\"description\":\"24: Carpentry\",\"sequence\":0,\"enabled\":true,\"displayName\":\"24: Carpentry\",\"color\":null},{\"path\":\";1;4;40;\",\"children\":[],\"hasChildren\":false,\"lazyLoadingHasChildren\":null,\"expanded\":false,\"id\":40,\"description\":\"25: Outfitting\",\"sequence\":0,\"enabled\":true,\"displayName\":\"25: Outfitting\",\"color\":null},{\"path\":\";1;4;41;\",\"children\":[],\"hasChildren\":false,\"lazyLoadingHasChildren\":null,\"expanded\":false,\"id\":41,\"description\":\"26: Painting/Surface\",\"sequence\":0,\"enabled\":true,\"displayName\":\"26: Painting/Surface\",\"color\":null},{\"path\":\";1;4;42;\",\"children\":[],\"hasChildren\":false,\"lazyLoadingHasChildren\":null,\"expanded\":false,\"id\":42,\"description\":\"27: Pipe shop\",\"sequence\":0,\"enabled\":true,\"displayName\":\"27: Pipe shop\",\"color\":null},{\"path\":\";1;4;43;\",\"children\":[],\"hasChildren\":false,\"lazyLoadingHasChildren\":null,\"expanded\":false,\"id\":43,\"description\":\"28: Pipe Fitting\",\"sequence\":0,\"enabled\":true,\"displayName\":\"28: Pipe Fitting\",\"color\":null},{\"path\":\";1;4;46;\",\"children\":[],\"hasChildren\":false,\"lazyLoadingHasChildren\":null,\"expanded\":false,\"id\":46,\"description\":\"29: Electric Shop\",\"sequence\":0,\"enabled\":true,\"displayName\":\"29: Electric Shop\",\"color\":null}],\"hasChildren\":true,\"lazyLoadingHasChildren\":null,\"expanded\":false,\"id\":4,\"description\":\"20: Production\",\"sequence\":0,\"enabled\":true,\"displayName\":\"20: Production\",\"color\":null},{\"path\":\";1;44;\",\"children\":[{\"path\":\";1;44;25;\",\"children\":[],\"hasChildren\":false,\"lazyLoadingHasChildren\":null,\"expanded\":false,\"id\":25,\"description\":\"31: Quality Control\",\"sequence\":0,\"enabled\":true,\"displayName\":\"31: Quality Control\",\"color\":null},{\"path\":\";1;44;77;\",\"children\":[],\"hasChildren\":false,\"lazyLoadingHasChildren\":null,\"expanded\":false,\"id\":77,\"description\":\"32: Purchasing\",\"sequence\":0,\"enabled\":true,\"displayName\":\"32: Purchasing\",\"color\":null},{\"path\":\";1;44;111;\",\"children\":[],\"hasChildren\":false,\"lazyLoadingHasChildren\":null,\"expanded\":false,\"id\":111,\"description\":\"33: Transport\",\"sequence\":0,\"enabled\":true,\"displayName\":\"33: Transport\",\"color\":null}],\"hasChildren\":true,\"lazyLoadingHasChildren\":null,\"expanded\":false,\"id\":44,\"description\":\"30: Yard Support\",\"sequence\":0,\"enabled\":true,\"displayName\":\"30: Yard Support\",\"color\":null},{\"path\":\";1;116;\",\"children\":[],\"hasChildren\":false,\"lazyLoadingHasChildren\":null,\"expanded\":false…"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/OptionList/OrganisationHierarchicalOptions": {
+      "get": {
+        "summary": "GET /OptionList/OrganisationHierarchicalOptions",
+        "tags": [
+          "OptionList"
+        ],
+        "responses": {
+          "200": {
+            "description": "application/json; charset=utf-8",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                },
+                "example": "[{\"path\":\";1;3;\",\"children\":[],\"hasChildren\":false,\"lazyLoadingHasChildren\":null,\"expanded\":false,\"id\":3,\"description\":\"10: Engineering\",\"sequence\":0,\"enabled\":true,\"displayName\":\"10: Engineering\",\"color\":null}]"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/OptionList/ActivityStatusOptions": {
+      "get": {
+        "summary": "GET /OptionList/ActivityStatusOptions",
+        "tags": [
+          "OptionList"
+        ],
+        "responses": {
+          "200": {
+            "description": "application/json; charset=utf-8",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                },
+                "example": "[{\"id\":1,\"description\":\"Plan\",\"sequence\":0,\"enabled\":true,\"displayName\":\"Plan\",\"color\":null},{\"id\":2,\"description\":\"Production\",\"sequence\":1,\"enabled\":true,\"displayName\":\"Production\",\"color\":null},{\"id\":7,\"description\":\"Active\",\"sequence\":2,\"enabled\":true,\"displayName\":\"Active\",\"color\":null},{\"id\":3,\"description\":\"Ready\",\"sequence\":3,\"enabled\":true,\"displayName\":\"Ready\",\"color\":null},{\"id\":4,\"description\":\"Done\",\"sequence\":4,\"enabled\":true,\"displayName\":\"Done\",\"color\":null},{\"id\":5,\"description\":\"Cancel\",\"sequence\":5,\"enabled\":true,\"displayName\":\"Cancel\",\"color\":null},{\"id\":6,\"description\":\"Blocked\",\"sequence\":6,\"enabled\":true,\"displayName\":\"Blocked\",\"color\":null}]"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/OptionList/ActivityPhaseOptions": {
+      "get": {
+        "summary": "GET /OptionList/ActivityPhaseOptions",
+        "tags": [
+          "OptionList"
+        ],
+        "responses": {
+          "200": {
+            "description": "application/json; charset=utf-8",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                },
+                "example": "[{\"id\":1,\"description\":\"Engineering\",\"sequence\":0,\"enabled\":true,\"displayName\":\"Engineering\",\"color\":null},{\"id\":2,\"description\":\"Hotwork\",\"sequence\":0,\"enabled\":true,\"displayName\":\"Hotwork\",\"color\":null},{\"id\":3,\"description\":\"Repair\",\"sequence\":0,\"enabled\":true,\"displayName\":\"Repair\",\"color\":null},{\"id\":4,\"description\":\"Outfitting\",\"sequence\":0,\"enabled\":true,\"displayName\":\"Outfitting\",\"color\":null}]"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/OptionList/DisciplineHierarchicalOptions": {
+      "get": {
+        "summary": "GET /OptionList/DisciplineHierarchicalOptions",
+        "tags": [
+          "OptionList"
+        ],
+        "responses": {
+          "200": {
+            "description": "application/json; charset=utf-8",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                },
+                "example": "[{\"children\":[],\"icon\":\"torso\",\"path\":\";1;\",\"hasChildren\":false,\"lazyLoadingHasChildren\":null,\"expanded\":false,\"id\":1,\"description\":\"1 : General\",\"sequence\":1,\"enabled\":true,\"displayName\":\"1 : General\",\"color\":null},{\"children\":[{\"children\":[{\"children\":[],\"icon\":\"engineering\",\"path\":\";61;62;64;\",\"hasChildren\":false,\"lazyLoadingHasChildren\":null,\"expanded\":false,\"id\":64,\"description\":\"210 : Detail Engineering\",\"sequence\":0,\"enabled\":true,\"displayName\":\"210 : Detail Engineering\",\"color\":null}],\"icon\":\"general\",\"path\":\";61;62;\",\"hasChildren\":false,\"lazyLoadingHasChildren\":null,\"expanded\":false,\"id\":62,\"description\":\"200 : Engineering\",\"sequence\":0,\"enabled\":true,\"displayName\":\"200 : Engineering\",\"color\":null}],\"icon\":\"general\",\"path\":\";61;\",\"hasChildren\":false,\"lazyLoadingHasChildren\":null,\"expanded\":false,\"id\":61,\"description\":\"100 : Custom Build\",\"sequence\":0,\"enabled\":true,\"displayName\":\"100 : Custom Build\",\"color\":null},{\"children\":[{\"children\":[],\"icon\":\"qc\",\"path\":\";11;56;\",\"hasChildren\":false,\"lazyLoadingHasChildren\":null,\"expanded\":false,\"id\":56,\"description\":\"104 : Workpreparation\",\"sequence\":0,\"enabled\":true,\"displayName\":\"104 : Workpreparation\",\"color\":null},{\"children\":[],\"icon\":\"qc\",\"path\":\";11;21;\",\"hasChildren\":false,\"lazyLoadingHasChildren\":null,\"expanded\":false,\"id\":21,\"description\":\"102 : Supply chain management\",\"sequence\":102,\"enabled\":true,\"displayName\":\"102 : Supply chain management\",\"color\":null},{\"children\":[],\"icon\":\"qc\",\"path\":\";11;22;\",\"hasChildren\":false,\"lazyLoadingHasChildren\":null,\"expanded\":false,\"id\":22,\"description\":\"101 : Projectmanager\",\"sequence\":101,\"enabled\":true,\"displayName\":\"101 : Projectmanager\",\"color\":null},{\"children\":[],\"icon\":\"qc\",\"path\":\";11;12;\",\"hasChildren\":false,\"lazyLoadingHasChildren\":null,\"expanded\":false,\"id\":12,\"description\":\"103 : Projectlead\",\"sequence\":103,\"enabled\":true,\"displayName\":\"103 : Projectlead\",\"color\":null},{\"children\":[{\"children\":[],\"icon\":\"engineering\",\"path\":\";11;2;36;\",\"hasChildren\":false,\"lazyLoadingHasChildren\":null,\"expanded\":false,\"id\":36,\"description\":\"210 : Basic Engineer\",\"sequence\":0,\"enabled\":true,\"displayName\":\"210 : Basic Engineer\",\"color\":null},{\"children\":[],\"icon\":\"engineering\",\"path\":\";11;2;37;\",\"hasChildren\":false,\"lazyLoadingHasChildren\":null,\"expanded\":false,\"id\":37,\"description\":\"220 : Detail Engineer\",\"sequence\":220,\"enabled\":true,\"displayName\":\"220 : Detail Engineer\",\"color\":null},{\"children\":[],\"icon\":\"engineering\",\"path\":\";11;2;63;\",\"hasChildren\":false,\"lazyLoadingHasChildren\":null,\"expanded\":false,\"id\":63,\"description\":\"205 : Basic Engineering\",\"sequence\":0,\"enabled\":true,\"displayName\":\"205 : Basic Engineering\",\"color\":null}],\"icon\":\"engineering\",\"path\":\";11;2;\",\"hasChildren\":false,\"lazyLoadingHasChildren\":null,\"expanded\":false,\"id\":2,\"description\":\"200 : Engineering\",\"sequence\":0,\"enabled\":true,\"displayName\":\"200 : Engineering\",\"color\":null}],\"icon\":\"foreman\",\"path\":\";11;\",\"hasChildren\":false,\"lazyLoadingHasChildren\":null,\"expanded\":false,\"id\":11,\"description\":\"100 : Lead\",\"sequence\":0,\"enabled\":true,\"displayName\":\"100 : Lead\",\"color\":null},{\"children\":[{\"children\":[],\"icon\":\"qc\",\"path\":\";38;26;\",\"hasChildren\":false,\"lazyLoadingHasChildren\":null,\"expanded\":false,\"id\":26,\"description\":\"304 : Quality Control\",\"sequence\":304,\"enabled\":true,\"displayName\":\"304 : Quality Control\",\"color\":null},{\"children\":[],\"icon\":\"qc\",\"path\":\";38;53;\",\"hasChildren\":false,\"lazyLoadingHasChildren\":null,\"expanded\":false,\"id\":53,\"description\":\"310 : Tank Watch\",\"sequence\":310,\"enabled\":true,\"displayName\":\"310 : Tank Watch\",\"color\":null}],\"icon\":\"qc\",\"path\":\";38;\",\"hasChildren\":false,\"lazyLoadingHasChildren\":null,\"expanded\":false,\"id\":38,\"description\":\"300 : Quality\",\"sequence\":200,\"enabled\":true,\"displayName\":\"300 : Quality\",\"color\":null},{\"children\":[{\"children\":[],\"icon\":\"torso\",\"path\":\";35;55;\",\"hasChildren\":false,\"lazyLoadingHasChildren\":null,\"expanded\":false,\"id\":55,\"description\":\"590 : Dock and Harbour\",\"sequence\":0,\"enabled\":true,\"displayName\":\"5…"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/Pbs/Planning/TreeView": {
+      "get": {
+        "summary": "GET /Pbs/Planning/TreeView",
+        "tags": [
+          "Pbs"
+        ],
+        "responses": {
+          "200": {
+            "description": "application/json; charset=utf-8",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                },
+                "example": "[{\"id\":-4,\"entityId\":-4,\"treeId\":null,\"text\":\"Projects\",\"icon\":{\"icon\":\"euro\",\"label\":null,\"overlays\":null,\"decorators\":null,\"iconDecorators\":null},\"type\":\"Project\",\"hasContextMenu\":false,\"hasChildren\":true,\"isSelectable\":true,\"parentTreeId\":null,\"parentId\":null,\"entityParentId\":null,\"path\":null,\"typePath\":null,\"contextMenuItems\":[],\"items\":[{\"id\":-2,\"entityId\":-2,\"treeId\":\"-2_Project\",\"text\":\"By type\",\"icon\":{\"icon\":\"euro\",\"label\":null,\"overlays\":null,\"decorators\":null,\"iconDecorators\":null},\"type\":\"Project\",\"hasContextMenu\":false,\"hasChildren\":false,\"isSelectable\":true,\"parentTreeId\":null,\"parentId\":null,\"entityParentId\":null,\"path\":null,\"typePath\":null,\"contextMenuItems\":[],\"items\":null,\"expanded\":false,\"filterType\":2,\"isActive\":false,\"sequence\":0,\"isLink\":false},{\"id\":-1,\"entityId\":-1,\"treeId\":\"-1_Project\",\"text\":\"By status\",\"icon\":{\"icon\":\"euro\",\"label\":null,\"overlays\":null,\"decorators\":null,\"iconDecorators\":null},\"type\":\"Project\",\"hasContextMenu\":false,\"hasChildren\":false,\"isSelectable\":true,\"parentTreeId\":null,\"parentId\":null,\"entityParentId\":null,\"path\":null,\"typePath\":null,\"contextMenuItems\":[],\"items\":null,\"expanded\":false,\"filterType\":1,\"isActive\":false,\"sequence\":0,\"isLink\":false},{\"id\":-3,\"entityId\":-3,\"treeId\":\"-3_Project\",\"text\":\"Inactive\",\"icon\":{\"icon\":\"euro\",\"label\":null,\"overlays\":null,\"decorators\":null,\"iconDecorators\":null},\"type\":\"Project\",\"hasContextMenu\":false,\"hasChildren\":false,\"isSelectable\":true,\"parentTreeId\":null,\"parentId\":null,\"entityParentId\":null,\"path\":null,\"typePath\":null,\"contextMenuItems\":[],\"items\":null,\"expanded\":false,\"filterType\":3,\"isActive\":false,\"sequence\":0,\"isLink\":false}],\"expanded\":true,\"filterType\":2,\"isActive\":false,\"sequence\":0,\"isLink\":false}]"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/OptionList/OrganisationRoleOptions": {
+      "get": {
+        "summary": "GET /OptionList/OrganisationRoleOptions",
+        "tags": [
+          "OptionList"
+        ],
+        "responses": {
+          "200": {
+            "description": "application/json; charset=utf-8",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                },
+                "example": "[{\"id\":1,\"description\":\"Client\",\"sequence\":1,\"enabled\":true,\"displayName\":\"Client\",\"color\":null},{\"id\":2,\"description\":\"Own organisation\",\"sequence\":2,\"enabled\":true,\"displayName\":\"Own organisation\",\"color\":null},{\"id\":3,\"description\":\"Supplier\",\"sequence\":3,\"enabled\":true,\"displayName\":\"Supplier\",\"color\":null},{\"id\":4,\"description\":\"Subcontractor\",\"sequence\":4,\"enabled\":true,\"displayName\":\"Subcontractor\",\"color\":null},{\"id\":5,\"description\":\"Production department\",\"sequence\":5,\"enabled\":true,\"displayName\":\"Production department\",\"color\":null},{\"id\":6,\"description\":\"Team\",\"sequence\":6,\"enabled\":true,\"displayName\":\"Team\",\"color\":null},{\"id\":7,\"description\":\"Equipment\",\"sequence\":7,\"enabled\":true,\"displayName\":\"Equipment\",\"color\":null}]"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/OptionList/ProjectStatusOptions": {
+      "get": {
+        "summary": "GET /OptionList/ProjectStatusOptions",
+        "tags": [
+          "OptionList"
+        ],
+        "responses": {
+          "200": {
+            "description": "application/json; charset=utf-8",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                },
+                "example": "[{\"id\":1,\"description\":\"Acquisition\",\"sequence\":1,\"enabled\":true,\"displayName\":\"Acquisition\",\"color\":null},{\"id\":7,\"description\":\"scenario\",\"sequence\":2,\"enabled\":true,\"displayName\":\"scenario\",\"color\":null},{\"id\":2,\"description\":\"In production\",\"sequence\":3,\"enabled\":true,\"displayName\":\"In production\",\"color\":null},{\"id\":3,\"description\":\"Production Ready\",\"sequence\":4,\"enabled\":true,\"displayName\":\"Production Ready\",\"color\":null},{\"id\":4,\"description\":\"Project is done\",\"sequence\":5,\"enabled\":true,\"displayName\":\"Project is done\",\"color\":null},{\"id\":5,\"description\":\"Archived\",\"sequence\":6,\"enabled\":true,\"displayName\":\"Archived\",\"color\":null},{\"id\":6,\"description\":\"template project\",\"sequence\":7,\"enabled\":true,\"displayName\":\"template project\",\"color\":null}]"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/Pbs/Planning/ProjectFilterTreeView": {
+      "get": {
+        "summary": "GET /Pbs/Planning/ProjectFilterTreeView",
+        "tags": [
+          "Pbs"
+        ],
+        "responses": {
+          "200": {
+            "description": "application/json; charset=utf-8",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                },
+                "example": "[{\"id\":-4,\"entityId\":-4,\"treeId\":null,\"text\":\"Project\",\"icon\":{\"icon\":\"euro\",\"label\":null,\"overlays\":null,\"decorators\":null,\"iconDecorators\":null},\"type\":\"Project\",\"hasContextMenu\":false,\"hasChildren\":true,\"isSelectable\":true,\"parentTreeId\":null,\"parentId\":null,\"entityParentId\":null,\"path\":null,\"typePath\":null,\"contextMenuItems\":[],\"items\":[{\"id\":1,\"entityId\":1,\"treeId\":\"1_ComponentType\",\"text\":\"Product\",\"icon\":{\"icon\":\"prd\",\"label\":null,\"overlays\":null,\"decorators\":null,\"iconDecorators\":null},\"type\":\"ComponentType\",\"hasContextMenu\":true,\"hasChildren\":true,\"isSelectable\":true,\"parentTreeId\":\"\",\"parentId\":null,\"entityParentId\":null,\"path\":null,\"typePath\":null,\"contextMenuItems\":[{\"key\":\"{add}{product}{1}\",\"type\":\"ComponentType\",\"text\":null,\"cssClass\":null,\"icon\":{\"icon\":\"prd\",\"label\":null,\"overlays\":[\"add\"],\"decorators\":null,\"iconDecorators\":null},\"hasSeparator\":false},{\"key\":\"{delete}{product}{1}\",\"type\":\"ComponentType\",\"text\":null,\"cssClass\":null,\"icon\":{\"icon\":\"prd\",\"label\":null,\"overlays\":[\"delete\"],\"decorators\":null,\"iconDecorators\":null},\"hasSeparator\":true}],\"items\":[{\"id\":2,\"entityId\":2,\"treeId\":\"2_ComponentType\",\"text\":\"Block\",\"icon\":{\"icon\":\"sct\",\"label\":null,\"overlays\":null,\"decorators\":null,\"iconDecorators\":null},\"type\":\"ComponentType\",\"hasContextMenu\":true,\"hasChildren\":false,\"isSelectable\":true,\"parentTreeId\":\"\",\"parentId\":null,\"entityParentId\":null,\"path\":null,\"typePath\":null,\"contextMenuItems\":[{\"key\":\"{add}{block}{2}\",\"type\":\"ComponentType\",\"text\":null,\"cssClass\":null,\"icon\":{\"icon\":\"sct\",\"label\":null,\"overlays\":[\"add\"],\"decorators\":null,\"iconDecorators\":null},\"hasSeparator\":false},{\"key\":\"{delete}{block}{2}\",\"type\":\"ComponentType\",\"text\":null,\"cssClass\":null,\"icon\":{\"icon\":\"sct\",\"label\":null,\"overlays\":[\"delete\"],\"decorators\":null,\"iconDecorators\":null},\"hasSeparator\":true}],\"items\":[],\"expanded\":false,\"filterType\":null,\"isActive\":false,\"sequence\":1,\"isLink\":false},{\"id\":3,\"entityId\":3,\"treeId\":\"3_ComponentType\",\"text\":\"Space\",\"icon\":{\"icon\":\"spc\",\"label\":null,\"overlays\":null,\"decorators\":null,\"iconDecorators\":null},\"type\":\"ComponentType\",\"hasContextMenu\":true,\"hasChildren\":false,\"isSelectable\":true,\"parentTreeId\":\"\",\"parentId\":null,\"entityParentId\":null,\"path\":null,\"typePath\":null,\"contextMenuItems\":[{\"key\":\"{add}{space}{3}\",\"type\":\"ComponentType\",\"text\":null,\"cssClass\":null,\"icon\":{\"icon\":\"spc\",\"label\":null,\"overlays\":[\"add\"],\"decorators\":null,\"iconDecorators\":null},\"hasSeparator\":false},{\"key\":\"{delete}{space}{3}\",\"type\":\"ComponentType\",\"text\":null,\"cssClass\":null,\"icon\":{\"icon\":\"spc\",\"label\":null,\"overlays\":[\"delete\"],\"decorators\":null,\"iconDecorators\":null},\"hasSeparator\":true}],\"items\":[],\"expanded\":false,\"filterType\":null,\"isActive\":false,\"sequence\":2,\"isLink\":false},{\"id\":4,\"entityId\":4,\"treeId\":\"4_ComponentType\",\"text\":\"System\",\"icon\":{\"icon\":\"sst\",\"label\":null,\"overlays\":null,\"decorators\":null,\"iconDecorators\":null},\"type\":\"ComponentType\",\"hasContextMenu\":true,\"hasChildren\":false,\"isSelectable\":true,\"parentTreeId\":\"\",\"parentId\":null,\"entityParentId\":null,\"path\":null,\"typePath\":null,\"contextMenuItems\":[{\"key\":\"{add}{system}{4}\",\"type\":\"ComponentType\",\"text\":null,\"cssClass\":null,\"icon\":{\"icon\":\"sst\",\"label\":null,\"overlays\":[\"add\"],\"decorators\":null,\"iconDecorators\":null},\"hasSeparator\":false},{\"key\":\"{delete}{system}{4}\",\"type\":\"ComponentType\",\"text\":null,\"cssClass\":null,\"icon\":{\"icon\":\"sst\",\"label\":null,\"overlays\":[\"delete\"],\"decorators\":null,\"iconDecorators\":null},\"hasSeparator\":true}],\"items\":[],\"expanded\":false,\"filterType\":null,\"isActive\":false,\"sequence\":3,\"isLink\":false},{\"id\":9,\"entityId\":9,\"treeId\":\"9_ComponentType\",\"text\":\"Workpackage\",\"icon\":{\"icon\":\"buffer\",\"label\":null,\"overlays\":null,\"decorators\":null,\"iconDecorators\":null},\"type\":\"ComponentType\",\"hasContextMenu\":true,\"hasChildren\":false,\"isSelectable\":true,\"parentTreeId\":\"\",\"parentId\":null,\"entityParentId\":null,\"path\":null,\"typePath\":null,\"contextMenuItems\":[{\"key\":\"{add}{workpackage}{9}\",\"type\":\"ComponentType\",\"text\":null,\"cssClass\":nul…"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/Pbs/Project/TreeView/{id}?params=%7B%22loadOnDemand%22:false%7D": {
+      "get": {
+        "summary": "GET /Pbs/Project/TreeView/2?params=%7B%22loadOnDemand%22:false%7D",
+        "tags": [
+          "Pbs"
+        ],
+        "responses": {
+          "200": {
+            "description": "application/json; charset=utf-8",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                },
+                "example": "[{\"id\":1,\"entityId\":1,\"treeId\":\"1_ProjectType\",\"text\":\"Custom\",\"icon\":{\"icon\":\"fld\",\"label\":null,\"overlays\":null,\"decorators\":null,\"iconDecorators\":null},\"type\":\"ProjectType\",\"hasContextMenu\":false,\"hasChildren\":true,\"isSelectable\":false,\"parentTreeId\":\"\",\"parentId\":null,\"entityParentId\":null,\"path\":null,\"typePath\":null,\"contextMenuItems\":[{\"key\":\"{add}{project}{1}{project-type}\",\"type\":\"Project\",\"text\":\"Add new project\",\"cssClass\":null,\"icon\":{\"icon\":\"prj\",\"label\":null,\"overlays\":[\"add\"],\"decorators\":null,\"iconDecorators\":null},\"hasSeparator\":false}],\"items\":[{\"id\":313,\"entityId\":313,\"treeId\":\"313_Project\",\"text\":\"7124\",\"icon\":{\"icon\":\"prj\",\"label\":null,\"overlays\":null,\"decorators\":null,\"iconDecorators\":null},\"type\":\"Project\",\"hasContextMenu\":false,\"hasChildren\":false,\"isSelectable\":true,\"parentTreeId\":null,\"parentId\":null,\"entityParentId\":null,\"path\":null,\"typePath\":\";1;\",\"contextMenuItems\":[],\"items\":[],\"expanded\":false,\"filterType\":null,\"isActive\":false,\"sequence\":0,\"isLink\":false},{\"id\":331,\"entityId\":331,\"treeId\":\"331_Project\",\"text\":\"7124\",\"icon\":{\"icon\":\"prj\",\"label\":null,\"overlays\":null,\"decorators\":null,\"iconDecorators\":null},\"type\":\"Project\",\"hasContextMenu\":false,\"hasChildren\":false,\"isSelectable\":true,\"parentTreeId\":null,\"parentId\":null,\"entityParentId\":null,\"path\":null,\"typePath\":\";1;\",\"contextMenuItems\":[],\"items\":[],\"expanded\":false,\"filterType\":null,\"isActive\":false,\"sequence\":0,\"isLink\":false},{\"id\":321,\"entityId\":321,\"treeId\":\"321_Project\",\"text\":\"aaa\",\"icon\":{\"icon\":\"prj\",\"label\":null,\"overlays\":null,\"decorators\":null,\"iconDecorators\":null},\"type\":\"Project\",\"hasContextMenu\":false,\"hasChildren\":false,\"isSelectable\":true,\"parentTreeId\":null,\"parentId\":null,\"entityParentId\":null,\"path\":null,\"typePath\":\";1;\",\"contextMenuItems\":[],\"items\":[],\"expanded\":false,\"filterType\":null,\"isActive\":false,\"sequence\":0,\"isLink\":false},{\"id\":304,\"entityId\":304,\"treeId\":\"304_Project\",\"text\":\"Demo Scenario\",\"icon\":{\"icon\":\"prj\",\"label\":null,\"overlays\":null,\"decorators\":null,\"iconDecorators\":null},\"type\":\"Project\",\"hasContextMenu\":false,\"hasChildren\":false,\"isSelectable\":true,\"parentTreeId\":null,\"parentId\":null,\"entityParentId\":null,\"path\":null,\"typePath\":\";1;\",\"contextMenuItems\":[],\"items\":[],\"expanded\":false,\"filterType\":null,\"isActive\":false,\"sequence\":0,\"isLink\":false},{\"id\":28,\"entityId\":28,\"treeId\":\"28_Project\",\"text\":\"Easy Dredge TSHD\",\"icon\":{\"icon\":\"prj\",\"label\":null,\"overlays\":null,\"decorators\":null,\"iconDecorators\":null},\"type\":\"Project\",\"hasContextMenu\":false,\"hasChildren\":false,\"isSelectable\":true,\"parentTreeId\":null,\"parentId\":null,\"entityParentId\":null,\"path\":null,\"typePath\":\";1;\",\"contextMenuItems\":[],\"items\":[],\"expanded\":false,\"filterType\":null,\"isActive\":false,\"sequence\":0,\"isLink\":false},{\"id\":310,\"entityId\":310,\"treeId\":\"310_Project\",\"text\":\"Fincantieri\",\"icon\":{\"icon\":\"prj\",\"label\":null,\"overlays\":null,\"decorators\":null,\"iconDecorators\":null},\"type\":\"Project\",\"hasContextMenu\":false,\"hasChildren\":false,\"isSelectable\":true,\"parentTreeId\":null,\"parentId\":null,\"entityParentId\":null,\"path\":null,\"typePath\":\";1;\",\"contextMenuItems\":[],\"items\":[],\"expanded\":false,\"filterType\":null,\"isActive\":false,\"sequence\":0,\"isLink\":false},{\"id\":335,\"entityId\":335,\"treeId\":\"335_Project\",\"text\":\"Float with multiple links\",\"icon\":{\"icon\":\"prj\",\"label\":null,\"overlays\":null,\"decorators\":null,\"iconDecorators\":null},\"type\":\"Project\",\"hasContextMenu\":false,\"hasChildren\":false,\"isSelectable\":true,\"parentTreeId\":null,\"parentId\":null,\"entityParentId\":null,\"path\":null,\"typePath\":\";1;\",\"contextMenuItems\":[],\"items\":[],\"expanded\":false,\"filterType\":null,\"isActive\":false,\"sequence\":0,\"isLink\":false},{\"id\":318,\"entityId\":318,\"treeId\":\"318_Project\",\"text\":\"Floats testing\",\"icon\":{\"icon\":\"prj\",\"label\":null,\"overlays\":null,\"decorators\":null,\"iconDecorators\":null},\"type\":\"Project\",\"hasContextMenu\":false,\"hasChildren\":false,\"isSelectable\":true,\"parentTreeId\":null,\"parentId\":null,\"entityParentId\":null,\"path\":null,\"typePath\":\";1;\",\"contextMenuItems\":[…"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/OptionList/OrganisationOptions?viewConfiguration=ReporterFilter": {
+      "get": {
+        "summary": "GET /OptionList/OrganisationOptions?viewConfiguration=ReporterFilter",
+        "tags": [
+          "OptionList"
+        ],
+        "responses": {
+          "200": {
+            "description": "application/json; charset=utf-8",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                },
+                "example": "[{\"id\":3,\"description\":\"10: Engineering\",\"sequence\":0,\"enabled\":true,\"displayName\":\"10: Engineering\",\"color\":null}]"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/OptionList/DisciplineOptions": {
+      "get": {
+        "summary": "GET /OptionList/DisciplineOptions",
+        "tags": [
+          "OptionList"
+        ],
+        "responses": {
+          "200": {
+            "description": "application/json; charset=utf-8",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                },
+                "example": "[{\"id\":1,\"description\":\"1 : General\",\"sequence\":1,\"enabled\":true,\"displayName\":\"1 : General\",\"color\":null},{\"id\":61,\"description\":\"100 : Custom Build\",\"sequence\":0,\"enabled\":true,\"displayName\":\"100 : Custom Build\",\"color\":null},{\"id\":11,\"description\":\"100 : Lead\",\"sequence\":0,\"enabled\":true,\"displayName\":\"100 : Lead\",\"color\":null},{\"id\":22,\"description\":\"101 : Projectmanager\",\"sequence\":101,\"enabled\":true,\"displayName\":\"101 : Projectmanager\",\"color\":null},{\"id\":21,\"description\":\"102 : Supply chain management\",\"sequence\":102,\"enabled\":true,\"displayName\":\"102 : Supply chain management\",\"color\":null},{\"id\":12,\"description\":\"103 : Projectlead\",\"sequence\":103,\"enabled\":true,\"displayName\":\"103 : Projectlead\",\"color\":null},{\"id\":56,\"description\":\"104 : Workpreparation\",\"sequence\":0,\"enabled\":true,\"displayName\":\"104 : Workpreparation\",\"color\":null},{\"id\":2,\"description\":\"200 : Engineering\",\"sequence\":0,\"enabled\":true,\"displayName\":\"200 : Engineering\",\"color\":null},{\"id\":62,\"description\":\"200 : Engineering\",\"sequence\":0,\"enabled\":true,\"displayName\":\"200 : Engineering\",\"color\":null},{\"id\":63,\"description\":\"205 : Basic Engineering\",\"sequence\":0,\"enabled\":true,\"displayName\":\"205 : Basic Engineering\",\"color\":null},{\"id\":36,\"description\":\"210 : Basic Engineer\",\"sequence\":0,\"enabled\":true,\"displayName\":\"210 : Basic Engineer\",\"color\":null},{\"id\":64,\"description\":\"210 : Detail Engineering\",\"sequence\":0,\"enabled\":true,\"displayName\":\"210 : Detail Engineering\",\"color\":null},{\"id\":37,\"description\":\"220 : Detail Engineer\",\"sequence\":220,\"enabled\":true,\"displayName\":\"220 : Detail Engineer\",\"color\":null},{\"id\":38,\"description\":\"300 : Quality\",\"sequence\":200,\"enabled\":true,\"displayName\":\"300 : Quality\",\"color\":null},{\"id\":26,\"description\":\"304 : Quality Control\",\"sequence\":304,\"enabled\":true,\"displayName\":\"304 : Quality Control\",\"color\":null},{\"id\":53,\"description\":\"310 : Tank Watch\",\"sequence\":310,\"enabled\":true,\"displayName\":\"310 : Tank Watch\",\"color\":null},{\"id\":35,\"description\":\"500 : Production\",\"sequence\":500,\"enabled\":true,\"displayName\":\"500 : Production\",\"color\":null},{\"id\":16,\"description\":\"510 : Paint\",\"sequence\":510,\"enabled\":true,\"displayName\":\"510 : Paint\",\"color\":null},{\"id\":18,\"description\":\"511 : Paint Shop\",\"sequence\":511,\"enabled\":true,\"displayName\":\"511 : Paint Shop\",\"color\":null},{\"id\":23,\"description\":\"512 : Painting/Surface\",\"sequence\":512,\"enabled\":true,\"displayName\":\"512 : Painting/Surface\",\"color\":null},{\"id\":4,\"description\":\"520 : Metal work\",\"sequence\":520,\"enabled\":true,\"displayName\":\"520 : Metal work\",\"color\":null},{\"id\":6,\"description\":\"521 : Grinding\",\"sequence\":521,\"enabled\":true,\"displayName\":\"521 : Grinding\",\"color\":null},{\"id\":5,\"description\":\"522 : Welding\",\"sequence\":522,\"enabled\":true,\"displayName\":\"522 : Welding\",\"color\":null},{\"id\":14,\"description\":\"523 : Fitting\",\"sequence\":523,\"enabled\":true,\"displayName\":\"523 : Fitting\",\"color\":null},{\"id\":49,\"description\":\"524 : Cutting\",\"sequence\":524,\"enabled\":true,\"displayName\":\"524 : Cutting\",\"color\":null},{\"id\":58,\"description\":\"525 : Mechanical\",\"sequence\":0,\"enabled\":true,\"displayName\":\"525 : Mechanical\",\"color\":null},{\"id\":7,\"description\":\"530 : Outfitting\",\"sequence\":530,\"enabled\":true,\"displayName\":\"530 : Outfitting\",\"color\":null},{\"id\":20,\"description\":\"531 : Accommodation\",\"sequence\":531,\"enabled\":true,\"displayName\":\"531 : Accommodation\",\"color\":null},{\"id\":9,\"description\":\"532 : Pipe\",\"sequence\":532,\"enabled\":true,\"displayName\":\"532 : Pipe\",\"color\":null},{\"id\":59,\"description\":\"535 : Structural\",\"sequence\":0,\"enabled\":true,\"displayName\":\"535 : Structural\",\"color\":null},{\"id\":3,\"description\":\"540 : Machining\",\"sequence\":540,\"enabled\":true,\"displayName\":\"540 : Machining\",\"color\":null},{\"id\":24,\"description\":\"541 : Machinery\",\"sequence\":541,\"enabled\":true,\"displayName\":\"541 : Machinery\",\"color\":null},{\"id\":25,\"description\":\"550 : Electrical\",\"sequence\":550,\"enabled\":true,\"displayName\":\"550 : Electrical\",\"color\":null},{\"id\":8,\"description\":\"551 : Electrical\",\"sequen…"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/OptionList/ProjectOptions": {
+      "post": {
+        "summary": "POST /OptionList/ProjectOptions",
+        "tags": [
+          "OptionList"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "viewConfiguration": {
+                    "type": "string"
+                  }
+                }
+              },
+              "example": {
+                "viewConfiguration": "ReporterProjectFilter"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "application/json; charset=utf-8",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                },
+                "example": "[{\"remark\":null,\"id\":313,\"description\":\"7124\",\"sequence\":0,\"enabled\":true,\"displayName\":\"7124\",\"color\":null},{\"remark\":null,\"id\":331,\"description\":\"7124\",\"sequence\":0,\"enabled\":true,\"displayName\":\"7124\",\"color\":null},{\"remark\":null,\"id\":321,\"description\":\"aaa\",\"sequence\":0,\"enabled\":true,\"displayName\":\"aaa\",\"color\":null},{\"remark\":null,\"id\":171,\"description\":\"Demo Repair extended\",\"sequence\":0,\"enabled\":true,\"displayName\":\"Demo Repair extended\",\"color\":null},{\"remark\":null,\"id\":304,\"description\":\"Demo Scenario\",\"sequence\":0,\"enabled\":true,\"displayName\":\"Demo Scenario\",\"color\":null},{\"remark\":null,\"id\":28,\"description\":\"Easy Dredge TSHD\",\"sequence\":0,\"enabled\":true,\"displayName\":\"Easy Dredge TSHD\",\"color\":null},{\"remark\":null,\"id\":310,\"description\":\"Fincantieri\",\"sequence\":0,\"enabled\":true,\"displayName\":\"Fincantieri\",\"color\":null},{\"remark\":null,\"id\":335,\"description\":\"Float with multiple links\",\"sequence\":0,\"enabled\":true,\"displayName\":\"Float with multiple links\",\"color\":null},{\"remark\":null,\"id\":318,\"description\":\"Floats testing\",\"sequence\":0,\"enabled\":true,\"displayName\":\"Floats testing\",\"color\":null},{\"remark\":null,\"id\":289,\"description\":\"Future Repair Project 1\",\"sequence\":0,\"enabled\":true,\"displayName\":\"Future Repair Project 1\",\"color\":null},{\"remark\":null,\"id\":291,\"description\":\"Future Repair Project 2\",\"sequence\":0,\"enabled\":true,\"displayName\":\"Future Repair Project 2\",\"color\":null},{\"remark\":null,\"id\":290,\"description\":\"Future Repair Project 3\",\"sequence\":0,\"enabled\":true,\"displayName\":\"Future Repair Project 3\",\"color\":null},{\"remark\":null,\"id\":294,\"description\":\"Future Repair Project 4\",\"sequence\":0,\"enabled\":true,\"displayName\":\"Future Repair Project 4\",\"color\":null},{\"remark\":null,\"id\":292,\"description\":\"Future Repair Project 5\",\"sequence\":0,\"enabled\":true,\"displayName\":\"Future Repair Project 5\",\"color\":null},{\"remark\":null,\"id\":241,\"description\":\"GDMien\",\"sequence\":0,\"enabled\":true,\"displayName\":\"GDMien\",\"color\":null},{\"remark\":null,\"id\":326,\"description\":\"Hammoc Test\",\"sequence\":0,\"enabled\":true,\"displayName\":\"Hammoc Test\",\"color\":null},{\"remark\":null,\"id\":342,\"description\":\"MX Project\",\"sequence\":0,\"enabled\":true,\"displayName\":\"MX Project\",\"color\":null},{\"remark\":null,\"id\":317,\"description\":\"new test project\",\"sequence\":0,\"enabled\":true,\"displayName\":\"new test project\",\"color\":null},{\"remark\":null,\"id\":19,\"description\":\"NSMV Demo\",\"sequence\":0,\"enabled\":true,\"displayName\":\"NSMV Demo\",\"color\":null},{\"remark\":null,\"id\":329,\"description\":\"PP\",\"sequence\":0,\"enabled\":true,\"displayName\":\"PP\",\"color\":null},{\"remark\":null,\"id\":324,\"description\":\"project circular relation\",\"sequence\":0,\"enabled\":true,\"displayName\":\"project circular relation\",\"color\":null},{\"remark\":null,\"id\":327,\"description\":\"ProjectJ\",\"sequence\":0,\"enabled\":true,\"displayName\":\"ProjectJ\",\"color\":null},{\"remark\":null,\"id\":338,\"description\":\"Reg Selenium Repair demo\",\"sequence\":0,\"enabled\":true,\"displayName\":\"Reg Selenium Repair demo\",\"color\":null},{\"remark\":null,\"id\":312,\"description\":\"Regression Selenium PRJ2\",\"sequence\":0,\"enabled\":true,\"displayName\":\"Regression Selenium PRJ2\",\"color\":null},{\"remark\":null,\"id\":320,\"description\":\"ScenarioTest\",\"sequence\":0,\"enabled\":true,\"displayName\":\"ScenarioTest\",\"color\":null},{\"remark\":null,\"id\":325,\"description\":\"Smoke Project\",\"sequence\":0,\"enabled\":true,\"displayName\":\"Smoke Project\",\"color\":null},{\"remark\":null,\"id\":337,\"description\":\"smoker0306\",\"sequence\":0,\"enabled\":true,\"displayName\":\"smoker0306\",\"color\":null},{\"remark\":null,\"id\":315,\"description\":\"Test link floorboard\",\"sequence\":0,\"enabled\":true,\"displayName\":\"Test link floorboard\",\"color\":null},{\"remark\":null,\"id\":311,\"description\":\"test material\",\"sequence\":0,\"enabled\":true,\"displayName\":\"test material\",\"color\":null},{\"remark\":null,\"id\":333,\"description\":\"test progress\",\"sequence\":0,\"enabled\":true,\"displayName\":\"test progress\",\"color\":null},{\"remark\":null,\"id\":341,\"description\":\"Test project\",\"sequence\":0,\"enabled\":true,\"displayName\":\"Test project\",\"color\":n…"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/OptionList/StructureFilter": {
+      "post": {
+        "summary": "POST /OptionList/StructureFilter",
+        "tags": [
+          "OptionList"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "projectIds": {
+                    "type": "array",
+                    "items": {
+                      "type": "integer"
+                    }
+                  }
+                }
+              },
+              "example": {
+                "projectIds": [
+                  313,
+                  331,
+                  321,
+                  171,
+                  304,
+                  28,
+                  310,
+                  335,
+                  318,
+                  289,
+                  291,
+                  290,
+                  294,
+                  292,
+                  241,
+                  326,
+                  342,
+                  317,
+                  19,
+                  329,
+                  324,
+                  327,
+                  338,
+                  312,
+                  320,
+                  325,
+                  337,
+                  315,
+                  311,
+                  333,
+                  341,
+                  334,
+                  330,
+                  332,
+                  319,
+                  336,
+                  339,
+                  17
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "application/json; charset=utf-8",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                },
+                "example": "[{\"id\":1,\"description\":\"Location\",\"abbreviation\":null,\"icon\":\"loc\",\"perProject\":false,\"enabled\":true,\"leavesOnly\":false,\"via\":\"Component\",\"sequence\":0,\"inheritable\":true,\"labelFormat\":null,\"shortLabelFormat\":null,\"systemName\":null,\"structures\":[{\"id\":164,\"icon\":null,\"sequence\":0,\"shortName\":\"Magazijn\",\"description\":\"Magazijn\",\"projectDescription\":null,\"remark\":null,\"typeId\":1,\"projectId\":null,\"parentId\":null,\"enabled\":true,\"createdOn\":\"2021-06-18T12:30:03.63\",\"createdBy\":\"admin (1)\",\"cacheIcon\":null,\"sourceComponentId\":null,\"sourceComponentLabel\":null,\"externalLinkUri\":null,\"externalLinkIcon\":null,\"treeId\":\"164_Structure\"}]},{\"id\":3,\"description\":\"Block\",\"abbreviation\":null,\"icon\":\"blk\",\"perProject\":true,\"enabled\":true,\"leavesOnly\":true,\"via\":\"Component\",\"sequence\":2,\"inheritable\":true,\"labelFormat\":null,\"shortLabelFormat\":null,\"systemName\":null,\"structures\":[{\"id\":97,\"icon\":null,\"sequence\":0,\"shortName\":null,\"description\":\"103\",\"projectDescription\":\"WärtsiläDemo\",\"remark\":null,\"typeId\":3,\"projectId\":17,\"parentId\":null,\"enabled\":true,\"createdOn\":\"2020-12-18T10:30:44.113\",\"createdBy\":\"script\",\"cacheIcon\":null,\"sourceComponentId\":null,\"sourceComponentLabel\":null,\"externalLinkUri\":null,\"externalLinkIcon\":null,\"treeId\":\"97_Structure\"},{\"id\":145,\"icon\":null,\"sequence\":0,\"shortName\":null,\"description\":\"13-P2 Mid body\",\"projectDescription\":\"NSMV Demo\",\"remark\":null,\"typeId\":3,\"projectId\":19,\"parentId\":null,\"enabled\":true,\"createdOn\":\"2021-11-29T11:44:34.437\",\"createdBy\":null,\"cacheIcon\":null,\"sourceComponentId\":null,\"sourceComponentLabel\":null,\"externalLinkUri\":null,\"externalLinkIcon\":null,\"treeId\":\"145_Structure\"},{\"id\":144,\"icon\":null,\"sequence\":0,\"shortName\":null,\"description\":\"14-P2 Aft Body\",\"projectDescription\":\"NSMV Demo\",\"remark\":null,\"typeId\":3,\"projectId\":19,\"parentId\":null,\"enabled\":true,\"createdOn\":\"2021-11-29T11:44:47.923\",\"createdBy\":null,\"cacheIcon\":null,\"sourceComponentId\":null,\"sourceComponentLabel\":null,\"externalLinkUri\":null,\"externalLinkIcon\":null,\"treeId\":\"144_Structure\"},{\"id\":98,\"icon\":null,\"sequence\":0,\"shortName\":null,\"description\":\"213\",\"projectDescription\":\"WärtsiläDemo\",\"remark\":null,\"typeId\":3,\"projectId\":17,\"parentId\":null,\"enabled\":true,\"createdOn\":\"2020-12-18T10:30:44.113\",\"createdBy\":\"script\",\"cacheIcon\":null,\"sourceComponentId\":null,\"sourceComponentLabel\":null,\"externalLinkUri\":null,\"externalLinkIcon\":null,\"treeId\":\"98_Structure\"},{\"id\":99,\"icon\":null,\"sequence\":0,\"shortName\":null,\"description\":\"2131\",\"projectDescription\":\"WärtsiläDemo\",\"remark\":null,\"typeId\":3,\"projectId\":17,\"parentId\":null,\"enabled\":true,\"createdOn\":\"2020-12-18T10:30:44.113\",\"createdBy\":\"script\",\"cacheIcon\":null,\"sourceComponentId\":null,\"sourceComponentLabel\":null,\"externalLinkUri\":null,\"externalLinkIcon\":null,\"treeId\":\"99_Structure\"},{\"id\":100,\"icon\":null,\"sequence\":0,\"shortName\":null,\"description\":\"2132\",\"projectDescription\":\"WärtsiläDemo\",\"remark\":null,\"typeId\":3,\"projectId\":17,\"parentId\":null,\"enabled\":true,\"createdOn\":\"2020-12-18T10:30:44.113\",\"createdBy\":\"script\",\"cacheIcon\":null,\"sourceComponentId\":null,\"sourceComponentLabel\":null,\"externalLinkUri\":null,\"externalLinkIcon\":null,\"treeId\":\"100_Structure\"},{\"id\":2498,\"icon\":\"blk\",\"sequence\":0,\"shortName\":\"311\",\"description\":\"311\",\"projectDescription\":\"Demo Scenario\",\"remark\":null,\"typeId\":3,\"projectId\":304,\"parentId\":null,\"enabled\":true,\"createdOn\":\"2024-06-04T09:14:44.673\",\"createdBy\":\"admin (gert-jan@floorganise.com) (1)\",\"cacheIcon\":\"blk\",\"sourceComponentId\":140118,\"sourceComponentLabel\":null,\"externalLinkUri\":null,\"externalLinkIcon\":null,\"treeId\":\"2498_Structure\"},{\"id\":1756,\"icon\":\"blk\",\"sequence\":0,\"shortName\":\"312\",\"description\":\"312\",\"projectDescription\":\"NSMV Demo\",\"remark\":null,\"typeId\":3,\"projectId\":19,\"parentId\":null,\"enabled\":true,\"createdOn\":\"2023-08-18T17:22:52.657\",\"createdBy\":\"admin (ronald@floorganise.com) (1)\",\"cacheIcon\":\"blk\",\"sourceComponentId\":138510,\"sourceComponentLabel\":null,\"externalLinkUri\":null,\"externalLinkIcon\":null,\"treeId\":\"1756_Structure\"},{\"id\"…"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/do/reporter/TaskListRead": {
+      "post": {
+        "summary": "POST /do/reporter/TaskListRead",
+        "tags": [
+          "do"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "dataSourceRequest": {
+                    "type": "object",
+                    "properties": {
+                      "sort": {
+                        "type": "string"
+                      },
+                      "page": {
+                        "type": "integer"
+                      },
+                      "pageSize": {
+                        "type": "integer"
+                      },
+                      "group": {
+                        "type": "string"
+                      },
+                      "filter": {
+                        "type": "string"
+                      }
+                    }
+                  },
+                  "filterViewParams": {
+                    "type": "object",
+                    "properties": {
+                      "showNonReleased": {
+                        "type": "boolean"
+                      },
+                      "showCompleted": {
+                        "type": "boolean"
+                      },
+                      "showAllOrganisations": {
+                        "type": "boolean"
+                      },
+                      "organisationIds": {
+                        "type": "array",
+                        "items": {
+                          "type": "integer"
+                        }
+                      },
+                      "projectIds": {
+                        "type": "array",
+                        "items": {}
+                      },
+                      "structureIds": {
+                        "type": "array",
+                        "items": {}
+                      },
+                      "activityPhaseIds": {
+                        "type": "array",
+                        "items": {}
+                      },
+                      "projectStatusIds": {
+                        "type": "array",
+                        "items": {}
+                      },
+                      "disciplineIds": {
+                        "type": "array",
+                        "items": {}
+                      },
+                      "ignoredStructureTypeIds": {
+                        "type": "array",
+                        "items": {}
+                      }
+                    }
+                  }
+                }
+              },
+              "example": {
+                "dataSourceRequest": {
+                  "sort": "start-asc",
+                  "page": 1,
+                  "pageSize": 40,
+                  "group": "",
+                  "filter": "progress~lt~1"
+                },
+                "filterViewParams": {
+                  "showNonReleased": true,
+                  "showCompleted": true,
+                  "showAllOrganisations": false,
+                  "organisationIds": [
+                    3
+                  ],
+                  "projectIds": [],
+                  "structureIds": [],
+                  "activityPhaseIds": [],
+                  "projectStatusIds": [],
+                  "disciplineIds": [],
+                  "ignoredStructureTypeIds": []
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "application/json; charset=utf-8",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                },
+                "example": "{\"dataSourceResult\":{\"data\":[{\"id\":371410,\"hoursBudget\":100,\"hoursWorked\":69.9421965317919,\"hoursToGo\":36.994219653179115,\"hoursPreCalculated\":0,\"hoursCalculated\":0,\"activityId\":342488,\"projectStatusId\":2,\"activityStatusId\":7,\"projectDescription\":\"WärtsiläDemo\",\"componentId\":130023,\"componentDescription\":\"801-009A\",\"componentRemark\":null,\"activityDescription\":\"Detail Design\",\"activityRemark\":\"\",\"disciplineLabel\":null,\"organisationLabel\":\"10: Engineering\",\"planningLevel\":\"Detail\",\"text1\":\"\",\"text2\":\"\",\"text3\":\"\",\"text4\":\"\",\"text5\":\"\",\"text6\":\"\",\"text7\":\"\",\"text8\":\"\",\"text9\":\"\",\"text10\":\"\",\"boolean1\":null,\"boolean2\":null,\"boolean3\":null,\"boolean4\":null,\"boolean5\":null,\"isText1Changed\":false,\"isText2Changed\":false,\"isText3Changed\":false,\"isText4Changed\":false,\"isText5Changed\":false,\"isText6Changed\":false,\"isText7Changed\":false,\"isText8Changed\":false,\"isText9Changed\":false,\"isText10Changed\":false,\"isBoolean1Changed\":false,\"isBoolean2Changed\":false,\"isBoolean3Changed\":false,\"isBoolean4Changed\":false,\"isBoolean5Changed\":false,\"canEditLevelActivity\":true,\"progress\":0.6300578034682088,\"completed\":false,\"start\":\"2024-06-25T00:00:00\",\"finish\":\"2025-02-20T00:00:00\",\"yearWeekStart\":\"2024-26\",\"yearWeekFinish\":\"2025-8\",\"statusId\":7,\"isStatusIdChanged\":false,\"erpCode\":null,\"isErpCodeChanged\":false,\"disciplineId\":null,\"isDisciplineChanged\":false,\"organisationId\":3,\"isOrganisationChanged\":false,\"planningCode\":null,\"isPlanningCodeChanged\":false,\"isPlanningLevelChanged\":false,\"type\":\"Activity\",\"isDescriptionChanged\":false,\"description\":null,\"isActivityRemarkChanged\":false,\"isPlannedFinishChanged\":false,\"isPlannedStartChanged\":false,\"plannedFinish\":null,\"plannedStart\":null,\"isHoursBudgetChanged\":false,\"isHoursToGoChanged\":false,\"constraintDate\":null,\"isConstraintDateChanged\":false,\"constraintType\":\"AsSoonAsPossible\",\"objectiveDate\":null,\"isObjectiveDateChanged\":false,\"customPlanningMode\":null},{\"id\":371411,\"hoursBudget\":100,\"hoursWorked\":69.54022988505746,\"hoursToGo\":37.35632183908042,\"hoursPreCalculated\":0,\"hoursCalculated\":0,\"activityId\":344433,\"projectStatusId\":2,\"activityStatusId\":7,\"projectDescription\":\"WärtsiläDemo\",\"componentId\":130729,\"componentDescription\":\"801-001E\",\"componentRemark\":null,\"activityDescription\":\"Detail Design\",\"activityRemark\":\"\",\"disciplineLabel\":null,\"organisationLabel\":\"10: Engineering\",\"planningLevel\":\"Detail\",\"text1\":\"\",\"text2\":\"\",\"text3\":\"\",\"text4\":\"\",\"text5\":\"\",\"text6\":\"\",\"text7\":\"\",\"text8\":\"\",\"text9\":\"\",\"text10\":\"\",\"boolean1\":null,\"boolean2\":null,\"boolean3\":null,\"boolean4\":null,\"boolean5\":null,\"isText1Changed\":false,\"isText2Changed\":false,\"isText3Changed\":false,\"isText4Changed\":false,\"isText5Changed\":false,\"isText6Changed\":false,\"isText7Changed\":false,\"isText8Changed\":false,\"isText9Changed\":false,\"isText10Changed\":false,\"isBoolean1Changed\":false,\"isBoolean2Changed\":false,\"isBoolean3Changed\":false,\"isBoolean4Changed\":false,\"isBoolean5Changed\":false,\"canEditLevelActivity\":true,\"progress\":0.6264367816091958,\"completed\":false,\"start\":\"2024-06-25T00:00:00\",\"finish\":\"2025-02-21T00:00:00\",\"yearWeekStart\":\"2024-26\",\"yearWeekFinish\":\"2025-8\",\"statusId\":7,\"isStatusIdChanged\":false,\"erpCode\":null,\"isErpCodeChanged\":false,\"disciplineId\":null,\"isDisciplineChanged\":false,\"organisationId\":3,\"isOrganisationChanged\":false,\"planningCode\":null,\"isPlanningCodeChanged\":false,\"isPlanningLevelChanged\":false,\"type\":\"Activity\",\"isDescriptionChanged\":false,\"description\":null,\"isActivityRemarkChanged\":false,\"isPlannedFinishChanged\":false,\"isPlannedStartChanged\":false,\"plannedFinish\":null,\"plannedStart\":null,\"isHoursBudgetChanged\":false,\"isHoursToGoChanged\":false,\"constraintDate\":null,\"isConstraintDateChanged\":false,\"constraintType\":\"AsSoonAsPossible\",\"objectiveDate\":null,\"isObjectiveDateChanged\":false,\"customPlanningMode\":null},{\"id\":357919,\"hoursBudget\":0,\"hoursWorked\":0,\"hoursToGo\":0,\"hoursPreCalculated\":0,\"hoursCalculated\":0,\"activityId\":336449,\"projectStatusId\":2,\"activityStatusId\":7,\"projectDescription\":\"WärtsiläDemo\",\"componentId\":12…"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/do/reporter/GetFilterData": {
+      "post": {
+        "summary": "POST /do/reporter/GetFilterData",
+        "tags": [
+          "do"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "showNonReleased": {
+                    "type": "boolean"
+                  },
+                  "showCompleted": {
+                    "type": "boolean"
+                  },
+                  "showAllOrganisations": {
+                    "type": "boolean"
+                  },
+                  "organisationIds": {
+                    "type": "array",
+                    "items": {
+                      "type": "integer"
+                    }
+                  },
+                  "projectIds": {
+                    "type": "array",
+                    "items": {}
+                  },
+                  "structureIds": {
+                    "type": "array",
+                    "items": {}
+                  },
+                  "activityPhaseIds": {
+                    "type": "array",
+                    "items": {}
+                  },
+                  "projectStatusIds": {
+                    "type": "array",
+                    "items": {}
+                  },
+                  "disciplineIds": {
+                    "type": "array",
+                    "items": {}
+                  },
+                  "ignoredStructureTypeIds": {
+                    "type": "array",
+                    "items": {}
+                  }
+                }
+              },
+              "example": {
+                "showNonReleased": true,
+                "showCompleted": true,
+                "showAllOrganisations": false,
+                "organisationIds": [
+                  3
+                ],
+                "projectIds": [],
+                "structureIds": [],
+                "activityPhaseIds": [],
+                "projectStatusIds": [],
+                "disciplineIds": [],
+                "ignoredStructureTypeIds": []
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "application/json; charset=utf-8",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                },
+                "example": "{\"organisationIds\":[23,9,109,89,3,52,26,12,6,43,55,21,121,58,101,7,44,1,24,93,18,110,41,104,4,96,79,19,25,105,42,5,56,null,53,102,77,17,40,11,111,54,103,120,20,8,51],\"projectIds\":[17,19,28,241,304,310,311,312,313,315,319,325,327,330,332,334,336,337,341],\"disciplineIds\":[null,2,12,36,37],\"structureIdPaths\":[[100],[100,129],[100,130],[137,139,140,141,144,157,165,166,167,168,183,184],[139,140,141,145,166,167],[139,140,141,157,165,166,167,168],[152],[154,164],[159,160,161,162],[159,160,161,162,163],[184],[185],[2475,2497],[2744],[2834],[97],[97,112],[97,113],[97,114],[97,115],[97,116],[97,117],[97,138],[98],[98,119],[98,120],[98,121],[98,122],[99],[99,123],[99,124],[99,125],[99,126],[99,127]],\"activityPhaseIds\":[null],\"projectStatusIds\":[1,2]}"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/Do/EmployeeTimesheet/ReadPersonTimeSheet?dateForTimeSheet=2026-06-15": {
+      "get": {
+        "summary": "GET /Do/EmployeeTimesheet/ReadPersonTimeSheet?dateForTimeSheet=2026-06-15",
+        "tags": [
+          "Do"
+        ],
+        "responses": {
+          "200": {
+            "description": "application/json; charset=utf-8",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                },
+                "example": "{\"clockedHoursSunday\":{\"total\":0,\"firstIn\":null,\"lastOut\":null},\"clockedHoursMonday\":{\"total\":0,\"firstIn\":null,\"lastOut\":null},\"clockedHoursTuesday\":{\"total\":0,\"firstIn\":null,\"lastOut\":null},\"clockedHoursWednesday\":{\"total\":0,\"firstIn\":null,\"lastOut\":null},\"clockedHoursThursday\":{\"total\":0,\"firstIn\":null,\"lastOut\":null},\"clockedHoursFriday\":{\"total\":0,\"firstIn\":null,\"lastOut\":null},\"clockedHoursSaturday\":{\"total\":0,\"firstIn\":null,\"lastOut\":null},\"timesheetWeek\":{\"monday\":{\"statusDescription\":null,\"needsApproval\":false,\"hasOverwork\":false,\"canEdit\":true,\"canApprove\":false,\"canUnapprove\":false,\"isDeclined\":false,\"hasHoursMismatch\":false},\"tuesday\":{\"statusDescription\":null,\"needsApproval\":false,\"hasOverwork\":false,\"canEdit\":true,\"canApprove\":false,\"canUnapprove\":false,\"isDeclined\":false,\"hasHoursMismatch\":false},\"wednesday\":{\"statusDescription\":null,\"needsApproval\":false,\"hasOverwork\":false,\"canEdit\":true,\"canApprove\":false,\"canUnapprove\":false,\"isDeclined\":false,\"hasHoursMismatch\":false},\"thursday\":{\"statusDescription\":null,\"needsApproval\":false,\"hasOverwork\":false,\"canEdit\":true,\"canApprove\":false,\"canUnapprove\":false,\"isDeclined\":false,\"hasHoursMismatch\":false},\"friday\":{\"statusDescription\":null,\"needsApproval\":false,\"hasOverwork\":false,\"canEdit\":true,\"canApprove\":false,\"canUnapprove\":false,\"isDeclined\":false,\"hasHoursMismatch\":false},\"saturday\":{\"statusDescription\":null,\"needsApproval\":false,\"hasOverwork\":false,\"canEdit\":true,\"canApprove\":false,\"canUnapprove\":false,\"isDeclined\":false,\"hasHoursMismatch\":false},\"sunday\":{\"statusDescription\":null,\"needsApproval\":false,\"hasOverwork\":false,\"canEdit\":true,\"canApprove\":false,\"canUnapprove\":false,\"isDeclined\":false,\"hasHoursMismatch\":false}},\"weeks\":[{\"week\":25,\"year\":2026,\"isCurrent\":true,\"yearWeek\":2625,\"weekYearString\":\"25 - 2026\",\"yearWeekString\":\"2026-25\",\"days\":[{\"date\":\"2026-06-15T00:00:00\",\"day\":15,\"week\":25,\"year\":2026,\"yearWeekDay\":262515,\"isCurrent\":true,\"dateString\":\"Monday, 15 June 2026\",\"dayString\":\"Mon\"},{\"date\":\"2026-06-16T00:00:00\",\"day\":16,\"week\":25,\"year\":2026,\"yearWeekDay\":262516,\"isCurrent\":false,\"dateString\":\"Tuesday, 16 June 2026\",\"dayString\":\"Tue\"},{\"date\":\"2026-06-17T00:00:00\",\"day\":17,\"week\":25,\"year\":2026,\"yearWeekDay\":262517,\"isCurrent\":false,\"dateString\":\"Wednesday, 17 June 2026\",\"dayString\":\"Wed\"},{\"date\":\"2026-06-18T00:00:00\",\"day\":18,\"week\":25,\"year\":2026,\"yearWeekDay\":262518,\"isCurrent\":false,\"dateString\":\"Thursday, 18 June 2026\",\"dayString\":\"Thu\"},{\"date\":\"2026-06-19T00:00:00\",\"day\":19,\"week\":25,\"year\":2026,\"yearWeekDay\":262519,\"isCurrent\":false,\"dateString\":\"Friday, 19 June 2026\",\"dayString\":\"Fri\"},{\"date\":\"2026-06-20T00:00:00\",\"day\":20,\"week\":25,\"year\":2026,\"yearWeekDay\":262520,\"isCurrent\":false,\"dateString\":\"Saturday, 20 June 2026\",\"dayString\":\"Sat\"},{\"date\":\"2026-06-21T00:00:00\",\"day\":21,\"week\":25,\"year\":2026,\"yearWeekDay\":262521,\"isCurrent\":false,\"dateString\":\"Sunday, 21 June 2026\",\"dayString\":\"Sun\"}],\"firstDayOfWeek\":\"2026-06-15T00:00:00\",\"lastDayOfWeek\":\"2026-06-21T00:00:00\"}],\"id\":490,\"dateMonday\":\"2026-06-15T00:00:00\",\"date\":\"2026-06-15T00:00:00\",\"dayOfWeek\":1,\"weekNumber\":25,\"year\":2026,\"organisationId\":3,\"personId\":397,\"statusId\":0,\"status\":\"NotExisting\",\"statusDescription\":null,\"remark\":null,\"remainder\":0,\"hasClockedToday\":false,\"sumMonday\":0,\"sumTuesday\":0,\"sumWednesday\":0,\"sumThursday\":0,\"sumFriday\":0,\"sumSaturday\":0,\"sumSunday\":0,\"sumTotal\":0,\"hoursPerWeek\":40,\"workTypeId\":0,\"hourTypeId\":0,\"additionId\":0,\"team\":null,\"canApprove\":false,\"canUnapprove\":false,\"canEdit\":true,\"isRemarkChangeHoursRequired\":false,\"isDeclined\":false,\"hasHoursMismatch\":false,\"correctedClockInTime\":null,\"correctedClockOutTime\":null,\"clockedHours\":null,\"person\":{\"id\":397,\"code\":null,\"erpCode\":null,\"projectId\":0,\"firstName\":\"test\",\"middleName\":null,\"lastName\":\"test\",\"fullName\":\"test test\",\"email\":null,\"phoneNumber\":null,\"remark\":null,\"disciplineId\":0,\"disciplineDescription\":null,\"enabled\":true,\"inEducation\":false,\"canBookIndirectHours\":false,\"canBookEducationHours…"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/Do/EmployeeTimesheet/ReadInitData": {
+      "post": {
+        "summary": "POST /Do/EmployeeTimesheet/ReadInitData",
+        "tags": [
+          "Do"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "filterParams": {
+                    "type": "object",
+                    "properties": {
+                      "viewConfiguration": {
+                        "type": "string"
+                      },
+                      "organisationIds": {
+                        "type": "array",
+                        "items": {}
+                      },
+                      "Started": {
+                        "type": "boolean"
+                      },
+                      "personIds": {
+                        "type": "array",
+                        "items": {
+                          "type": "integer"
+                        }
+                      }
+                    }
+                  },
+                  "date": {
+                    "type": "string"
+                  }
+                }
+              },
+              "example": {
+                "filterParams": {
+                  "viewConfiguration": "EmployeeTimesheetAssignmentsAssigned",
+                  "organisationIds": [],
+                  "Started": true,
+                  "personIds": [
+                    397
+                  ]
+                },
+                "date": "2026-06-15"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "application/json; charset=utf-8",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                },
+                "example": "{\"result\":{\"projects\":[],\"structureFilter\":[],\"tasks\":[]},\"structureTypeIdsInPath\":[3,7]}"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/NewsFeed/GetCurrent": {
+      "get": {
+        "summary": "GET /NewsFeed/GetCurrent",
+        "tags": [
+          "NewsFeed"
+        ],
+        "responses": {
+          "200": {
+            "description": "application/json; charset=utf-8",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                },
+                "example": "[]"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/Structure/path?organisationIds=3": {
+      "get": {
+        "summary": "GET /Structure/path?organisationIds=3",
+        "tags": [
+          "Structure"
+        ],
+        "responses": {
+          "200": {
+            "description": "application/json; charset=utf-8",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                },
+                "example": "[{\"pathForId\":3,\"structureTypes\":[{\"id\":3,\"description\":\"Block\",\"abbreviation\":null,\"icon\":\"blk\",\"perProject\":true,\"enabled\":true,\"leavesOnly\":true,\"via\":\"Component\",\"sequence\":2,\"inheritable\":true,\"labelFormat\":null,\"shortLabelFormat\":null,\"systemName\":null,\"structures\":[]},{\"id\":7,\"description\":\"Unit\",\"abbreviation\":null,\"icon\":\"sct\",\"perProject\":true,\"enabled\":true,\"leavesOnly\":true,\"via\":\"Component\",\"sequence\":7,\"inheritable\":true,\"labelFormat\":null,\"shortLabelFormat\":null,\"systemName\":null,\"structures\":[]}]}]"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/Do/Floorboard/GetComponents": {
+      "post": {
+        "summary": "POST /Do/Floorboard/GetComponents",
+        "tags": [
+          "Do"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "ViewConfiguration": {
+                    "type": "string"
+                  },
+                  "organisationIds": {
+                    "type": "array",
+                    "items": {
+                      "type": "integer"
+                    }
+                  },
+                  "period": {
+                    "type": "object",
+                    "properties": {
+                      "end": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              },
+              "example": {
+                "ViewConfiguration": "FloorboardActivities",
+                "organisationIds": [
+                  3
+                ],
+                "period": {
+                  "end": "2026-07-27T17:55:26.272Z"
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "application/json; charset=utf-8",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                },
+                "example": "{\"components\":[{\"id\":133441,\"description\":\"15- MIDBODY BLOCK\",\"remark\":null,\"typeId\":2,\"componentId\":133441,\"progress\":0,\"progressTimes100\":0,\"organisationId\":3,\"organisationLabel\":\"10: Engineering\",\"projectId\":28,\"projectDescription\":\"Easy Dredge TSHD\",\"statusTypeId\":null,\"statusColor\":null,\"statusMessage\":null,\"text1\":\"\",\"text2\":\"\",\"text3\":\"\",\"text4\":\"\",\"text5\":\"\",\"text6\":\"\",\"text7\":\"\",\"text8\":\"\",\"text9\":\"\",\"text10\":\"\",\"boolean1\":null,\"boolean2\":null,\"boolean3\":null,\"boolean4\":null,\"boolean5\":null,\"abbreviation\":\"Ac\",\"structures\":[{\"id\":185,\"icon\":null,\"sequence\":0,\"shortName\":\"B15\",\"description\":\"B15\",\"projectDescription\":\"Easy Dredge TSHD\",\"remark\":null,\"typeId\":3,\"projectId\":28,\"parentId\":null,\"enabled\":true,\"createdOn\":\"0001-01-01T00:00:00\",\"createdBy\":null,\"cacheIcon\":null,\"sourceComponentId\":null,\"sourceComponentLabel\":null,\"externalLinkUri\":null,\"externalLinkIcon\":null,\"treeId\":\"185_Structure\"}],\"componentImageId\":null},{\"id\":132239,\"description\":\"3788-623-0202 (lay-out)\",\"remark\":null,\"typeId\":33,\"componentId\":132239,\"progress\":0,\"progressTimes100\":0,\"organisationId\":3,\"organisationLabel\":\"10: Engineering\",\"projectId\":28,\"projectDescription\":\"Easy Dredge TSHD\",\"statusTypeId\":null,\"statusColor\":null,\"statusMessage\":null,\"text1\":\"\",\"text2\":\"\",\"text3\":\"\",\"text4\":\"\",\"text5\":\"\",\"text6\":\"\",\"text7\":\"\",\"text8\":\"\",\"text9\":\"\",\"text10\":\"\",\"boolean1\":null,\"boolean2\":null,\"boolean3\":null,\"boolean4\":null,\"boolean5\":null,\"abbreviation\":\"Ac\",\"structures\":[{\"id\":154,\"icon\":null,\"sequence\":0,\"shortName\":null,\"description\":\"C\",\"projectDescription\":\"Easy Dredge TSHD\",\"remark\":null,\"typeId\":2,\"projectId\":28,\"parentId\":null,\"enabled\":true,\"createdOn\":\"0001-01-01T00:00:00\",\"createdBy\":null,\"cacheIcon\":null,\"sourceComponentId\":null,\"sourceComponentLabel\":null,\"externalLinkUri\":null,\"externalLinkIcon\":null,\"treeId\":\"154_Structure\"},{\"id\":164,\"icon\":null,\"sequence\":0,\"shortName\":\"Magazijn\",\"description\":\"Magazijn\",\"projectDescription\":\"Easy Dredge TSHD\",\"remark\":null,\"typeId\":1,\"projectId\":28,\"parentId\":null,\"enabled\":true,\"createdOn\":\"0001-01-01T00:00:00\",\"createdBy\":null,\"cacheIcon\":null,\"sourceComponentId\":null,\"sourceComponentLabel\":null,\"externalLinkUri\":null,\"externalLinkIcon\":null,\"treeId\":\"164_Structure\"}],\"componentImageId\":null},{\"id\":132262,\"description\":\"3788-623-0202 (lay-out)\",\"remark\":null,\"typeId\":8,\"componentId\":132262,\"progress\":0,\"progressTimes100\":0,\"organisationId\":3,\"organisationLabel\":\"10: Engineering\",\"projectId\":28,\"projectDescription\":\"Easy Dredge TSHD\",\"statusTypeId\":null,\"statusColor\":null,\"statusMessage\":null,\"text1\":\"\",\"text2\":\"\",\"text3\":\"\",\"text4\":\"\",\"text5\":\"\",\"text6\":\"\",\"text7\":\"\",\"text8\":\"\",\"text9\":\"\",\"text10\":\"\",\"boolean1\":null,\"boolean2\":null,\"boolean3\":null,\"boolean4\":null,\"boolean5\":null,\"abbreviation\":\"Ac\",\"structures\":[{\"id\":152,\"icon\":null,\"sequence\":0,\"shortName\":null,\"description\":\"B35\",\"projectDescription\":\"Easy Dredge TSHD\",\"remark\":null,\"typeId\":2,\"projectId\":28,\"parentId\":null,\"enabled\":true,\"createdOn\":\"0001-01-01T00:00:00\",\"createdBy\":null,\"cacheIcon\":null,\"sourceComponentId\":null,\"sourceComponentLabel\":null,\"externalLinkUri\":null,\"externalLinkIcon\":null,\"treeId\":\"152_Structure\"}],\"componentImageId\":null},{\"id\":130023,\"description\":\"801-009A\",\"remark\":null,\"typeId\":8,\"componentId\":130023,\"progress\":0.6300578034682088,\"progressTimes100\":63.005780346820885,\"organisationId\":3,\"organisationLabel\":\"10: Engineering\",\"projectId\":17,\"projectDescription\":\"WärtsiläDemo\",\"statusTypeId\":null,\"statusColor\":null,\"statusMessage\":null,\"text1\":\"\",\"text2\":\"\",\"text3\":\"\",\"text4\":\"\",\"text5\":\"\",\"text6\":\"\",\"text7\":\"\",\"text8\":\"\",\"text9\":\"\",\"text10\":\"\",\"boolean1\":null,\"boolean2\":null,\"boolean3\":null,\"boolean4\":null,\"boolean5\":null,\"abbreviation\":\"Ac\",\"structures\":[{\"id\":159,\"icon\":null,\"sequence\":0,\"shortName\":null,\"description\":\"Room \",\"projectDescription\":\"WärtsiläDemo\",\"remark\":null,\"typeId\":9,\"projectId\":17,\"parentId\":null,\"enabled\":true,\"createdOn\":\"0001-01-01T00:00:00\",\"createdBy\":null,\"cacheIcon\":null,\"sourceCom…"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/Do/Floorboard/GetDepartmentStats?organisationId=3": {
+      "get": {
+        "summary": "GET /Do/Floorboard/GetDepartmentStats?organisationId=3",
+        "tags": [
+          "Do"
+        ],
+        "responses": {
+          "200": {
+            "description": "application/json; charset=utf-8",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                },
+                "example": "[{\"showAsPercentage\":false,\"showWithoutTotal\":false,\"name\":\"Hours budgeted/available hours\",\"description\":\"Average hours per week for the next two weeks.\",\"amount\":0,\"displayAmount\":null,\"totalAmount\":110,\"amountSplit\":0,\"statusSplit\":\"Default\",\"statusRanges\":[{\"status\":\"Warning\",\"first\":0,\"last\":110}],\"status\":\"Warning\"},{\"showAsPercentage\":false,\"showWithoutTotal\":false,\"name\":\"Hours to go/available hours\",\"description\":\"Average hours per week for the next two weeks.\",\"amount\":10069,\"displayAmount\":null,\"totalAmount\":110,\"amountSplit\":0,\"statusSplit\":\"Default\",\"statusRanges\":[{\"status\":\"Warning\",\"first\":0,\"last\":110}],\"status\":\"Danger\"}]"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/PersonManagement/GetWeeks?deltaEnd=3&deltaStart=-3&yearWeek=2625": {
+      "get": {
+        "summary": "GET /PersonManagement/GetWeeks?deltaEnd=3&deltaStart=-3&yearWeek=2625",
+        "tags": [
+          "PersonManagement"
+        ],
+        "responses": {
+          "200": {
+            "description": "application/json; charset=utf-8",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                },
+                "example": "[{\"week\":22,\"year\":26,\"isCurrent\":false,\"yearWeek\":2622,\"weekYearString\":\"22 - 26\",\"yearWeekString\":\"26-22\",\"days\":null,\"firstDayOfWeek\":\"2026-05-25T00:00:00\",\"lastDayOfWeek\":\"2026-05-31T00:00:00\"},{\"week\":23,\"year\":26,\"isCurrent\":false,\"yearWeek\":2623,\"weekYearString\":\"23 - 26\",\"yearWeekString\":\"26-23\",\"days\":null,\"firstDayOfWeek\":\"2026-06-01T00:00:00\",\"lastDayOfWeek\":\"2026-06-07T00:00:00\"},{\"week\":24,\"year\":26,\"isCurrent\":false,\"yearWeek\":2624,\"weekYearString\":\"24 - 26\",\"yearWeekString\":\"26-24\",\"days\":null,\"firstDayOfWeek\":\"2026-06-08T00:00:00\",\"lastDayOfWeek\":\"2026-06-14T00:00:00\"},{\"week\":25,\"year\":26,\"isCurrent\":true,\"yearWeek\":2625,\"weekYearString\":\"25 - 26\",\"yearWeekString\":\"26-25\",\"days\":null,\"firstDayOfWeek\":\"2026-06-15T00:00:00\",\"lastDayOfWeek\":\"2026-06-21T00:00:00\"},{\"week\":26,\"year\":26,\"isCurrent\":false,\"yearWeek\":2626,\"weekYearString\":\"26 - 26\",\"yearWeekString\":\"26-26\",\"days\":null,\"firstDayOfWeek\":\"2026-06-22T00:00:00\",\"lastDayOfWeek\":\"2026-06-28T00:00:00\"},{\"week\":27,\"year\":26,\"isCurrent\":false,\"yearWeek\":2627,\"weekYearString\":\"27 - 26\",\"yearWeekString\":\"26-27\",\"days\":null,\"firstDayOfWeek\":\"2026-06-29T00:00:00\",\"lastDayOfWeek\":\"2026-07-05T00:00:00\"},{\"week\":28,\"year\":26,\"isCurrent\":false,\"yearWeek\":2628,\"weekYearString\":\"28 - 26\",\"yearWeekString\":\"26-28\",\"days\":null,\"firstDayOfWeek\":\"2026-07-06T00:00:00\",\"lastDayOfWeek\":\"2026-07-12T00:00:00\"}]"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/Allocation/ReadOrganisationAllocationsForPeriod?end=2026-06-21&onlyTemp=true&start=2026-06-15": {
+      "get": {
+        "summary": "GET /Allocation/ReadOrganisationAllocationsForPeriod?end=2026-06-21&onlyTemp=true&start=2026-06-15",
+        "tags": [
+          "Allocation"
+        ],
+        "responses": {
+          "200": {
+            "description": "application/json; charset=utf-8",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                },
+                "example": "[{\"id\":1728,\"hoursPerWeek\":40,\"start\":\"2026-06-08T00:00:00\",\"end\":null,\"personId\":100,\"organisationId\":5,\"projectId\":null,\"assignmentId\":null,\"roleId\":null,\"parentId\":505}]"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/OptionList/OrganisationOptions?viewConfiguration=OrganisationPersonsFilter": {
+      "get": {
+        "summary": "GET /OptionList/OrganisationOptions?viewConfiguration=OrganisationPersonsFilter",
+        "tags": [
+          "OptionList"
+        ],
+        "responses": {
+          "200": {
+            "description": "application/json; charset=utf-8",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                },
+                "example": "[{\"id\":3,\"description\":\"10: Engineering\",\"sequence\":0,\"enabled\":true,\"displayName\":\"10: Engineering\",\"color\":null}]"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/PersonManagement/ReadExtended?end=2026-06-21&hasDefaultAllocation=true&start=2026-06-15": {
+      "get": {
+        "summary": "GET /PersonManagement/ReadExtended?end=2026-06-21&hasDefaultAllocation=true&start=2026-06-15",
+        "tags": [
+          "PersonManagement"
+        ],
+        "responses": {
+          "200": {
+            "description": "application/json; charset=utf-8",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                },
+                "example": "[{\"id\":95,\"code\":\"\",\"erpCode\":\"PRS.CC.95\",\"projectId\":0,\"firstName\":\"Arnold\",\"middleName\":\"\",\"lastName\":\"-\",\"fullName\":\"Arnold -\",\"email\":null,\"phoneNumber\":null,\"remark\":\"\",\"disciplineId\":0,\"disciplineDescription\":null,\"enabled\":true,\"inEducation\":false,\"canBookIndirectHours\":false,\"canBookEducationHours\":false,\"isContractor\":false,\"isDefault\":false,\"rfidCode\":null,\"organisationId\":0,\"currentOrganisationId\":0,\"currentOrganisationDescription\":null,\"defaultOrganisationId\":1,\"defaultOrganisationDescription\":null,\"defaultOrganisationStartDate\":null,\"defaultOrganisationAllocationId\":1056,\"username\":null,\"roleIds\":null,\"roleNames\":null,\"disciplineIds\":[],\"autoBookHoursMode\":\"OnClockOut\",\"cacheCanAutoBookHours\":false,\"autoBookAssignmentDescription\":null,\"organisationAllocations\":[],\"projectAllocations\":[]},{\"id\":34,\"code\":\"\",\"erpCode\":\"PRS.CC.34\",\"projectId\":0,\"firstName\":\"Laborer Ironwork\",\"middleName\":\"\",\"lastName\":\"#1\",\"fullName\":\"Laborer Ironwork #1\",\"email\":null,\"phoneNumber\":null,\"remark\":\"\",\"disciplineId\":4,\"disciplineDescription\":null,\"enabled\":true,\"inEducation\":false,\"canBookIndirectHours\":false,\"canBookEducationHours\":false,\"isContractor\":false,\"isDefault\":false,\"rfidCode\":null,\"organisationId\":1,\"currentOrganisationId\":0,\"currentOrganisationDescription\":null,\"defaultOrganisationId\":1,\"defaultOrganisationDescription\":null,\"defaultOrganisationStartDate\":null,\"defaultOrganisationAllocationId\":316,\"username\":null,\"roleIds\":null,\"roleNames\":null,\"disciplineIds\":[4],\"autoBookHoursMode\":\"OnClockOut\",\"cacheCanAutoBookHours\":false,\"autoBookAssignmentDescription\":null,\"organisationAllocations\":[],\"projectAllocations\":[]},{\"id\":35,\"code\":\"\",\"erpCode\":\"PRS.CC.35\",\"projectId\":0,\"firstName\":\"Laborer Ironwork\",\"middleName\":\"\",\"lastName\":\"#2\",\"fullName\":\"Laborer Ironwork #2\",\"email\":null,\"phoneNumber\":null,\"remark\":\"\",\"disciplineId\":4,\"disciplineDescription\":null,\"enabled\":true,\"inEducation\":false,\"canBookIndirectHours\":false,\"canBookEducationHours\":false,\"isContractor\":false,\"isDefault\":false,\"rfidCode\":null,\"organisationId\":1,\"currentOrganisationId\":0,\"currentOrganisationDescription\":null,\"defaultOrganisationId\":1,\"defaultOrganisationDescription\":null,\"defaultOrganisationStartDate\":null,\"defaultOrganisationAllocationId\":315,\"username\":null,\"roleIds\":null,\"roleNames\":null,\"disciplineIds\":[4],\"autoBookHoursMode\":\"OnClockOut\",\"cacheCanAutoBookHours\":false,\"autoBookAssignmentDescription\":null,\"organisationAllocations\":[],\"projectAllocations\":[]},{\"id\":96,\"code\":\"\",\"erpCode\":\"PRS.CC.96\",\"projectId\":0,\"firstName\":\"Engineer\",\"middleName\":\"\",\"lastName\":\"1\",\"fullName\":\"Engineer 1\",\"email\":\"william@floorganise.com\",\"phoneNumber\":null,\"remark\":\"\",\"disciplineId\":0,\"disciplineDescription\":null,\"enabled\":true,\"inEducation\":false,\"canBookIndirectHours\":false,\"canBookEducationHours\":false,\"isContractor\":false,\"isDefault\":false,\"rfidCode\":null,\"organisationId\":0,\"currentOrganisationId\":0,\"currentOrganisationDescription\":null,\"defaultOrganisationId\":1,\"defaultOrganisationDescription\":null,\"defaultOrganisationStartDate\":null,\"defaultOrganisationAllocationId\":1084,\"username\":null,\"roleIds\":null,\"roleNames\":null,\"disciplineIds\":[],\"autoBookHoursMode\":\"OnClockOut\",\"cacheCanAutoBookHours\":false,\"autoBookAssignmentDescription\":null,\"organisationAllocations\":[],\"projectAllocations\":[]},{\"id\":385,\"code\":null,\"erpCode\":null,\"projectId\":0,\"firstName\":\"User\",\"middleName\":null,\"lastName\":\"2121\",\"fullName\":\"User 2121\",\"email\":null,\"phoneNumber\":null,\"remark\":null,\"disciplineId\":0,\"disciplineDescription\":null,\"enabled\":true,\"inEducation\":false,\"canBookIndirectHours\":false,\"canBookEducationHours\":false,\"isContractor\":false,\"isDefault\":false,\"rfidCode\":null,\"organisationId\":5,\"currentOrganisationId\":0,\"currentOrganisationDescription\":null,\"defaultOrganisationId\":5,\"defaultOrganisationDescription\":null,\"defaultOrganisationStartDate\":null,\"defaultOrganisationAllocationId\":1564,\"username\":null,\"roleIds\":null,\"roleNames\":null,\"disciplineIds\":[],\"autoBookHoursMode\":\"OnCloc…"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/OptionList/ClockTypeOptions": {
+      "get": {
+        "summary": "GET /OptionList/ClockTypeOptions",
+        "tags": [
+          "OptionList"
+        ],
+        "responses": {
+          "200": {
+            "description": "application/json; charset=utf-8",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                },
+                "example": "[{\"id\":1,\"description\":\"Floor2Plan\",\"sequence\":1,\"enabled\":true,\"displayName\":\"Floor2Plan\",\"color\":null}]"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/OptionList/OrganisationOptions": {
+      "get": {
+        "summary": "GET /OptionList/OrganisationOptions",
+        "tags": [
+          "OptionList"
+        ],
+        "responses": {
+          "200": {
+            "description": "application/json; charset=utf-8",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                },
+                "example": "[{\"id\":3,\"description\":\"10: Engineering\",\"sequence\":0,\"enabled\":true,\"displayName\":\"10: Engineering\",\"color\":null}]"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/OptionList/OrganisationOptions?viewConfiguration=ContractOrganisation": {
+      "get": {
+        "summary": "GET /OptionList/OrganisationOptions?viewConfiguration=ContractOrganisation",
+        "tags": [
+          "OptionList"
+        ],
+        "responses": {
+          "200": {
+            "description": "application/json; charset=utf-8",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                },
+                "example": "[{\"id\":3,\"description\":\"10: Engineering\",\"sequence\":0,\"enabled\":true,\"displayName\":\"10: Engineering\",\"color\":null}]"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/OptionList/HourTypeOptions?viewConfiguration=All": {
+      "get": {
+        "summary": "GET /OptionList/HourTypeOptions?viewConfiguration=All",
+        "tags": [
+          "OptionList"
+        ],
+        "responses": {
+          "200": {
+            "description": "application/json; charset=utf-8",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                },
+                "example": "[{\"id\":1,\"description\":\"normal\",\"isDefault\":false,\"isOvertime\":false},{\"id\":2,\"description\":\"Overtime 1\",\"isDefault\":false,\"isOvertime\":true},{\"id\":5,\"description\":\"Overtime 2\",\"isDefault\":false,\"isOvertime\":true},{\"id\":4,\"description\":\"Special (shifts)\",\"isDefault\":false,\"isOvertime\":false},{\"id\":3,\"description\":\"weekend\",\"isDefault\":false,\"isOvertime\":false}]"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/Hr/ClockingTerminal/ReadPersonalDailyClockTimes": {
+      "post": {
+        "summary": "POST /Hr/ClockingTerminal/ReadPersonalDailyClockTimes",
+        "tags": [
+          "Hr"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "filters": {
+                    "type": "object",
+                    "properties": {
+                      "from": {
+                        "type": "string"
+                      },
+                      "to": {
+                        "type": "string"
+                      },
+                      "organisationIds": {
+                        "type": "array",
+                        "items": {
+                          "type": "integer"
+                        }
+                      },
+                      "contractOrganisationIds": {
+                        "type": "array",
+                        "items": {}
+                      },
+                      "onlyAbnormalities": {
+                        "type": "boolean"
+                      },
+                      "clockTypeIds": {
+                        "type": "array",
+                        "items": {}
+                      }
+                    }
+                  },
+                  "dataSourceRequest": {
+                    "type": "object",
+                    "properties": {
+                      "sort": {
+                        "type": "string"
+                      },
+                      "page": {
+                        "type": "integer"
+                      },
+                      "pageSize": {
+                        "type": "integer"
+                      },
+                      "group": {
+                        "type": "string"
+                      },
+                      "filter": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              },
+              "example": {
+                "filters": {
+                  "from": "2026-06-15",
+                  "to": "2026-06-21",
+                  "organisationIds": [
+                    3
+                  ],
+                  "contractOrganisationIds": [],
+                  "onlyAbnormalities": false,
+                  "clockTypeIds": []
+                },
+                "dataSourceRequest": {
+                  "sort": "date-asc~cacheFullName-asc",
+                  "page": 1,
+                  "pageSize": 25,
+                  "group": "",
+                  "filter": ""
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "application/json; charset=utf-8",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                },
+                "example": "{\"data\":[],\"total\":0,\"aggregateResults\":null,\"errors\":null}"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/Do/WeeklyTimesheet/GetTimesheetStatusFilterOptions": {
+      "get": {
+        "summary": "GET /Do/WeeklyTimesheet/GetTimesheetStatusFilterOptions",
+        "tags": [
+          "Do"
+        ],
+        "responses": {
+          "200": {
+            "description": "application/json; charset=utf-8",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                },
+                "example": "[{\"colorLabelClass\":\"status-none\",\"id\":1,\"description\":\"Employee not present\",\"sequence\":0,\"enabled\":false,\"displayName\":\"Employee not present\",\"color\":null},{\"colorLabelClass\":\"clocked-hours\",\"id\":2,\"description\":\"Missing information\",\"sequence\":0,\"enabled\":false,\"displayName\":\"Missing information\",\"color\":null},{\"colorLabelClass\":\"hours-mismatch\",\"id\":7,\"description\":\"Hours mismatch\",\"sequence\":0,\"enabled\":false,\"displayName\":\"Hours mismatch\",\"color\":null},{\"colorLabelClass\":\"ExistsHours\",\"id\":4,\"description\":\"Requires approval\",\"sequence\":0,\"enabled\":false,\"displayName\":\"Requires approval\",\"color\":null},{\"colorLabelClass\":\" signed\",\"id\":3,\"description\":\"Approved\",\"sequence\":0,\"enabled\":false,\"displayName\":\"Approved\",\"color\":null},{\"colorLabelClass\":\" sent\",\"id\":6,\"description\":\"Approved by administration\",\"sequence\":0,\"enabled\":false,\"displayName\":\"Approved by administration\",\"color\":null},{\"colorLabelClass\":\" declined\",\"id\":5,\"description\":\"Declined\",\"sequence\":0,\"enabled\":false,\"displayName\":\"Declined\",\"color\":null}]"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/Do/WeeklyTimesheet/ReadHistory": {
+      "post": {
+        "summary": "POST /Do/WeeklyTimesheet/ReadHistory",
+        "tags": [
+          "Do"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "start": {
+                    "type": "string"
+                  },
+                  "end": {
+                    "type": "string"
+                  },
+                  "filteredStatuses": {
+                    "type": "array",
+                    "items": {}
+                  },
+                  "weeks": {
+                    "type": "array",
+                    "items": {}
+                  },
+                  "contractOrganisationIds": {
+                    "type": "array",
+                    "items": {}
+                  },
+                  "disciplineIds": {
+                    "type": "array",
+                    "items": {}
+                  }
+                }
+              },
+              "example": {
+                "start": "2026-05-18",
+                "end": "2026-07-05",
+                "filteredStatuses": [],
+                "weeks": [],
+                "contractOrganisationIds": [],
+                "disciplineIds": []
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "application/json; charset=utf-8",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                },
+                "example": "{\"persons\":[{\"weeks\":[{\"hasClockedHours\":false,\"hoursInWeek\":0,\"isCurrent\":false,\"sequence\":1,\"status\":\"NotExisting\",\"yearWeek\":2621,\"hasValidAllocation\":true,\"hasHoursMismatch\":false},{\"hasClockedHours\":false,\"hoursInWeek\":0,\"isCurrent\":false,\"sequence\":2,\"status\":\"NotExisting\",\"yearWeek\":2622,\"hasValidAllocation\":true,\"hasHoursMismatch\":false},{\"hasClockedHours\":false,\"hoursInWeek\":0,\"isCurrent\":false,\"sequence\":3,\"status\":\"NotExisting\",\"yearWeek\":2623,\"hasValidAllocation\":true,\"hasHoursMismatch\":false},{\"hasClockedHours\":false,\"hoursInWeek\":0,\"isCurrent\":false,\"sequence\":4,\"status\":\"NotExisting\",\"yearWeek\":2624,\"hasValidAllocation\":true,\"hasHoursMismatch\":false},{\"hasClockedHours\":false,\"hoursInWeek\":0,\"isCurrent\":true,\"sequence\":5,\"status\":\"NotExisting\",\"yearWeek\":2625,\"hasValidAllocation\":true,\"hasHoursMismatch\":false},{\"hasClockedHours\":false,\"hoursInWeek\":0,\"isCurrent\":false,\"sequence\":6,\"status\":\"NotExisting\",\"yearWeek\":2626,\"hasValidAllocation\":true,\"hasHoursMismatch\":false},{\"hasClockedHours\":false,\"hoursInWeek\":0,\"isCurrent\":false,\"sequence\":7,\"status\":\"NotExisting\",\"yearWeek\":2627,\"hasValidAllocation\":true,\"hasHoursMismatch\":false}],\"defaultDisciplineId\":11,\"disciplineIds\":[11],\"erpCode\":\"PRS.CC.14\",\"fullName\":\"Amer Kalla\",\"id\":14,\"lastName\":\"Kalla\"},{\"weeks\":[{\"hasClockedHours\":false,\"hoursInWeek\":4,\"isCurrent\":false,\"sequence\":1,\"status\":\"NeedsApproval\",\"yearWeek\":2621,\"hasValidAllocation\":true,\"hasHoursMismatch\":false},{\"hasClockedHours\":false,\"hoursInWeek\":0,\"isCurrent\":false,\"sequence\":2,\"status\":\"NotExisting\",\"yearWeek\":2622,\"hasValidAllocation\":true,\"hasHoursMismatch\":false},{\"hasClockedHours\":false,\"hoursInWeek\":0,\"isCurrent\":false,\"sequence\":3,\"status\":\"NotExisting\",\"yearWeek\":2623,\"hasValidAllocation\":true,\"hasHoursMismatch\":false},{\"hasClockedHours\":false,\"hoursInWeek\":0,\"isCurrent\":false,\"sequence\":4,\"status\":\"NotExisting\",\"yearWeek\":2624,\"hasValidAllocation\":true,\"hasHoursMismatch\":false},{\"hasClockedHours\":false,\"hoursInWeek\":0,\"isCurrent\":true,\"sequence\":5,\"status\":\"NotExisting\",\"yearWeek\":2625,\"hasValidAllocation\":true,\"hasHoursMismatch\":false},{\"hasClockedHours\":false,\"hoursInWeek\":0,\"isCurrent\":false,\"sequence\":6,\"status\":\"NotExisting\",\"yearWeek\":2626,\"hasValidAllocation\":true,\"hasHoursMismatch\":false},{\"hasClockedHours\":false,\"hoursInWeek\":0,\"isCurrent\":false,\"sequence\":7,\"status\":\"NotExisting\",\"yearWeek\":2627,\"hasValidAllocation\":true,\"hasHoursMismatch\":false}],\"defaultDisciplineId\":0,\"disciplineIds\":[],\"erpCode\":null,\"fullName\":\"Engineer A\",\"id\":356,\"lastName\":\"A\"},{\"weeks\":[{\"hasClockedHours\":false,\"hoursInWeek\":0,\"isCurrent\":false,\"sequence\":1,\"status\":\"NotExisting\",\"yearWeek\":2621,\"hasValidAllocation\":true,\"hasHoursMismatch\":false},{\"hasClockedHours\":false,\"hoursInWeek\":0,\"isCurrent\":false,\"sequence\":2,\"status\":\"NotExisting\",\"yearWeek\":2622,\"hasValidAllocation\":true,\"hasHoursMismatch\":false},{\"hasClockedHours\":false,\"hoursInWeek\":0,\"isCurrent\":false,\"sequence\":3,\"status\":\"NotExisting\",\"yearWeek\":2623,\"hasValidAllocation\":true,\"hasHoursMismatch\":false},{\"hasClockedHours\":false,\"hoursInWeek\":0,\"isCurrent\":false,\"sequence\":4,\"status\":\"NotExisting\",\"yearWeek\":2624,\"hasValidAllocation\":true,\"hasHoursMismatch\":false},{\"hasClockedHours\":false,\"hoursInWeek\":0,\"isCurrent\":true,\"sequence\":5,\"status\":\"NotExisting\",\"yearWeek\":2625,\"hasValidAllocation\":true,\"hasHoursMismatch\":false},{\"hasClockedHours\":false,\"hoursInWeek\":0,\"isCurrent\":false,\"sequence\":6,\"status\":\"NotExisting\",\"yearWeek\":2626,\"hasValidAllocation\":true,\"hasHoursMismatch\":false},{\"hasClockedHours\":false,\"hoursInWeek\":0,\"isCurrent\":false,\"sequence\":7,\"status\":\"NotExisting\",\"yearWeek\":2627,\"hasValidAllocation\":true,\"hasHoursMismatch\":false}],\"defaultDisciplineId\":0,\"disciplineIds\":[],\"erpCode\":null,\"fullName\":\"Engineer B\",\"id\":358,\"lastName\":\"B\"},{\"weeks\":[{\"hasClockedHours\":false,\"hoursInWeek\":0,\"isCurrent\":false,\"sequence\":1,\"status\":\"NotExisting\",\"yearWeek\":2621,\"hasValidAllocation\":true,\"hasHoursMismatch\":false},{\"hasClockedHours\":false,\"…"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/Check/ErpWeeklyTimesheet/GetTimesheetStatusFilterOptions": {
+      "get": {
+        "summary": "GET /Check/ErpWeeklyTimesheet/GetTimesheetStatusFilterOptions",
+        "tags": [
+          "Check"
+        ],
+        "responses": {
+          "200": {
+            "description": "application/json; charset=utf-8",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                },
+                "example": "[{\"colorLabelClass\":\"Empty\",\"id\":1,\"description\":\"Employee not present\",\"sequence\":0,\"enabled\":false,\"displayName\":\"Employee not present\",\"color\":null},{\"colorLabelClass\":\"MissingInformation\",\"id\":2,\"description\":\"Missing information\",\"sequence\":0,\"enabled\":false,\"displayName\":\"Missing information\",\"color\":null},{\"colorLabelClass\":\"MismatchedHours\",\"id\":7,\"description\":\"Hours mismatch\",\"sequence\":0,\"enabled\":false,\"displayName\":\"Hours mismatch\",\"color\":null},{\"colorLabelClass\":\"ForemanNotDone\",\"id\":4,\"description\":\"Timesheet requires approval by supervisor\",\"sequence\":0,\"enabled\":false,\"displayName\":\"Timesheet requires approval by supervisor\",\"color\":null},{\"colorLabelClass\":\"Signed\",\"id\":3,\"description\":\"Requires approval\",\"sequence\":0,\"enabled\":false,\"displayName\":\"Requires approval\",\"color\":null},{\"colorLabelClass\":\"Approved\",\"id\":5,\"description\":\"Approved by administration\",\"sequence\":0,\"enabled\":false,\"displayName\":\"Approved by administration\",\"color\":null},{\"colorLabelClass\":\"Sent\",\"id\":6,\"description\":\"Sent to ERP\",\"sequence\":0,\"enabled\":false,\"displayName\":\"Sent to ERP\",\"color\":null}]"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/Check/ErpWeeklyTimesheet/ReadHistory": {
+      "post": {
+        "summary": "POST /Check/ErpWeeklyTimesheet/ReadHistory",
+        "tags": [
+          "Check"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "start": {
+                    "type": "string"
+                  },
+                  "end": {
+                    "type": "string"
+                  },
+                  "filteredStatuses": {
+                    "type": "array",
+                    "items": {}
+                  },
+                  "contractOrganisationIds": {
+                    "type": "array",
+                    "items": {}
+                  },
+                  "disciplineIds": {
+                    "type": "array",
+                    "items": {}
+                  }
+                }
+              },
+              "example": {
+                "start": "2026-05-18",
+                "end": "2026-07-05",
+                "filteredStatuses": [],
+                "contractOrganisationIds": [],
+                "disciplineIds": []
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "application/json; charset=utf-8",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                },
+                "example": "{\"persons\":[{\"weeks\":[{\"isErpTimesheet\":false,\"hasClockedHours\":false,\"hoursInWeek\":0,\"isCurrent\":false,\"sequence\":1,\"status\":\"NotExisting\",\"yearWeek\":2621,\"hasValidAllocation\":true,\"hasHoursMismatch\":false},{\"isErpTimesheet\":false,\"hasClockedHours\":false,\"hoursInWeek\":0,\"isCurrent\":false,\"sequence\":2,\"status\":\"NotExisting\",\"yearWeek\":2622,\"hasValidAllocation\":true,\"hasHoursMismatch\":false},{\"isErpTimesheet\":false,\"hasClockedHours\":false,\"hoursInWeek\":0,\"isCurrent\":false,\"sequence\":3,\"status\":\"NotExisting\",\"yearWeek\":2623,\"hasValidAllocation\":true,\"hasHoursMismatch\":false},{\"isErpTimesheet\":false,\"hasClockedHours\":false,\"hoursInWeek\":0,\"isCurrent\":false,\"sequence\":4,\"status\":\"NotExisting\",\"yearWeek\":2624,\"hasValidAllocation\":true,\"hasHoursMismatch\":false},{\"isErpTimesheet\":false,\"hasClockedHours\":false,\"hoursInWeek\":0,\"isCurrent\":true,\"sequence\":5,\"status\":\"NotExisting\",\"yearWeek\":2625,\"hasValidAllocation\":true,\"hasHoursMismatch\":false},{\"isErpTimesheet\":false,\"hasClockedHours\":false,\"hoursInWeek\":0,\"isCurrent\":false,\"sequence\":6,\"status\":\"NotExisting\",\"yearWeek\":2626,\"hasValidAllocation\":true,\"hasHoursMismatch\":false},{\"isErpTimesheet\":false,\"hasClockedHours\":false,\"hoursInWeek\":0,\"isCurrent\":false,\"sequence\":7,\"status\":\"NotExisting\",\"yearWeek\":2627,\"hasValidAllocation\":true,\"hasHoursMismatch\":false}],\"defaultDisciplineId\":11,\"disciplineIds\":[11],\"erpCode\":\"PRS.CC.14\",\"fullName\":\"Amer Kalla\",\"id\":14,\"lastName\":\"Kalla\"},{\"weeks\":[{\"isErpTimesheet\":false,\"hasClockedHours\":false,\"hoursInWeek\":1,\"isCurrent\":false,\"sequence\":1,\"status\":\"NeedsApproval\",\"yearWeek\":2621,\"hasValidAllocation\":true,\"hasHoursMismatch\":false},{\"isErpTimesheet\":false,\"hasClockedHours\":false,\"hoursInWeek\":0,\"isCurrent\":false,\"sequence\":2,\"status\":\"NotExisting\",\"yearWeek\":2622,\"hasValidAllocation\":true,\"hasHoursMismatch\":false},{\"isErpTimesheet\":false,\"hasClockedHours\":false,\"hoursInWeek\":0,\"isCurrent\":false,\"sequence\":3,\"status\":\"NotExisting\",\"yearWeek\":2623,\"hasValidAllocation\":true,\"hasHoursMismatch\":false},{\"isErpTimesheet\":false,\"hasClockedHours\":false,\"hoursInWeek\":0,\"isCurrent\":false,\"sequence\":4,\"status\":\"NotExisting\",\"yearWeek\":2624,\"hasValidAllocation\":true,\"hasHoursMismatch\":false},{\"isErpTimesheet\":false,\"hasClockedHours\":false,\"hoursInWeek\":0,\"isCurrent\":true,\"sequence\":5,\"status\":\"NotExisting\",\"yearWeek\":2625,\"hasValidAllocation\":true,\"hasHoursMismatch\":false},{\"isErpTimesheet\":false,\"hasClockedHours\":false,\"hoursInWeek\":0,\"isCurrent\":false,\"sequence\":6,\"status\":\"NotExisting\",\"yearWeek\":2626,\"hasValidAllocation\":true,\"hasHoursMismatch\":false},{\"isErpTimesheet\":false,\"hasClockedHours\":false,\"hoursInWeek\":0,\"isCurrent\":false,\"sequence\":7,\"status\":\"NotExisting\",\"yearWeek\":2627,\"hasValidAllocation\":true,\"hasHoursMismatch\":false}],\"defaultDisciplineId\":0,\"disciplineIds\":[],\"erpCode\":null,\"fullName\":\"Engineer A\",\"id\":356,\"lastName\":\"A\"},{\"weeks\":[{\"isErpTimesheet\":false,\"hasClockedHours\":false,\"hoursInWeek\":0,\"isCurrent\":false,\"sequence\":1,\"status\":\"NotExisting\",\"yearWeek\":2621,\"hasValidAllocation\":true,\"hasHoursMismatch\":false},{\"isErpTimesheet\":false,\"hasClockedHours\":false,\"hoursInWeek\":0,\"isCurrent\":false,\"sequence\":2,\"status\":\"NotExisting\",\"yearWeek\":2622,\"hasValidAllocation\":true,\"hasHoursMismatch\":false},{\"isErpTimesheet\":false,\"hasClockedHours\":false,\"hoursInWeek\":0,\"isCurrent\":false,\"sequence\":3,\"status\":\"NotExisting\",\"yearWeek\":2623,\"hasValidAllocation\":true,\"hasHoursMismatch\":false},{\"isErpTimesheet\":false,\"hasClockedHours\":false,\"hoursInWeek\":0,\"isCurrent\":false,\"sequence\":4,\"status\":\"NotExisting\",\"yearWeek\":2624,\"hasValidAllocation\":true,\"hasHoursMismatch\":false},{\"isErpTimesheet\":false,\"hasClockedHours\":false,\"hoursInWeek\":0,\"isCurrent\":true,\"sequence\":5,\"status\":\"NotExisting\",\"yearWeek\":2625,\"hasValidAllocation\":true,\"hasHoursMismatch\":false},{\"isErpTimesheet\":false,\"hasClockedHours\":false,\"hoursInWeek\":0,\"isCurrent\":false,\"sequence\":6,\"status\":\"NotExisting\",\"yearWeek\":2626,\"hasValidAllocation\":true,\"hasHoursMismatch\":false},{\"isErpTim…"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/Ticket/GetTicketTypes": {
+      "get": {
+        "summary": "GET /Ticket/GetTicketTypes",
+        "tags": [
+          "Ticket"
+        ],
+        "responses": {
+          "200": {
+            "description": "application/json; charset=utf-8",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                },
+                "example": "[{\"id\":\"transport_request\",\"description\":\"Transport request\",\"sequence\":1,\"enabled\":false,\"displayName\":\"Transport request\",\"color\":null}]"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/Ticket/GetList?statuses=0&statuses=3&statuses=2&statuses=1": {
+      "get": {
+        "summary": "GET /Ticket/GetList?statuses=0&statuses=3&statuses=2&statuses=1",
+        "tags": [
+          "Ticket"
+        ],
+        "responses": {
+          "200": {
+            "description": "application/json; charset=utf-8",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                },
+                "example": "{\"totalCount\":4,\"items\":[{\"$type\":\"transport_request\",\"executionDate\":\"2026-06-24T00:00:00\",\"projectOptionDescription\":\"Test project\",\"componentOptionDescription\":null,\"equipmentOptionDescription\":\"North crane\",\"fromLocationOptionDescription\":\"location2\",\"toLocationOptionDescription\":\"Magazijn\",\"id\":33,\"code\":\"TRANS-33\",\"name\":null,\"type\":\"transport_request\",\"reporterPersonOptionDescription\":\"Worker Admin\",\"createdOn\":\"2026-06-10T14:03:25.54\",\"status\":\"Approved\",\"statusClass\":\"success\",\"properties\":[{\"name\":\"Size\",\"description\":null,\"value\":null,\"valueType\":0,\"propertyTypeOption\":null,\"isReadOnly\":false,\"ticketId\":33},{\"name\":\"Weight\",\"description\":null,\"value\":null,\"valueType\":0,\"propertyTypeOption\":null,\"isReadOnly\":false,\"ticketId\":33},{\"name\":\"Nr. Lifts\",\"description\":null,\"value\":null,\"valueType\":0,\"propertyTypeOption\":null,\"isReadOnly\":false,\"ticketId\":33}]},{\"$type\":\"transport_request\",\"executionDate\":\"2026-04-15T00:00:00\",\"projectOptionDescription\":\"7124\",\"componentOptionDescription\":null,\"equipmentOptionDescription\":\"North crane\",\"fromLocationOptionDescription\":\"Magazijn\",\"toLocationOptionDescription\":\"location2\",\"id\":24,\"code\":\"TRANS-24\",\"name\":null,\"type\":\"transport_request\",\"reporterPersonOptionDescription\":\"Adam Law\",\"createdOn\":\"2026-04-08T13:06:28.037\",\"status\":\"Closed\",\"statusClass\":\"neutral\",\"properties\":[{\"name\":\"Size\",\"description\":null,\"value\":null,\"valueType\":0,\"propertyTypeOption\":null,\"isReadOnly\":false,\"ticketId\":24},{\"name\":\"Weight\",\"description\":null,\"value\":null,\"valueType\":0,\"propertyTypeOption\":null,\"isReadOnly\":false,\"ticketId\":24},{\"name\":\"Nr. Lifts\",\"description\":null,\"value\":null,\"valueType\":0,\"propertyTypeOption\":null,\"isReadOnly\":false,\"ticketId\":24}]},{\"$type\":\"transport_request\",\"executionDate\":\"2026-03-17T00:00:00\",\"projectOptionDescription\":\"7124\",\"componentOptionDescription\":\"Demo Block\",\"equipmentOptionDescription\":\"North crane\",\"fromLocationOptionDescription\":\"Magazijn\",\"toLocationOptionDescription\":\"location2\",\"id\":20,\"code\":\"TRANS-20\",\"name\":null,\"type\":\"transport_request\",\"reporterPersonOptionDescription\":\"Manual Admin\",\"createdOn\":\"2026-03-16T09:14:57.607\",\"status\":\"Open\",\"statusClass\":\"warning\",\"properties\":[{\"name\":\"Size\",\"description\":null,\"value\":null,\"valueType\":0,\"propertyTypeOption\":null,\"isReadOnly\":false,\"ticketId\":20},{\"name\":\"Weight\",\"description\":null,\"value\":null,\"valueType\":0,\"propertyTypeOption\":null,\"isReadOnly\":false,\"ticketId\":20},{\"name\":\"Nr. Lifts\",\"description\":null,\"value\":null,\"valueType\":0,\"propertyTypeOption\":null,\"isReadOnly\":false,\"ticketId\":20}]},{\"$type\":\"transport_request\",\"executionDate\":\"2024-09-28T00:00:00\",\"projectOptionDescription\":\"WärtsiläDemo\",\"componentOptionDescription\":null,\"equipmentOptionDescription\":\"East crane\",\"fromLocationOptionDescription\":\"Magazijn\",\"toLocationOptionDescription\":\"location2\",\"id\":15,\"code\":\"TRANS-15\",\"name\":null,\"type\":\"transport_request\",\"reporterPersonOptionDescription\":\"A Repair Worker\",\"createdOn\":\"2024-09-22T20:45:58.47\",\"status\":\"Open\",\"statusClass\":\"warning\",\"properties\":[{\"name\":\"Size\",\"description\":null,\"value\":null,\"valueType\":0,\"propertyTypeOption\":null,\"isReadOnly\":false,\"ticketId\":15},{\"name\":\"Weight\",\"description\":null,\"value\":null,\"valueType\":0,\"propertyTypeOption\":null,\"isReadOnly\":false,\"ticketId\":15},{\"name\":\"Nr. Lifts\",\"description\":null,\"value\":null,\"valueType\":0,\"propertyTypeOption\":null,\"isReadOnly\":false,\"ticketId\":15}]}]}"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/Check/Reports/LegacyReportsAndFoldersModels": {
+      "get": {
+        "summary": "GET /Check/Reports/LegacyReportsAndFoldersModels",
+        "tags": [
+          "Check"
+        ],
+        "responses": {
+          "200": {
+            "description": "application/json; charset=utf-8",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "name": {
+                      "type": "string"
+                    },
+                    "id": {
+                      "type": "string"
+                    },
+                    "subDirectories": {
+                      "type": "array",
+                      "items": {}
+                    },
+                    "reports": {
+                      "type": "array",
+                      "items": {}
+                    }
+                  }
+                },
+                "example": {
+                  "name": "",
+                  "id": "9406228e-2c1d-4ae9-a2f8-51b51cc964f4",
+                  "subDirectories": [],
+                  "reports": []
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/Check/Reports/ReportsAndFoldersModels": {
+      "get": {
+        "summary": "GET /Check/Reports/ReportsAndFoldersModels",
+        "tags": [
+          "Check"
+        ],
+        "responses": {
+          "200": {
+            "description": "application/json; charset=utf-8",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "name": {
+                      "type": "string"
+                    },
+                    "id": {
+                      "type": "string"
+                    },
+                    "subDirectories": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "name": {
+                            "type": "string"
+                          },
+                          "id": {
+                            "type": "string"
+                          },
+                          "subDirectories": {
+                            "type": "array",
+                            "items": {}
+                          },
+                          "reports": {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "properties": {
+                                "id": {
+                                  "nullable": true
+                                },
+                                "title": {
+                                  "type": "string"
+                                },
+                                "showTitleInExcelExport": {
+                                  "type": "boolean"
+                                },
+                                "enabled": {
+                                  "nullable": true
+                                },
+                                "directory": {
+                                  "nullable": true
+                                },
+                                "type": {
+                                  "nullable": true
+                                },
+                                "roles": {
+                                  "nullable": true
+                                },
+                                "editRoles": {
+                                  "nullable": true
+                                },
+                                "logoPath": {
+                                  "nullable": true
+                                },
+                                "pageable": {
+                                  "type": "boolean"
+                                },
+                                "pdfScaling": {
+                                  "type": "integer"
+                                },
+                                "autoCollapse": {
+                                  "type": "boolean"
+                                },
+                                "aggregateInGroupHeader": {
+                                  "type": "boolean"
+                                },
+                                "allowSubcontractor": {
+                                  "type": "boolean"
+                                },
+                                "canEdit": {
+                                  "type": "boolean"
+                                },
+                                "query": {
+                                  "nullable": true
+                                },
+                                "properties": {
+                                  "nullable": true
+                                },
+                                "columns": {
+                                  "nullable": true
+                                },
+                                "uploadedFile": {
+                                  "nullable": true
+                                },
+                                "uri": {
+                                  "type": "string"
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "reports": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "nullable": true
+                          },
+                          "title": {
+                            "type": "string"
+                          },
+                          "showTitleInExcelExport": {
+                            "type": "boolean"
+                          },
+                          "enabled": {
+                            "nullable": true
+                          },
+                          "directory": {
+                            "nullable": true
+                          },
+                          "type": {
+                            "nullable": true
+                          },
+                          "roles": {
+                            "nullable": true
+                          },
+                          "editRoles": {
+                            "nullable": true
+                          },
+                          "logoPath": {
+                            "nullable": true
+                          },
+                          "pageable": {
+                            "type": "boolean"
+                          },
+                          "pdfScaling": {
+                            "type": "integer"
+                          },
+                          "autoCollapse": {
+                            "type": "boolean"
+                          },
+                          "aggregateInGroupHeader": {
+                            "type": "boolean"
+                          },
+                          "allowSubcontractor": {
+                            "type": "boolean"
+                          },
+                          "canEdit": {
+                            "type": "boolean"
+                          },
+                          "query": {
+                            "nullable": true
+                          },
+                          "properties": {
+                            "nullable": true
+                          },
+                          "columns": {
+                            "nullable": true
+                          },
+                          "uploadedFile": {
+                            "nullable": true
+                          },
+                          "uri": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "name": "",
+                  "id": "19a11dc1-248f-4188-bb61-073ac6c8aa25",
+                  "subDirectories": [
+                    {
+                      "name": "Defaults",
+                      "id": "fca98c10-ebad-4b4c-9328-188ed9c79853",
+                      "subDirectories": [],
+                      "reports": [
+                        {
+                          "id": null,
+                          "title": "ExportFromFloorboardDefault.trdx",
+                          "showTitleInExcelExport": true,
+                          "enabled": null,
+                          "directory": null,
+                          "type": null,
+                          "roles": null,
+                          "editRoles": null,
+                          "logoPath": null,
+                          "pageable": false,
+                          "pdfScaling": 0,
+                          "autoCollapse": false,
+                          "aggregateInGroupHeader": false,
+                          "allowSubcontractor": false,
+                          "canEdit": false,
+                          "query": null,
+                          "properties": null,
+                          "columns": null,
+                          "uploadedFile": null,
+                          "uri": "Defaults\\ExportFromFloorboardDefault.trdx"
+                        }
+                      ]
+                    }
+                  ],
+                  "reports": [
+                    {
+                      "id": null,
+                      "title": "New Report1.trdx",
+                      "showTitleInExcelExport": true,
+                      "enabled": null,
+                      "directory": null,
+                      "type": null,
+                      "roles": null,
+                      "editRoles": null,
+                      "logoPath": null,
+                      "pageable": false,
+                      "pdfScaling": 0,
+                      "autoCollapse": false,
+                      "aggregateInGroupHeader": false,
+                      "allowSubcontractor": false,
+                      "canEdit": false,
+                      "query": null,
+                      "properties": null,
+                      "columns": null,
+                      "uploadedFile": null,
+                      "uri": "New Report1.trdx"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/Event/GetMessagesForPerson": {
+      "post": {
+        "summary": "POST /Event/GetMessagesForPerson",
+        "tags": [
+          "Event"
+        ],
+        "responses": {
+          "200": {
+            "description": "application/json; charset=utf-8",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {}
+                },
+                "example": []
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
