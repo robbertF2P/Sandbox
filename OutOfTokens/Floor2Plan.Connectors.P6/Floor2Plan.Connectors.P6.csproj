@@ -16,6 +16,7 @@
     <ProjectReference Include="..\Stubs\Contracts.Model\Contracts.Model.csproj" />
     <ProjectReference Include="..\Stubs\Domain.Model\Domain.Model.csproj" />
     <ProjectReference Include="..\Infrastructure.Akka.Contracts\Infrastructure.Akka.Contracts.csproj" />
+    <ProjectReference Include="..\Infrastructure.Akka\Infrastructure.Akka.csproj" />
     <ProjectReference Include="..\Stubs\Infrastructure.Process.Contracts\Infrastructure.Process.Contracts.csproj" />
   </ItemGroup>
 </Project>

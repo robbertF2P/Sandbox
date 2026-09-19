@@ -3,6 +3,7 @@ using Akka.Event;
 using Floor2Plan.Connectors.P6.Api;
 using Floor2Plan.Connectors.P6.Api.Models;
 using Floor2Plan.Connectors.P6.Messages;
+using Infrastructure.Akka.Actors.Workers;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -51,8 +52,8 @@ namespace Floor2Plan.Connectors.P6.Actors
             _replyTo = message.ReplyTo;
             _log.Info("Building P6 raw data export");
 
-            var catalog = Context.ActorOf(P6ProjectCatalogActor.Props(_api));
-            catalog.Tell(new P6ProjectCatalogActor.Fetch(_cookie, Self));
+            var catalog = Context.ActorOf(P6ProjectCatalogActor.Props(_api, _cookie));
+            catalog.Tell(new PagedFetchActor<P6ProjectRecord>.Start(Self));
             Become(WaitingForProjects);
         }
 
