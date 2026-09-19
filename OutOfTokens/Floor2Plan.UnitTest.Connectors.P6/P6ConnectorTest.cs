@@ -1,5 +1,4 @@
 using Akka.Actor;
-using Akka.Hosting;
 using AwesomeAssertions;
 using Contracts.Infrastructure.Connectors;
 using Domain.Model;
@@ -9,6 +8,7 @@ using Floor2Plan.Connectors.P6.Actors;
 using Floor2Plan.Connectors.P6.Api;
 using Floor2Plan.Connectors.P6.Api.Models;
 using Floor2Plan.Connectors.P6.Configuration;
+using Floor2Plan.TestUtility.Common.Akka;
 using Floor2Plan.TestUtility.Common.Framework;
 using Infrastructure.Akka.Contracts;
 using Infrastructure.Process.Contracts.Scope;
@@ -27,17 +27,11 @@ using Xunit;
 
 namespace Floor2Plan.UnitTest.Connectors.P6
 {
-    public class P6ConnectorTest : global::Akka.Hosting.TestKit.TestKit
+    public class P6ConnectorTest : AkkaSerilogTestKit
     {
         public P6ConnectorTest(ITestOutputHelper output)
             : base(nameof(P6ConnectorTest), output)
         {
-        }
-
-        protected override void ConfigureAkka(AkkaConfigurationBuilder builder, IServiceProvider provider)
-        {
-            _ = builder;
-            _ = provider;
         }
 
         [F2PFact]

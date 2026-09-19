@@ -20,7 +20,7 @@
 
 Integration connectors (login → fetch → transform → store) are naturally **sequential pipelines with concurrency limits**, **session state**, and **failure isolation**. Akka.NET gives that structure without ad-hoc `Task` chains or scattered `lock` blocks — and the same patterns reuse across connectors.
 
-This solution proves it with a real P6 EPPM connector: **18 unit tests, standalone build, generic building blocks extracted.**
+This solution proves it with a real P6 EPPM connector: **28 unit tests, standalone build, generic building blocks extracted.**
 
 ---
 
@@ -184,8 +184,10 @@ Generic actors handle **orchestration shape**. Connectors supply **vendor behavi
 ```bash
 cd OutOfTokens
 dotnet build OutOfTokens.sln
-dotnet test Floor2Plan.UnitTest.Connectors.P6/Floor2Plan.UnitTest.Connectors.P6.csproj
+dotnet test OutOfTokens.sln --logger "console;verbosity=detailed"
 ```
+
+Actor tests use `AkkaSerilogTestKit` — run with **detailed** console verbosity to see session login, sync progress, and errors in the test output (same logs you would get from Serilog in a host).
 
 ---
 

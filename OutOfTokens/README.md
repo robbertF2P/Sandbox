@@ -37,6 +37,8 @@ dotnet test Infrastructure.Akka.Tests/Infrastructure.Akka.Tests.csproj
 dotnet test Floor2Plan.UnitTest.Connectors.P6/Floor2Plan.UnitTest.Connectors.P6.csproj
 ```
 
+Actor tests inherit `AkkaSerilogTestKit` (`Floor2Plan.TestUtility.Common`) — Serilog routes Akka pipeline logs to **console** and **xUnit test output** during `dotnet test`, so developers see session login, sync progress, and errors locally without waiting for DevOps to surface production logs.
+
 ---
 
 ## Related learning paths

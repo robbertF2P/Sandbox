@@ -1,6 +1,5 @@
 using Akka.Actor;
 using Akka.Hosting;
-using Akka.Logger.Serilog;
 using Common.Utility;
 using Common.Utility.Framework;
 using Infrastructure.Akka.Actors;
@@ -27,11 +26,7 @@ namespace Infrastructure.Akka
             context.Services.AddAkka(ActorSystemName, (builder, serviceProvider) =>
             {
                 builder
-                    .ConfigureLoggers(setup =>
-                    {
-                        setup.LogLevel = global::Akka.Event.LogLevel.InfoLevel;
-                        setup.AddSerilogLogging();
-                    })
+                    .ConfigureSerilogLogging()
                     .WithActors((system, registry) =>
                     {
                         var scopeFactory = serviceProvider.GetRequiredService<IServiceScopeFactory>();

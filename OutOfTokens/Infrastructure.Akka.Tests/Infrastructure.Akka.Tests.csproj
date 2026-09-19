@@ -18,5 +18,6 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Infrastructure.Akka\Infrastructure.Akka.csproj" />
+    <ProjectReference Include="..\Stubs\Floor2Plan.TestUtility.Common\Floor2Plan.TestUtility.Common.csproj" />
   </ItemGroup>
 </Project>
