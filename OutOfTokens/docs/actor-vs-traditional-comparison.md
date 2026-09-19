@@ -121,6 +121,63 @@ The actor tests prove **wiring**; the traditional tests prove **services** direc
 
 ---
 
+## Your real context: several SOAP Primavera connectors + customer overrides
+
+OutOfTokens compares two **greenfield REST (EPPM)** shapes. That is not where most Primavera customers live today.
+
+### What you have now (legacy)
+
+```text
+customized-repo/
+├── core/                          ← Floor2Plan submodule
+├── connectors/primavera-soap-*/   ← per integration, often can't build alone
+└── client/
+    └── AcmeImportService.cs       ← : ImportService with overrides
+        AcmeSyncService.cs         ← customer mapping rules baked into core services
+```
+
+Each customer delivery compiles **core + connector + derived services**. Mapping and sync behaviour leak into `ClientXService : BaseService` overrides — not into a small, versioned pack. See [floor2plan-legacy-connector-submodule-antipattern.md](../../docs/floor2plan-legacy-connector-submodule-antipattern.md).
+
+### What that means for this comparison
+
+| Question | Honest answer |
+|----------|----------------|
+| Does **traditional OOP** fix the override problem? | **No.** You can recreate the same pattern: `P6TraditionalConnector` + `AcmeP6MappingService : DefaultP6MappingService` + forked sync loop per customer. Familiar, but same maintenance cost at scale. |
+| Does the **actor model** fix SOAP? | **Not by itself.** OutOfTokens is **REST EPPM**. SOAP customers still need a strangler: keep legacy sync running while a REST pack (or adapter actor) takes over catalog fetch step by step. |
+| What problem *does* the actor model target for you? | **Where the variance lives.** Shared orchestration (session, paging, batch, progress) stays in platform/generic actors; **customer rules ship as mapper + pack**, not core service overrides. Same idea as “one `P6.Client`, one mapper per customer” in [floor2plan-akka-actor-integration-design.md](../../docs/floor2plan-akka-actor-integration-design.md). |
+| Is `P6.Traditional` the path for existing SOAP clients? | **No — it is a control experiment.** It shows how much code you write without actors when behaviour is identical. Useful for debate, not a migration target for ten customized Primavera repos. |
+
+### Migration mental model (SOAP → REST, many customers)
+
+```mermaid
+flowchart LR
+    subgraph legacy ["Today per customer"]
+        SOAP["SOAP connector repo"]
+        OVR["Core service overrides"]
+        SOAP --> OVR
+    end
+
+    subgraph target ["Platform 2.0 target"]
+        REST["Shared REST client (Refit)"]
+        ORCH["Shared orchestration\n(actors or tested services)"]
+        PACK["Customer pack:\nmapping + rules only"]
+        REST --> ORCH --> PACK
+    end
+
+    legacy -->|"strangler per tenant"| target
+```
+
+**Practical sequence** (not either/or actor vs OO):
+
+1. **Stop new forks** — no new `ClientXImportService` overrides for Primavera; new rules go in a pack.
+2. **Extract shared REST client** — one `IP6RestApi` (already in OutOfTokens); SOAP stays behind a `[StranglerAdapter]` until retired.
+3. **Pick orchestration once** — actors if multiple vendors/connectors share session/paging/batch; plain services acceptable only if Primavera is the *only* integration and stays simple.
+4. **Migrate customers one at a time** — tenant enables REST pack; SOAP path remains until parity; mapping moves from override methods to pack code.
+
+The actor vs OO debate matters **inside step 3**. Your bigger pain is **step 1 and 4** — overrides and N customized builds — which both approaches can repeat if you are not disciplined about packs.
+
+---
+
 ## When to choose which
 
 **Prefer actors** when:
