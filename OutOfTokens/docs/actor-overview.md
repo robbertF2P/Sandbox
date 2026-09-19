@@ -38,7 +38,7 @@ The connector **composes** generic actors via `Props` and small option/behavior 
 ```mermaid
 flowchart TB
     subgraph host ["Host application"]
-        Connector["P6Connector\n(IConnector facade)"]
+        Connector["P6Connector\n(IGenericConnector)"]
         Scope["IServiceScopeFactory\nIProcessLogger"]
     end
 
@@ -85,7 +85,7 @@ flowchart TB
 
 **Read the diagram top-down:**
 
-1. **Host** calls `P6Connector` (sync, config, raw data). The connector talks to `P6Actor` — not to HTTP directly.
+1. **Floor2Plan UI** calls the **app backend** (ASP.NET API/services). Those resolve `P6Connector` and invoke sync, config, or raw-data methods. The connector talks to `P6Actor` — not to P6 HTTP directly.
 2. **`P6Actor`** owns the tree: session gate, exclusive gate (one sync at a time), raw-data store, progress subscriber.
 3. **`Infrastructure.Akka`** actors are the engine; **`P6SessionGateBehavior`** and worker `*Options` types supply P6 rules (cookie, which API to call, concurrency).
 
@@ -119,9 +119,19 @@ Another connector (SAP, Primavera Cloud, …) would add a sibling project next t
 
 ## Big picture
 
+The actor pipeline starts **inside** the Floor2Plan backend — after the UI has called an app API and the host has resolved `P6Connector` from DI. This diagram is everything from that connector downward.
+
 ```mermaid
 flowchart TB
-    API["HTTP / Connector API"] --> P6["P6Actor\n(facade)"]
+    subgraph f2p ["Floor2Plan application backend"]
+        UI["UI\n(sync screen, connector config)"]
+        App["App API & services\n(ASP.NET host)"]
+        Connector["P6Connector\n(IGenericConnector)"]
+        UI --> App
+        App -->|"SyncAllAsync, GetConnectorConfigurationAsync, …"| Connector
+    end
+
+    Connector -->|"Ask / Tell via IActorSystemFacade"| P6["P6Actor\n(actor entry)"]
     P6 --> Session["SessionGateActor\n+ P6SessionGateBehavior"]
     P6 --> Store["P6RawDataStoreActor"]
 
@@ -130,7 +140,7 @@ flowchart TB
     Session --> Raw["P6RawDataBuilderActor"]
     Session --> Sync["P6SyncOrchestratorActor"]
 
-    Catalog --> API_P6["P6 REST API"]
+    Catalog --> API_P6["P6 REST API\n(external EPPM)"]
     Raw --> Catalog
     Sync --> Workers["P6CatalogWorkerActor × N"]
     Workers --> Store
