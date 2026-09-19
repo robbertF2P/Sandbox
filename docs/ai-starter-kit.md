@@ -48,11 +48,20 @@ After editing skills in `.cursor/skills/`:
 | `reactive-applications-akka-net` | Reactive systems patterns |
 | `functional-programming-csharp` | FP style in C# |
 
+### AI in .NET
+
+| Skill | When |
+|-------|------|
+| `semantic-search-dotnet` | Embeddings, meaning-based search, vector similarity |
+| `rag-dotnet` | Grounded Q&A over your docs/data |
+| `mcp-server-dotnet` | Expose tools to Cursor/Copilot via MCP |
+
 ## Reference implementations
 
 - **Akka + SignalR + Vue:** `AkkaSignalRVuePoc/`
 - **Import + hours progress:** `ApiImportActorPoc/`
 - **Planning adjustment approvals (foreman):** `PlanningApprovalsPoc/` — see [floor2plan-planning-approval-data-model.md](floor2plan-planning-approval-data-model.md)
+- **AI basics (search, RAG, MCP):** `AiBasicsPoc/` — see [AiBasicsPoc/README.md](../AiBasicsPoc/README.md)
 - **Platform packages:** `Platform.Serilog.Logging/`, `build/Platform.Logging.*.props`
 
 ## Platform standards (docs)

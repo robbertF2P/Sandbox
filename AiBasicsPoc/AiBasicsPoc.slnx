@@ -1,0 +1,11 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/AiBasics.Core/AiBasics.Core.csproj" />
+    <Project Path="src/DocsSearch.Mcp/DocsSearch.Mcp.csproj" />
+    <Project Path="src/RagBasics.Api/RagBasics.Api.csproj" />
+    <Project Path="src/SemanticSearch.Console/SemanticSearch.Console.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/AiBasics.Tests/AiBasics.Tests.csproj" />
+  </Folder>
+</Solution>
