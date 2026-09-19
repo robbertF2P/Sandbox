@@ -103,6 +103,14 @@ Context.ActorOf(BatchOrchestratorActor<MyWorkItem>.Props(options))
 
 ---
 
+## Tests
+
+`Infrastructure.Akka.Tests` — TestKit coverage for generic actors (run with `dotnet test Infrastructure.Akka.Tests/Infrastructure.Akka.Tests.csproj`).
+
+`Floor2Plan.UnitTest.Connectors.P6` — P6 connector integration tests (18 tests).
+
+---
+
 ## Design rules
 
 - **No `Ask` inside actors** — `Tell`, `Forward`, `PipeTo`, `Become` only ([platform-actor-standard.md](../../docs/monolith-modularization/platform-actor-standard.md))

@@ -33,6 +33,7 @@ OutOfTokens/
 ```bash
 cd OutOfTokens
 dotnet build OutOfTokens.sln
+dotnet test Infrastructure.Akka.Tests/Infrastructure.Akka.Tests.csproj
 dotnet test Floor2Plan.UnitTest.Connectors.P6/Floor2Plan.UnitTest.Connectors.P6.csproj
 ```
 
