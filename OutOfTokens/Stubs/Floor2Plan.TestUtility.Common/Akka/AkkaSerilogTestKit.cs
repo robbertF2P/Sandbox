@@ -7,9 +7,6 @@ using Xunit;
 
 namespace Floor2Plan.TestUtility.Common.Akka
 {
-    /// <summary>
-    /// Akka Hosting TestKit base wired to <see cref="SerilogTestLogging"/> (platform) and Serilog Akka logging.
-    /// </summary>
     public abstract class AkkaSerilogTestKit : TestKit
     {
         protected AkkaSerilogTestKit(string testClassName, ITestOutputHelper output)
@@ -21,7 +18,6 @@ namespace Floor2Plan.TestUtility.Common.Akka
         {
             global::Serilog.ILogger logger = SerilogTestLogging.CreateTestLogger();
             global::Serilog.Log.Logger = logger;
-
             builder.AddPlatformSerilog(logger);
         }
 

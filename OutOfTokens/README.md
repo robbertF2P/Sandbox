@@ -33,13 +33,12 @@ OutOfTokens/
 ```bash
 cd OutOfTokens
 dotnet build OutOfTokens.sln
-dotnet test Infrastructure.Akka.Tests/Infrastructure.Akka.Tests.csproj
-dotnet test Floor2Plan.UnitTest.Connectors.P6/Floor2Plan.UnitTest.Connectors.P6.csproj
+dotnet test OutOfTokens.sln
 ```
 
 Actor tests inherit `AkkaSerilogTestKit` using `Platform.Serilog.Logging.Testing` — pipeline logs appear in xUnit test output during `dotnet test` (use `--logger "console;verbosity=detailed"` or the IDE test view).
 
-`P6Connector.SyncAllAsync` queues sync via **Tell**; live progress is written to the sync log by `P6SyncProgressActor` (scoped `IProcessLogger` per EventStream message).
+`P6Connector.SyncAllAsync` queues sync via **Tell**; live progress is written to the sync log by `P6SyncProgressActor` (scoped `IProcessLogger` per progress message).
 
 ---
 

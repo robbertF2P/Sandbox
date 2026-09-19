@@ -21,6 +21,7 @@ namespace Floor2Plan.Connectors.P6.Actors
         private readonly IP6RestApi _api;
         private readonly IActorRef _store;
         private readonly P6SyncOptions _syncOptions;
+        private readonly IActorRef _progress;
 
         private readonly Dictionary<P6EntityKind, int> _catalogCounts = new();
         private readonly Queue<P6ProjectSyncPlan> _pendingPlans = new();
@@ -28,19 +29,22 @@ namespace Floor2Plan.Connectors.P6.Actors
 
         private string _sessionCookie = string.Empty;
         private IActorRef _replyTo = ActorRefs.Nobody;
-        private IActorRef _progressReporter = ActorRefs.Nobody;
 
-        public P6SyncOrchestratorActor(IP6RestApi api, IActorRef store, P6SyncOptions syncOptions)
+        public P6SyncOrchestratorActor(
+            IP6RestApi api,
+            IActorRef store,
+            P6SyncOptions syncOptions,
+            IActorRef progress = null)
         {
             _api = api;
             _store = store;
             _syncOptions = syncOptions;
+            _progress = progress ?? ActorRefs.Nobody;
 
             Receive<Start>(message =>
             {
                 _sessionCookie = message.Cookie;
                 _replyTo = message.ReplyTo;
-                _progressReporter = message.ProgressReporter ?? ActorRefs.Nobody;
                 _pendingPlans.Clear();
                 var plans = ResolvePlans(message);
                 foreach (var plan in plans)
@@ -53,7 +57,7 @@ namespace Floor2Plan.Connectors.P6.Actors
                     _pendingPlans.Count,
                     _syncOptions.MaxConcurrency);
 
-                Publish(new P6SyncStarted(_pendingPlans.Count));
+                ReportProgress(new P6SyncStarted(_pendingPlans.Count));
 
                 _catalogCounts.Clear();
                 _syncErrors.Clear();
@@ -64,17 +68,20 @@ namespace Floor2Plan.Connectors.P6.Actors
             Receive<ProjectBatchComplete>(_ => StartNextProjectBatch());
         }
 
-        public static Props Props(IP6RestApi api, IActorRef store, P6SyncOptions syncOptions)
+        public static Props Props(
+            IP6RestApi api,
+            IActorRef store,
+            P6SyncOptions syncOptions,
+            IActorRef progress = null)
         {
-            return Akka.Actor.Props.Create(() => new P6SyncOrchestratorActor(api, store, syncOptions));
+            return Akka.Actor.Props.Create(() => new P6SyncOrchestratorActor(api, store, syncOptions, progress));
         }
 
         internal sealed record Start(
             IReadOnlyList<string> ProjectIds,
             string Cookie,
             IActorRef ReplyTo,
-            IReadOnlyList<P6ProjectSyncPlan> SyncPlans = null,
-            IActorRef ProgressReporter = null);
+            IReadOnlyList<P6ProjectSyncPlan> SyncPlans = null);
 
         internal sealed record SyncFinished;
 
@@ -109,7 +116,7 @@ namespace Floor2Plan.Connectors.P6.Actors
                 plan.ProjectObjectId,
                 _pendingPlans.Count);
 
-            Publish(new P6ProjectStarted(objectId, _pendingPlans.Count));
+            ReportProgress(new P6ProjectStarted(objectId, _pendingPlans.Count));
 
             var workItems = plan.GetEntityKinds()
                 .Select(kind => new P6CatalogSyncWorkItem(
@@ -153,7 +160,7 @@ namespace Floor2Plan.Connectors.P6.Actors
                         item.Kind,
                         item.Plan.ProjectObjectId,
                         fetched.Count);
-                    Publish(new P6ProjectCatalogFetched(item.ProjectObjectId, item.Kind, fetched.Count));
+                    ReportProgress(new P6ProjectCatalogFetched(item.ProjectObjectId, item.Kind, fetched.Count));
                 },
                 OnFailure = (item, message, context) =>
                 {
@@ -162,7 +169,7 @@ namespace Floor2Plan.Connectors.P6.Actors
                     context.Errors.Add(error);
                     _syncErrors.Add(error);
                     _log.Error(failed.Exception, "P6 sync failed while fetching {0}", failed.Kind);
-                    Publish(new P6ProjectCatalogFetchFailed(
+                    ReportProgress(new P6ProjectCatalogFetchFailed(
                         item.ProjectObjectId,
                         item.Kind,
                         failed.Exception.Message));
@@ -193,7 +200,7 @@ namespace Floor2Plan.Connectors.P6.Actors
         private void CompleteSync(P6SyncResult result)
         {
             _log.Info("P6 sync completed: {0} records, {1} errors", result.TotalRecordCount, result.Errors.Count);
-            Publish(new P6SyncCompleted(result));
+            ReportProgress(new P6SyncCompleted(result));
             if (!_replyTo.IsNobody())
             {
                 _replyTo.Tell(result);
@@ -203,15 +210,12 @@ namespace Floor2Plan.Connectors.P6.Actors
             Context.Stop(Self);
         }
 
-        private void Publish(object progressEvent)
+        private void ReportProgress(object progressEvent)
         {
-            if (!_progressReporter.IsNobody())
+            if (!_progress.IsNobody())
             {
-                _progressReporter.Tell(progressEvent);
-                return;
+                _progress.Tell(progressEvent);
             }
-
-            Context.System.EventStream.Publish(progressEvent);
         }
     }
 }

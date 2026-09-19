@@ -3,8 +3,8 @@ using Floor2Plan.Connectors.P6.Api.Models;
 namespace Floor2Plan.Connectors.P6.Messages
 {
     /// <summary>
-    /// Progress events published by <see cref="Actors.P6SyncOrchestratorActor"/> on the actor system's EventStream.
-    /// <see cref="Actors.P6SyncProgressActor"/> subscribes and writes each event to <see cref="Infrastructure.Process.Contracts.Scope.IProcessLogger"/>
+    /// Progress events sent by <see cref="Actors.P6SyncOrchestratorActor"/> to <see cref="Actors.P6SyncProgressActor"/>.
+    /// The progress actor writes each event to <see cref="Infrastructure.Process.Contracts.Scope.IProcessLogger"/>
     /// via a fresh DI scope per message (safe when the HTTP request scope has already ended).
     /// </summary>
     public sealed record P6SyncStarted(int ProjectCount);

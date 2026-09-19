@@ -119,7 +119,7 @@ That persist/import behaviour lives outside `BatchOrchestratorActor` — the pla
 | Entry point | How |
 |-------------|-----|
 | **Actor** | `new StartP6Sync(projectIds, syncPlans: plans)` — use `Ask` when the caller must wait for `P6SyncResult` |
-| **Connector** | `SyncAllAsync` **Tell**s `StartP6Sync` and returns immediately; live progress via EventStream → `P6SyncProgressActor` |
+| **Connector** | `SyncAllAsync` **Tell**s `StartP6Sync` and returns immediately; live progress via direct Tell → `P6SyncProgressActor` |
 | **Connector config** | `P6Sync:EntityKinds` / `P6Sync:AdditionalFilter` → `P6SyncPlanFactory.FromSyncOptions` |
 | **Session → orchestrator** | `RunSync` → `P6SyncOrchestratorActor.Start(..., syncPlans: sync.SyncPlans)` |
 
@@ -129,7 +129,7 @@ That persist/import behaviour lives outside `BatchOrchestratorActor` — the pla
 
 ```mermaid
 flowchart LR
-    Orch["P6SyncOrchestratorActor"] -->|EventStream| Progress["P6SyncProgressActor"]
+    Orch["P6SyncOrchestratorActor"] -->|Tell| Progress["P6SyncProgressActor"]
     Progress -->|scope per event| Logger["IProcessLogger"]
 ```
 

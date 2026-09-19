@@ -10,8 +10,8 @@ using Microsoft.Extensions.DependencyInjection;
 namespace Floor2Plan.Connectors.P6.Actors
 {
     /// <summary>
-    /// Subscribes to P6 sync progress on the actor system's EventStream and writes each event to
-    /// <see cref="IProcessLogger"/> using a fresh DI scope per message (safe for async background sync).
+    /// Receives P6 sync progress events and writes each one to <see cref="IProcessLogger"/>
+    /// using a fresh DI scope per message (safe for async background sync).
     /// </summary>
     public sealed class P6SyncProgressActor : ReceiveActor
     {
@@ -91,23 +91,6 @@ namespace Floor2Plan.Connectors.P6.Actors
         public static Props Props(IServiceScopeFactory scopeFactory)
         {
             return Akka.Actor.Props.Create(() => new P6SyncProgressActor(scopeFactory));
-        }
-
-        protected override void PreStart()
-        {
-            var eventStream = Context.System.EventStream;
-            eventStream.Subscribe(Self, typeof(P6SyncStarted));
-            eventStream.Subscribe(Self, typeof(P6ProjectStarted));
-            eventStream.Subscribe(Self, typeof(P6ProjectCatalogFetched));
-            eventStream.Subscribe(Self, typeof(P6ProjectCatalogFetchFailed));
-            eventStream.Subscribe(Self, typeof(P6SyncCompleted));
-            base.PreStart();
-        }
-
-        protected override void PostStop()
-        {
-            Context.System.EventStream.Unsubscribe(Self);
-            base.PostStop();
         }
 
         private void WithProcessLogger(Action<IProcessLogger> write)

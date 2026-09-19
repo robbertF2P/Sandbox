@@ -29,7 +29,6 @@ using Xunit;
 
 namespace Floor2Plan.UnitTest.Connectors.P6
 {
-    [Collection("OutOfTokens.P6")]
     public class P6ConnectorTest : AkkaSerilogTestKit
     {
         public P6ConnectorTest(ITestOutputHelper output)
@@ -154,7 +153,7 @@ namespace Floor2Plan.UnitTest.Connectors.P6
         public async Task SyncAllAsync_WithConfiguredEntityKinds_OnlyFetchesSelectedCatalogs()
         {
             var api = CreateApi();
-            var (scopeFactory, _) = CreateScopeFactory();
+            var (scopeFactory, _) = P6TestSupport.CreateScopeFactory();
             var target = CreateTarget(
                 api,
                 CreateSelectionStore("1").Object,
@@ -181,7 +180,7 @@ namespace Floor2Plan.UnitTest.Connectors.P6
         public async Task SyncAllAsync_ReturnsImmediatelyAndLogsProgressViaScopedLogger()
         {
             var api = CreateApi();
-            var (scopeFactory, processLogger) = CreateScopeFactory();
+            var (scopeFactory, processLogger) = P6TestSupport.CreateScopeFactory();
             var target = CreateTarget(api, CreateSelectionStore("1").Object, processLogger.Object, scopeFactory);
 
             await target.SyncAllAsync([]);
@@ -214,7 +213,7 @@ namespace Floor2Plan.UnitTest.Connectors.P6
             {
                 var mock = processLogger as Mock<IProcessLogger<P6Connector>>
                     ?? (processLogger != null ? Mock.Get(processLogger) : null);
-                factory = CreateScopeFactory(mock).ScopeFactory;
+                factory = P6TestSupport.CreateScopeFactory(mock).ScopeFactory;
             }
 
             var p6Actor = Sys.ActorOf(P6Actor.Props(api.Object, CreateAuthOptions(), syncOptions, factory));
@@ -231,16 +230,6 @@ namespace Floor2Plan.UnitTest.Connectors.P6
                 projectSelectionStore,
                 factory,
                 Options.Create(syncOptions ?? new P6SyncOptions()));
-        }
-
-        private static (IServiceScopeFactory ScopeFactory, Mock<IProcessLogger<P6Connector>> ProcessLogger) CreateScopeFactory(
-            Mock<IProcessLogger<P6Connector>> processLogger = null)
-        {
-            var logger = processLogger ?? new Mock<IProcessLogger<P6Connector>>();
-            var services = new ServiceCollection();
-            services.AddSingleton<IProcessLogger<P6Connector>>(logger.Object);
-            var provider = services.BuildServiceProvider();
-            return (provider.GetRequiredService<IServiceScopeFactory>(), logger);
         }
 
         private static Mock<IP6ProjectSelectionStore> CreateSelectionStore(params string[] selectedProjectIds)

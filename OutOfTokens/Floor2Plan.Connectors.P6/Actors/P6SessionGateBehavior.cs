@@ -94,13 +94,12 @@ namespace Floor2Plan.Connectors.P6.Actors
                         .Tell(new P6RawDataBuilderActor.Build(cookie, rawData.ReplyTo));
                     break;
                 case RunSync sync:
-                    SpawnWorker(P6SyncOrchestratorActor.Props(_api, sync.Store, sync.SyncOptions))
+                    SpawnWorker(P6SyncOrchestratorActor.Props(_api, sync.Store, sync.SyncOptions, sync.Progress))
                         .Tell(new P6SyncOrchestratorActor.Start(
                             sync.ProjectIds,
                             cookie,
                             sync.ReplyTo,
-                            sync.SyncPlans,
-                            sync.ProgressReporter));
+                            sync.SyncPlans));
                     break;
                 default:
                     throw new InvalidOperationException("Unsupported P6 session command.");

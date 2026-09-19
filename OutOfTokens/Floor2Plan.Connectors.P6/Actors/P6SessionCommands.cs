@@ -17,5 +17,5 @@ namespace Floor2Plan.Connectors.P6.Actors
         IActorRef Store,
         P6SyncOptions SyncOptions,
         IReadOnlyList<P6ProjectSyncPlan> SyncPlans = null,
-        IActorRef ProgressReporter = null);
+        IActorRef Progress = null);
 }

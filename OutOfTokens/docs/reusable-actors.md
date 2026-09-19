@@ -81,7 +81,7 @@ Context.ActorOf(BatchOrchestratorActor<MyWorkItem>.Props(options))
 
 ## P6 connector — live sync log (wired)
 
-`P6SyncOrchestratorActor` publishes progress on the **EventStream**. `P6SyncProgressActor` subscribes and writes to `IProcessLogger` using **`IServiceScopeFactory` per event** (see [floor2plan-akka-actor-integration-design.md](../../docs/floor2plan-akka-actor-integration-design.md)).
+`P6SyncOrchestratorActor` **Tell**s progress events to `P6SyncProgressActor`, which writes to `IProcessLogger` using **`IServiceScopeFactory` per event** (see [floor2plan-akka-actor-integration-design.md](../../docs/floor2plan-akka-actor-integration-design.md)).
 
 `P6Connector.SyncAllAsync` **Tell**s `StartP6Sync` and returns immediately; the sync log updates as catalogs are fetched.
 
@@ -98,9 +98,7 @@ Context.ActorOf(BatchOrchestratorActor<MyWorkItem>.Props(options))
 
 ## Tests
 
-`Infrastructure.Akka.Tests` — TestKit coverage for generic actors (run with `dotnet test Infrastructure.Akka.Tests/Infrastructure.Akka.Tests.csproj`).
-
-`Floor2Plan.UnitTest.Connectors.P6` — P6 connector integration tests.
+`Floor2Plan.UnitTest.Connectors.P6` — P6 connector integration tests and `InfrastructureAkka/` TestKit coverage for generic actors (run with `dotnet test OutOfTokens.sln`).
 
 ---
 
