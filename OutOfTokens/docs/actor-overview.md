@@ -20,7 +20,98 @@
 
 Integration connectors (login → fetch → transform → store) are naturally **sequential pipelines with concurrency limits**, **session state**, and **failure isolation**. Akka.NET gives that structure without ad-hoc `Task` chains or scattered `lock` blocks — and the same patterns reuse across connectors.
 
-This solution proves it with a real P6 EPPM connector: **28 unit tests, standalone build, generic building blocks extracted.**
+This solution proves it with a real P6 EPPM connector: **33 unit tests, standalone build, generic building blocks extracted.**
+
+---
+
+## How the connector and Akka module fit together
+
+Two projects, one pipeline:
+
+| Project | Responsibility |
+|---------|----------------|
+| **`Infrastructure.Akka`** | Reusable orchestration *shape* — session gate, paging, batching, mutex, keyed store |
+| **`Floor2Plan.Connectors.P6`** | P6-specific *behavior* — login, REST calls, sync plans, progress events |
+
+The connector **composes** generic actors via `Props` and small option/behavior types. It does not fork or copy them.
+
+```mermaid
+flowchart TB
+    subgraph host ["Host application"]
+        Connector["P6Connector\n(IConnector facade)"]
+        Scope["IServiceScopeFactory\nIProcessLogger"]
+    end
+
+    subgraph p6 ["Floor2Plan.Connectors.P6 — domain connector"]
+        direction TB
+        Entry["P6Actor\n(entry point)"]
+        Behavior["P6SessionGateBehavior\nplug-in for SessionGateActor"]
+        Domain["P6 domain actors\nlogin · catalog · sync orchestrator · workers"]
+        Plans["P6SyncPlanFactory / P6ProjectSyncPlan\npartial sync per project"]
+    end
+
+    subgraph akka ["Infrastructure.Akka — reusable module"]
+        direction TB
+        SG["SessionGateActor"]
+        PF["PagedFetchActor"]
+        BO["BatchOrchestratorActor"]
+        EG["ExclusiveGateActor"]
+        KA["KeyedAccumulatorActor"]
+    end
+
+    subgraph external ["Outside the actor system"]
+        API["P6 REST API"]
+        Bus["EventStream\nIP6SyncProgressEvent"]
+        Log["Sync log / UI"]
+    end
+
+    Connector -->|"Tell / Ask"| Entry
+    Entry --> SG
+    Entry --> EG
+    Entry --> KA
+    Behavior -.->|"implements ISessionGateBehavior"| SG
+    SG --> Domain
+    Domain -->|"Props + options"| PF
+    Domain -->|"Props + options"| BO
+    Plans --> Entry
+    PF --> API
+    BO --> API
+    Domain --> API
+    Domain -->|"Publish"| Bus
+    Bus -->|"Subscribe"| Progress["P6SyncProgressActor"]
+    Progress --> Scope
+    Scope --> Log
+```
+
+**Read the diagram top-down:**
+
+1. **Host** calls `P6Connector` (sync, config, raw data). The connector talks to `P6Actor` — not to HTTP directly.
+2. **`P6Actor`** owns the tree: session gate, sync mutex, raw-data store, progress subscriber.
+3. **`Infrastructure.Akka`** actors are the engine; **`P6SessionGateBehavior`** and worker `*Options` types supply P6 rules (cookie, which API to call, concurrency).
+4. **EventStream** decouples progress: orchestrator publishes; `P6SyncProgressActor` (and later SignalR) subscribe without the orchestrator knowing.
+
+```mermaid
+flowchart LR
+    subgraph what ["What to run — connector"]
+        W1["Which P6 command?"]
+        W2["Which projects / entity kinds?"]
+        W3["Login, filters, API mapping"]
+    end
+
+    subgraph how ["How to run it — Infrastructure.Akka"]
+        H1["One session, login on demand"]
+        H2["Page until done"]
+        H3["N workers, bounded concurrency"]
+        H4["One sync at a time"]
+    end
+
+    W1 --> H1
+    W2 --> H3
+    W3 --> H2
+    W3 --> H4
+```
+
+Another connector (SAP, Primavera Cloud, …) would add a sibling project next to `Floor2Plan.Connectors.P6` and plug in its own `ISessionGateBehavior` + worker options — same `Infrastructure.Akka` module.
 
 ---
 
