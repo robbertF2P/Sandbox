@@ -3,6 +3,8 @@ using Akka.Event;
 using Floor2Plan.Connectors.P6.Api;
 using Floor2Plan.Connectors.P6.Api.Models;
 using Floor2Plan.Connectors.P6.Messages;
+using Floor2Plan.Connectors.P6.Sync;
+using Infrastructure.Akka.Actors.Orchestration;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,7 +12,8 @@ using System.Linq;
 namespace Floor2Plan.Connectors.P6.Actors
 {
     /// <summary>
-    /// Orchestrates a full P6 synchronization run for the selected project ObjectIds.
+    /// Orchestrates a P6 synchronization run for the selected project plans.
+    /// Each project is processed sequentially; catalogs within a project run in parallel via <see cref="BatchOrchestratorActor{TWorkItem}"/>.
     /// </summary>
     public sealed class P6SyncOrchestratorActor : ReceiveActor
     {
@@ -20,15 +23,11 @@ namespace Floor2Plan.Connectors.P6.Actors
         private readonly P6SyncOptions _syncOptions;
 
         private readonly Dictionary<P6EntityKind, int> _catalogCounts = new();
-        private readonly Queue<P6EntityKind> _pendingCatalogs = new();
-        private readonly Queue<string> _pendingProjectIds = new();
+        private readonly Queue<P6ProjectSyncPlan> _pendingPlans = new();
         private readonly List<string> _syncErrors = new();
 
         private string _sessionCookie = string.Empty;
         private IActorRef _replyTo = ActorRefs.Nobody;
-        private int _activeWorkers;
-        private string _currentProjectId;
-        private int _currentProjectObjectId;
 
         public P6SyncOrchestratorActor(IP6RestApi api, IActorRef store, P6SyncOptions syncOptions)
         {
@@ -40,41 +39,24 @@ namespace Floor2Plan.Connectors.P6.Actors
             {
                 _sessionCookie = message.Cookie;
                 _replyTo = message.ReplyTo;
-                _pendingProjectIds.Clear();
-                foreach (var projectId in message.ProjectIds.Where(x => !string.IsNullOrWhiteSpace(x)).Distinct())
+                _pendingPlans.Clear();
+                foreach (var plan in ResolvePlans(message))
                 {
-                    _pendingProjectIds.Enqueue(projectId);
+                    _pendingPlans.Enqueue(plan);
                 }
 
                 _log.Info(
                     "P6 sync started for {0} project(s) with concurrency limit {1}",
-                    _pendingProjectIds.Count,
+                    _pendingPlans.Count,
                     _syncOptions.MaxConcurrency);
 
                 _catalogCounts.Clear();
                 _syncErrors.Clear();
                 _store.Tell(new P6RawDataStoreActor.ClearRawData());
-                _activeWorkers = 0;
-                StartNextProject();
+                StartNextProjectBatch();
             });
 
-            Receive<P6CatalogWorkerActor.CatalogFetched>(message =>
-            {
-                _activeWorkers--;
-                _catalogCounts[message.Kind] = _catalogCounts.TryGetValue(message.Kind, out var existing)
-                    ? existing + message.Count
-                    : message.Count;
-                _log.Info("P6 sync fetched {0} for project {1}: {2} records", message.Kind, _currentProjectId, message.Count);
-                StartNextCatalogWorkers();
-            });
-
-            Receive<P6CatalogWorkerActor.CatalogFetchFailed>(message =>
-            {
-                _activeWorkers--;
-                _syncErrors.Add($"{message.Kind}: {message.Exception.Message}");
-                _log.Error(message.Exception, "P6 sync failed while fetching {0}", message.Kind);
-                StartNextCatalogWorkers();
-            });
+            Receive<ProjectBatchComplete>(_ => StartNextProjectBatch());
         }
 
         public static Props Props(IP6RestApi api, IActorRef store, P6SyncOptions syncOptions)
@@ -82,13 +64,19 @@ namespace Floor2Plan.Connectors.P6.Actors
             return Akka.Actor.Props.Create(() => new P6SyncOrchestratorActor(api, store, syncOptions));
         }
 
-        internal sealed record Start(IReadOnlyList<string> ProjectIds, string Cookie, IActorRef ReplyTo);
+        internal sealed record Start(
+            IReadOnlyList<string> ProjectIds,
+            string Cookie,
+            IActorRef ReplyTo,
+            IReadOnlyList<P6ProjectSyncPlan> SyncPlans = null);
 
         internal sealed record SyncFinished;
 
-        private void StartNextProject()
+        private sealed record ProjectBatchComplete;
+
+        private void StartNextProjectBatch()
         {
-            if (_pendingProjectIds.Count == 0)
+            if (_pendingPlans.Count == 0)
             {
                 CompleteSync(new P6SyncResult(
                     GetCatalogCount(P6EntityKind.Projects),
@@ -101,50 +89,87 @@ namespace Floor2Plan.Connectors.P6.Actors
                 return;
             }
 
-            _currentProjectId = _pendingProjectIds.Dequeue();
-            if (!int.TryParse(_currentProjectId, out var objectId))
+            var plan = _pendingPlans.Dequeue();
+            if (!int.TryParse(plan.ProjectObjectId, out var objectId))
             {
-                _syncErrors.Add($"Project {_currentProjectId}: stored value is not a valid P6 ObjectId (project selection may need to be re-saved).");
-                StartNextProject();
+                _syncErrors.Add(
+                    $"Project {plan.ProjectObjectId}: stored value is not a valid P6 ObjectId (project selection may need to be re-saved).");
+                StartNextProjectBatch();
                 return;
             }
 
-            _currentProjectObjectId = objectId;
             _log.Info(
                 "P6 sync starting for project ObjectId {0} ({1} project(s) remaining after this one)",
-                _currentProjectId,
-                _pendingProjectIds.Count);
+                plan.ProjectObjectId,
+                _pendingPlans.Count);
 
-            _pendingCatalogs.Clear();
-            foreach (var kind in Enum.GetValues<P6EntityKind>())
-            {
-                _pendingCatalogs.Enqueue(kind);
-            }
+            var workItems = plan.GetEntityKinds()
+                .Select(kind => new P6CatalogSyncWorkItem(
+                    plan,
+                    objectId,
+                    kind,
+                    _sessionCookie,
+                    plan.BuildFilter(kind, objectId)))
+                .ToList();
 
-            StartNextCatalogWorkers();
+            var batch = Context.ActorOf(
+                BatchOrchestratorActor<P6CatalogSyncWorkItem>.Props(CreateProjectBatchOptions()),
+                $"p6-project-batch-{plan.ProjectObjectId}");
+            batch.Tell(new BatchOrchestratorActor<P6CatalogSyncWorkItem>.Start(workItems, Self));
         }
 
-        private void StartNextCatalogWorkers()
+        private BatchOrchestratorOptions<P6CatalogSyncWorkItem> CreateProjectBatchOptions()
         {
-            while (_activeWorkers < Math.Max(1, _syncOptions.MaxConcurrency) && _pendingCatalogs.Count > 0)
+            return new BatchOrchestratorOptions<P6CatalogSyncWorkItem>
             {
-                var kind = _pendingCatalogs.Dequeue();
-                var projectFilter = kind switch
+                MaxConcurrency = _syncOptions.MaxConcurrency,
+                CreateWorker = item => (
+                    P6CatalogWorkerActor.Props(
+                        _api,
+                        _store,
+                        Math.Max(1, _syncOptions.PageSize),
+                        item.ProjectFilter),
+                    new P6CatalogWorkerActor.FetchCatalog(item.Kind, item.Cookie, 0)),
+                IsSuccess = (item, message) =>
+                    message is P6CatalogWorkerActor.CatalogFetched fetched && fetched.Kind == item.Kind,
+                IsFailure = (item, message) =>
+                    message is P6CatalogWorkerActor.CatalogFetchFailed failed && failed.Kind == item.Kind,
+                OnSuccess = (item, message, context) =>
                 {
-                    P6EntityKind.Projects => $"ObjectId={_currentProjectObjectId}",
-                    P6EntityKind.Relationships => $"PredecessorProjectObjectId={_currentProjectObjectId}",
-                    _ => $"ProjectObjectId={_currentProjectObjectId}"
-                };
-                var worker = Context.ActorOf(
-                    P6CatalogWorkerActor.Props(_api, _store, Math.Max(1, _syncOptions.PageSize), projectFilter));
-                _activeWorkers++;
-                worker.Tell(new P6CatalogWorkerActor.FetchCatalog(kind, _sessionCookie, 0));
+                    var fetched = (P6CatalogWorkerActor.CatalogFetched)message;
+                    _catalogCounts[item.Kind] = _catalogCounts.TryGetValue(item.Kind, out var existing)
+                        ? existing + fetched.Count
+                        : fetched.Count;
+                    _log.Info(
+                        "P6 sync fetched {0} for project {1}: {2} records",
+                        item.Kind,
+                        item.Plan.ProjectObjectId,
+                        fetched.Count);
+                },
+                OnFailure = (item, message, context) =>
+                {
+                    var failed = (P6CatalogWorkerActor.CatalogFetchFailed)message;
+                    var error = $"{failed.Kind}: {failed.Exception.Message}";
+                    context.Errors.Add(error);
+                    _syncErrors.Add(error);
+                    _log.Error(failed.Exception, "P6 sync failed while fetching {0}", failed.Kind);
+                },
+                BuildReply = _ => new ProjectBatchComplete()
+            };
+        }
+
+        private static IReadOnlyList<P6ProjectSyncPlan> ResolvePlans(Start message)
+        {
+            if (message.SyncPlans is { Count: > 0 })
+            {
+                return message.SyncPlans;
             }
 
-            if (_activeWorkers == 0 && _pendingCatalogs.Count == 0)
-            {
-                StartNextProject();
-            }
+            return message.ProjectIds
+                .Where(x => !string.IsNullOrWhiteSpace(x))
+                .Distinct()
+                .Select(P6ProjectSyncPlan.Full)
+                .ToList();
         }
 
         private int GetCatalogCount(P6EntityKind kind)

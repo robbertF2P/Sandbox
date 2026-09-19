@@ -58,12 +58,32 @@ P6 reference: [P6Actor.cs](../Floor2Plan.Connectors.P6/Actors/P6Actor.cs) (`Excl
 
 ---
 
-## Planned (P2+)
+## Implemented (P2)
+
+| Actor | Package path | When to use |
+|-------|--------------|-------------|
+| **BatchOrchestratorActor&lt;TWorkItem&gt;** | [Actors/Orchestration/BatchOrchestratorActor.cs](../Infrastructure.Akka/Actors/Orchestration/BatchOrchestratorActor.cs) | Bounded-concurrency work queue; reply when all items finish |
+| **BatchOrchestratorOptions&lt;TWorkItem&gt;** | [Actors/Orchestration/BatchOrchestratorOptions.cs](../Infrastructure.Akka/Actors/Orchestration/BatchOrchestratorOptions.cs) | Spawn worker, match success/failure, aggregate |
+| **P6ProjectSyncPlan** | [Sync/P6ProjectSyncPlan.cs](../Floor2Plan.Connectors.P6/Sync/P6ProjectSyncPlan.cs) | Per-project entity subset + optional P6 filter (partial sync extension) |
+
+P6 reference: [P6SyncOrchestratorActor.cs](../Floor2Plan.Connectors.P6/Actors/P6SyncOrchestratorActor.cs) — one batch per project plan.
+
+**Partial sync guide:** [partial-project-sync.md](partial-project-sync.md)
+
+### Minimal usage
+
+```csharp
+Context.ActorOf(BatchOrchestratorActor<MyWorkItem>.Props(options))
+    .Tell(new BatchOrchestratorActor<MyWorkItem>.Start(items, replyTo));
+```
+
+---
+
+## Planned (P3+)
 
 | Actor | Role | Motivation |
 |-------|------|------------|
-| **EventStreamBridgeActor** | Subscribe + side-effect | Progress logging, SignalR push |
-| **BatchOrchestratorActor&lt;TItem&gt;** | Bounded-concurrency batch | `P6SyncOrchestratorActor` outer loop |
+| **EventStreamBridgeActor** | Subscribe + side-effect | Progress logging, SignalR push (deferred — see below) |
 | **PipeWorkerActor&lt;TIn, TOut&gt;** | One-shot PipeTo worker | `P6LoginActor` shape |
 
 ### Deferred — connector sync logging (not now)

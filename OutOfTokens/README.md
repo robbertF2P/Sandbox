@@ -10,6 +10,7 @@ Standalone extraction of the **P6 EPPM connector** actor pipeline — compiles a
 |-----|----------------|
 | **[docs/actor-overview.md](docs/actor-overview.md)** | Visual pipeline diagram, session lifecycle, code samples — **best for advocating Akka.NET** |
 | **[docs/reusable-actors.md](docs/reusable-actors.md)** | Generic actor catalog with source links |
+| **[docs/partial-project-sync.md](docs/partial-project-sync.md)** | Partial / delta sync per selected project |
 | [docs/monolith-modularization/platform-actor-standard.md](../docs/monolith-modularization/platform-actor-standard.md) | Platform 2.0 actor rules |
 
 ---
