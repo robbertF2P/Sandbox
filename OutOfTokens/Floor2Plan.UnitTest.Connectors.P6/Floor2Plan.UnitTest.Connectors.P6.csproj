@@ -20,6 +20,11 @@
     <PackageReference Include="xunit.v3" />
   </ItemGroup>
   <ItemGroup>
+    <None Update="xunit.runner.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
     <ProjectReference Include="..\Stubs\Contracts.Infrastructure.Connectors\Contracts.Infrastructure.Connectors.csproj" />
     <ProjectReference Include="..\Stubs\Contracts.Model\Contracts.Model.csproj" />
     <ProjectReference Include="..\Stubs\Domain.Model\Domain.Model.csproj" />

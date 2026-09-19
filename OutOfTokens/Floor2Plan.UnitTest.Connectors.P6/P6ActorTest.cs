@@ -228,9 +228,9 @@ namespace Floor2Plan.UnitTest.Connectors.P6
         public async Task StartP6Sync_PublishesProgressToScopedProcessLogger()
         {
             var api = CreateApi();
-            var processLogger = new Mock<IProcessLogger<P6Connector>>();
+            var processLogger = new CapturingProcessLogger();
             var services = new ServiceCollection();
-            services.AddSingleton<IProcessLogger<P6Connector>>(processLogger.Object);
+            services.AddSingleton<IProcessLogger<P6Connector>>(processLogger);
             var provider = services.BuildServiceProvider();
             var scopeFactory = provider.GetRequiredService<IServiceScopeFactory>();
 
@@ -245,12 +245,21 @@ namespace Floor2Plan.UnitTest.Connectors.P6
                 TimeSpan.FromSeconds(5),
                 TestContext.Current.CancellationToken);
 
-            processLogger.Verify(
-                x => x.Log(It.Is<SyncLogMessageDto>(m => m.Message.Contains("P6 sync started"))),
-                Times.AtLeastOnce);
-            processLogger.Verify(
-                x => x.Log(It.Is<SyncLogMessageDto>(m => m.SyncInformation == SyncInformation.Success)),
-                Times.Once);
+            await AwaitAssertAsync(
+                () => processLogger.Messages.Should().Contain(m => m.Message.Contains("P6 sync started")),
+                TimeSpan.FromSeconds(5),
+                cancellationToken: TestContext.Current.CancellationToken);
+
+            processLogger.Messages.Should().ContainSingle(m => m.SyncInformation == SyncInformation.Success);
+        }
+
+        private sealed class CapturingProcessLogger : IProcessLogger<P6Connector>
+        {
+            public List<SyncLogMessageDto> Messages { get; } = new();
+
+            public void Log(SyncLogMessageDto message) => Messages.Add(message);
+
+            public void LogRange(IEnumerable<SyncLogMessageDto> messages) => Messages.AddRange(messages);
         }
 
         [F2PFact]

@@ -28,6 +28,7 @@ namespace Floor2Plan.Connectors.P6.Actors
 
         private string _sessionCookie = string.Empty;
         private IActorRef _replyTo = ActorRefs.Nobody;
+        private IActorRef _progressReporter = ActorRefs.Nobody;
 
         public P6SyncOrchestratorActor(IP6RestApi api, IActorRef store, P6SyncOptions syncOptions)
         {
@@ -39,6 +40,7 @@ namespace Floor2Plan.Connectors.P6.Actors
             {
                 _sessionCookie = message.Cookie;
                 _replyTo = message.ReplyTo;
+                _progressReporter = message.ProgressReporter ?? ActorRefs.Nobody;
                 _pendingPlans.Clear();
                 var plans = ResolvePlans(message);
                 foreach (var plan in plans)
@@ -71,7 +73,8 @@ namespace Floor2Plan.Connectors.P6.Actors
             IReadOnlyList<string> ProjectIds,
             string Cookie,
             IActorRef ReplyTo,
-            IReadOnlyList<P6ProjectSyncPlan> SyncPlans = null);
+            IReadOnlyList<P6ProjectSyncPlan> SyncPlans = null,
+            IActorRef ProgressReporter = null);
 
         internal sealed record SyncFinished;
 
@@ -202,6 +205,12 @@ namespace Floor2Plan.Connectors.P6.Actors
 
         private void Publish(object progressEvent)
         {
+            if (!_progressReporter.IsNobody())
+            {
+                _progressReporter.Tell(progressEvent);
+                return;
+            }
+
             Context.System.EventStream.Publish(progressEvent);
         }
     }

@@ -99,7 +99,8 @@ namespace Floor2Plan.Connectors.P6.Actors
                             sync.ProjectIds,
                             cookie,
                             sync.ReplyTo,
-                            sync.SyncPlans));
+                            sync.SyncPlans,
+                            sync.ProgressReporter));
                     break;
                 default:
                     throw new InvalidOperationException("Unsupported P6 session command.");

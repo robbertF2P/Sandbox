@@ -86,8 +86,6 @@ namespace Floor2Plan.Connectors.P6.Actors
             });
         }
 
-        internal sealed record Ready;
-
         internal sealed record SyncCompletedLogged;
 
         public static Props Props(IServiceScopeFactory scopeFactory)
@@ -103,7 +101,6 @@ namespace Floor2Plan.Connectors.P6.Actors
             eventStream.Subscribe(Self, typeof(P6ProjectCatalogFetched));
             eventStream.Subscribe(Self, typeof(P6ProjectCatalogFetchFailed));
             eventStream.Subscribe(Self, typeof(P6SyncCompleted));
-            Context.Parent.Tell(new Ready());
             base.PreStart();
         }
 
