@@ -28,7 +28,7 @@ Use this skill first. It routes you to focused skills and repo standards — do 
 | Platform logging | `Platform.Serilog.Logging/`, `build/Platform.Logging.*.props` | Serilog, Seq, App Insights, test sink |
 | Frontend design system | `FloorganiseCss/` | `@floorganise/css` — Tailwind v4 tokens + semantic aliases |
 | Admin backoffice UI (reference) | `AdminBackoffice/web/` | Exemplary Angular + `@floorganise/css` operator screens |
-| Platform packages feed | `local-feed/` | Packed NuGet (`Platform.Serilog.Logging*`) |
+| Platform packages feed | `local-feed/` (SandBox); Azure Artifacts (monolith) | Packed NuGet — see `docs/monolith-modularization/platform-nuget-feed-standard.md` |
 | Import domain | `ImportPipeline/` | `ImportPipeline.Domain` NuGet |
 | Modularization program | `docs/monolith-modularization/` | Roadmap, logging/correlation/frontend/**actor** standards, quality framework |
 | Laptop handoff pack | `docs/monolith-modularization/PLATFORM-V2-LAPTOP-HANDOFF.md` | Bundle plan + pilots for monolith laptop (`scripts/bundle-platform-v2-handoff.sh`) |

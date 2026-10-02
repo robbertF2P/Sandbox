@@ -9,7 +9,7 @@ Central Serilog configuration for every SandBox module and future bounded-contex
 | `Platform.Serilog.Logging` | Shared enrichers + environment sinks (Seq / Application Insights) |
 | `Platform.Serilog.Logging.Testing` | Same pipeline + `Serilog.Sinks.XUnit3` for tests |
 
-Both ship as NuGet to `local-feed/` (version `1.1.1`). See also [platform-correlation-standard.md](./platform-correlation-standard.md) for end-to-end tracing.
+Both ship as NuGet to `local-feed/` in SandBox (version `1.1.1`); production repos consume published packages from Azure Artifacts per [platform-nuget-feed-standard.md](./platform-nuget-feed-standard.md). See also [platform-correlation-standard.md](./platform-correlation-standard.md) for end-to-end tracing.
 
 ```bash
 ./scripts/pack-platform-logging.sh [version]
@@ -86,5 +86,5 @@ builder.AddPlatformSerilog(logger);
 
 ## Source vs package
 
-- **Consumers** use NuGet from `local-feed/` via the `build/` props imports.
+- **Consumers** use NuGet from Azure Artifacts (or `local-feed/` offline) via the `build/` props imports.
 - **Platform.Serilog.Logging solution** uses project references internally; `Platform.Serilog.Logging/nuget.config` disables `local-feed` to avoid ambiguous package resolution during development.

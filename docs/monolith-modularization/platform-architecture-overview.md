@@ -578,6 +578,7 @@ Yes — platform capability, not a tenant product feature. It typically has no c
 | Frontend (@floorganise/css) | `platform-frontend-standard.md` |
 | Tenant SPA (single app) | This document § [Tenant SPA](#tenant-spa--single-application) · [`platform-v2-tenant-spa.html`](platform-v2-tenant-spa.html) |
 | Auth & SSO | `platform-authentication-standard.md` |
+| Internal NuGet (Artifacts, Entra) | `platform-nuget-feed-standard.md` |
 | Legacy connector anti-pattern | `../floor2plan-legacy-connector-submodule-antipattern.md` |
 | Runnable POC index | `F2pPlatform/README.md` |
 

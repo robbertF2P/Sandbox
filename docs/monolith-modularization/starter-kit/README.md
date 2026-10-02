@@ -25,7 +25,7 @@ cp "$SB/scripts/scaffold-module.sh" "$MONO/scripts/"
 # cp -R "$SB/F2pPlatform/host" "$MONO/Src/Platform/"   # adjust paths per monolith layout
 ```
 
-Point monolith `nuget.config` at your internal feed for `Platform.Serilog.Logging` packages (published from SandBox).
+Configure monolith `nuget.config` per [platform-nuget-feed-standard.md](../platform-nuget-feed-standard.md) (template: `templates/nuget.config`). Internal packages such as `Platform.Serilog.Logging` are published from SandBox to Azure Artifacts.
 
 ---
 

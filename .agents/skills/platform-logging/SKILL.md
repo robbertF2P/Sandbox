@@ -20,7 +20,7 @@ metadata:
 
 # Platform logging
 
-**Authoritative doc:** `docs/monolith-modularization/platform-logging-standard.md`
+**Authoritative doc:** `docs/monolith-modularization/platform-logging-standard.md` · Feed/auth: `docs/monolith-modularization/platform-nuget-feed-standard.md`
 
 **Principle:** Consumers use NuGet + MSBuild props — not project references to `Platform.Serilog.Logging` source (except when developing the platform package itself).
 
