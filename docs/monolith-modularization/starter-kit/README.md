@@ -46,6 +46,8 @@ Configure monolith `nuget.config` per [platform-nuget-feed-standard.md](../platf
 | `../platform-architecture-overview.md` | **done** | V2 layers, module vs pack, presentation outline, **tenant SPA (single app)**, glossary |
 | SandBox `scripts/scaffold-customization-pack.sh` | **done** | Generate `F2pPlatform/src/Packs/<Context>.Packs.<Client>/` |
 | `templates/pr-module-extraction.md` | **planned** | PR body checklist |
+| `../platform-nuget-feed-standard.md` | **done** | Azure Artifacts + Entra; no PATs in repo |
+| `templates/nuget.config` | **done** | Monolith root `nuget.config` template with source mapping |
 | `../module-composition-di.md` | **done** | DI standard — extension methods, no ABP |
 | `../platform-frontend-standard.md` | **done** | `@floorganise/css` + `@floorganise/ui` for V2 modules |
 | SandBox `build/Platform.Logging.*.props` | **done** | Serilog MSBuild imports |
