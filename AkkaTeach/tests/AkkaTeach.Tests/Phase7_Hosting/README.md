@@ -39,8 +39,11 @@
   Console reuse that single method.
 - Give top-level actors **stable names** (`work-coordinator`, `session`, `data-ingestion`).
   They appear in paths and logs.
-- Resolve dependencies at `Props` creation time and pass them in — do not inject `IServiceProvider`
-  into an actor.
+- Resolve **singleton** dependencies at `Props` creation time and pass them in — do not stash
+  `IServiceProvider` in a field and call `GetService` ad hoc. For **scoped** services (e.g.
+  `DbContext`), inject `IServiceScopeFactory` and call `CreateAsyncScope()` at the start of each
+  message handler; dispose the scope when that handler finishes. See
+  [actor-model-guide §14](../../../docs/actor-model-guide.md#14-scoped-dependencies-dbcontext-per-message-work).
 - Non-actor code reaches actors through `IRequiredActor<T>` or a facade, never by path lookup.
 
 ## Crossing the boundary

@@ -413,6 +413,57 @@ Swap `MockDataApiClient` for a real `HttpClient` implementation later; actors st
 
 ---
 
+## 14. Scoped dependencies (DbContext, per-message work)
+
+ASP.NET gives you a DI scope per HTTP request. Actors have no ambient request — only an incoming
+message. Scoped data therefore comes from the **message** (tenant, correlation, command payload)
+or from a **short-lived scope you open inside the handler** for that one message.
+
+### What goes in the constructor (resolved at `Props` time)
+
+| Safe at `Props` time | Why |
+|----------------------|-----|
+| `IDataApiClient`, `IHttpClientFactory` | Singleton / stateless IO boundary |
+| `IOptions<T>`, `ILogger<T>` | Configuration and logging |
+| `IServiceScopeFactory` | The **factory** is a singleton; it creates per-operation scopes |
+
+### What does not go in the constructor
+
+| Not in fields | Why |
+|---------------|-----|
+| `DbContext` | Scoped — tied to one unit of work; actors are long-lived |
+| `IServiceProvider` as a service locator | Hides dependencies; easy to capture disposed scoped services |
+
+### Per-message scope pattern
+
+Inject `IServiceScopeFactory` when building `Props`. Open a scope at the **start** of each
+handler; resolve scoped services inside it; dispose when the handler finishes:
+
+```csharp
+public sealed class TodoActor : ReceiveActor
+{
+    private readonly IServiceScopeFactory _scopeFactory;
+
+    public TodoActor(IServiceScopeFactory scopeFactory) => _scopeFactory = scopeFactory;
+
+    private async Task HandleCreate(CreateTodoCommand command)
+    {
+        await using var scope = _scopeFactory.CreateAsyncScope();
+        var db = scope.ServiceProvider.GetRequiredService<TodoDbContext>();
+        // one unit of work for this message
+    }
+}
+```
+
+Reference: `AkkaAspirePoc/AkkaAspirePoc.Api/Actors/TodoActor.cs`.
+
+`IDbContextFactory<T>` is the same idea without a full DI scope: `await using var db = await factory.CreateDbContextAsync()`.
+
+**Takeaway:** the message is your request; the handler is your unit of work. Put context on the
+message; open scoped services only for the duration of that handler.
+
+---
+
 ## Quick reference
 
 | Topic | Actor | Test file |
@@ -482,8 +533,9 @@ Practical guidance for Akka.NET actors. These apply beyond this teaching repo.
 | Never block in `Receive` handlers | Blocks the mailbox; kills throughput | See `PipeToDemoActor` comments |
 | Use `PipeTo(Self, ...)` for `Task`-based I/O | Result arrives as a normal message | `PipeToDemoActor`, `DataIngestionActor` |
 | Use `IWithTimers` or `ScheduleTellOnce` for delays/retries | Never `Thread.Sleep` in handlers | See [§10](#10-scheduler--delay-and-repeat-messages); P6 retry backoff |
-| Resolve dependencies at `Props` creation time | Avoid service locator inside actors | `DataIngestionActor(IDataApiClient, IOptions<...>)` |
-| Do not pass `IServiceProvider` into actors | Hides dependencies; hard to test | Use `Akka.Hosting` `resolver.Props<T>()` instead |
+| Resolve singleton dependencies at `Props` creation time | Avoid service locator inside actors | `DataIngestionActor(IDataApiClient, IOptions<...>)` |
+| Do not stash `IServiceProvider` in actor fields | Hides dependencies; easy to capture disposed scoped services | `resolver.Props<T>()` for singletons; see [§14](#14-scoped-dependencies-dbcontext-per-message-work) |
+| Use `IServiceScopeFactory` for scoped services | One short-lived scope per message handler | `TodoActor` in `AkkaAspirePoc` |
 
 ### Addressing and topology
 
@@ -541,7 +593,7 @@ Practical guidance for Akka.NET actors. These apply beyond this teaching repo.
 | `Ask` inside actors | `Tell` + `Become`, or `Forward` |
 | Shared mutable static state between actors | Pass data in immutable messages |
 | Look up actors by path in application code | Inject `IActorRef`, use `ActorRegistry`, or pass refs at creation |
-| Pass `IServiceProvider` into actors | Resolve dependencies when building `Props` |
+| Stash `IServiceProvider` in actor fields | Resolve singletons at `Props` time; use `IServiceScopeFactory` + per-handler scope for `DbContext` — [§14](#14-scoped-dependencies-dbcontext-per-message-work) |
 | Send large object graphs in messages | Send IDs; load data in the receiving actor if needed |
 | Create a new `ActorSystem` per request | One hosted singleton system for the app |
 | Block the mailbox during I/O | `PipeTo` or message-driven continuation |
