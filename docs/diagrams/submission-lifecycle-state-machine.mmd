@@ -1,0 +1,42 @@
+flowchart LR
+    start(( )) --> Draft
+
+    subgraph intake["1 · Intake — Hours.Report"]
+        Draft -->|Submit| Reported
+    end
+
+    subgraph review["2 · Review — Hours.Check"]
+        Reported -->|CheckPass| Checked
+        Reported -->|CheckFail| Rejected
+        Checked -->|SendBack| Reported
+    end
+
+    subgraph approval["3 · Approval — ApproveHoursProgress"]
+        Checked -->|Approve| Approved
+        Checked -->|Reject| Rejected
+    end
+
+    subgraph export["4 · Export — Hours.Export"]
+        Approved -->|Export| Exported
+    end
+
+    subgraph correction["Correction lane"]
+        Rejected -->|Resubmit| Reported
+        Approved -->|Reopen · Hours.Reopen| Reported
+    end
+
+    Exported --> end(( ))
+
+    classDef draft fill:#f1f5f9,stroke:#64748b,stroke-dasharray:4 3
+    classDef reported fill:#eff6ff,stroke:#2563eb
+    classDef checked fill:#fef9c3,stroke:#ca8a04
+    classDef approved fill:#dcfce7,stroke:#16a34a
+    classDef exported fill:#f3e8ff,stroke:#9333ea
+    classDef rejected fill:#fee2e2,stroke:#dc2626
+
+    class Draft draft
+    class Reported reported
+    class Checked checked
+    class Approved approved
+    class Exported exported
+    class Rejected rejected
