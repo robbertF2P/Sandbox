@@ -1,0 +1,9 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/MetaTable.Domain/MetaTable.Domain.csproj" />
+    <Project Path="src/MetaTable.Infrastructure/MetaTable.Infrastructure.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/MetaTable.Tests/MetaTable.Tests.csproj" />
+  </Folder>
+</Solution>
